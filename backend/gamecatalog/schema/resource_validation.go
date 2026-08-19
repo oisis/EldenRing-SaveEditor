@@ -25,6 +25,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateTutorialResource(resource, sources)
 	case ResourceKindQuest:
 		return validateQuestResource(resource, sources)
+	case ResourceKindClass:
+		return validateClassResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -51,6 +53,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindMapRegion, resource.MapRegion != nil},
 		{ResourceKindTutorial, resource.Tutorial != nil},
 		{ResourceKindQuest, resource.Quest != nil},
+		{ResourceKindClass, resource.Class != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -510,6 +513,62 @@ func validateQuestResource(resource Resource, sources map[SourceID]struct{}) err
 					resource.Key, step.Key, flag.ID)
 			}
 			seenFlags[flag.ID] = struct{}{}
+		}
+	}
+	return nil
+}
+
+// validateClassResource requires the stable starting-class ID, the official
+// non-empty class name and the eight non-zero base attributes used to present
+// the resource. The key is the decimal class ID as a string, "0" through "9".
+func validateClassResource(resource Resource, sources map[SourceID]struct{}) error {
+	if len(resource.Key) != 1 || resource.Key[0] < '0' || resource.Key[0] > '9' {
+		return fmt.Errorf("resource %q: class key must be a single decimal digit 0..9", resource.Key)
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.Class == nil {
+		return fmt.Errorf("resource %q: class document is required", resource.Key)
+	}
+	classID := resource.Class.StartingClassID
+	if err := validateFact("class.startingClassID", classID, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !classID.Known {
+		return fmt.Errorf("resource %q: class.startingClassID must be known", resource.Key)
+	}
+	if resource.Key != fmt.Sprintf("%d", classID.Value) {
+		return fmt.Errorf(
+			"resource %q: class key must equal class.startingClassID %d",
+			resource.Key, classID.Value)
+	}
+	name := resource.Class.Name
+	if err := validateFact("class.name", name, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !name.Known || name.Value == "" {
+		return fmt.Errorf("resource %q: class.name must be known and non-empty", resource.Key)
+	}
+	attributes := []struct {
+		name string
+		fact Fact[uint32]
+	}{
+		{"class.vigor", resource.Class.Vigor},
+		{"class.mind", resource.Class.Mind},
+		{"class.endurance", resource.Class.Endurance},
+		{"class.strength", resource.Class.Strength},
+		{"class.dexterity", resource.Class.Dexterity},
+		{"class.intelligence", resource.Class.Intelligence},
+		{"class.faith", resource.Class.Faith},
+		{"class.arcane", resource.Class.Arcane},
+	}
+	for _, attr := range attributes {
+		if err := validateFact(attr.name, attr.fact, sources); err != nil {
+			return fmt.Errorf("resource %q: %w", resource.Key, err)
+		}
+		if !attr.fact.Known || attr.fact.Value == 0 {
+			return fmt.Errorf("resource %q: %s must be known and non-zero", resource.Key, attr.name)
 		}
 	}
 	return nil

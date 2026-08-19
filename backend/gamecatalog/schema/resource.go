@@ -12,6 +12,7 @@ const (
 	ResourceKindMapRegion     ResourceKind = "map_region"
 	ResourceKindTutorial      ResourceKind = "tutorial"
 	ResourceKindQuest         ResourceKind = "quest"
+	ResourceKindClass         ResourceKind = "class"
 )
 
 // ResourceRef is the identity of one catalog resource: the exact pair
@@ -39,6 +40,7 @@ type Resource struct {
 	MapRegion     *MapRegionDocument     `json:"mapRegion,omitempty"`
 	Tutorial      *TutorialDocument      `json:"tutorial,omitempty"`
 	Quest         *QuestDocument         `json:"quest,omitempty"`
+	Class         *ClassDocument         `json:"class,omitempty"`
 }
 
 func (resource Resource) Ref() ResourceRef {

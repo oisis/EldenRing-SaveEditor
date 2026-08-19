@@ -194,6 +194,11 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// a summary.
 			summary.NameKnown = resource.Quest.Name.Known
 			summary.Name = resource.Quest.Name.Value
+		case resource.Class != nil:
+			// A class likewise carries a name only; its starting class ID is part
+			// of the full document and is never projected into a summary.
+			summary.NameKnown = resource.Class.Name.Known
+			summary.Name = resource.Class.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

@@ -94,28 +94,17 @@ save offset, no private save byte and no starting class.
 3. The recalculated level must lie in `1..713`.
 4. The character's own `StartingClassID` is read from its `PlayerGameData`, and
    every attribute must be at or above that class's base value — the same floor
-   the game enforces when respeccing. A `StartingClassID` outside the ten
-   confirmed classes is a hard rejection: an unknown class carries no known
-   minima, so its save is not written.
+   the game enforces when respeccing. The minima are resolved directly from the
+   GameCatalog `class` resources (`0` through `9`), which serve as their single
+   source of truth. A `StartingClassID` outside the ten confirmed classes is a
+   hard rejection: an unknown class carries no known minima, so its save is not
+   written.
 
    `PlayerGameData` is the authoritative copy of the class, read relative to the
    same character anchor as the attributes. The second copy in the character's
    `ProfileSummary` is menu data that can be stale — for example after an edit by
    an older SaveForge — and does not take part in this mutation: it is neither
    read for the minima, nor compared, nor synchronised, nor repaired.
-
-| ID | Class | VIG | MIN | END | STR | DEX | INT | FAI | ARC |
-|---|---|---|---|---|---|---|---|---|---|
-| 0 | Vagabond | 15 | 10 | 11 | 14 | 13 | 9 | 9 | 7 |
-| 1 | Warrior | 11 | 12 | 11 | 10 | 16 | 10 | 8 | 9 |
-| 2 | Hero | 14 | 9 | 12 | 16 | 9 | 7 | 8 | 11 |
-| 3 | Bandit | 10 | 11 | 10 | 9 | 13 | 9 | 8 | 14 |
-| 4 | Astrologer | 9 | 15 | 9 | 8 | 12 | 16 | 7 | 9 |
-| 5 | Prophet | 10 | 14 | 8 | 11 | 10 | 7 | 16 | 10 |
-| 6 | Confessor | 10 | 13 | 10 | 12 | 12 | 9 | 14 | 9 |
-| 7 | Samurai | 12 | 11 | 13 | 12 | 15 | 9 | 8 | 8 |
-| 8 | Prisoner | 11 | 12 | 11 | 11 | 14 | 14 | 6 | 9 |
-| 9 | Wretch | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 |
 
 ## Derived values
 
@@ -225,8 +214,8 @@ because the public values are unsigned.
 ## Dependencies
 
 - The endpoint delegates to `backend/saveengine` and calls no other endpoint.
-- It uses no GameCatalog data: the starting-class minima are a local table of
-  ten rows, not a catalog resource.
+- It uses embedded GameCatalog data: the starting-class minima are resolved from
+  the GameCatalog `class` resources (`backend/gamecatalog/data/classes/`).
 - It creates no runtime or build dependency on the legacy SaveForge tree.
 
 ## Verification coverage

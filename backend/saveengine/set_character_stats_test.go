@@ -655,6 +655,12 @@ func TestLegalAttributesFor(t *testing.T) {
 		}
 	})
 
+	// The eighty values below are a deliberate second copy of the numbers that
+	// now live in the GameCatalog class resources, and they must stay literal.
+	// They are what pins the contract: the production path resolves the minima
+	// from backend/gamecatalog/data/classes/, so a test that read the same
+	// documents would assert only that the catalog equals itself. Do not
+	// "deduplicate" this table against the catalog.
 	t.Run("all ten confirmed starting classes return their confirmed base attributes", func(t *testing.T) {
 		confirmedBaseAttributes := [10]CharacterAttributes{
 			0: {Vigor: 15, Mind: 10, Endurance: 11, Strength: 14, Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7},    // Vagabond
@@ -803,5 +809,26 @@ func TestSetCharacterStats_CorrectedClassMinima(t *testing.T) {
 				t.Fatalf("error = %v, want %q", err, tc.wantError)
 			}
 		})
+	}
+}
+
+// TestStartingClassMinimaComeFromTheCatalog pins the boundary of the set the
+// embedded GameCatalog supplies. The minima are no longer a table in this
+// package: they are resolved from the class resources, so a class document that
+// is deleted, renumbered or added would change which IDs the writer accepts.
+// Exactly the ten confirmed IDs must resolve, and every other byte value must
+// fail closed rather than fall back to a default.
+func TestStartingClassMinimaComeFromTheCatalog(t *testing.T) {
+	for id := 0; id <= 255; id++ {
+		_, err := LegalAttributesFor(CharacterAttributes{}, uint8(id))
+		if id <= 9 {
+			if err != nil {
+				t.Errorf("class %d: LegalAttributesFor: %v, want the catalog to supply its minima", id, err)
+			}
+			continue
+		}
+		if err == nil {
+			t.Errorf("class %d was accepted, but only the ten confirmed classes carry minima", id)
+		}
 	}
 }

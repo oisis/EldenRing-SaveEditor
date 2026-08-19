@@ -1214,7 +1214,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	resourceTypes := document.Comps.Parameters["ResourceTypeFilter"].Schema.Enum
 	if !reflect.DeepEqual(resourceTypes, []string{
 		"", "item", "colosseum", "region", "summoning_pool", "grace", "boss",
-		"map_region", "tutorial", "quest",
+		"map_region", "tutorial", "quest", "class",
 	}) {
 		t.Fatalf("ResourceTypeFilter enum = %v", resourceTypes)
 	}
@@ -1231,6 +1231,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"BossDocument",
 		"MapRegionDocument",
 		"TutorialDocument",
+		"ClassDocument",
 		"QuestDocument",
 		"QuestStepDocument",
 		"QuestFlag",
@@ -1411,6 +1412,7 @@ var resourceUnionDocuments = map[string]string{
 	"map_region":     "mapRegion",
 	"tutorial":       "tutorial",
 	"quest":          "quest",
+	"class":          "class",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1448,11 +1450,11 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 9 {
-		t.Fatalf("Resource has %d oneOf branches, want 9", len(branches))
+	if len(branches) != 10 {
+		t.Fatalf("Resource has %d oneOf branches, want 10", len(branches))
 	}
 	for index, kind := range []string{
-		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial", "quest",
+		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial", "quest", "class",
 	} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {

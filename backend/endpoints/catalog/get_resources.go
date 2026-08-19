@@ -5,7 +5,7 @@ Purpose: Returns a paginated resource list filtered by type, family, capability,
 How it works: The runtime handler reads the already loaded GameCatalog through Catalog.ResourceSummaries, applies the declared filters in catalog order (kind, then key), counts the matches and returns one page of a light projection without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: resourceType, family, capability, endpointId, search, page, pageSize.
-GameCatalog variables read: Resource.Kind, Resource.Key, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only), Colosseum.Name, Region.Name, SummoningPool.Name, Grace.Name, Boss.Name, MapRegion.Name, Tutorial.Title and Quest.Name. The full resource document is never projected; it stays the responsibility of GetResource.
+GameCatalog variables read: Resource.Kind, Resource.Key, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only), Colosseum.Name, Region.Name, SummoningPool.Name, Grace.Name, Boss.Name, MapRegion.Name, Tutorial.Title, Quest.Name and Class.Name. The full resource document is never projected; it stays the responsibility of GetResource.
 Save variables read: none; the endpoint never opens or reads a save.
 Implementation status: implemented; GetResources is the runtime handler of this contract.
 */
@@ -74,7 +74,7 @@ type GetResourcesResult struct {
 // list or a picker needs. Every filter is matched exactly and case-sensitively
 // except search, which is case-insensitive on Resource.Key and on the resource
 // name. The accepted resource types are item, colosseum, region, summoning_pool,
-// grace, boss, map_region, tutorial and quest; family and capability describe
+// grace, boss, map_region, tutorial, quest and class; family and capability describe
 // items only, so a non-empty one of them never matches a non-item resource, whose
 // family stays empty. An empty filter never filters. The order is the catalog
 // order, kind first and only then key, so paging is stable across calls. Values
@@ -96,7 +96,8 @@ func GetResources(
 	switch schema.ResourceKind(resourceType) {
 	case "", schema.ResourceKindItem, schema.ResourceKindColosseum, schema.ResourceKindRegion,
 		schema.ResourceKindSummoningPool, schema.ResourceKindGrace, schema.ResourceKindBoss,
-		schema.ResourceKindMapRegion, schema.ResourceKindTutorial, schema.ResourceKindQuest:
+		schema.ResourceKindMapRegion, schema.ResourceKindTutorial, schema.ResourceKindQuest,
+		schema.ResourceKindClass:
 	default:
 		return GetResourcesResult{}, fmt.Errorf("unsupported resource type %q", resourceType)
 	}

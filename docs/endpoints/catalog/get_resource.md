@@ -15,9 +15,10 @@ a `BossDocument` for kind `boss` with its name, curated region label, encounter
 type, remembrance fact and synchronized defeat event flag ID,
 a `MapRegionDocument` for kind `map_region` with its name, area label and safe
 visibility event flag ID, a `TutorialDocument` for kind `tutorial` with its
-`TutorialParam` row ID and official title, or a `QuestDocument` for kind
-`quest` with its name, supported steps, locations, descriptions and canonical
-event flag plans. It returns no relations; those belong to
+`TutorialParam` row ID and official title, a `QuestDocument` for kind `quest`
+with its name, supported steps, locations, descriptions and canonical event
+flag plans, or a `ClassDocument` for kind `class` with its starting-class ID,
+official name and eight base attributes. It returns no relations; those belong to
 [`GetResourceRelations`](get_resource_relations.md).
 
 | | |
@@ -59,8 +60,8 @@ The pair is **not**:
 The lookup resolves the kind first and the key only inside that kind:
 
 - `kind` is matched exactly against `Resource.Kind`. `item`, `colosseum`,
-  `region`, `summoning_pool`, `grace`, `boss`, `map_region`, `tutorial` and
-  `quest` are the kinds the current schema supports.
+  `region`, `summoning_pool`, `grace`, `boss`, `map_region`, `tutorial`,
+  `quest` and `class` are the kinds the current schema supports.
 - `key` is matched exactly against `Resource.Key` inside the resolved kind. The
   same key may later exist under a different kind, so the key alone is not an
   identity.
@@ -77,7 +78,8 @@ and quest keys use lowercase letters, digits and underscores, for example
 `royal_colosseum`, `limgrave_the_first_step`,
 `stormveil_castle_gateside_chamber`,
 `weeping_peninsula_tombsward_catacombs` and `brother_corhyn`. A tutorial key is
-the decimal form of its `TutorialParam` row ID, for example `2010`.
+the decimal form of its `TutorialParam` row ID, for example `2010`. A class key
+is the single decimal digit of its starting-class ID, for example `0`.
 `gamecatalog.New` rejects a catalog containing the same `(kind, key)` pair
 twice, so at most one resource can match.
 
@@ -119,7 +121,7 @@ kind.
 | Field | Type | Meaning |
 |---|---|---|
 | `key` | `string` | The stable `Resource.Key` the lookup matched, for an item eight uppercase hexadecimal characters. |
-| `kind` | `string` | Resource kind, `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`, `map_region` or `tutorial`. |
+| `kind` | `string` | Resource kind, `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`, `map_region`, `tutorial`, `quest` or `class`. |
 | `item` | `ItemDocument` | The complete item document. Present only for kind `item`. |
 | `colosseum` | `ColosseumDocument` | The complete colosseum document. Present only for kind `colosseum`. |
 | `region` | `RegionDocument` | The complete curated region document. Present only for kind `region`. |
@@ -128,6 +130,8 @@ kind.
 | `boss` | `BossDocument` | The complete curated boss encounter document. Present only for kind `boss`. |
 | `mapRegion` | `MapRegionDocument` | The complete curated safe map visibility document. Present only for kind `map_region`. |
 | `tutorial` | `TutorialDocument` | The complete user-facing tutorial document. Present only for kind `tutorial`. |
+| `quest` | `QuestDocument` | The complete curated quest document. Present only for kind `quest`. |
+| `class` | `ClassDocument` | The complete playable starting class document. Present only for kind `class`. |
 
 `schema.Resource` is a union over those kinds: exactly one document field is
 present and the others are omitted from the JSON entirely.
@@ -223,8 +227,8 @@ whitespace-only kind and key, values with leading or trailing whitespace, an
 unknown kind, an unknown key, a lowercase key, the pre-migration prefixed key, a
 numeric string and a numeric `GameID` passed as a string, the four distinguishable
 kind and key failures, and the immutability of the returned result. They also
-cover colosseum, region, summoning pool, grace, boss, map region and tutorial
-resources: their complete typed documents and
+cover colosseum, region, summoning pool, grace, boss, map region, tutorial,
+quest and class resources: their complete typed documents and
 provenance, the absence of documents from other kinds, independent returned
 copies, and JSON bodies containing only the matching union field.
 

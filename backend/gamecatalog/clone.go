@@ -43,6 +43,10 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		quest.Steps = cloneQuestSteps(resource.Quest.Steps)
 		cloned.Quest = &quest
 	}
+	if resource.Class != nil {
+		class := *resource.Class
+		cloned.Class = &class
+	}
 	if resource.Item == nil {
 		return cloned
 	}

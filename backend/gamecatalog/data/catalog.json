@@ -85,6 +85,14 @@
         "reviewed": true
       },
       {
+        "id": "regulation_chara_init_param",
+        "kind": "regulation_parameter_csv",
+        "location": "regulation.bin/csv/CharaInitParam.csv",
+        "version": "6017c3d78979b1cb274acc6f1f4304e0e4f6ba4edb393a1abd834cdeb50dbbf1",
+        "evidence": "regulation",
+        "reviewed": true
+      },
+      {
         "id": "regulation_equip_mtrl_set_param",
         "kind": "regulation_parameter_csv",
         "location": "regulation.bin/csv/EquipMtrlSetParam.csv",
@@ -253,6 +261,14 @@
         "reviewed": true
       },
       {
+        "id": "game_text_gr_menu_text_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/menu.msgbnd/GR_MenuText.fmg",
+        "version": "6851600087f553ef58701850d245a7a43932e540bb08669ab205a39e702c7023",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
         "id": "curated_safety",
         "kind": "curated_safety_overrides",
         "location": "archive/saveforge-1.6.8/backend/gamecatalog/migration/safety_curation.go",
@@ -397,6 +413,16 @@
     "bosses/war_dead_catacombs_putrid_tree_spirit.json",
     "bosses/wyndham_catacombs_erdtree_burial_watchdog.json",
     "bosses/yelough_anix_tunnel_astel_stars_of_darkness.json",
+    "classes/0.json",
+    "classes/1.json",
+    "classes/2.json",
+    "classes/3.json",
+    "classes/4.json",
+    "classes/5.json",
+    "classes/6.json",
+    "classes/7.json",
+    "classes/8.json",
+    "classes/9.json",
     "colosseums/caelid_colosseum.json",
     "colosseums/limgrave_colosseum.json",
     "colosseums/royal_colosseum.json",

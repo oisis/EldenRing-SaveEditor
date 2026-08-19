@@ -1,0 +1,116 @@
+{
+  "key": "8",
+  "kind": "class",
+  "class": {
+    "startingClassID": {
+      "known": true,
+      "value": 8,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "Row ID"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Prisoner",
+      "provenance": {
+        "source": "game_text_gr_menu_text_base",
+        "method": "resolved GR_MenuText.fmg entry 288108 matching CharaInitParam class order",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "Row ID"
+      }
+    },
+    "vigor": {
+      "known": true,
+      "value": 11,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseVit"
+      }
+    },
+    "mind": {
+      "known": true,
+      "value": 12,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseWil"
+      }
+    },
+    "endurance": {
+      "known": true,
+      "value": 11,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseEnd"
+      }
+    },
+    "strength": {
+      "known": true,
+      "value": 11,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseStr"
+      }
+    },
+    "dexterity": {
+      "known": true,
+      "value": 14,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseDex"
+      }
+    },
+    "intelligence": {
+      "known": true,
+      "value": 14,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseMag"
+      }
+    },
+    "faith": {
+      "known": true,
+      "value": 6,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseFai"
+      }
+    },
+    "arcane": {
+      "known": true,
+      "value": 9,
+      "provenance": {
+        "source": "regulation_chara_init_param",
+        "method": "CharaInitParam row ID = 3000 + StartingClassID",
+        "table": "CharaInitParam",
+        "row": "3008",
+        "field": "baseLuc"
+      }
+    }
+  }
+}

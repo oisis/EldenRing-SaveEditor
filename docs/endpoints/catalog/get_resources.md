@@ -78,9 +78,9 @@ explicitly case-insensitive.
 Matched exactly and case-sensitively against `schema.Resource.Kind`.
 
 - Empty means every kind, which today mixes items, colosseums, regions,
-  summoning pools, graces, bosses, map regions, tutorials and quests in one page.
+  summoning pools, graces, bosses, map regions, tutorials, quests and classes in one page.
 - `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`,
-  `map_region`, `tutorial` and `quest` are the kinds the current schema
+  `map_region`, `tutorial`, `quest` and `class` are the kinds the current schema
   declares, so they are the only accepted non-empty values.
 - Any other value, including `Item`, is rejected with
   `unsupported resource type "…"`. It is not silently ignored and it does not
@@ -139,8 +139,9 @@ A case-insensitive substring search.
   name (`Item.Presentation.Name.Value`), colosseum name
   (`Colosseum.Name.Value`), region name (`Region.Name.Value`), summoning pool
   name (`SummoningPool.Name.Value`), grace name (`Grace.Name.Value`), boss name
-  (`Boss.Name.Value`), map region name (`MapRegion.Name.Value`) or tutorial
-  title (`Tutorial.Title.Value`).
+  (`Boss.Name.Value`), map region name (`MapRegion.Name.Value`), tutorial
+  title (`Tutorial.Title.Value`), quest name (`Quest.Name.Value`) or class name
+  (`Class.Name.Value`).
 - An unknown name is the empty string in the projection, so it is never searched
   as a placeholder value.
 - A resource matches when the substring occurs in either field.
@@ -213,7 +214,7 @@ no `ItemDocument`.
 | Condition | Message |
 |---|---|
 | `gameCatalog` is `nil` | `game catalog is not loaded` |
-| `resourceType` is neither empty nor `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`, `map_region` or `tutorial` | `unsupported resource type "…"` |
+| `resourceType` is neither empty nor `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`, `map_region`, `tutorial`, `quest` or `class` | `unsupported resource type "…"` |
 | `family` is neither empty nor a `schema.ItemFamily` | `unknown item family "…"` |
 | `capability` is neither empty nor a capability name | `unknown capability "…"` |
 | `endpointId` is not empty | `the endpointId filter is not supported because GameCatalog does not declare endpoint relations yet; got "…"` |
@@ -364,7 +365,7 @@ negative filter and paging values.
 - `endpointId` is accepted only as an empty value. GameCatalog declares no
   endpoint relations yet, so the filter cannot be answered from data.
 - `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`,
-  `map_region` and `tutorial` are the resource kinds the schema declares today.
+  `map_region`, `tutorial`, `quest` and `class` are the resource kinds the schema declares today.
   The `family` and `capability` filters describe items only and never match a
   non-item resource.
 - The result is a projection for lists and pickers. A caller that needs the full

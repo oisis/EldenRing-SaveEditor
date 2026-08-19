@@ -5,6 +5,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"sync"
+
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
 const (
@@ -55,33 +60,75 @@ var characterAttributeNames = [characterAttributeCount]string{
 	"dexterity", "intelligence", "faith", "arcane",
 }
 
-// startingClassBaseAttributes holds the base attributes of the ten starting
-// classes, indexed by the StartingClassID stored in the character's
-// PlayerGameData and listed in the same save order as characterAttributeNames. No
-// attribute may be lowered below its starting class's base value, which is what
-// the game itself enforces when respeccing.
-//
-// ponytail: a local table, not a class package and not a GameCatalog lookup.
-// This endpoint needs the ten minima and nothing else — no names, no levels, no
-// catalog resource. Promote it only when a second consumer needs class data.
-var startingClassBaseAttributes = [10][characterAttributeCount]uint32{
-	{15, 10, 11, 14, 13, 9, 9, 7},    // Vagabond
-	{11, 12, 11, 10, 16, 10, 8, 9},   // Warrior
-	{14, 9, 12, 16, 9, 7, 8, 11},     // Hero
-	{10, 11, 10, 9, 13, 9, 8, 14},    // Bandit
-	{9, 15, 9, 8, 12, 16, 7, 9},      // Astrologer
-	{10, 14, 8, 11, 10, 7, 16, 10},   // Prophet
-	{10, 13, 10, 12, 12, 9, 14, 9},   // Confessor
-	{12, 11, 13, 12, 15, 9, 8, 8},    // Samurai
-	{11, 12, 11, 11, 14, 14, 6, 9},   // Prisoner
-	{10, 10, 10, 10, 10, 10, 10, 10}, // Wretch
+var (
+	startingClassMinimaOnce  sync.Once
+	startingClassMinimaTable map[uint8][characterAttributeCount]uint32
+	startingClassMinimaErr   error
+)
+
+func loadStartingClassMinima() (map[uint8][characterAttributeCount]uint32, error) {
+	data, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		return nil, fmt.Errorf("load embedded catalog data: %w", err)
+	}
+	table := make(map[uint8][characterAttributeCount]uint32)
+	for _, res := range data.Resources() {
+		if res.Kind != schema.ResourceKindClass || res.Class == nil {
+			continue
+		}
+		classDoc := res.Class
+		if !classDoc.StartingClassID.Known {
+			return nil, fmt.Errorf("class resource %q has unknown startingClassID", res.Key)
+		}
+		id := classDoc.StartingClassID.Value
+		if id > 255 {
+			return nil, fmt.Errorf("class resource %q startingClassID %d exceeds uint8", res.Key, id)
+		}
+		if !classDoc.Vigor.Known || classDoc.Vigor.Value == 0 ||
+			!classDoc.Mind.Known || classDoc.Mind.Value == 0 ||
+			!classDoc.Endurance.Known || classDoc.Endurance.Value == 0 ||
+			!classDoc.Strength.Known || classDoc.Strength.Value == 0 ||
+			!classDoc.Dexterity.Known || classDoc.Dexterity.Value == 0 ||
+			!classDoc.Intelligence.Known || classDoc.Intelligence.Value == 0 ||
+			!classDoc.Faith.Known || classDoc.Faith.Value == 0 ||
+			!classDoc.Arcane.Known || classDoc.Arcane.Value == 0 {
+			return nil, fmt.Errorf("class resource %q has missing, unknown or zero attribute fact", res.Key)
+		}
+		table[uint8(id)] = [characterAttributeCount]uint32{
+			classDoc.Vigor.Value,
+			classDoc.Mind.Value,
+			classDoc.Endurance.Value,
+			classDoc.Strength.Value,
+			classDoc.Dexterity.Value,
+			classDoc.Intelligence.Value,
+			classDoc.Faith.Value,
+			classDoc.Arcane.Value,
+		}
+	}
+	return table, nil
+}
+
+func startingClassMinima(startingClassID uint8) ([characterAttributeCount]uint32, error) {
+	startingClassMinimaOnce.Do(func() {
+		startingClassMinimaTable, startingClassMinimaErr = loadStartingClassMinima()
+	})
+	if startingClassMinimaErr != nil {
+		return [characterAttributeCount]uint32{}, startingClassMinimaErr
+	}
+	minima, exists := startingClassMinimaTable[startingClassID]
+	if !exists {
+		return [characterAttributeCount]uint32{}, fmt.Errorf(
+			"starting class %d is unknown; its attribute minima are not confirmed",
+			startingClassID)
+	}
+	return minima, nil
 }
 
 // LegalAttributesFor returns the attribute set closest to the supplied one that
 // satisfies both confirmed attribute rules: the absolute range 1..99 and the
-// per-attribute minimum of the character's own starting class. Each attribute is
-// moved the smallest distance that makes it legal, and an already legal
-// attribute is returned unchanged.
+// per-attribute minimum of the character's own starting class resolved from the
+// GameCatalog class documents. Each attribute is moved the smallest distance
+// that makes it legal, and an already legal attribute is returned unchanged.
 //
 // It exists so a consumer deriving a corrected attribute set — currently
 // GetRepairPlan — applies exactly the rules SetCharacterStats enforces, instead
@@ -100,12 +147,10 @@ func LegalAttributesFor(
 	attributes CharacterAttributes,
 	startingClassID uint8,
 ) (CharacterAttributes, error) {
-	if int(startingClassID) >= len(startingClassBaseAttributes) {
-		return CharacterAttributes{}, fmt.Errorf(
-			"starting class %d is unknown; its attribute minima are not confirmed",
-			startingClassID)
+	minima, err := startingClassMinima(startingClassID)
+	if err != nil {
+		return CharacterAttributes{}, err
 	}
-	minima := startingClassBaseAttributes[startingClassID]
 
 	values := attributes.ordered()
 	for index, value := range values {
@@ -389,16 +434,15 @@ func recalculateCharacterLevel(values [characterAttributeCount]uint32) (uint32, 
 }
 
 // validateAgainstStartingClass rejects any attribute below the base value of the
-// character's own starting class, as stored in its PlayerGameData. An identifier
-// outside the ten confirmed
+// character's own starting class, as stored in its PlayerGameData and resolved
+// from the GameCatalog class documents. An identifier outside the ten confirmed
 // classes is a hard rejection, not a skipped check: an unknown class carries no
 // known minima, so its save must not be written.
 func validateAgainstStartingClass(values [characterAttributeCount]uint32, startingClassID uint8) error {
-	if int(startingClassID) >= len(startingClassBaseAttributes) {
-		return fmt.Errorf("starting class %d is unknown; its attribute minima are not confirmed",
-			startingClassID)
+	minima, err := startingClassMinima(startingClassID)
+	if err != nil {
+		return err
 	}
-	minima := startingClassBaseAttributes[startingClassID]
 	for index, value := range values {
 		if value < minima[index] {
 			return fmt.Errorf("attributes.%s %d is below the starting-class minimum %d",
