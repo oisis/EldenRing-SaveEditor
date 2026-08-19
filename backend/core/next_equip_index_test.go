@@ -82,6 +82,34 @@ func buildStorageFixture(t *testing.T, nextEquip, nextAcq uint32) *SaveSlot {
 	return slot
 }
 
+// buildStorageFixtureDense builds a SaveSlot whose Storage binary really holds
+// `n` records at physical indices 0..n-1 with even acquisition indices 2,4,...,2n.
+// buildStorageFixture leaves the binary table empty, which makes a NextEquipIndex
+// of 500 physically impossible: under the native rule NextEquipIndex ==
+// 128 + last_occupied_index, a counter of 500 means the last occupied physical
+// index is 372, i.e. 373 records. Native evidence for the rule: ER0000-out.sl2
+// (250 records, last index 249 -> 377) and t2-f4-refill.sl2 (1230 records,
+// last index 1229 -> 1357).
+func buildStorageFixtureDense(t *testing.T, n int, nextEquip, nextAcq uint32) *SaveSlot {
+	t.Helper()
+	slot := buildStorageFixture(t, nextEquip, nextAcq)
+	storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+	for i := 0; i < n; i++ {
+		it := InventoryItem{
+			GaItemHandle: uint32(0xB0000001 + i),
+			Quantity:     1,
+			Index:        uint32(2 * (i + 1)),
+		}
+		off := storageStart + i*InvRecordLen
+		binary.LittleEndian.PutUint32(slot.Data[off:], it.GaItemHandle)
+		binary.LittleEndian.PutUint32(slot.Data[off+4:], it.Quantity)
+		binary.LittleEndian.PutUint32(slot.Data[off+8:], it.Index)
+		slot.Storage.CommonItems = append(slot.Storage.CommonItems, it)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.StorageBoxOffset:], uint32(n))
+	return slot
+}
+
 // TestNextEquipIndex_InvInsert verifies that inserting a genuinely NEW
 // Inventory.CommonItems record advances NextEquipIndex by exactly one — T050/T210
 // native evidence (Throwing Dagger add: NextEquipIndex 433 -> 434) — while
@@ -130,7 +158,10 @@ func TestNextEquipIndex_InvInsert(t *testing.T) {
 // and the batch-scoped T330 rule by
 // TestAddItemsToSlotBatch_EmptyStorageSixItemBatchMatchesT330.
 func TestNextEquipIndex_StorageInsert(t *testing.T) {
-	slot := buildStorageFixture(t, 500, 1000)
+	// 373 records occupy physical 0..372, which is exactly what NextEquipIndex=500
+	// means under the native rule 128 + last_occupied_index. The new record lands at
+	// physical 373, so the expected 501 below is 128 + 373 — unchanged.
+	slot := buildStorageFixtureDense(t, 373, 500, 1000)
 	acqBefore := slot.Storage.NextAcquisitionSortId // 1000
 
 	const newHandle = uint32(0xB0ABCDEF)
@@ -138,10 +169,11 @@ func TestNextEquipIndex_StorageInsert(t *testing.T) {
 		t.Fatalf("addToInventory: %v", err)
 	}
 
-	// A record inserted into an already-populated Storage advances NextEquipIndex
-	// by exactly one, like every other Storage record. Native evidence:
-	// STOequip == 127 + (deposits ever made) holds on lab T330 and on three
-	// untouched slots of ER0000-out.sl2 (250 records -> 377, 88 -> 215, 6 -> 133).
+	// NextEquipIndex tracks the physical layout: 128 + last_occupied_index. The
+	// fixture holds 373 records (physical 0..372), the new record takes physical
+	// 373, so the counter becomes 128 + 373 = 501. Native evidence: three
+	// untouched slots of ER0000-out.sl2 (250 records, last 249 -> 377; 88, last
+	// 87 -> 215; 6, last 5 -> 133) and t2-f4-refill.sl2 (1230, last 1229 -> 1357).
 	const wantEquip = uint32(501)
 	if slot.Storage.NextEquipIndex != wantEquip {
 		t.Errorf("struct NextEquipIndex: got %d, want %d", slot.Storage.NextEquipIndex, wantEquip)

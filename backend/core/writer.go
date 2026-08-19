@@ -1036,16 +1036,84 @@ func nextAcquisitionWriteIndex(next, floor uint32) uint32 {
 	return next
 }
 
+// nextStorageAcquisitionIndex returns the next safe acquisition index for a
+// newly written or refreshed Storage record. We always write even indices with
+// stride 2 (acq = 2 * bucket) and no reserved equipment floor (native records
+// start at Index=2). Even-ness is OUR write policy, not a native invariant: the
+// game itself occasionally writes odd indices (three records in
+// tmp/storage-test/t2-f4-refill.sl2). The invariant the game does hold is that
+// no two records share a bucket, and writing on the even stride guarantees it.
+// Acquisition order in-game is keyed by Index >> 1.
+func nextStorageAcquisitionIndex(slot *SaveSlot) uint32 {
+	if slot == nil || len(slot.Data) == 0 {
+		return nextAcquisitionWriteIndex(1, 2)
+	}
+	next := slot.Storage.NextAcquisitionSortId
+	startOffset := slot.StorageBoxOffset + StorageHeaderSkip
+	for i := 0; i < StorageCommonCount; i++ {
+		off := startOffset + i*InvRecordLen
+		if off+InvRecordLen > len(slot.Data) {
+			break
+		}
+		h := binary.LittleEndian.Uint32(slot.Data[off:])
+		if h == GaHandleEmpty || h == GaHandleInvalid {
+			continue
+		}
+		typeBits := h & GaHandleTypeMask
+		if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
+			typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
+			continue
+		}
+		idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
+		if idx < 50000 && idx >= next {
+			next = idx + 1
+		}
+	}
+	return nextAcquisitionWriteIndex(next, 2)
+}
+
+// applyStorageCountersAfterWrite updates NextAcquisitionSortId and NextEquipIndex
+// on slot.Storage (and persists them to binary) after writing or refreshing a Storage record.
+//
+// Native contract rules:
+//   - NextAcquisitionSortId holds the next free bucket: writtenIndex/2 + 1.
+//   - NextEquipIndex = 128 + last_occupied_index (where last_occupied_index is the 0-based
+//     physical index of the last non-empty record in the 1920-slot Storage table).
+func applyStorageCountersAfterWrite(slot *SaveSlot, writtenIndex uint32) {
+	if slot == nil {
+		return
+	}
+	slot.Storage.NextAcquisitionSortId = writtenIndex/2 + 1
+	if slot.Storage.nextAcqSortIdOff > 0 && slot.Storage.nextAcqSortIdOff+4 <= len(slot.Data) {
+		binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
+	}
+
+	startOffset := slot.StorageBoxOffset + StorageHeaderSkip
+	lastOccupied := -1
+	for i := 0; i < StorageCommonCount; i++ {
+		off := startOffset + i*InvRecordLen
+		if off+InvRecordLen > len(slot.Data) {
+			break
+		}
+		h := binary.LittleEndian.Uint32(slot.Data[off:])
+		if h != GaHandleEmpty && h != GaHandleInvalid {
+			lastOccupied = i
+		}
+	}
+	if lastOccupied >= 0 {
+		slot.Storage.NextEquipIndex = uint32(128 + lastOccupied)
+		if slot.Storage.nextEquipIndexOff > 0 && slot.Storage.nextEquipIndexOff+4 <= len(slot.Data) {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextEquipIndexOff:], slot.Storage.NextEquipIndex)
+		}
+	}
+}
+
 // allowDuplicate: when true, always append a NEW physical record even if a record
 // with the same handle already exists. Used for talismans, where N copies are N
 // separate records sharing the id-derived handle (not a merged quantity stack).
 //
-// storageBatchStartedEmpty: only meaningful when isStorage is true. It must be
-// decided ONCE by the caller from Storage's state before the enclosing
-// AddItemsToSlotBatch call touched anything, never re-derived per insert from
-// the (by-then-mutated) persisted counters — otherwise every batch on an
-// already-populated Storage would be misidentified as the T310/T330 empty-init
-// case. See AddItemsToSlotBatch.
+// storageBatchStartedEmpty: retained for signature compatibility. Storage counters
+// are now unified under applyStorageCountersAfterWrite and nextStorageAcquisitionIndex.
 func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, allowDuplicate bool, storageBatchStartedEmpty bool) error {
 	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem
@@ -1067,6 +1135,7 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 			break
 		}
 		if item.GaItemHandle == handle {
+			oldQty := (*items)[i].Quantity
 			(*items)[i].Quantity = qty
 			// Binary position: held inventory CommonItems is a full 2688-entry array
 			// (slice index == binary slot), so i*InvRecordLen is correct. Storage
@@ -1080,14 +1149,28 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 					return err
 				}
 				off = binOff + 4
+				if err := sa.CheckBounds(off, 4, "addToInventory/update"); err != nil {
+					return err
+				}
+				binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+				if qty > oldQty {
+					newAcq := nextStorageAcquisitionIndex(slot)
+					(*items)[i].Index = newAcq
+					if err := sa.CheckBounds(binOff+8, 4, "addToInventory/update-index"); err != nil {
+						return err
+					}
+					binary.LittleEndian.PutUint32(slot.Data[binOff+8:], newAcq)
+					applyStorageCountersAfterWrite(slot, newAcq)
+				}
+				return nil
 			} else {
 				off = startOffset + i*InvRecordLen + 4
+				if err := sa.CheckBounds(off, 4, "addToInventory/update"); err != nil {
+					return err
+				}
+				binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+				return nil
 			}
-			if err := sa.CheckBounds(off, 4, "addToInventory/update"); err != nil {
-				return err
-			}
-			binary.LittleEndian.PutUint32(slot.Data[off:], qty)
-			return nil
 		}
 	}
 
@@ -1112,56 +1195,7 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 			return io.ErrShortBuffer // All storage slots occupied
 		}
 
-		// T310 native evidence: a genuinely empty Storage (no CommonItems records,
-		// NextAcquisitionSortId=1, NextEquipIndex=0 — the fresh-save signature) gets
-		// its first direct-add record at Index=2, after which NextAcquisitionSortId
-		// becomes 2 and NextEquipIndex jumps to 128. T330 only confirms this for a
-		// SINGLE native transfer of six records into a Storage that started with
-		// that exact signature: within that one batch, every later insert (not
-		// just the first) advances both counters by exactly 1 (T330 native
-		// evidence: six direct-adds to an empty Storage end at NextEquipIndex=133,
-		// NextAcquisitionSortId=7 — i.e. 128+5 and 2+5). storageBatchStartedEmpty
-		// is what scopes the rule to that one batch — it must NOT be re-derived
-		// from the mutated persisted counters below, or a second, unrelated batch
-		// that happens to run before Storage's counters move again would wrongly
-		// qualify. A direct-add to a Storage that was already non-empty before the
-		// enclosing batch started keeps the prior policy: NextEquipIndex untouched,
-		// NextAcquisitionSortId as a high-water mark.
-		isEmptyStorageInit := storageBatchStartedEmpty && len(*items) == 0 &&
-			slot.Storage.NextAcquisitionSortId <= 1 && slot.Storage.NextEquipIndex == 0
-
-		var nextListId uint32
-		if isEmptyStorageInit {
-			nextListId = 2
-		} else {
-			// Record indices still follow the stride-2 bucket rule floored at 2
-			// (Storage has no reserved-equipment range like Inventory's
-			// InvEquipReservedMax), independent of the +1 counter advance below.
-			// Acquisition order is keyed by Index >> 1 in-game. Start from the
-			// acquisition counter (not NextEquipIndex), then keep the value above
-			// existing storage records and on an even stride-2 boundary.
-			nextListId = slot.Storage.NextAcquisitionSortId
-			for i := 0; i < storageCapacity; i++ {
-				off := startOffset + i*InvRecordLen
-				if off+InvRecordLen > len(slot.Data) {
-					break
-				}
-				h := binary.LittleEndian.Uint32(slot.Data[off:])
-				if h == GaHandleEmpty || h == GaHandleInvalid {
-					continue
-				}
-				typeBits := h & GaHandleTypeMask
-				if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
-					typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
-					continue
-				}
-				idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
-				if idx < 50000 && idx >= nextListId {
-					nextListId = idx + 1
-				}
-			}
-			nextListId = nextAcquisitionWriteIndex(nextListId, 2)
-		}
+		nextListId := nextStorageAcquisitionIndex(slot)
 
 		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: nextListId}
 		off := startOffset + emptyIdx*InvRecordLen
@@ -1172,75 +1206,7 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
 
-		// NextEquipIndex and NextAcquisitionSortId are both game-owned counters.
-		// T310 establishes their empty-Storage-init values, and T330 confirms
-		// that within a single batch/session that started with that exact
-		// empty signature, every record advances both counters by exactly 1,
-		// first jumping to their native floor (2 and 128).
-		//
-		// VERIFIED NATIVE SAVE CONTRACT — DO NOT CHANGE WITHOUT NEW NATIVE SAVE
-		// EVIDENCE AND A REGRESSION TEST. Evidence: T310 (writer_storage_empty_init_test.go,
-		// writer_acquisition_index_test.go — a genuinely empty Storage's first
-		// direct-add record lands at Index=2, NextAcquisitionSortId=2,
-		// NextEquipIndex=128) and T330/T352 (same files, plus
-		// app_storage_add_session_test.go — a batch or session that began
-		// from that same empty signature ends with both counters advanced by
-		// exactly 1 per record). Invariant: this contract is scoped strictly
-		// to a batch/session that began from the T310 empty signature.
-		//
-		// The `default` branch below (populated Storage) preserves the
-		// writer's pre-existing fallback policy, unchanged by this task: it
-		// leaves NextEquipIndex untouched and advances NextAcquisitionSortId
-		// as a high-water mark.
-		//
-		// The default branch below covers a Storage that already held records
-		// when the save was loaded. It used to leave NextEquipIndex frozen and
-		// to compute NextAcquisitionSortId with the Inventory rule; both are
-		// corrected here against native evidence, so all three branches now
-		// describe the same two counters consistently.
-		//
-		// VERIFIED NATIVE SAVE CONTRACT — DO NOT CHANGE WITHOUT NEW NATIVE SAVE
-		// EVIDENCE AND A REGRESSION TEST.
-		//
-		// NextEquipIndex is an allocation high-water mark: the first record of a
-		// previously empty Storage sets it to 128 and every further record adds
-		// exactly one, whether or not the container was empty when the save was
-		// loaded. Evidence: STOequip == 127 + (deposits ever made) holds exactly
-		// on lab T330 (6 records, 133) and on three untouched slots of
-		// ER0000-out.sl2 (250 records -> 377, 88 -> 215, 6 -> 133); the one slot
-		// that differs by one had a single item withdrawn, which lab T508 shows
-		// lowers the mark by one.
-		//
-		// NextAcquisitionSortId is a BUCKET counter, and this is where Storage
-		// differs from Inventory. The game keys Order of Acquisition by
-		// Index>>1, Storage stores Index = 2*bucket, and the field holds the next
-		// free bucket: STOacq == max(Index)/2 + 1. Evidence: lab T330 (max Index
-		// 12 -> 7) and ER0000-out.sl2 (1086 -> 544, 1572 -> 787, 198 -> 100).
-		// Inventory instead keeps a raw mark, max(Index) + 1 (15668 -> 15669,
-		// 969 -> 970), which is the rule this branch previously applied to
-		// Storage by mistake. The two empty-Storage branches already produce the
-		// bucket value because they step by one while Index steps by two.
-		switch {
-		case isEmptyStorageInit:
-			// T310: the confirmed empty-Storage init writes the bucket of the
-			// record's own Index (2 -> bucket 1 -> next bucket 2).
-			slot.Storage.NextAcquisitionSortId = nextListId
-			slot.Storage.NextEquipIndex = 128
-		case storageBatchStartedEmpty:
-			// T330: later record in the same originally-empty-Storage batch.
-			slot.Storage.NextAcquisitionSortId++
-			slot.Storage.NextEquipIndex++
-		default:
-			// Storage already populated when the save was loaded.
-			slot.Storage.NextAcquisitionSortId = nextListId/2 + 1
-			slot.Storage.NextEquipIndex++
-		}
-		if slot.Storage.nextEquipIndexOff > 0 {
-			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextEquipIndexOff:], slot.Storage.NextEquipIndex)
-		}
-		if slot.Storage.nextAcqSortIdOff > 0 {
-			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
-		}
+		applyStorageCountersAfterWrite(slot, nextListId)
 
 		// Update common_inventory_items_distinct_count header.
 		// The game uses this count to determine how many storage items to load.

@@ -265,6 +265,14 @@ func transferOne(slot *SaveSlot, handle uint32, direction TransferDirection, cap
 			transferQty = available
 		}
 		writeRecordQty(slot.Data, dstStart, dstExistingIdx, dstExistingQty+transferQty)
+		if destContainer(direction) == containerStorage {
+			newAcq := nextStorageAcquisitionIndex(slot)
+			off := dstStart + dstExistingIdx*InvRecordLen + 8
+			if off+4 <= len(slot.Data) {
+				binary.LittleEndian.PutUint32(slot.Data[off:], newAcq)
+			}
+			applyStorageCountersAfterWrite(slot, newAcq)
+		}
 		remaining := srcQty - transferQty
 		if remaining == 0 {
 			clearRecord(slot.Data, srcStart, srcIdx, sourceContainer(direction))
@@ -427,35 +435,7 @@ func assignDestIndex(slot *SaveSlot, c containerKind) uint32 {
 		mark := nextAcquisitionWriteIndex(slot.Inventory.NextAcquisitionSortId, InvEquipReservedMax+2)
 		return mark + 1
 	}
-	// Storage: use next_equip_index clamped above InvEquipReservedMax and above
-	// max existing Index of any valid record (matches writer.go:766-790).
-	nextListId := slot.Storage.NextEquipIndex
-	if nextListId <= InvEquipReservedMax {
-		nextListId = InvEquipReservedMax + 1
-	}
-	storageStart, slots := containerBinary(slot, containerStorage)
-	if storageStart > 0 {
-		for i := 0; i < slots; i++ {
-			off := storageStart + i*InvRecordLen
-			if off+InvRecordLen > len(slot.Data) {
-				break
-			}
-			h := binary.LittleEndian.Uint32(slot.Data[off:])
-			if h == GaHandleEmpty || h == GaHandleInvalid {
-				continue
-			}
-			typeBits := h & GaHandleTypeMask
-			if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
-				typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
-				continue
-			}
-			idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
-			if idx > InvEquipReservedMax && idx < 50000 && idx >= nextListId {
-				nextListId = idx + 1
-			}
-		}
-	}
-	return nextListId
+	return nextStorageAcquisitionIndex(slot)
 }
 
 // advanceDestCounters updates NextEquipIndex / NextAcquisitionSortId on the
@@ -477,14 +457,7 @@ func advanceDestCounters(slot *SaveSlot, c containerKind, writtenIndex uint32) {
 		return
 	}
 	// Storage
-	if slot.Storage.NextAcquisitionSortId <= writtenIndex {
-		slot.Storage.NextAcquisitionSortId = writtenIndex + 1
-	} else {
-		slot.Storage.NextAcquisitionSortId++
-	}
-	if slot.Storage.nextAcqSortIdOff > 0 {
-		binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
-	}
+	applyStorageCountersAfterWrite(slot, writtenIndex)
 }
 
 // ── in-memory list helpers ───────────────────────────────────────────────────
