@@ -4240,6 +4240,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/starting-class": {
+      "patch": {
+        "operationId": "setCharacterStartingClass",
+        "tags": ["Character"],
+        "summary": "SetCharacterStartingClass",
+        "description": "Atomically changes the starting class of one active character under expectedRevision control. If any current attribute is below the new class's minimum, it is raised to that minimum; attributes above the minimum are never lowered. The level is recalculated from the resulting attributes (sum minus 79) and written to PlayerGameData and to the character's profile summary. TotalGetSoul (SoulMemory) is raised to the minimum the recalculated level requires and otherwise left untouched. Both the PlayerGameData class byte (offset -248) and the ProfileSummary class byte (offset 0x243) are written and kept synchronised. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterStartingClassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed starting class mutation receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterStartingClassResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, missing or unknown field, unknown startingClassID, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/network-settings": {
       "get": {
         "operationId": "getNetworkSettings",
@@ -5608,6 +5656,68 @@
         "required": [
           "saveSessionID", "saveRevision", "characterID",
           "attributes", "level", "soulMemory"
+        ]
+      },
+      "SetCharacterStartingClassRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Starting class assignment and optimistic-concurrency revision.",
+        "properties": {
+          "startingClassID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "Target starting class identifier (0..9)."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["startingClassID", "expectedRevision"]
+      },
+      "SetCharacterStartingClassResult": {
+        "type": "object",
+        "description": "Receipt for one committed starting-class mutation. Reports the resulting attributes, level, SoulMemory, and whether any attribute was raised.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startingClassID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/CharacterAttributes"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 713
+          },
+          "soulMemory": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "attributesRaised": {
+            "type": "boolean",
+            "description": "True if any attribute was raised to meet the new class's minima."
+          }
+        },
+        "required": [
+          "saveSessionID", "saveRevision", "characterID",
+          "startingClassID", "attributes", "level", "soulMemory", "attributesRaised"
         ]
       },
       "CharacterStats": {

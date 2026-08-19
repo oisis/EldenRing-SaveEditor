@@ -158,6 +158,11 @@
                 "filepath": "../../../docs/endpoints/character/set_character_stats.md",
                 "title": "SetCharacterStats"
               },
+              "/set-character-starting-class": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/set_character_starting_class.md",
+                "title": "SetCharacterStartingClass"
+              },
               "/get-character-appearance": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/get_character_appearance.md",

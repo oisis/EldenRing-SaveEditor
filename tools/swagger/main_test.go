@@ -901,6 +901,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/gender", `{"gender":0,"expectedRevision":"0"}`},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/starting-class", `{"startingClassID":0,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/undo", ""},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/undo", `{"undoToken":"any-token","expectedRevision":"0"}`},
@@ -1043,6 +1044,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active":                             "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name":                               "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender":                             "patch",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/starting-class":                     "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes":                              "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                              "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo":                               "get",
@@ -1274,6 +1276,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterAttributes",
 		"SetCharacterStatsRequest",
 		"SetCharacterStatsResult",
+		"SetCharacterStartingClassRequest",
+		"SetCharacterStartingClassResult",
 		"CharacterAppearance",
 		"CharacterAppearanceValues",
 		"SetCharacterAppearanceRequest",
@@ -1622,8 +1626,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 82 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 82", found)
+	if found != 83 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 83", found)
 	}
 }
 
@@ -2638,6 +2642,88 @@ func TestSetCharacterStatsRoute(t *testing.T) {
 func TestSetCharacterStatsRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	target := "/api/v1/save-sessions/any-session/characters/0/stats"
 	recorder := doSave(t, nil, http.MethodPatch, target, setCharacterStatsRouteBody)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)",
+			target, recorder.Code, recorder.Body.String())
+	}
+}
+
+const setCharacterStartingClassRouteBody = `{"startingClassID":4,"expectedRevision":"0"}`
+
+func TestSetCharacterStartingClassRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/starting-class"
+		request := httptest.NewRequest(http.MethodPatch, target,
+			strings.NewReader(setCharacterStartingClassRouteBody))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got character.SetCharacterStartingClassResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := character.SetCharacterStartingClass(
+			saveEngine, directSession.SaveSessionID, 0, 4, "0")
+		if err != nil {
+			t.Fatalf("character.SetCharacterStartingClass: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/starting-class"
+		for name, body := range map[string]string{
+			"missing startingClassID":  `{"expectedRevision":"0"}`,
+			"unknown startingClassID":  `{"startingClassID":99,"expectedRevision":"0"}`,
+			"unknown top-level field":  `{"startingClassID":4,"expectedRevision":"0","extra":true}`,
+			"invalid expectedRevision": `{"startingClassID":4,"expectedRevision":"stale"}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPatch, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)",
+						recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
+}
+
+func TestSetCharacterStartingClassRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/starting-class"
+	recorder := doSave(t, nil, http.MethodPatch, target, setCharacterStartingClassRouteBody)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)",
 			target, recorder.Code, recorder.Body.String())

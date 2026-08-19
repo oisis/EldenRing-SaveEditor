@@ -476,6 +476,14 @@ type setCharacterStatsRequest struct {
 	ExpectedRevision string                         `json:"expectedRevision"`
 }
 
+// setCharacterStartingClassRequest is the strict JSON body of the starting-class
+// route. A pointer distinguishes an omitted startingClassID from the valid
+// Vagabond value zero.
+type setCharacterStartingClassRequest struct {
+	StartingClassID  *uint8 `json:"startingClassID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 func (request setCharacterAttributesRequest) values() (character.CharacterAttributes, error) {
 	values := character.CharacterAttributes{}
 	for _, field := range []struct {
@@ -1222,6 +1230,44 @@ func registerSaveSessionRoutes(
 				characterID,
 				attributes,
 				body.LevelPolicy,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/starting-class",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterStartingClassRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.StartingClassID == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("startingClassID is required"))
+				return
+			}
+			result, err := character.SetCharacterStartingClass(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.StartingClassID,
 				body.ExpectedRevision,
 			)
 			if err != nil {
