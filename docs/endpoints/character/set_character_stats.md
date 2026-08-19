@@ -112,9 +112,9 @@ save offset, no private save byte and no starting class.
 | 3 | Bandit | 10 | 11 | 10 | 9 | 13 | 9 | 8 | 14 |
 | 4 | Astrologer | 9 | 15 | 9 | 8 | 12 | 16 | 7 | 9 |
 | 5 | Prophet | 10 | 14 | 8 | 11 | 10 | 7 | 16 | 10 |
-| 6 | Samurai | 12 | 11 | 13 | 12 | 15 | 9 | 8 | 8 |
-| 7 | Prisoner | 11 | 12 | 11 | 11 | 14 | 14 | 6 | 9 |
-| 8 | Confessor | 10 | 13 | 10 | 12 | 12 | 9 | 14 | 9 |
+| 6 | Confessor | 10 | 13 | 10 | 12 | 12 | 9 | 14 | 9 |
+| 7 | Samurai | 12 | 11 | 13 | 12 | 15 | 9 | 8 | 8 |
+| 8 | Prisoner | 11 | 12 | 11 | 11 | 14 | 14 | 6 | 9 |
 | 9 | Wretch | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 |
 
 ## Derived values

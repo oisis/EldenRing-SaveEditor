@@ -655,6 +655,89 @@ func TestLegalAttributesFor(t *testing.T) {
 		}
 	})
 
+	t.Run("all ten confirmed starting classes return their confirmed base attributes", func(t *testing.T) {
+		confirmedBaseAttributes := [10]CharacterAttributes{
+			0: {Vigor: 15, Mind: 10, Endurance: 11, Strength: 14, Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7},    // Vagabond
+			1: {Vigor: 11, Mind: 12, Endurance: 11, Strength: 10, Dexterity: 16, Intelligence: 10, Faith: 8, Arcane: 9},   // Warrior
+			2: {Vigor: 14, Mind: 9, Endurance: 12, Strength: 16, Dexterity: 9, Intelligence: 7, Faith: 8, Arcane: 11},     // Hero
+			3: {Vigor: 10, Mind: 11, Endurance: 10, Strength: 9, Dexterity: 13, Intelligence: 9, Faith: 8, Arcane: 14},    // Bandit
+			4: {Vigor: 9, Mind: 15, Endurance: 9, Strength: 8, Dexterity: 12, Intelligence: 16, Faith: 7, Arcane: 9},      // Astrologer
+			5: {Vigor: 10, Mind: 14, Endurance: 8, Strength: 11, Dexterity: 10, Intelligence: 7, Faith: 16, Arcane: 10},   // Prophet
+			6: {Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},   // Confessor
+			7: {Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},    // Samurai
+			8: {Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},   // Prisoner
+			9: {Vigor: 10, Mind: 10, Endurance: 10, Strength: 10, Dexterity: 10, Intelligence: 10, Faith: 10, Arcane: 10}, // Wretch
+		}
+
+		for classID, want := range confirmedBaseAttributes {
+			got, err := LegalAttributesFor(CharacterAttributes{}, uint8(classID))
+			if err != nil {
+				t.Fatalf("class %d: LegalAttributesFor: %v", classID, err)
+			}
+			if got != want {
+				t.Errorf("class %d minima = %+v, want %+v", classID, got, want)
+			}
+		}
+	})
+
+	t.Run("boundary attributes at and below confirmed class minima", func(t *testing.T) {
+		cases := []struct {
+			name    string
+			classID uint8
+			input   CharacterAttributes
+			want    CharacterAttributes
+		}{
+			{
+				name:    "confessor attribute at minimum is unchanged",
+				classID: 6,
+				input:   CharacterAttributes{Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+				want:    CharacterAttributes{Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+			},
+			{
+				name:    "confessor attribute below minimum is raised",
+				classID: 6,
+				input:   CharacterAttributes{Vigor: 9, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+				want:    CharacterAttributes{Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+			},
+			{
+				name:    "samurai attribute at minimum is unchanged",
+				classID: 7,
+				input:   CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},
+				want:    CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},
+			},
+			{
+				name:    "samurai attribute below minimum is raised",
+				classID: 7,
+				input:   CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 14, Intelligence: 9, Faith: 8, Arcane: 8},
+				want:    CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},
+			},
+			{
+				name:    "prisoner attribute at minimum is unchanged",
+				classID: 8,
+				input:   CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},
+				want:    CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},
+			},
+			{
+				name:    "prisoner attribute below minimum is raised",
+				classID: 8,
+				input:   CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 13, Faith: 6, Arcane: 9},
+				want:    CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},
+			},
+		}
+
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				got, err := LegalAttributesFor(tc.input, tc.classID)
+				if err != nil {
+					t.Fatalf("LegalAttributesFor: %v", err)
+				}
+				if got != tc.want {
+					t.Errorf("LegalAttributesFor = %+v, want %+v", got, tc.want)
+				}
+			})
+		}
+	})
+
 	t.Run("an unknown starting class is rejected", func(t *testing.T) {
 		if _, err := LegalAttributesFor(CharacterAttributes{
 			Vigor: 20, Mind: 20, Endurance: 20, Strength: 20,
@@ -663,4 +746,62 @@ func TestLegalAttributesFor(t *testing.T) {
 			t.Error("class 10 was accepted, but it carries no confirmed minima")
 		}
 	})
+}
+
+func TestSetCharacterStats_CorrectedClassMinima(t *testing.T) {
+	classes := []struct {
+		name       string
+		classID    byte
+		legalBase  CharacterAttributes
+		belowField CharacterAttributes
+		wantError  string
+	}{
+		{
+			name:       "Confessor class 6",
+			classID:    6,
+			legalBase:  CharacterAttributes{Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+			belowField: CharacterAttributes{Vigor: 9, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},
+			wantError:  "attributes.vigor 9 is below the starting-class minimum 10",
+		},
+		{
+			name:       "Samurai class 7",
+			classID:    7,
+			legalBase:  CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},
+			belowField: CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 14, Intelligence: 9, Faith: 8, Arcane: 8},
+			wantError:  "attributes.dexterity 14 is below the starting-class minimum 15",
+		},
+		{
+			name:       "Prisoner class 8",
+			classID:    8,
+			legalBase:  CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},
+			belowField: CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 13, Faith: 6, Arcane: 9},
+			wantError:  "attributes.intelligence 13 is below the starting-class minimum 14",
+		},
+	}
+
+	for _, tc := range classes {
+		t.Run(tc.name, func(t *testing.T) {
+			content := setStatsTestActiveContent(PlatformPC)
+			content.classID = tc.classID
+			content.summaryClassID = tc.classID
+			engine, sessionID := loadSetStatsSession(t, content)
+
+			// 1. Legal base attributes must be accepted
+			res, err := engine.SetCharacterStats(
+				sessionID, setStatsTestSlot, tc.legalBase, LevelPolicyRecalculate, "0")
+			if err != nil {
+				t.Fatalf("SetCharacterStats rejected legal base build: %v", err)
+			}
+			if res.Attributes != tc.legalBase {
+				t.Errorf("res.Attributes = %+v, want %+v", res.Attributes, tc.legalBase)
+			}
+
+			// 2. An attribute below class minimum must be rejected
+			_, err = engine.SetCharacterStats(
+				sessionID, setStatsTestSlot, tc.belowField, LevelPolicyRecalculate, "1")
+			if err == nil || err.Error() != tc.wantError {
+				t.Fatalf("error = %v, want %q", err, tc.wantError)
+			}
+		})
+	}
 }

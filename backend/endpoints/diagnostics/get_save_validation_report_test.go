@@ -744,3 +744,70 @@ func TestGetSaveValidationReport_RejectsMissingDependencies(t *testing.T) {
 		t.Error("a characterID outside the slot range was accepted")
 	}
 }
+
+func TestGetSaveValidationReport_StartingClassMinima(t *testing.T) {
+	gameCatalog := reportTestCatalog(t)
+
+	classes := []struct {
+		name          string
+		startingClass uint8
+		level         uint32
+		attributes    [8]uint32
+		belowAttr     [8]uint32
+	}{
+		{
+			name:          "Confessor class 6",
+			startingClass: 6,
+			level:         10,
+			attributes:    [8]uint32{10, 13, 10, 12, 12, 9, 14, 9},
+			belowAttr:     [8]uint32{9, 13, 10, 12, 12, 9, 14, 9},
+		},
+		{
+			name:          "Samurai class 7",
+			startingClass: 7,
+			level:         9,
+			attributes:    [8]uint32{12, 11, 13, 12, 15, 9, 8, 8},
+			belowAttr:     [8]uint32{12, 11, 13, 12, 14, 9, 8, 8},
+		},
+		{
+			name:          "Prisoner class 8",
+			startingClass: 8,
+			level:         9,
+			attributes:    [8]uint32{11, 12, 11, 11, 14, 14, 6, 9},
+			belowAttr:     [8]uint32{11, 12, 11, 11, 14, 13, 6, 9},
+		},
+	}
+
+	for _, tc := range classes {
+		t.Run(tc.name+" legal base produces no issue", func(t *testing.T) {
+			engine, session := loadReportFixture(t, reportTestFixture{
+				startingClass: tc.startingClass,
+				level:         &tc.level,
+				attributes:    &tc.attributes,
+			})
+			result, err := diagnostics.GetSaveValidationReport(
+				engine, gameCatalog, session, reportTestSlot, "stats")
+			if err != nil {
+				t.Fatalf("GetSaveValidationReport: %v", err)
+			}
+			requireNoIssue(t, result, "attribute_below_class_minimum")
+			requireNoIssue(t, result, "level_mismatch")
+			if result.ErrorCount != 0 {
+				t.Errorf("ErrorCount = %d, want 0", result.ErrorCount)
+			}
+		})
+
+		t.Run(tc.name+" below minimum produces error", func(t *testing.T) {
+			engine, session := loadReportFixture(t, reportTestFixture{
+				startingClass: tc.startingClass,
+				attributes:    &tc.belowAttr,
+			})
+			result, err := diagnostics.GetSaveValidationReport(
+				engine, gameCatalog, session, reportTestSlot, "stats")
+			if err != nil {
+				t.Fatalf("GetSaveValidationReport: %v", err)
+			}
+			requireIssue(t, result, "attribute_below_class_minimum", "error")
+		})
+	}
+}

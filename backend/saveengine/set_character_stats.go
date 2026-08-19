@@ -71,9 +71,9 @@ var startingClassBaseAttributes = [10][characterAttributeCount]uint32{
 	{10, 11, 10, 9, 13, 9, 8, 14},    // Bandit
 	{9, 15, 9, 8, 12, 16, 7, 9},      // Astrologer
 	{10, 14, 8, 11, 10, 7, 16, 10},   // Prophet
+	{10, 13, 10, 12, 12, 9, 14, 9},   // Confessor
 	{12, 11, 13, 12, 15, 9, 8, 8},    // Samurai
 	{11, 12, 11, 11, 14, 14, 6, 9},   // Prisoner
-	{10, 13, 10, 12, 12, 9, 14, 9},   // Confessor
 	{10, 10, 10, 10, 10, 10, 10, 10}, // Wretch
 }
 
