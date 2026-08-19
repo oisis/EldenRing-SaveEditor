@@ -1171,6 +1171,20 @@ func (a *App) addItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 				a.logInfo("already max storage qty %d/%d — skipping %s (0x%08X)", existingStorageQty[id], maxStorage, itemData.Name, id)
 				actualStorage = 0
 			}
+			// Add to an existing stack, don't replace it. core.addToInventory
+			// takes qty as the TARGET TOTAL for a stackable record ("SET
+			// quantity to the desired value (not ADD)" in writer.go), so the
+			// quantity already held has to be folded in here — otherwise
+			// "add 5" to a 586-strong stack rewrites it to 5 and silently
+			// destroys 581 items. Clamped to the item's cap so topping up a
+			// nearly full stack saturates instead of overflowing; the two
+			// guards above already dropped the at-cap case to 0.
+			if actualInv > 0 {
+				actualInv = min(actualInv+existingItemQty[id], int(maxInventory))
+			}
+			if actualStorage > 0 {
+				actualStorage = min(actualStorage+existingStorageQty[id], int(maxStorage))
+			}
 		}
 
 		// Container enforcement (inventory only — storage has no cap).
