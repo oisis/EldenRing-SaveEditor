@@ -377,3 +377,144 @@ func TestStorageContract_RemoveRecord_LeavesHoleAndPreservesCounters(t *testing.
 		t.Errorf("NextAcquisitionSortId changed on removal: got %d, want 4", slot.Storage.NextAcquisitionSortId)
 	}
 }
+
+// buildStorageFullSectionFixture builds a SaveSlot with a fully-formed Storage section
+// containing:
+//   - 4-byte header count at StorageBoxOffset
+//   - 1920 common records (StorageCommonCount * InvRecordLen bytes)
+//   - 4-byte key_count header at storageStart + StorageCommonCount*InvRecordLen
+//   - 128 key records (StorageKeyCount * InvRecordLen bytes)
+//   - next_equip_index (4 bytes)
+//   - next_acq_sort_id (4 bytes)
+//
+// MagicOffset is pointed past Data so inventory parsing is skipped on mapInventory.
+func buildStorageFullSectionFixture(t *testing.T, commonRecords map[int]InventoryItem, keyRecords map[int]InventoryItem, nextEquip, nextAcq uint32) *SaveSlot {
+	t.Helper()
+	storageBoxOff := 0x1000
+	storageStart := storageBoxOff + StorageHeaderSkip
+	keyCountOff := storageStart + StorageCommonCount*InvRecordLen
+	keyRecordsStart := keyCountOff + InvKeyCountHeader
+	nextEquipOff := storageStart + StorageNextEquipIdxRel
+	nextAcqOff := storageStart + StorageNextAcqSortRel
+	storageBufSize := nextAcqOff + 8
+
+	totalSize := storageBufSize + 0x1000
+
+	slot := &SaveSlot{
+		Version:          1,
+		StorageBoxOffset: storageBoxOff,
+		MagicOffset:      totalSize,
+		Data:             make([]byte, totalSize),
+		GaMap:            make(map[uint32]uint32),
+	}
+
+	nonEmptyCommon := 0
+	for idx, it := range commonRecords {
+		if it.GaItemHandle != GaHandleEmpty && it.GaItemHandle != GaHandleInvalid {
+			nonEmptyCommon++
+			off := storageStart + idx*InvRecordLen
+			binary.LittleEndian.PutUint32(slot.Data[off:], it.GaItemHandle)
+			binary.LittleEndian.PutUint32(slot.Data[off+4:], it.Quantity)
+			binary.LittleEndian.PutUint32(slot.Data[off+8:], it.Index)
+		}
+	}
+	binary.LittleEndian.PutUint32(slot.Data[storageBoxOff:], uint32(nonEmptyCommon))
+
+	nonEmptyKey := 0
+	for idx, it := range keyRecords {
+		if it.GaItemHandle != GaHandleEmpty && it.GaItemHandle != GaHandleInvalid {
+			nonEmptyKey++
+			off := keyRecordsStart + idx*InvRecordLen
+			binary.LittleEndian.PutUint32(slot.Data[off:], it.GaItemHandle)
+			binary.LittleEndian.PutUint32(slot.Data[off+4:], it.Quantity)
+			binary.LittleEndian.PutUint32(slot.Data[off+8:], it.Index)
+		}
+	}
+	binary.LittleEndian.PutUint32(slot.Data[keyCountOff:], uint32(nonEmptyKey))
+
+	binary.LittleEndian.PutUint32(slot.Data[nextEquipOff:], nextEquip)
+	binary.LittleEndian.PutUint32(slot.Data[nextAcqOff:], nextAcq)
+
+	return slot
+}
+
+// Regression Test 7:
+// ReadStorage must read the storage common array only (StorageCommonCount = 1920
+// records) and stop before the 4-byte key_count header and the 128 storage key
+// records that follow it.
+//
+// Passing StorageItemCount (2048) overshot the common array by 128 records. The
+// reader swallowed the 4-byte key_count first, so every following field landed one
+// word early: key_count became a handle and the fields of adjacent key records were
+// glued into phantom common records with impossible handle types (e.g. 0x00000005).
+// The repair scanner then reported unknown_handle_type on records that do not exist
+// in the binary, and the compacted-to-physical mapping no longer matched.
+//
+// The key block must be non-empty for this test to mean anything: with an empty key
+// block the overshoot reads zeroes and is skipped, so the test would pass identically
+// before and after the fix. The key handles below are the ones the game itself wrote
+// into Zofia's chest in tmp/storage-test/t3-b.sl2 slot 1.
+func TestStorageContract_ReadStorage_NonEmptyKeyBlock(t *testing.T) {
+	// Valid common records, including the boundary case at the LAST position (index 1919).
+	commonRecords := map[int]InventoryItem{
+		0:    {GaItemHandle: testHandleSmithingStone, Quantity: 10, Index: 2},
+		1:    {GaItemHandle: testHandleDagger, Quantity: 1, Index: 4},
+		1919: {GaItemHandle: testHandleArrow, Quantity: 30, Index: 6},
+	}
+
+	// Non-empty storage key block, taken verbatim from t3-b.sl2 slot 1.
+	keyRecords := map[int]InventoryItem{
+		0: {GaItemHandle: 0xB0001F40, Quantity: 16, Index: 4045}, // Stonesword Key
+		1: {GaItemHandle: 0xB0002756, Quantity: 7, Index: 4046},  // Lost Ashes of War
+		2: {GaItemHandle: 0xB0000852, Quantity: 7, Index: 4047},  // Celestial Dew
+		3: {GaItemHandle: 0xB000274C, Quantity: 9, Index: 4048},  // Dragon Heart
+		4: {GaItemHandle: 0xB000082A, Quantity: 3, Index: 4049},  // Deathroot
+	}
+
+	slot := buildStorageFullSectionFixture(t, commonRecords, keyRecords, 130, 8)
+	slot.GaMap[testHandleDagger] = testItemIDDagger
+	slot.GaMap[testHandleArrow] = testItemIDArrow
+
+	if err := slot.mapInventory(); err != nil {
+		t.Fatalf("mapInventory failed: %v", err)
+	}
+
+	// Assertion 1: the storage_common record count equals the number of NON-EMPTY
+	// physical records in the common array.
+	if got, want := len(slot.Storage.CommonItems), len(commonRecords); got != want {
+		t.Errorf("Storage.CommonItems count: got %d, want %d", got, want)
+	}
+
+	// Assertion 2: no key record leaks into the common list.
+	for _, it := range slot.Storage.CommonItems {
+		if it.GaItemHandle == 0x00000005 {
+			t.Errorf("phantom record with key_count as handle found in CommonItems: %+v", it)
+		}
+		for _, keyIt := range keyRecords {
+			if it.GaItemHandle == keyIt.GaItemHandle {
+				t.Errorf("key item handle 0x%08X leaked into CommonItems: %+v", it.GaItemHandle, it)
+			}
+		}
+	}
+
+	// Assertion 3: a healthy save with a non-empty key block emits no unknown_handle_type issue.
+	issues := ScanRepairIssues(0, slot)
+	for _, iss := range issues {
+		if iss.Key.Code == RepairCodeUnknownHandleType {
+			t.Errorf("unexpected unknown_handle_type issue emitted: %+v (debug: %s)", iss.Key, iss.DebugKey)
+		}
+	}
+
+	// Assertion 4: boundary case — the record at the LAST common position (physical
+	// index 1919) is still read; the narrower bound must not truncate it.
+	foundLast := false
+	for _, it := range slot.Storage.CommonItems {
+		if it.GaItemHandle == testHandleArrow && it.Quantity == 30 && it.Index == 6 {
+			foundLast = true
+			break
+		}
+	}
+	if !foundLast {
+		t.Errorf("boundary record at physical index 1919 was not found in Storage.CommonItems: %+v", slot.Storage.CommonItems)
+	}
+}
