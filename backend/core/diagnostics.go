@@ -32,6 +32,18 @@ type SlotDiagnostics struct {
 func DiagnoseSaveCorruption(slot *SaveSlot, slotIndex int) SlotDiagnostics {
 	diag := SlotDiagnostics{SlotIndex: slotIndex}
 
+	// 0. Never-created character. A save always carries ten slot structures;
+	// the unused ones are zero-filled, so every range check below would report
+	// them as corrupt (Level 0, all attributes 0 — nine criticals per slot).
+	// Version is the slot's own marker: real slots carry the save version that
+	// wrote them, unused ones carry 0, and it agrees with UserData10 ActiveSlots
+	// @ 0x1954. Callers already skip these, but the guard belongs here so a new
+	// caller cannot resurrect the false positives — scanStatsRepairIssues
+	// defends itself the same way.
+	if slot.Version == 0 {
+		return diag
+	}
+
 	// 1. Data length
 	if len(slot.Data) != SlotSize {
 		diag.addCritical("data_size", "slot data length %d != expected %d", len(slot.Data), SlotSize)
