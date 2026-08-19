@@ -4,6 +4,46 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.10] - 2026-08-19
+
+### fix(storage): follow the game's own acquisition rules when depositing items
+
+Depositing into Storage wrote acquisition indices and header counters that the
+game itself never produces. Items landed in the chest in the wrong sort order,
+and after enough deposits the two Storage counters drifted far enough apart to
+matter. Confirmed against native saves captured before and after in-game
+sessions: the game numbers acquisition in even steps, advances
+`NextEquipIndex` to `128 + last occupied row`, and keeps
+`NextAcquisitionSortId` at the next free acquisition bucket.
+
+Adding and moving items now follow one shared rule instead of three
+independent ones. The transfer path previously wrote odd indices that collided
+with existing entries.
+
+### fix(inventory): add to an existing stack instead of overwriting its quantity
+
+Adding a stackable item the character already carried replaced the stack size
+with the amount added rather than adding to it. Depositing 10 more of an item
+you already had 40 of left you with 10. Quantities are now summed and clamped
+to the item's in-game maximum.
+
+### fix(storage): stop reporting phantom items in a chest holding key items
+
+A chest containing key items — a Stonesword Key, Celestial Dew, a Dragon Heart —
+made the repair scanner report items that do not exist in the save, and
+refuse to repair them. The reader ran 128 records past the end of the chest's
+item array and into the key-item block, gluing neighbouring fields into records
+that were never there. Nothing was ever written to the save; the phantoms
+existed only in the reading. Saves with an empty key block were unaffected,
+which is why this went unnoticed.
+
+### fix(diagnostics): stop reporting empty character slots as corrupt
+
+A save with fewer than ten characters reported nine critical problems per
+unused slot — level 0, every attribute 0. Those slots have never held a
+character and are zero-filled by design. The corruption scan now recognises
+them and reports nothing.
+
 ## [1.6.9] - 2026-08-18
 
 ### fix(storage): advance both counters when adding to a populated storage
