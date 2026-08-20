@@ -217,14 +217,14 @@ non-JSON media type are rejected before the endpoint is called.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 carry byte-identical implementations of this mutation:
+SaveForge 1.5.8 and 1.6.10 carry byte-identical implementations of this mutation:
 `backend/db/data/summoning_pools.go` declares `ColosseumFlagSets` with the same
 three arenas and the same four members each, and `ColosseumGlobalFlags` with
 `6080`, `60100` and `69480`; `applyColosseumUnlocked` in `app_world.go`
-(`internal/application/app_world.go` in 1.6.8) writes the four arena flags
+(`internal/application/app_world.go` in 1.6.10) writes the four arena flags
 following `unlocked` and applies the globals on activation only. The two tags do
-not differ in either file, and the local read-only copy in `tmp/er-sf-1.6.8`
-matches the `v1.6.8` tag. Both versions document the same `WorldGeom` limitation
+not differ in either file, and the local read-only copy in `tmp/er-sf-1.6.10`
+matches the `v1.6.10` tag. Both versions document the same `WorldGeom` limitation
 for the physical gate.
 
 One legacy behaviour is deliberately **not** reproduced: when the identifier is
@@ -234,7 +234,7 @@ SaveForge 2.0 rejects an unconfirmed identifier instead, so no arbitrary flag of
 block `60` can be written under the name of a colosseum.
 
 The block-to-BST table both versions embed (`backend/db/data/eventflag_bst.txt`)
-is byte-identical between `v1.5.8`, `v1.6.8` and the local copy, so every block
+is byte-identical between `v1.5.8`, `v1.6.10` and the local copy, so every block
 position this endpoint needs is confirmed in both releases:
 
 | Block | BST position | Used for |

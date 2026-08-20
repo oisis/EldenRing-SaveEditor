@@ -236,7 +236,7 @@ For a **new record**:
 | `NextAcquisitionSortId`, the second trailing counter | `acquisitionIndex + 1` |
 | One active `GaItemData` entry | `{gameID, 1}`, only when the character owns no physical record of that item yet |
 
-`acquisitionIndex` is derived the way SaveForge 1.5.8 and 1.6.8 derived it, byte
+`acquisitionIndex` is derived the way SaveForge 1.5.8 and 1.6.10 derived it, byte
 for byte identically in both: `NextAcquisitionSortId` is a **high-water mark**,
 not the index to assign. It is raised to the reserved-equipment floor `434` when
 it is below it, stabilised to an even value, and the new record takes the odd
@@ -363,7 +363,7 @@ this writer can never disagree about where a row lives.
   [Supported resources](#supported-resources) and [Limits](#limits). It returns no
   document, name or synthetic value.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
-  `backend/templates`, `backend/vm`, or `internal/`. SaveForge 1.5.8 and 1.6.8
+  `backend/templates`, `backend/vm`, or `internal/`. SaveForge 1.5.8 and 1.6.10
   are byte-identical in `addToInventory`, `addToKeyItems`, `classifyItemAdd` and
   `nextAcquisitionWriteIndex`; their entire difference sits in the `GaItem` table
   allocator, which this endpoint does not have and never reaches. The one

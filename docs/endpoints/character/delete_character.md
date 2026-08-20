@@ -97,7 +97,7 @@ empty slot is an error rather than an idempotent commit.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 use the same clear-in-place model and the same three
+SaveForge 1.5.8 and 1.6.10 use the same clear-in-place model and the same three
 ranges. Both accept an active slot or an inactive slot with a residual name and
 reject a slot with neither. The later positional implementation replaced an old
 shift-down deletion that could desynchronize profile summaries; SaveForge 2.0

@@ -66,7 +66,7 @@ SaveEngine remains the single owner of validation, atomicity, revision handling,
 rollback and the PC/PS4 DFLT/ZSTD write paths. The endpoint never merges a
 preset with the current save and never applies only selected fields.
 
-The model mappings reproduce the behavior shared by SaveForge 1.5.8 and 1.6.8,
+The model mappings reproduce the behavior shared by SaveForge 1.5.8 and 1.6.10,
 but the 2.0 implementation fails closed where legacy Type A hair code had a
 one-based fallback for an unknown value.
 

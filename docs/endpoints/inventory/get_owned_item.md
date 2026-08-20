@@ -239,7 +239,7 @@ resolved instance or an error.
   returned.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. SaveForge 2.0 is
-  greenfield. Earlier SaveForge versions (1.5.8 and 1.6.8) carried no owned-item
+  greenfield. Earlier SaveForge versions (1.5.8 and 1.6.10) carried no owned-item
   identity and no equivalent endpoint at all, so no legacy behaviour was
   reproduced, imported or depended on here.
 

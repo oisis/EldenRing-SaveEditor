@@ -68,7 +68,7 @@ The endpoint performs four steps:
    `SaveEngine.SetCharacterGenderAppearance`.
 
 The operation intentionally does not preserve the previous face or voice. This
-matches the behavior shared by SaveForge 1.5.8 and 1.6.8, where changing body
+matches the behavior shared by SaveForge 1.5.8 and 1.6.10, where changing body
 type applies the corresponding complete default preset.
 
 SaveEngine owns validation, atomicity, revision handling, rollback, FACE layout

@@ -101,8 +101,8 @@ already stale after the revision advance.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 use the same supported Inventory categories, exclude
-Unarmed and require a complete order. Native save experiments in the 1.6.8
+SaveForge 1.5.8 and 1.6.10 use the same supported Inventory categories, exclude
+Unarmed and require a complete order. Native save experiments in the 1.6.10
 workspace established the even stride-two rule and the unsafe `10000`
 boundary.
 

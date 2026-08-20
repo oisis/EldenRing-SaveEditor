@@ -96,7 +96,7 @@ supplies the private `RegionID` to SaveEngine.
 
 All other raw entries (including non-curated or unknown IDs, zeros and duplicates)
 are preserved verbatim. The whole list is deliberately not sorted or deduplicated,
-which differs intentionally from SaveForge 1.5.8 / 1.6.8 legacy behavior.
+which differs intentionally from SaveForge 1.5.8 / 1.6.10 legacy behavior.
 
 The slot payload (`0x280000` bytes) is rebuilt through the private
 `rebuildSlotWithRegions` foundation. All post-region structures shift by the

@@ -66,7 +66,7 @@ capability with mode `custom`. The selected resource must be a known
 `ash_of_war` item with a valid `0x8...` game ID and known compatibility data.
 GameCatalog must contain the exact `compatible_with_aow` relation from the
 current weapon resource to the selected Ash resource. Removal needs no
-compatibility or mount-capability check, matching the confirmed 1.5.8 and 1.6.8
+compatibility or mount-capability check, matching the confirmed 1.5.8 and 1.6.10
 clear contract.
 
 ## Existing-copy rule
@@ -110,7 +110,7 @@ four-byte write is read back and verified; a failed write or verification is
 rolled back without advancing the revision.
 
 The in-place contract and zero removal sentinel are identical in SaveForge
-1.5.8 and 1.6.8. Their separate path that allocated a fresh Ash copy depended
+1.5.8 and 1.6.10. Their separate path that allocated a fresh Ash copy depended
 on the retired GaItem repacker and is deliberately not part of this endpoint.
 
 ## Result

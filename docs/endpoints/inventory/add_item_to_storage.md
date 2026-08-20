@@ -80,7 +80,7 @@ must equal `1`.
 
 Storage uses `item.storage.maxStorage` as both the per-record and total
 container limit. This matches the repository-quantity rule shared by SaveForge
-1.5.8 and 1.6.8. The total is calculated across all matching Storage records by
+1.5.8 and 1.6.10. The total is calculated across all matching Storage records by
 resolved game ID. A matching record in either Inventory or Storage key section
 rejects the common-only operation.
 

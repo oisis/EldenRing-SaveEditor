@@ -108,11 +108,11 @@ or inconsistent existing equipment representations.
 ## Evidence and scope
 
 SaveForge 1.5.8 wrote one equipment representation and recomputed an equipment
-hash. SaveForge 1.6.8 corrected that behavior from native cases T544, T547 and
+hash. SaveForge 1.6.10 corrected that behavior from native cases T544, T547 and
 T548: the game maintains four representations, preserves the existing hash and
 allows cleared hand slots to share one `Unarmed` record. SaveForge 2.0 follows
 that native-backed contract without restoring the retired allocator or slot
-repacker used by 1.6.8 when the technical record was absent.
+repacker used by 1.6.10 when the technical record was absent.
 
 PC and PS4 use the same slot-internal representation. Platform handling remains
 owned by SaveEngine and the save codecs. Ammunition slots 6–9 are not part of

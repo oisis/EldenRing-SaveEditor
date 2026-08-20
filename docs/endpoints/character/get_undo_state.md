@@ -105,7 +105,7 @@ is a normal result with `available: false`, not an error.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 are identical here: both kept ten independent undo
+SaveForge 1.5.8 and 1.6.10 are identical here: both kept ten independent undo
 stacks of depth five, each entry holding the slot snapshot, the `ProfileSummary`
 and the activity flag, and both cleared every stack on load and on a successful
 save. `GetUndoDepth` returned the stack length. SaveForge 2.0 keeps the same

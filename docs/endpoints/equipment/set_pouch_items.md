@@ -97,7 +97,7 @@ an inactive slot, a stale revision or a malformed save-side layout.
 
 ## Evidence and scope
 
-SaveForge 1.5.8 had no pouch writer. SaveForge 1.6.8 confirmed dual representation
+SaveForge 1.5.8 had no pouch writer. SaveForge 1.6.10 confirmed dual representation
 writing, empty slot sentinels, position preservation and duplicate checks. SaveForge 2.0
 reimplements those confirmed invariants through its own GameCatalog, SaveEngine
 session, and revision model.

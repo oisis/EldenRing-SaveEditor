@@ -394,7 +394,7 @@ request.
   plus exact resolved `gameID`; no full document, name or synthetic value is returned.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. SaveForge 2.0 is
-  greenfield. Earlier SaveForge versions (1.5.8 and 1.6.8) were used as research
+  greenfield. Earlier SaveForge versions (1.5.8 and 1.6.10) were used as research
   material to confirm the binary format only; no legacy code is imported,
   reused or depended on at runtime.
 

@@ -222,17 +222,17 @@ non-JSON media type are rejected before the endpoint is called.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 carry semantically identical implementations of this
+SaveForge 1.5.8 and 1.6.10 carry semantically identical implementations of this
 mutation. `applyGraceVisited` writes the grace flag through `db.SetEventFlag`,
 follows it with the `GraceData.DoorFlag` when that field is non-zero, and applies
 `CompanionEventFlagsForGrace` on activation only — the same closed set SaveForge
 2.0 keeps inside SaveEngine. `worldGraceFlagIDs` builds the
 same flag list for the diagnostic journal. Both files are identical between the
-two tags, and the local read-only copy in `tmp/er-sf-1.6.8` matches the `v1.6.8`
+two tags, and the local read-only copy in `tmp/er-sf-1.6.10` matches the `v1.6.10`
 tag byte for byte.
 
 The block-to-BST table both versions embed (`backend/db/data/eventflag_bst.txt`)
-is byte-identical between `v1.5.8`, `v1.6.8` and the local copy, so every block
+is byte-identical between `v1.5.8`, `v1.6.10` and the local copy, so every block
 position this endpoint needs is confirmed in both releases:
 
 | Block | BST position | Used for |

@@ -106,7 +106,7 @@ invalidates identities minted under the previous revision.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 use the same positional clone and unique-suffix rules,
+SaveForge 1.5.8 and 1.6.10 use the same positional clone and unique-suffix rules,
 including UTF-16-aware shortening and residual-name collisions. SaveForge 2.0
 deliberately strengthens target validation: the target must be physically zero
 instead of relying only on legacy residual-slot classification.

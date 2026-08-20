@@ -109,5 +109,5 @@ back to a later block or a guessed offset.
 - It creates no runtime or build dependency on either legacy SaveForge tree.
 
 The confirmed layout and dependent sex-flag reset agree between SaveForge
-1.5.8 and 1.6.8. Synthetic PC and PS4 tests verify exact byte preservation and
+1.5.8 and 1.6.10. Synthetic PC and PS4 tests verify exact byte preservation and
 `WriteSave`/`LoadSave` persistence without modifying a real save.

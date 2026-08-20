@@ -164,7 +164,7 @@ non-JSON media type are rejected before the endpoint is called.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 have the same cookbook mutation: both change the
+SaveForge 1.5.8 and 1.6.10 have the same cookbook mutation: both change the
 event flag and also add or remove the corresponding physical Key Items record.
 SaveForge 2.0 intentionally does not reproduce that coupling. `GetCookbooks`
 already defines the event flag as the single source of the reported unlock

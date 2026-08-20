@@ -99,11 +99,11 @@ the trailing parenthesis is the region label and everything in front of it is th
 name. Every one of the 419 curated names declares that suffix, so the split needs
 no fallback and a row without it is rejected instead of guessed.
 
-### Version difference between SaveForge 1.5.8 and 1.6.8
+### Version difference between SaveForge 1.5.8 and 1.6.10
 
 The two legacy versions disagree about exactly one record: `Castle Sol Main Gate`
-(flag `76522`) is a boss-arena grace in 1.5.8 and a regular grace in 1.6.8. The
-1.6.8 value is the migrated one, because 1.6.8 introduced the change together
+(flag `76522`) is a boss-arena grace in 1.5.8 and a regular grace in 1.6.10. The
+1.6.10 value is the migrated one, because 1.6.10 introduced the change together
 with a dedicated regression test recording why: the boss of Castle Sol sits at
 `Castle Sol Rooftop` (flag `76524`), which stays a boss-arena grace in both
 versions. The newer value was not preferred for being newer.

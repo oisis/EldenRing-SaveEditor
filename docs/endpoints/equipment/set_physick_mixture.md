@@ -105,7 +105,7 @@ the endpoint does not canonicalise one into the other.
 
 ## Evidence and scope
 
-SaveForge 1.5.8 had no separate Physick mixture writer. SaveForge 1.6.8
+SaveForge 1.5.8 had no separate Physick mixture writer. SaveForge 1.6.10
 confirmed the two writable fields, the `0xFFFFFFFF` empty value, preservation of
 position order, duplicate rejection, exact Crimson variant handling, Inventory
 ownership and Flask ownership. SaveForge 2.0 reimplements those confirmed

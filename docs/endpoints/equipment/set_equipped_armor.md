@@ -98,10 +98,10 @@ existing equipment representations.
 ## Evidence and scope
 
 SaveForge 1.5.8 wrote one equipment representation and recomputed an equipment
-hash. SaveForge 1.6.8 corrected that behavior from native cases T544, T547 and
+hash. SaveForge 1.6.10 corrected that behavior from native cases T544, T547 and
 T548: the game maintains four representations and the existing hash is
 preserved. SaveForge 2.0 follows the later native-backed contract and does not
-restore the retired allocator or slot repacker used by 1.6.8 to provision a
+restore the retired allocator or slot repacker used by 1.6.10 to provision a
 missing bare-body record.
 
 PC and PS4 use the same slot-internal representation. Platform handling remains

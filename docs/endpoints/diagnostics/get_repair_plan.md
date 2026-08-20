@@ -178,7 +178,7 @@ than leaving it to be discovered on apply.
 | `quantity_above_container_limit` | The finding names a container total, not one record. No confirmed rule selects which of the records holding that item is reduced. |
 | `item_not_allowed_in_container` | No confirmed rule states whether an item stored in a container that does not accept it is moved or destroyed. |
 | `memory_slots_exceeded` | No confirmed rule selects which of the equipped spells is unequipped to fit the available capacity. |
-| `level_mismatch`, `soul_memory_below_minimum` | Neither value has a repair contract of its own. SaveEngine writes the stored level and the lifetime runes only as derived consequences of `SetCharacterStats`. Whether this build may rewrite a stored level to match its attributes is an unresolved contract decision: SaveForge 1.5.8 and 1.6.8 both rated the mismatch a *warning* and marked it explicitly not automatically repairable, while 2.0 rates it an error. Until that is settled, a plan does not settle it. A selected attribute repair still moves both values as the side effect described above. |
+| `level_mismatch`, `soul_memory_below_minimum` | Neither value has a repair contract of its own. SaveEngine writes the stored level and the lifetime runes only as derived consequences of `SetCharacterStats`. Whether this build may rewrite a stored level to match its attributes is an unresolved contract decision: SaveForge 1.5.8 and 1.6.10 both rated the mismatch a *warning* and marked it explicitly not automatically repairable, while 2.0 rates it an error. Until that is settled, a plan does not settle it. A selected attribute repair still moves both values as the side effect described above. |
 | `dangling_equipment_reference`, `reserved_spell_position_occupied` | Clearing the offending position is not yet a confirmed repair contract of this build. |
 
 A refusal is a result, not an error. The plan is returned with the remaining
@@ -258,7 +258,7 @@ writable, and an unknown class rejected.
   set is a separate task per code, each needing the confirmed rule that makes its
   target state unique.
 - `quantity_above_container_limit` is refused partly because 2.0 and 1.x disagree
-  about what `maxInventory`/`maxStorage` means. 1.5.8 and 1.6.8 treated it as a
+  about what `maxInventory`/`maxStorage` means. 1.5.8 and 1.6.10 treated it as a
   per-record cap only; 2.0 also enforces it as a cross-record container total, in
   `AddItemToInventory` and therefore in the report. Resolving that divergence is
   deliberately out of scope for this endpoint.

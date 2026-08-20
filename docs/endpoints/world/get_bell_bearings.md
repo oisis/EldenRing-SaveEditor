@@ -56,12 +56,12 @@ list and does not expose the physical flag identifier.
 ## Unlock state
 
 An entry is unlocked only when its acquisition event flag is set. This matches
-SaveForge 1.5.8 and 1.6.8, where the flag represents a Bell Bearing handed to
+SaveForge 1.5.8 and 1.6.10, where the flag represents a Bell Bearing handed to
 the Twin Maiden Husks. A matching item still present in Inventory or Storage is
 the pre-handover state and is not treated as unlocked.
 
 All current Bell Bearing flags belong to block `11109`, whose confirmed BST
-position is `11129` in SaveForge 1.5.8, 1.6.8 and the local legacy reference.
+position is `11129` in SaveForge 1.5.8, 1.6.10 and the local legacy reference.
 Unknown blocks still fail explicitly; there is no generic BST table or fallback.
 
 An inactive or residual slot returns `active=false` and every entry locked. Its

@@ -84,7 +84,7 @@ or inconsistent existing representations.
 
 ## Evidence and scope
 
-SaveForge 1.6.8 and native cases T544/T547/T548 confirm four player-visible
+SaveForge 1.6.10 and native cases T544/T547/T548 confirm four player-visible
 talisman fields, four representations, native empty sentinels and preservation
 of the equipment hashes. SaveForge 1.5.8 included the unverified fifth field;
 SaveForge 2.0 deliberately excludes field 21 and leaves it byte-for-byte

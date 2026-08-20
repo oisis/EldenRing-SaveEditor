@@ -100,9 +100,9 @@ already stale after the revision advance.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 use the same supported Storage categories, exclude
+SaveForge 1.5.8 and 1.6.10 use the same supported Storage categories, exclude
 Unarmed and require a complete order. Controlled native Storage additions in
-the 1.6.8 research workspace establish the same even stride-two acquisition
+the 1.6.10 research workspace establish the same even stride-two acquisition
 indices used for Inventory.
 
 The old writer also changed Storage `NextEquipIndex`. Later native evidence

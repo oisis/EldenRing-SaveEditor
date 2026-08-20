@@ -45,7 +45,7 @@ The family, prefix, category and record-mode checks are shared with the common
 item-add endpoints. Inventory uses
 `min(item.capabilities.stack.rules.maxPerStack, item.storage.maxInventory)` as
 the per-record stack limit. Storage uses `item.storage.maxStorage`, matching the
-repository quantity rule in SaveForge 1.5.8 and 1.6.8. A separate-instance item
+repository quantity rule in SaveForge 1.5.8 and 1.6.10. A separate-instance item
 accepts quantity `1` and consumes one new physical row.
 
 ## Request

@@ -102,7 +102,7 @@ assignment, or inconsistent existing Quick Items data.
 
 ## Evidence and scope
 
-SaveForge 1.5.8 had no Quick Items writer. SaveForge 1.6.8 confirms the dual
+SaveForge 1.5.8 had no Quick Items writer. SaveForge 1.6.10 confirms the dual
 representation, native empty sentinels, within-family duplicate rejection,
 cross-family allowance and preservation of the active Quick Item index.
 SaveForge 2.0 reimplements those invariants through its own GameCatalog,

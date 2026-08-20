@@ -195,7 +195,7 @@ presence of a canonical `slotID` inside `GestureGameData`.
 > in Git history states that gesture unlock is controlled by Event Flags in the
 > range 60800–60849, and its gesture table lists the even `GestureParam` row IDs
 > rather than the canonical save slot IDs. That contradicts the verified working
-> read path of SaveForge 1.6.8, which touches no event flag and matches the odd
+> read path of SaveForge 1.6.10, which touches no event flag and matches the odd
 > canonical IDs. The behaviour implemented here follows the verified read path;
 > this note records the unresolved historical divergence without keeping the
 > legacy specification in the active tree.
@@ -365,7 +365,7 @@ duplicated or implausible; it simply matches no canonical `slotID`.
   calls no other endpoint.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. SaveForge 2.0 is greenfield.
-  Earlier SaveForge versions (1.5.8 and 1.6.8) were used as research material to
+  Earlier SaveForge versions (1.5.8 and 1.6.10) were used as research material to
   confirm the binary format and the unlock rule only; no legacy code is imported,
   reused or depended on at runtime.
 

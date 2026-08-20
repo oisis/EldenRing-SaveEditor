@@ -203,32 +203,32 @@ only records the decision those changes must follow.
 | C11 | `containerSection` is an input *filter* on both implemented getters: the empty string means both physical sections, `"common"` and `"key"` select one. It is not part of any record identity. | `backend/saveengine/inventory.go:15-19, 191-196` |
 | C12 | The engine serialises every session operation on one process-wide `Engine.mutex`. There is no per-session lock. | `backend/saveengine/engine.go:20-21, 97, 117, 147` |
 
-### 2.2 Confirmed facts (legacy 1.5.8 / 1.6.8, behaviour evidence only)
+### 2.2 Confirmed facts (legacy 1.5.8 / 1.6.10, behaviour evidence only)
 
 | # | Fact | Source |
 |---|---|---|
-| L1 | Legacy already concluded that a handle alone does not identify a record, and said so explicitly: talisman handles (and other item-derived handles) are legitimately shared by several records in one container or split across inventory and storage. | `tmp/er-sf-1.6.8/backend/editor/session.go:26-31` |
-| L2 | Legacy therefore minted a string UID: `hnd:0x%08X`, upgraded to `hnd:0x%08X:<container>:<slotIdx>` whenever the handle occurred more than once in the snapshot. | `tmp/er-sf-1.6.8/backend/editor/workspace.go:410-422` |
-| L3 | A duplicate UID was a *known, non-blocking* validation error (`CodeDuplicateUID`), i.e. the legacy identity was not guaranteed unique and the save path proceeded anyway. | `tmp/er-sf-1.6.8/backend/editor/save.go:94-100` |
-| L4 | The UID was session-scoped: it lived on an in-memory `InventoryEditSession` that was never persisted, and the baseline map keyed by UID was regenerated after every successful save. | `tmp/er-sf-1.6.8/backend/editor/session.go:20-50, 137-171` |
-| L5 | A transfer between containers can mint a **fresh handle** for the moved instance when the destination already holds the same handle. The handle is therefore not stable across a mutation. | `tmp/er-sf-1.6.8/backend/core/transfer_rehandle_integration_test.go` |
-| L6 | A transfer also **reassigns** the acquisition index of the moved record. That value is not stable across a mutation either. | `tmp/er-sf-1.6.8/backend/core/transfer_acquisition_index_test.go` |
-| L7 | Legacy had a revision-shaped field, `InventoryEditSession.BaseRevision`, a truncated SHA-256 over slot version, GaItem count, magic offset and the first 1024 slot bytes. | `tmp/er-sf-1.6.8/backend/editor/session.go:122-136` |
-| L8 | `BaseRevision` was **never compared anywhere** — in either tag, in Go or in the frontend. It was set at `StartSession`, refreshed after save, and read by nothing. The concurrency guard it was meant to provide did not exist. | grep over `tmp/er-sf-1.6.8` and `git show v1.5.8:backend/editor/session.go` |
-| L9 | The GaItem record itself is small and its size depends on the item-ID family: 8 bytes for a plain item, 16 for armor, 21 for a weapon (weapon records additionally carry `AoWGaItemHandle`). | `tmp/er-sf-1.6.8/backend/core/structures.go:58-90` |
+| L1 | Legacy already concluded that a handle alone does not identify a record, and said so explicitly: talisman handles (and other item-derived handles) are legitimately shared by several records in one container or split across inventory and storage. | `v1.6.10:backend/editor/session.go:26-31` |
+| L2 | Legacy therefore minted a string UID: `hnd:0x%08X`, upgraded to `hnd:0x%08X:<container>:<slotIdx>` whenever the handle occurred more than once in the snapshot. | `v1.6.10:backend/editor/workspace.go:410-422` |
+| L3 | A duplicate UID was a *known, non-blocking* validation error (`CodeDuplicateUID`), i.e. the legacy identity was not guaranteed unique and the save path proceeded anyway. | `v1.6.10:backend/editor/save.go:94-100` |
+| L4 | The UID was session-scoped: it lived on an in-memory `InventoryEditSession` that was never persisted, and the baseline map keyed by UID was regenerated after every successful save. | `v1.6.10:backend/editor/session.go:20-50, 137-171` |
+| L5 | A transfer between containers can mint a **fresh handle** for the moved instance when the destination already holds the same handle. The handle is therefore not stable across a mutation. | `v1.6.10:backend/core/transfer_rehandle_integration_test.go` |
+| L6 | A transfer also **reassigns** the acquisition index of the moved record. That value is not stable across a mutation either. | `v1.6.10:backend/core/transfer_acquisition_index_test.go` |
+| L7 | Legacy had a revision-shaped field, `InventoryEditSession.BaseRevision`, a truncated SHA-256 over slot version, GaItem count, magic offset and the first 1024 slot bytes. | `v1.6.10:backend/editor/session.go:122-136` |
+| L8 | `BaseRevision` was **never compared anywhere** — in either tag, in Go or in the frontend. It was set at `StartSession`, refreshed after save, and read by nothing. The concurrency guard it was meant to provide did not exist. | `git show` over `v1.5.8:backend/editor/session.go` and `v1.6.10:backend/editor/session.go` |
+| L9 | The GaItem record itself is small and its size depends on the item-ID family: 8 bytes for a plain item, 16 for armor, 21 for a weapon (weapon records additionally carry `AoWGaItemHandle`). | `v1.6.10:backend/core/structures.go:58-90` |
 
-### 2.3 Differences between v1.5.8 and v1.6.8
+### 2.3 Differences between v1.5.8 and v1.6.10
 
-| Area | v1.5.8 | v1.6.8 | Consequence for 2.0 |
+| Area | v1.5.8 | v1.6.10 | Consequence for 2.0 |
 |---|---|---|---|
 | UID construction | identical (`hnd:0x%08X`, qualified on collision) | identical | The rule is stable across both tags → the *problem* it solves is real, but the rule itself is still not a 2.0 contract. |
 | `ComputeBaseRevision` | present, identical body | present, identical body | Two releases shipped an unenforced revision. Do not repeat: a revision without an enforcement point is a fail-open. |
 | `BaseRevision` enforcement | none | none | Same as above. |
 | `EditableItem` shape | same fields plus formatting | adds `CanChangeAffinity`; whitespace realignment | Irrelevant to identity. |
-| Transfer handle collision | present in `backend/core/transfer.go` | 1.6.8 adds the persistent integration test `transfer_rehandle_integration_test.go` proving the rehandle path end to end | 1.6.8 is the stronger evidence for L5, but only because it added a test — not because behaviour changed. |
-| Acquisition index on transfer | reassignment logic present | 1.6.8 adds `transfer_acquisition_index_test.go` | Same: stronger documentation of unchanged behaviour. |
+| Transfer handle collision | present in `backend/core/transfer.go` | 1.6.10 adds the persistent integration test `transfer_rehandle_integration_test.go` proving the rehandle path end to end | 1.6.10 is the stronger evidence for L5, but only because it added a test — not because behaviour changed. |
+| Acquisition index on transfer | reassignment logic present | 1.6.10 adds `transfer_acquisition_index_test.go` | Same: stronger documentation of unchanged behaviour. |
 
-The versions do not conflict on any point relevant to this contract. Where 1.6.8
+The versions do not conflict on any point relevant to this contract. Where 1.6.10
 is preferred it is because it carries the test, not because it is newer.
 
 ### 2.4 Inferences (reasoned, not directly observed)
@@ -747,7 +747,7 @@ not change, because no endpoint was added or removed.
 ### 6.3 Gate — GaItem parser evidence
 
 **Closed for the read-only Task 2b getter.** The accepted basis is the matching
-1.5.8/1.6.8 GaItem reader, the static read-only PC and PS4 artifacts in `tmp/`,
+1.5.8/1.6.10 GaItem reader, the static read-only PC and PS4 artifacts in `tmp/`,
 and synthetic coverage of both platform entry points and both legacy record
 counts. This is sufficient to resolve an existing loaded snapshot fail-closed;
 it does not establish a mutation, serialization or game-reload guarantee.
@@ -912,10 +912,10 @@ rules, a `recordMode` that is unknown or `separate_instances`, or an unknown or
 zero limit of the record's own container — rejects the whole request. No limit is
 defaulted, invented, widened or clamped, and `quantity` is never clamped to fit.
 
-This differs from SaveForge 1.5.8 and 1.6.8 on purpose. Both older versions
+This differs from SaveForge 1.5.8 and 1.6.10 on purpose. Both older versions
 capped a quantity by the container limit alone (`MaxInventory` / `MaxStorage`,
 or their `GameMax*` variants) and **clamped** the requested value to it
-(`resolveQty` in 1.5.8, the clamp repair primitive in 1.6.8). 2.0 rejects
+(`resolveQty` in 1.5.8, the clamp repair primitive in 1.6.10). 2.0 rejects
 instead of clamping and additionally bounds one physical record by `maxPerStack`.
 The older behaviour was not adopted; it is recorded here as the compared
 alternative.

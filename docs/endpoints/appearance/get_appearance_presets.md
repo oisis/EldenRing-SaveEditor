@@ -185,7 +185,7 @@ list today.
 
 The legacy `backend/db/data/presets_generated.go` file and
 `frontend/public/presets` assets were removed from the active tree during the
-2.0 cutover. They remain available through Git history and the `v1.6.8` tag.
+2.0 cutover. They remain available through Git history and the `v1.6.10` tag.
 The values and images migrated into `presets/appearance.json` and
 `assets/appearance` are the only data read by `GetAppearancePresets`.
 

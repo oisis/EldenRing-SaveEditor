@@ -91,7 +91,7 @@ already equals the requested value, matching the other mutation endpoints.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 agree on the field type, relative offset and legal
+SaveForge 1.5.8 and 1.6.10 agree on the field type, relative offset and legal
 maximum. Their Safe Mode frontend clamped input above `999999999`; this endpoint
 instead rejects it because silent input correction would hide a failed API
 contract. No legacy implementation is imported or called.

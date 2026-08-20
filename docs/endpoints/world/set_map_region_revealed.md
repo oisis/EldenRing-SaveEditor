@@ -102,7 +102,7 @@ records, and applies the normal owned-item reference protection.
 
 The endpoint never reads or writes Storage. It also never writes block `63`
 Map Fragment acquisition flags. Those flags are transient pickup triggers and
-were not part of this mutation in SaveForge 1.5.8 or 1.6.8.
+were not part of this mutation in SaveForge 1.5.8 or 1.6.10.
 
 SaveEngine resolves the block `62` position before entering the session
 mutation. Under one revision-controlled operation it validates slot activity,
@@ -148,7 +148,7 @@ Every rejection is fail-closed.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 have the same `MapFragmentItems` table and the same
+SaveForge 1.5.8 and 1.6.10 have the same `MapFragmentItems` table and the same
 `applyMapRegionUnlock` behavior: the safe map visibility flag follows the
 requested state, and a mapped Map Fragment is added or removed with it. Both
 versions deliberately leave the block `63` acquisition flag untouched.

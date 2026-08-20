@@ -74,7 +74,7 @@ item metadata. `GetMapRegions` does not duplicate or infer that relationship.
 
 Visibility flags are resolved by the existing `saveengine.resolveEventFlag`.
 Block `62` maps to BST position `12`, as declared by the event-flag tables used
-by both SaveForge 1.5.8 and 1.6.8. Blocks `63` and `82` remain unsupported by
+by both SaveForge 1.5.8 and 1.6.10. Blocks `63` and `82` remain unsupported by
 this reader contract.
 
 The endpoint resolves every catalog flag before touching the slot and then

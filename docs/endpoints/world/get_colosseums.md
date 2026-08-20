@@ -68,7 +68,7 @@ sources:
 The activation flags are **not** regulation data and are not presented as such.
 Only the Limgrave flag (`60360`) was confirmed against a native save; the Caelid
 and Royal flags follow the stride verified alongside it and remain curated
-research, identical in SaveForge 1.5.8 and 1.6.8.
+research, identical in SaveForge 1.5.8 and 1.6.10.
 
 ## Unlock state
 

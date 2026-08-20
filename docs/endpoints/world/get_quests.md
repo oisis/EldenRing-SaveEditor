@@ -56,8 +56,8 @@ such graph exists in any confirmed source, and none was introduced:
 - The curated quest data is a flat list of independently addressable steps. Each
   step declares only a key, a description, a location and a canonical event flag
   plan. There is no predecessor, successor, precondition or exclusion field.
-- SaveForge 1.5.8 (`app_world.go`) and 1.6.8
-  (`tmp/er-sf-1.6.8/internal/application/app_world.go`) carry a **byte-identical**
+- SaveForge 1.5.8 (`app_world.go`) and 1.6.10
+  (`tmp/er-sf-1.6.10/internal/application/app_world.go`) carry a **byte-identical**
   `GetQuestProgress`. It evaluates every step independently and marks it
   `Complete` when all of its flags equal their targets. It never selects a
   current step, never resolves ties between several complete steps, never uses

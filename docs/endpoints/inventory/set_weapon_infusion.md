@@ -71,7 +71,7 @@ evidence rejects the complete plan before its first write. Applied writes are
 verified and rolled back as one unit on failure.
 
 The mounted Ash of War is deliberately not used to derive affinity. SaveForge
-1.5.8 and 1.6.8 treated these edits independently, and GameCatalog currently
+1.5.8 and 1.6.10 treated these edits independently, and GameCatalog currently
 contains no confirmed relation that maps one mounted Ash of War to the subset of
 affinities it permits.
 

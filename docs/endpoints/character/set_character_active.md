@@ -81,7 +81,7 @@ was clean before the call.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 both store slot activity as `0` or `1` in the same ten
+SaveForge 1.5.8 and 1.6.10 both store slot activity as `0` or `1` in the same ten
 `UserData10` bytes and preserve slot contents when toggling the flag. Their
 residual-slot check accepts a deleted character when its PlayerGameData or
 profile-summary name remains. SaveForge 2.0 additionally requires the existing

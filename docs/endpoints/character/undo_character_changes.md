@@ -115,7 +115,7 @@ unreadable range, and a write or verification failure.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 implemented `RevertSlot` identically: ten independent
+SaveForge 1.5.8 and 1.6.10 implemented `RevertSlot` identically: ten independent
 per-slot stacks of depth five, each entry holding the activity flag, the
 `ProfileSummary` and a structural slot snapshot, cleared on load and on a
 successful save. SaveForge 2.0 keeps the capture scope and the lifecycle

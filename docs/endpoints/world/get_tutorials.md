@@ -72,7 +72,7 @@ the confirmed hard cap of 255, an incomplete header and any range outside the
 character slot or snapshot.
 
 The physical format and membership semantics are identical in SaveForge v1.5.8
-and v1.6.8. The verified native transition in the legacy research appended row
+and v1.6.10. The verified native transition in the legacy research appended row
 ID `2010` after the Item Crafting tutorial was triggered.
 
 An inactive or residual slot returns `active=false`. Its slot data is never

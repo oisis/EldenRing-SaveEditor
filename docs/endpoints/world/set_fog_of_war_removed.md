@@ -67,7 +67,7 @@ The bitfield is a flat per-tile exploration mask whose bit-to-tile mapping is
 unknown. Zeroing it would not restore an earlier exploration state — it would
 destroy the state the save still carries, and it is not what the game writes when
 a tile is unexplored in a partially explored slot. Neither SaveForge 1.5.8 nor
-1.6.8 implemented an inverse operation.
+1.6.10 implemented an inverse operation.
 
 The endpoint therefore has no "restore Fog of War" behavior, and none is
 advertised in OpenAPI or in the explorer.
@@ -147,7 +147,7 @@ Every rejection is fail-closed.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 (`app_world.go::RemoveFogOfWar`) and SaveForge 1.6.8
+SaveForge 1.5.8 (`app_world.go::RemoveFogOfWar`) and SaveForge 1.6.10
 (`internal/application/app_world.go::RemoveFogOfWar`) are byte-identical for this
 operation, including `resolveAfterRegs` and the `FoWBlobStart` / `FoWBlobEnd`
 constants `0x087E` and `0x10B0`. Their `spec/27-map-reveal.md` §9 is identical in

@@ -15,7 +15,7 @@ the list of thirteen presets are unchanged.
 
 The older preset functions from SaveForge 1.x were removed from the active tree
 during the 2.0 cutover. They remain available only through Git history and the
-`v1.6.8` tag and are not a data source for SaveForge 2.0.
+`v1.6.10` tag and are not a data source for SaveForge 2.0.
 
 | | |
 |---|---|

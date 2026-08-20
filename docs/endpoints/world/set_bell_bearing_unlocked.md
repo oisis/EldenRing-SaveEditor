@@ -125,7 +125,7 @@ The route is not registered when the explorer uses `-allow-external-bind`.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 implement the same public meaning:
+SaveForge 1.5.8 and 1.6.10 implement the same public meaning:
 
 - unlocking sets the acquisition flag and removes both raw-ID and computed
   goods-handle copies from Inventory and Storage;
@@ -133,7 +133,7 @@ SaveForge 1.5.8 and 1.6.8 implement the same public meaning:
 - removal scans all matching Inventory common/key records and Storage common
   records, not Storage key.
 
-The 1.6.8 removal path additionally contains GaItem reprojection for physical
+The 1.6.10 removal path additionally contains GaItem reprojection for physical
 item families. Bell Bearings are record-free goods handles, so that path is not
 used here and SaveForge 2.0 neither allocates nor repacks GaItem data.
 

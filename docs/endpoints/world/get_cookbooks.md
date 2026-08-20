@@ -366,11 +366,11 @@ An inactive or residual slot is not in this table: it is a successful result.
   calls no other endpoint.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. SaveForge 2.0 is greenfield.
-  Earlier SaveForge versions (1.5.8 and 1.6.8) were used as research material to
+  Earlier SaveForge versions (1.5.8 and 1.6.10) were used as research material to
   confirm the flag blocks and the cookbook list only; no legacy code is imported,
   reused or depended on at runtime.
 
-> **Legacy divergence.** SaveForge 1.5.8 and 1.6.8 report a cookbook as unlocked
+> **Legacy divergence.** SaveForge 1.5.8 and 1.6.10 report a cookbook as unlocked
 > when its event flag is set **or** when the matching cookbook item is present in
 > the inventory. SaveForge 2.0 deliberately does not reproduce that fallback: the
 > event flag is the single source of truth, so an owned but unregistered cookbook

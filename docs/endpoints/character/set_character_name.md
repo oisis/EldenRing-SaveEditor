@@ -113,7 +113,7 @@ slots, stale revisions, idempotent assignment, persistence through
 `WriteSave`/`LoadSave`, strict JSON transport, loopback-only route registration,
 and OpenAPI/Scalar conformance.
 
-The field locations and encoding behavior match SaveForge 1.5.8 and 1.6.8.
+The field locations and encoding behavior match SaveForge 1.5.8 and 1.6.10.
 Controlled native PS4 before/after evidence has not yet been collected, so PS4
 semantic validation remains a recorded limitation beyond the synthetic layout
 and persistence coverage.

@@ -139,7 +139,7 @@ operation is rejected. In that case:
 - the OwnedItemID registry is unchanged.
 
 A partially synced save — a new global identifier with stale slot copies — is
-the failure mode SaveForge 1.6.8 confirmed the game treats as corrupt. It cannot
+the failure mode SaveForge 1.6.10 confirmed the game treats as corrupt. It cannot
 be produced here, because either all copies change or none does.
 
 Inactive and residual slots are never read past their activity flag and never
@@ -156,11 +156,11 @@ or written, and the endpoint performs no platform conversion.
 
 - `1.5.8` updated the global `UserData10` copy alone. That behaviour is not
   reproduced.
-- `1.6.8` added propagation into every active slot and confirmed that a
+- `1.6.10` added propagation into every active slot and confirmed that a
   disagreement between the global and the slot copies makes the game treat the
   save as corrupt.
 
-The 2.0 implementation follows the confirmed `1.6.8` behaviour but shares no
+The 2.0 implementation follows the confirmed `1.6.10` behaviour but shares no
 code, type, helper, or package structure with either version.
 
 ## Dependencies and transport safety

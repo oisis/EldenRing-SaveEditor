@@ -66,7 +66,7 @@ mark the session dirty. Persistence remains the responsibility of `WriteSave`.
 
 ## Compatibility evidence
 
-SaveForge `v1.5.8` and `v1.6.8` use the same Whetblade main flags, affinity
+SaveForge `v1.5.8` and `v1.6.10` use the same Whetblade main flags, affinity
 flags, Inventory representations and shared menu rule. They also place the
 Whetstone Knife system-affinity flag `1042378601` at byte `0xA0D0C`, bit 6 of
 the Event Flags section. SaveForge 2.0 reimplements those confirmed save rules

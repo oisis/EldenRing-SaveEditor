@@ -116,12 +116,12 @@ The request is rejected before mutation when, among other cases:
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 agree on the relevant direct-transfer rules: an
+SaveForge 1.5.8 and 1.6.10 agree on the relevant direct-transfer rules: an
 Inventory-to-Storage move preserves the record handle and quantity, rejects an
 equipped item, assigns a fresh Storage index and advances `NextAcquisitionSortId`.
 In 2.0, every deposit into Storage also updates `NextEquipIndex`, which follows
 the physical layout of the common section rather than the number of deposits, in
-accordance with the native Test 3 evidence confirmed in 1.6.10. Version 1.6.8
+accordance with the native Test 3 evidence confirmed in 1.6.10. Version 1.6.10
 changed allocator details for duplicate instance handles, but this endpoint
 deliberately does not invoke that retired allocation/repack path.
 

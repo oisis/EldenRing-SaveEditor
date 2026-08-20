@@ -39,7 +39,7 @@ Each public entry comes from a `RegionDocument` with:
 - provenance for all three facts.
 
 The stored data is the 274-entry curated allowlist used by SaveForge 1.5.8 and
-1.6.8, not the complete `PlayRegionParam` table. It contains 208 base-game and
+1.6.10, not the complete `PlayRegionParam` table. It contains 208 base-game and
 66 Shadow of the Erdtree invasion or blue-summon contexts. Internal sub-areas
 and network-only rows outside that allowlist are not presented as regions.
 

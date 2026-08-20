@@ -62,7 +62,7 @@ An entry is unlocked when either:
 2. a positive-quantity record for its goods game ID exists in common or key
    `InventoryHeld`.
 
-This is the state rule shared by SaveForge 1.5.8 and 1.6.8. Their getter used a
+This is the state rule shared by SaveForge 1.5.8 and 1.6.10. Their getter used a
 fixed five-entry table. SaveForge 2.0 instead follows the six declarations in
 GameCatalog, which also includes Whetstone Knife.
 

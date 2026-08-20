@@ -94,7 +94,7 @@ new list uses as one in-place range.
   - if the existing list is ascending, the row ID is inserted at its ascending
     position, which is what the native list of case `1590` shows;
   - if the existing list is not ascending, the row ID is appended at the end and
-    the existing physical order is preserved verbatim. SaveForge 1.5.8 and 1.6.8
+    the existing physical order is preserved verbatim. SaveForge 1.5.8 and 1.6.10
     appended every new ID, so a list one of them wrote may be unsorted; such a
     list is never sorted, deduplicated or normalised;
   - a list that already fills the declared payload capacity, or the hard cap of
@@ -113,7 +113,7 @@ above the payload capacity or the hard cap — is rejected before any write.
 ## Residual gameplay risk of `unlocked: false`
 
 Removing a tutorial ID is **not** a guaranteed inert operation. No build, tool or
-documented experiment has ever removed one: SaveForge 1.5.8, 1.6.8 and every
+documented experiment has ever removed one: SaveForge 1.5.8, 1.6.10 and every
 reference parser only append or round-trip the block. Two effects are plausible
 and unmeasured:
 

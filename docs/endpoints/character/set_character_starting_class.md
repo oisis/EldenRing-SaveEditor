@@ -140,7 +140,7 @@ dirty, including when the requested class equals the stored one.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 implemented starting class changes in the frontend
+SaveForge 1.5.8 and 1.6.10 implemented starting class changes in the frontend
 (`handleClassChange` in `CharacterTab.tsx`), byte-identically between versions.
 SaveForge 2.0 reimplements this rule in the Go backend.
 

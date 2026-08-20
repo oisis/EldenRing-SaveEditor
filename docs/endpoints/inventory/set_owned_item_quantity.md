@@ -246,7 +246,7 @@ reader of that container uses, so the two can never disagree.
   value.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. Earlier SaveForge versions
-  (1.5.8 and 1.6.8) capped a quantity by the container limit and **clamped** the
+  (1.5.8 and 1.6.10) capped a quantity by the container limit and **clamped** the
   requested value to fit; 2.0 rejects instead of clamping, and additionally bounds
   a single record by `maxPerStack`. No legacy code, helper or type was imported
   or reproduced.

@@ -137,7 +137,7 @@ successful operation from the caller's perspective.
 ## Platform scope
 
 The implementation follows the confirmed container behavior of SaveForge
-1.5.8 and 1.6.8 and is covered by synthetic PC and PS4 tests. It does not convert
+1.5.8 and 1.6.10 and is covered by synthetic PC and PS4 tests. It does not convert
 between platforms, decrypt encrypted PC saves, or infer a platform from the
 file extension.
 

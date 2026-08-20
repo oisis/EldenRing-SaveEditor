@@ -128,20 +128,20 @@ A count that already reads `0` is left at `0` rather than wrapped around to
 removal is not the place to repair or to reject it.
 
 **Why the `InventoryHeld` third field keeps the row number.** SaveForge 1.5.8 and
-1.6.8 both wrote `{handle 0, quantity 0, index = physical row}` when they cleared
+1.6.10 both wrote `{handle 0, quantity 0, index = physical row}` when they cleared
 an inventory row (`backend/core/writer.go`, `backend/core/transfer.go`), and
 `backend/core/wondrous_physick_repair.go` did the same. Zeroing that field too
 would be a new, unevidenced write.
 
-**Why `key_count` stays.** `v1.6.8:backend/core/remove_key_item_test.go` is a
+**Why `key_count` stays.** `v1.6.10:backend/core/remove_key_item_test.go` is a
 regression test that explicitly protects the `InventoryHeld` `key_count` header
 across a key-item removal, and the removal path there lowered only the common
 count. No native evidence in this project contradicts it, so 2.0 inherits the
 confirmed behaviour instead of introducing a decrement.
 
-**Why Storage key is rejected.** `v1.6.8:spec/10-storage.md` records that the
+**Why Storage key is rejected.** `v1.6.10:spec/10-storage.md` records that the
 Storage key section is not exposed by the 1.x runtime model at all and that its
-semantics are `needs verification`; 1.6.8 never wrote it. A synthetic fixture is
+semantics are `needs verification`; 1.6.10 never wrote it. A synthetic fixture is
 not evidence of a write contract, so the removal fails closed with an explicit
 `not supported` error and changes nothing at all. It becomes supported only after
 native evidence, not before.
@@ -173,7 +173,7 @@ records, in one container or split across Inventory and Storage, and *Variant B 
 `GaItemHandle` alone* is rejected for exactly that reason. A guard matching on
 the handle alone would therefore refuse removals that reference nothing, and
 would contradict the rule that a removal deletes exactly one instance. Legacy's
-own reference check (`v1.6.8:backend/core/equipment_writer_test.go`,
+own reference check (`v1.6.10:backend/core/equipment_writer_test.go`,
 `nativeHandleMatches`) resolves the row first and compares the handle **of that
 row** — the same rule 2.0 applies.
 
@@ -187,7 +187,7 @@ three would otherwise be left pointing at a row this removal empties:
 | Pouch | 6 | `EquipItemData` at anchor + `0x9279` + `0x50` + 4 | one interleaved 8-byte pair per slot |
 
 Every pair is `{GaItem handle, 0x180 + physical InventoryHeld common row}`, which
-is what `v1.6.8:backend/core/quick_pouch_writer.go` writes for the two
+is what `v1.6.10:backend/core/quick_pouch_writer.go` writes for the two
 `EquipItemData` families and what `equipmentRepresentationOffsets` documents for
 the equipment blocks. (`EquipedItemsID` at anchor + `0x0144` + 1 carries the bare
 item ID and takes no part in this guard.) The three `EquipItemData` positions,
@@ -312,7 +312,7 @@ can never disagree.
 - It reads no GameCatalog and holds no catalog rule.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. Earlier SaveForge versions
-  (1.5.8 and 1.6.8) removed **by handle**, clearing every row that carried it in
+  (1.5.8 and 1.6.10) removed **by handle**, clearing every row that carried it in
   the selected containers, deleted the GaItem record once no list referenced the
   handle any more and rebuilt the whole slot around the shortened table. 2.0
   removes one instance, keeps the table and rebuilds nothing. No legacy code,

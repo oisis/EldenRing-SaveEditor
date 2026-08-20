@@ -88,7 +88,7 @@ completely independent surface. This matches
 
 The defeat flags are resolved through the single existing
 `saveengine.resolveEventFlag`. Block `9` was added there, mapped to BST position
-`9`, which both SaveForge 1.5.8 and 1.6.8 confirm through `eventflag_bst.txt`.
+`9`, which both SaveForge 1.5.8 and 1.6.10 confirm through `eventflag_bst.txt`.
 No second resolver, no separate BST table, no `eventFlagID/8` fallback and no
 cache were introduced. The neighbouring blocks `8` and `10` carry no curated
 resource and stay rejected by name.

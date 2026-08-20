@@ -123,9 +123,9 @@ The request is rejected before mutation when, among other cases:
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 both ordered their Inventory workspace by raw
+SaveForge 1.5.8 and 1.6.10 both ordered their Inventory workspace by raw
 acquisition index, wrote a transfer into a free destination row and reassigned
-the moved record's index. Version 1.6.8 corrected the Inventory allocator to
+the moved record's index. Version 1.6.10 corrected the Inventory allocator to
 the native parity-stabilised high-water rule also used by SaveForge 2.0.
 
 The legacy workspace could later wipe and replay a whole container. SaveForge

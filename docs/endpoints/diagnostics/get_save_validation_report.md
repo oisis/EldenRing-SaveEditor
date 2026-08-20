@@ -211,7 +211,7 @@ and each exclusion is a decision, not an omission:
   and depends on. Reporting a shared handle would classify known-good native data
   as corrupt.
 - **Duplicate acquisition indices.** SaveForge 1.5.8 matched indices exactly and
-  1.6.8 replaced that with a mixed-range bucket rule. Both describe the index
+  1.6.10 replaced that with a mixed-range bucket rule. Both describe the index
   allocator of the 1.x editor, which SaveForge 2.0 does not reproduce; applied to
   native data alone, both produce false positives.
 - **GaItem repack, allocator and container-overuse findings.** That behaviour was

@@ -134,7 +134,7 @@ The sum is evaluated in integer arithmetic, so the result cannot depend on the
 host's floating-point behaviour. Six per-level costs are corrected by one to
 reproduce the established results at the boundaries where the historical
 floating-point evaluation rounded down. The reference vectors are those of the
-1.6.8 integer evaluation and its own reference tests; the 1.5.8 `float64` sum is
+1.6.10 integer evaluation and its own reference tests; the 1.5.8 `float64` sum is
 not a reference, because its results depend on the host. They are level `1` →
 `0`, `9` → `473`, `50` → `256598`, `150` → `7106585` and `713` → `1692560963`;
 the maximum fits into `uint32`, so no clamp is needed.
@@ -181,7 +181,7 @@ already equal the requested ones, matching the other mutation endpoints.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.8 agree on the field layout, the level formula, the
+SaveForge 1.5.8 and 1.6.10 agree on the field layout, the level formula, the
 `1..99` attribute range, the `1..713` level range and the ten starting classes
 with their base attributes; the two class tables are byte-identical. Both also
 validate the minima against the `PlayerGameData` class at offset `-248` from the
@@ -190,8 +190,8 @@ that source.
 
 They differ in how the SoulMemory minimum is evaluated. 1.5.8 summed the
 per-level cost in `float64`, which made the result depend on the host's
-floating-point behaviour. 1.6.8 replaced it with integer arithmetic that
-reproduces the established results. This endpoint reimplements the 1.6.8
+floating-point behaviour. 1.6.10 replaced it with integer arithmetic that
+reproduces the established results. This endpoint reimplements the 1.6.10
 integer evaluation and pins its confirmed reference vectors in a test.
 
 They also differ on an unknown `StartingClassID`. 1.x downgraded it to a warning
