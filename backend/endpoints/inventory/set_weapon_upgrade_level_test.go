@@ -104,15 +104,105 @@ func TestSetWeaponUpgradeLevelDefinitionAndCatalogLimits(t *testing.T) {
 				t.Fatalf("GetInventory after upgrade: %v, records=%+v", err, listed.Records)
 			}
 
+			// Verify durable matchmaking weapon level byte is updated to 25
+			matchmakingAt := int64(setWeaponEndpointSlotBase + setWeaponEndpointAnchorAt - 0xD5)
+			targetFile := filepath.Join(t.TempDir(), "upgrade-persisted.sl2")
+			if _, err := engine.WriteSave(sessionID, result.SaveRevision, targetFile); err != nil {
+				t.Fatalf("WriteSave: %v", err)
+			}
+			reloadedEngine := saveengine.New()
+			reloadedSession, err := reloadedEngine.LoadSave(targetFile, "pc")
+			if err != nil {
+				t.Fatalf("LoadSave reloaded: %v", err)
+			}
+			info, err := reloadedEngine.GetSessionInfo(reloadedSession.SaveSessionID)
+			if err != nil {
+				t.Fatalf("GetSessionInfo: %v", err)
+			}
+			if info.Platform != "pc" {
+				t.Fatalf("platform = %q, want pc", info.Platform)
+			}
+			persistedData, err := os.ReadFile(targetFile)
+			if err != nil {
+				t.Fatalf("ReadFile target: %v", err)
+			}
+			if got := persistedData[matchmakingAt]; got != 25 {
+				t.Errorf("%s upgrade: matchmaking level in persisted file = %d, want 25", testCase.name, got)
+			}
+
 			other, otherSessionID, otherToken := setWeaponUpgradeEndpointTarget(t, testCase.gameID)
 			if _, err := SetWeaponUpgradeLevel(
 				other, catalog, otherSessionID, 0, otherToken, testCase.invalid, "0"); err == nil {
 				t.Fatalf("upgrade level %d succeeded", testCase.invalid)
 			}
-			info, err := other.GetSessionInfo(otherSessionID)
-			if err != nil || info.UnsavedChanges {
-				t.Fatalf("rejected mutation changed session: %+v, %v", info, err)
+			otherInfo, err := other.GetSessionInfo(otherSessionID)
+			if err != nil || otherInfo.UnsavedChanges {
+				t.Fatalf("rejected mutation changed session: %+v, %v", otherInfo, err)
 			}
 		})
+	}
+}
+
+func TestSetWeaponUpgradeLevelMatchmakingMonotonicityAndDowngrade(t *testing.T) {
+	catalog := inventoryCatalog(t)
+	engine, sessionID, token := setWeaponUpgradeEndpointTarget(t, setWeaponEndpointDaggerID)
+
+	// Step 1: Upgrade to +25 -> matchmaking byte becomes 25
+	res1, err := SetWeaponUpgradeLevel(
+		engine, catalog, sessionID, 0, token, 25, "0")
+	if err != nil {
+		t.Fatalf("SetWeaponUpgradeLevel +25: %v", err)
+	}
+
+	matchmakingAt := int64(setWeaponEndpointSlotBase + setWeaponEndpointAnchorAt - 0xD5)
+	targetFile1 := filepath.Join(t.TempDir(), "step1.sl2")
+	writeRes1, err := engine.WriteSave(sessionID, res1.SaveRevision, targetFile1)
+	if err != nil {
+		t.Fatalf("WriteSave step 1: %v", err)
+	}
+	data1, err := os.ReadFile(targetFile1)
+	if err != nil {
+		t.Fatalf("ReadFile step 1: %v", err)
+	}
+	if got := data1[matchmakingAt]; got != 25 {
+		t.Fatalf("matchmaking level after +25 = %d, want 25", got)
+	}
+
+	// Step 2: Downgrade to +0 -> weapon changes to +0, but matchmaking byte REMAINS 25 (monotonic)
+	listed, err := GetInventory(engine, catalog, sessionID, 0, "common", 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	token2 := listed.Records[1].OwnedItemID
+	res2, err := SetWeaponUpgradeLevel(
+		engine, catalog, sessionID, 0, token2, 0, writeRes1.SaveRevision)
+	if err != nil {
+		t.Fatalf("SetWeaponUpgradeLevel +0: %v", err)
+	}
+	if res2.GameID != setWeaponEndpointDaggerID || res2.UpgradeLevel != 0 {
+		t.Fatalf("downgraded result = %+v", res2)
+	}
+
+	targetFile2 := filepath.Join(t.TempDir(), "step2.sl2")
+	if _, err := engine.WriteSave(sessionID, res2.SaveRevision, targetFile2); err != nil {
+		t.Fatalf("WriteSave step 2: %v", err)
+	}
+	data2, err := os.ReadFile(targetFile2)
+	if err != nil {
+		t.Fatalf("ReadFile step 2: %v", err)
+	}
+	if got := data2[matchmakingAt]; got != 25 {
+		t.Fatalf("matchmaking level after downgrade to +0 = %d, want 25 (monotonic)", got)
+	}
+}
+
+func TestSetWeaponUpgradeLevelRejectsSpiritAshInWeaponEndpoint(t *testing.T) {
+	catalog := inventoryCatalog(t)
+	const spiritAshGameID = uint32(0x40038A40)
+	engine, sessionID, token := setWeaponUpgradeEndpointTarget(t, spiritAshGameID)
+
+	if _, err := SetWeaponUpgradeLevel(
+		engine, catalog, sessionID, 0, token, 10, "0"); err == nil {
+		t.Fatal("SetWeaponUpgradeLevel for Spirit Ash succeeded, want error")
 	}
 }

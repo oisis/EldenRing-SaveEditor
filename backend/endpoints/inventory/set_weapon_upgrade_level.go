@@ -6,7 +6,7 @@ How it works: The handler resolves the opaque owned record, asks GameCatalog for
 Supported resource types: ItemDocument: weapon with a known and enabled standard or somber upgrade capability.
 Input variables: saveSessionID, characterID, ownedItemID, upgradeLevel, expectedRevision.
 GameCatalog variables read: item.gameID, item.family and item.capabilities.upgrade including model and maxLevel; stored affinity variants provide the preserved upgrade anchor.
-Save variables processed: one weapon GaItem ID, the target GaItemData entry and both item-ID representations of every matching equipped hand slot; the handle, row, quantity, acquisition index and unrelated bytes stay unchanged.
+Save variables processed: one weapon GaItem ID, the target GaItemData entry, the durable matchmaking weapon level byte and both item-ID representations of every matching equipped hand slot; the handle, row, quantity, acquisition index and unrelated bytes stay unchanged.
 Implementation status: implemented
 */
 package inventory
@@ -62,8 +62,12 @@ func SetWeaponUpgradeLevel(
 	if err != nil {
 		return SetWeaponUpgradeLevelResult{}, fmt.Errorf("owned item %q: %w", ownedItemID, err)
 	}
+	matchmakingLevel, err := gameCatalog.WeaponMatchmakingLevel(currentGameID, upgradeLevel)
+	if err != nil {
+		return SetWeaponUpgradeLevelResult{}, fmt.Errorf("owned item %q: %w", ownedItemID, err)
+	}
 
 	return engine.SetWeaponUpgradeLevel(
 		saveSessionID, characterID, ownedItemID, upgradeLevel, expectedRevision,
-		currentGameID, targetGameID)
+		currentGameID, targetGameID, matchmakingLevel)
 }

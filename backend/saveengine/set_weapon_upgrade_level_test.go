@@ -66,7 +66,7 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 
 			result, err := engine.SetWeaponUpgradeLevel(
 				loaded.SaveSessionID, setArmamentsSlot, token, 5, "0",
-				setWeaponUpgradeCurrent, setWeaponUpgradeTarget)
+				setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
 			if err != nil {
 				t.Fatalf("SetWeaponUpgradeLevel: %v", err)
 			}
@@ -95,6 +95,9 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 				setArmamentsAnchorAt+addItemTestGaItemDataArrayAt); got != setWeaponUpgradeTarget {
 				t.Errorf("GaItemData ID = 0x%08X", got)
 			}
+			if got := after[setArmamentsAnchorAt+statsMatchmakingWeaponLevelOffset]; got != 5 {
+				t.Errorf("matchmaking level = %d, want 5", got)
+			}
 			allowed := [][2]int64{
 				{weaponRecordAt, weaponRecordAt + 4},
 				{setArmamentsAnchorAt + setArmamentsItemIDsAt,
@@ -105,6 +108,8 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 					setArmamentsAnchorAt + addItemTestGaItemDataAt + 4},
 				{setArmamentsAnchorAt + addItemTestGaItemDataArrayAt,
 					setArmamentsAnchorAt + addItemTestGaItemDataArrayAt + 8},
+				{setArmamentsAnchorAt + statsMatchmakingWeaponLevelOffset,
+					setArmamentsAnchorAt + statsMatchmakingWeaponLevelOffset + 1},
 			}
 			for offset := range before {
 				if before[offset] == after[offset] {
@@ -139,6 +144,22 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 			if err != nil || gameIDs[0] != setWeaponUpgradeTarget {
 				t.Fatalf("reloaded game ID = %v, err=%v", gameIDs, err)
 			}
+			reloadedEngine.mutex.Lock()
+			reloadedAnchor, err := findStatsAnchor(
+				reloadedEngine.sessions[reloaded.SaveSessionID].snapshot, platform, setArmamentsSlot)
+			if err != nil {
+				reloadedEngine.mutex.Unlock()
+				t.Fatalf("findStatsAnchor reloaded (%s): %v", platform, err)
+			}
+			reloadedMatchmaking, err := reloadedEngine.sessions[reloaded.SaveSessionID].snapshot.readAt(
+				reloadedAnchor+statsMatchmakingWeaponLevelOffset, 1)
+			reloadedEngine.mutex.Unlock()
+			if err != nil {
+				t.Fatalf("read matchmaking level after reload (%s): %v", platform, err)
+			}
+			if reloadedMatchmaking[0] != 5 {
+				t.Errorf("reloaded %s matchmaking level = %d, want 5", platform, reloadedMatchmaking[0])
+			}
 		})
 	}
 }
@@ -166,7 +187,7 @@ func TestSetWeaponUpgradeLevelRejectsAmbiguousGaItemWithoutMutation(t *testing.T
 
 	_, err = engine.SetWeaponUpgradeLevel(
 		loaded.SaveSessionID, setArmamentsSlot, token, 5, "0",
-		setWeaponUpgradeCurrent, setWeaponUpgradeTarget)
+		setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
 	if err == nil || !strings.Contains(err.Error(), "want exactly 1") {
 		t.Fatalf("duplicate GaItem error = %v", err)
 	}
@@ -213,11 +234,75 @@ func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
 	}
 	result, err := engine.SetWeaponUpgradeLevel(
 		loaded.SaveSessionID, setArmamentsSlot, storage.Records[0].OwnedItemID, 5, "0",
-		setWeaponUpgradeCurrent, setWeaponUpgradeTarget)
+		setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
 	if err != nil {
 		t.Fatalf("SetWeaponUpgradeLevel: %v", err)
 	}
 	if result.Container != "storage" || result.GameID != setWeaponUpgradeTarget {
 		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestSetWeaponUpgradeLevelMatchmakingMonotonicityAndFailClosed(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	inventory, err := engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	token := inventory.Records[1].OwnedItemID
+	slotBase := addItemTestSlotBase(t, PlatformPC, setArmamentsSlot)
+	matchmakingAt := slotBase + setArmamentsAnchorAt + statsMatchmakingWeaponLevelOffset
+
+	// 1. Initial upgrade to matchmaking level 25 raises the byte from 0 to 25
+	res1, err := engine.SetWeaponUpgradeLevel(
+		loaded.SaveSessionID, setArmamentsSlot, token, 25, "0",
+		setWeaponUpgradeCurrent, setWeaponUpgradeCurrent+25, 25)
+	if err != nil {
+		t.Fatalf("SetWeaponUpgradeLevel +25: %v", err)
+	}
+	if got := engine.sessions[loaded.SaveSessionID].snapshot.data[matchmakingAt]; got != 25 {
+		t.Fatalf("matchmaking level = %d, want 25", got)
+	}
+
+	// 2. Subsequent lower upgrade (e.g. level 5) mutates the weapon but NEVER lowers matchmaking level
+	inventory, err = engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	token = inventory.Records[1].OwnedItemID
+	_, err = engine.SetWeaponUpgradeLevel(
+		loaded.SaveSessionID, setArmamentsSlot, token, 5, res1.SaveRevision,
+		setWeaponUpgradeCurrent+25, setWeaponUpgradeCurrent+5, 5)
+	if err != nil {
+		t.Fatalf("SetWeaponUpgradeLevel +5: %v", err)
+	}
+	if got := engine.sessions[loaded.SaveSessionID].snapshot.data[matchmakingAt]; got != 25 {
+		t.Fatalf("matchmaking level after downgrade = %d, want 25 (monotonic)", got)
+	}
+
+	// 3. Fail-closed: invalid matchmaking level > 25 fails and rolls back
+	inventory, err = engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	token = inventory.Records[1].OwnedItemID
+	currRev := engine.sessions[loaded.SaveSessionID].session.revisionString()
+	beforeData := append([]byte(nil), engine.sessions[loaded.SaveSessionID].snapshot.data...)
+
+	if _, err := engine.SetWeaponUpgradeLevel(
+		loaded.SaveSessionID, setArmamentsSlot, token, 26, currRev,
+		setWeaponUpgradeCurrent+5, setWeaponUpgradeCurrent+26, 26); err == nil {
+		t.Fatal("SetWeaponUpgradeLevel with matchmaking level 26 succeeded, want error")
+	}
+
+	if !bytes.Equal(beforeData, engine.sessions[loaded.SaveSessionID].snapshot.data) {
+		t.Fatal("failed mutation modified snapshot")
 	}
 }

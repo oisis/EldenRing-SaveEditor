@@ -17,24 +17,25 @@ const (
 
 	// Offsets of the confirmed fields, counted backwards from the anchor. Every
 	// field is a little-endian uint32.
-	statsHPOffset           = -423
-	statsMaxHPOffset        = -419
-	statsBaseMaxHPOffset    = -415
-	statsFPOffset           = -411
-	statsMaxFPOffset        = -407
-	statsBaseMaxFPOffset    = -403
-	statsSPOffset           = -395
-	statsMaxSPOffset        = -391
-	statsBaseMaxSPOffset    = -387
-	statsVigorOffset        = -379
-	statsMindOffset         = -375
-	statsEnduranceOffset    = -371
-	statsStrengthOffset     = -367
-	statsDexterityOffset    = -363
-	statsIntelligenceOffset = -359
-	statsFaithOffset        = -355
-	statsArcaneOffset       = -351
-	statsLevelOffset        = -335
+	statsHPOffset                     = -423
+	statsMaxHPOffset                  = -419
+	statsBaseMaxHPOffset              = -415
+	statsFPOffset                     = -411
+	statsMaxFPOffset                  = -407
+	statsBaseMaxFPOffset              = -403
+	statsSPOffset                     = -395
+	statsMaxSPOffset                  = -391
+	statsBaseMaxSPOffset              = -387
+	statsVigorOffset                  = -379
+	statsMindOffset                   = -375
+	statsEnduranceOffset              = -371
+	statsStrengthOffset               = -367
+	statsDexterityOffset              = -363
+	statsIntelligenceOffset           = -359
+	statsFaithOffset                  = -355
+	statsArcaneOffset                 = -351
+	statsLevelOffset                  = -335
+	statsMatchmakingWeaponLevelOffset = int64(-0xD5)
 
 	// statsAnchorLead is how many bytes an anchor needs in front of it for all
 	// confirmed fields to lie inside the same slot. It is the distance of the

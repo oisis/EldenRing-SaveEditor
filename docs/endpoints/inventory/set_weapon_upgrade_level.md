@@ -54,12 +54,14 @@ missing or non-weapon upgrade rules fail closed. Values are never clamped.
 1. SaveEngine resolves `ownedItemID` to its exact Inventory or Storage common
    record and resolves the GaItem handle to the current weapon game ID.
 2. GameCatalog finds the unique canonical or affinity anchor containing that
-   exact ID, validates a known enabled `standard` or `somber` upgrade model and
-   derives `anchor + upgradeLevel`.
+   exact ID, validates a known enabled `standard` or `somber` upgrade model,
+   derives `anchor + upgradeLevel`, and computes the 0..25 matchmaking level.
 3. SaveEngine repeats identity, revision and current-ID checks under its lock.
 4. One atomic plan changes the four-byte ID in the existing GaItem record,
-   inserts the target ID in GaItemData when absent, and synchronises both stored
-   item-ID representations of every matching equipped hand slot.
+   inserts the target ID in GaItemData when absent, synchronises both stored
+   item-ID representations of every matching equipped hand slot, and raises the
+   durable matchmaking weapon level byte at `MagicOffset - 0xD5` if the target
+   level exceeds the character's stored value (strictly monotonic).
 5. The handle, physical row, quantity, acquisition index, affinity, old
    GaItemData entry and unrelated equipment remain unchanged. No GaItem record
    is allocated and no section is repacked.

@@ -18,6 +18,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 	expectedGameID uint32,
 	targetGameID uint32,
 	operationID string,
+	matchmakingLevel uint8,
 ) (string, string, error) {
 	if expectedGameID&gaItemHandleTypeMask != 0 || targetGameID&gaItemHandleTypeMask != 0 {
 		return "", "", fmt.Errorf(
@@ -100,22 +101,35 @@ func (engine *Engine) setOwnedWeaponGameID(
 			return fmt.Errorf("weapon handle 0x%08X has %d GaItem records, want exactly 1",
 				target.gaItemHandle, matches)
 		}
-		if targetGameID == expectedGameID {
+
+		var writes []byteWrite
+		if targetGameID != expectedGameID {
+			writes = append(writes, byteWrite{at: gaItemAt + 4, data: littleEndianUint32(targetGameID)})
+			equippedWrites, err := planEquippedWeaponIDWrites(
+				loaded, characterID, locator, target.gaItemHandle, expectedGameID, targetGameID)
+			if err != nil {
+				return err
+			}
+			writes = append(writes, equippedWrites...)
+			gaItemDataWrites, err := planGaItemDataInsertion(loaded, characterID, targetGameID)
+			if err != nil {
+				return err
+			}
+			writes = append(writes, gaItemDataWrites...)
+		}
+
+		if operationID == opSetWeaponUpgradeLevel {
+			matchmakingWrites, err := planWeaponMatchmakingLevelWrite(loaded, characterID, matchmakingLevel)
+			if err != nil {
+				return err
+			}
+			writes = append(writes, matchmakingWrites...)
+		}
+
+		if len(writes) == 0 {
 			return nil
 		}
 
-		writes := []byteWrite{{at: gaItemAt + 4, data: littleEndianUint32(targetGameID)}}
-		equippedWrites, err := planEquippedWeaponIDWrites(
-			loaded, characterID, locator, target.gaItemHandle, expectedGameID, targetGameID)
-		if err != nil {
-			return err
-		}
-		writes = append(writes, equippedWrites...)
-		gaItemDataWrites, err := planGaItemDataInsertion(loaded, characterID, targetGameID)
-		if err != nil {
-			return err
-		}
-		writes = append(writes, gaItemDataWrites...)
 		if err := applyByteWrites(loaded.snapshot, writes); err != nil {
 			return fmt.Errorf("cannot change owned weapon %q: %w", ownedItemID, err)
 		}
@@ -125,6 +139,39 @@ func (engine *Engine) setOwnedWeaponGameID(
 		return "", "", err
 	}
 	return saveRevision, container, nil
+}
+
+// planWeaponMatchmakingLevelWrite locates the character's stats anchor and plans
+// a write to the durable matchmaking level byte at MagicOffset - 0xD5 if the
+// target level is higher than the current value. The rule is strictly monotonic.
+func planWeaponMatchmakingLevelWrite(
+	loaded *loadedSave,
+	characterID int,
+	matchmakingLevel uint8,
+) ([]byteWrite, error) {
+	if matchmakingLevel > 25 {
+		return nil, fmt.Errorf("matchmaking level %d exceeds maximum 25", matchmakingLevel)
+	}
+	anchor, err := findStatsAnchor(loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return nil, err
+	}
+	slotBase := slotDataBase(loaded.session.platform, characterID)
+	slotEnd := slotBase + characterSlotDataSize
+	targetAt := anchor + statsMatchmakingWeaponLevelOffset
+	if targetAt < slotBase || targetAt >= slotEnd {
+		return nil, fmt.Errorf("matchmaking level offset %d for character %d is outside slot bounds [%d, %d)",
+			targetAt, characterID, slotBase, slotEnd)
+	}
+	currentByte, err := loaded.snapshot.readAt(targetAt, 1)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read matchmaking level of character %d: %w", characterID, err)
+	}
+	currentLevel := currentByte[0]
+	if matchmakingLevel > currentLevel {
+		return []byteWrite{{at: targetAt, data: []byte{matchmakingLevel}}}, nil
+	}
+	return nil, nil
 }
 
 // planEquippedWeaponIDWrites validates and updates only hand slots carrying the

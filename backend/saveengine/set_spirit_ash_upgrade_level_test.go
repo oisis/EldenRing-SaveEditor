@@ -62,6 +62,11 @@ func TestSetSpiritAshUpgradeLevelUpdatesInventoryReferencesAndReloads(t *testing
 					t.Fatalf("write reference ID: %v", err)
 				}
 			}
+			matchmakingAt := anchor + statsMatchmakingWeaponLevelOffset
+			if err := snapshot.writeAt(matchmakingAt, []byte{4}); err != nil {
+				engine.mutex.Unlock()
+				t.Fatalf("write initial matchmaking level: %v", err)
+			}
 			before := append([]byte(nil), snapshot.data...)
 			engine.mutex.Unlock()
 
@@ -145,6 +150,24 @@ func TestSetSpiritAshUpgradeLevelUpdatesInventoryReferencesAndReloads(t *testing
 				reloaded.SaveSessionID, slot, InventorySectionCommon, 1, 50)
 			if err != nil || reloadedInventory.Records[0].GaItemHandle != spiritAshTargetHandle {
 				t.Fatalf("reloaded inventory: %v, records=%+v", err, reloadedInventory.Records)
+			}
+
+			reloadedEngine.mutex.Lock()
+			reloadedAnchor, err := findStatsAnchor(
+				reloadedEngine.sessions[reloaded.SaveSessionID].snapshot, platform, slot)
+			if err != nil {
+				reloadedEngine.mutex.Unlock()
+				t.Fatalf("findStatsAnchor reloaded (%s): %v", platform, err)
+			}
+			reloadedMatchmaking, err := reloadedEngine.sessions[reloaded.SaveSessionID].snapshot.readAt(
+				reloadedAnchor+statsMatchmakingWeaponLevelOffset, 1)
+			reloadedEngine.mutex.Unlock()
+			if err != nil {
+				t.Fatalf("read matchmaking level after reload (%s): %v", platform, err)
+			}
+			if reloadedMatchmaking[0] != 4 {
+				t.Errorf("reloaded %s matchmaking level after Spirit Ash +10 = %d, want preserved 4",
+					platform, reloadedMatchmaking[0])
 			}
 		})
 	}

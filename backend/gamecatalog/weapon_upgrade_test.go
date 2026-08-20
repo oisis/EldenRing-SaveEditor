@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/prototype"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
@@ -114,5 +116,58 @@ func TestWeaponUpgradeTargetRejectsInvalidLevelsAndCapabilities(t *testing.T) {
 	}
 	if _, err := disabled.WeaponUpgradeTarget(prototype.DaggerGameID, 1); err == nil {
 		t.Fatal("disabled upgrade capability succeeded")
+	}
+}
+
+func TestWeaponMatchmakingLevelStandardAndSomber(t *testing.T) {
+	data, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("loader.LoadFS: %v", err)
+	}
+	catalog, err := gamecatalog.New(data.Manifest, data.Resources())
+	if err != nil {
+		t.Fatalf("gamecatalog.New: %v", err)
+	}
+
+	const (
+		daggerID     = uint32(1000000) // standard weapon (max 25)
+		blackKnifeID = uint32(1010000) // somber weapon (max 10)
+		spiritAshID  = uint32(0x40038A40)
+	)
+
+	// Standard mapping: +N -> N
+	for lvl := uint8(0); lvl <= 25; lvl++ {
+		got, err := catalog.WeaponMatchmakingLevel(daggerID, lvl)
+		if err != nil {
+			t.Fatalf("standard dagger level %d: %v", lvl, err)
+		}
+		if got != lvl {
+			t.Errorf("standard dagger level %d: got %d, want %d", lvl, got, lvl)
+		}
+	}
+
+	// Somber mapping: [0, 0, 5, 7, 10, 12, 15, 17, 20, 24, 25]
+	somberExpected := []uint8{0, 0, 5, 7, 10, 12, 15, 17, 20, 24, 25}
+	for lvl := uint8(0); lvl <= 10; lvl++ {
+		got, err := catalog.WeaponMatchmakingLevel(blackKnifeID, lvl)
+		if err != nil {
+			t.Fatalf("somber black knife level %d: %v", lvl, err)
+		}
+		if got != somberExpected[lvl] {
+			t.Errorf("somber black knife level %d: got %d, want %d", lvl, got, somberExpected[lvl])
+		}
+	}
+
+	// Invalid levels (> maxLevel)
+	if _, err := catalog.WeaponMatchmakingLevel(daggerID, 26); err == nil {
+		t.Error("standard dagger level 26 succeeded, want error")
+	}
+	if _, err := catalog.WeaponMatchmakingLevel(blackKnifeID, 11); err == nil {
+		t.Error("somber black knife level 11 succeeded, want error")
+	}
+
+	// Spirit Ash exclusion
+	if _, err := catalog.WeaponMatchmakingLevel(spiritAshID, 10); err == nil {
+		t.Error("spirit ash succeeded in WeaponMatchmakingLevel, want error")
 	}
 }

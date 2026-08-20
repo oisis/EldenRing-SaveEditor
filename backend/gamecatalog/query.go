@@ -340,6 +340,60 @@ func (catalog *Catalog) WeaponUpgradeTarget(
 	return anchor + uint32(upgradeLevel), nil
 }
 
+// somberMatchmakingTable maps Somber weapon upgrade levels 0..10 to the standard 0..25 matchmaking scale.
+// Values: 0, 0, 5, 7, 10, 12, 15, 17, 20, 24, 25.
+var somberMatchmakingTable = [...]uint8{0, 0, 5, 7, 10, 12, 15, 17, 20, 24, 25}
+
+// WeaponMatchmakingLevel computes the 0..25 matchmaking scale level for a weapon at the specified upgrade level.
+// It requires an ItemDocument of family weapon with an enabled standard or somber upgrade capability.
+func (catalog *Catalog) WeaponMatchmakingLevel(
+	currentGameID uint32,
+	upgradeLevel uint8,
+) (uint8, error) {
+	if catalog == nil {
+		return 0, errors.New("game catalog is not loaded")
+	}
+	resource, _, matches := catalog.weaponUpgradeAnchor(currentGameID)
+	if matches == 0 {
+		return 0, fmt.Errorf(
+			"game ID 0x%08X is not a catalog weapon upgrade", currentGameID)
+	}
+	if matches != 1 {
+		return 0, fmt.Errorf(
+			"game ID 0x%08X matches more than one weapon upgrade range", currentGameID)
+	}
+
+	upgrade := resource.Item.Capabilities.Upgrade
+	if !upgrade.Known {
+		return 0, fmt.Errorf(
+			"weapon 0x%08X has an unknown upgrade capability", currentGameID)
+	}
+	if !upgrade.Enabled {
+		return 0, fmt.Errorf("weapon 0x%08X cannot be upgraded", currentGameID)
+	}
+	if upgrade.Rules == nil {
+		return 0, fmt.Errorf("weapon 0x%08X carries no upgrade rules", currentGameID)
+	}
+	if upgradeLevel > upgrade.Rules.MaxLevel {
+		return 0, fmt.Errorf(
+			"upgradeLevel %d exceeds the catalog limit of %d for weapon 0x%08X",
+			upgradeLevel, upgrade.Rules.MaxLevel, currentGameID)
+	}
+
+	switch upgrade.Rules.Model {
+	case schema.UpgradeModelStandard:
+		return upgradeLevel, nil
+	case schema.UpgradeModelSomber:
+		if int(upgradeLevel) < len(somberMatchmakingTable) {
+			return somberMatchmakingTable[upgradeLevel], nil
+		}
+		return somberMatchmakingTable[len(somberMatchmakingTable)-1], nil
+	default:
+		return 0, fmt.Errorf(
+			"weapon 0x%08X uses unsupported upgrade model %q", currentGameID, upgrade.Rules.Model)
+	}
+}
+
 // SpiritAshUpgradeTarget resolves one exact save-side Spirit Ash ID and returns
 // the stored catalog variant for the requested level. Unlike weapon upgrades,
 // Spirit Ash chains are explicit variants and are never derived arithmetically.
