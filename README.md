@@ -153,3 +153,11 @@ This project is not affiliated with FromSoftware or Bandai Namco.
 Portions of this project are derived from third-party MIT-licensed code. See
 [THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) for the required license
 notices and attributions.
+
+## Support / Donations
+
+If you find this project useful, you can support its development via Bitcoin:
+
+`18FqJhKioiuxH859LU2pcpas2h46MGr9a2`
+
+[![Donate with Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-orange.svg?logo=bitcoin)](bitcoin:18FqJhKioiuxH859LU2pcpas2h46MGr9a2)
