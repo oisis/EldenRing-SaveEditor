@@ -449,6 +449,14 @@ type getRepairPlanRequest struct {
 	IssueIDs     []string `json:"issueIDs"`
 }
 
+// applyRepairsRequest repeats the selected identifiers because a plan token
+// verifies its actions but cannot reconstruct which selection produced them.
+type applyRepairsRequest struct {
+	IssueIDs         []string `json:"issueIDs"`
+	PlanToken        string   `json:"planToken"`
+	ExpectedRevision string   `json:"expectedRevision"`
+}
+
 type undoCharacterChangesRequest struct {
 	UndoToken        string `json:"undoToken"`
 	ExpectedRevision string `json:"expectedRevision"`
@@ -1771,6 +1779,42 @@ func registerSaveSessionRoutes(
 				characterID,
 				body.SaveRevision,
 				body.IssueIDs,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repairs/apply",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body applyRepairsRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := diagnostics.ApplyRepairs(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.IssueIDs,
+				body.PlanToken,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

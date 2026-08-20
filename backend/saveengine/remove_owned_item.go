@@ -194,18 +194,56 @@ func removeOwnedItemRecord(
 	locator ownedItemLocator,
 	ownedItemID string,
 ) (uint32, error) {
+	gameID, removal, err := planOwnedItemRemovalWrite(loaded, locator, ownedItemID)
+	if err != nil {
+		return 0, err
+	}
+	if err := applyByteWrites(loaded.snapshot, removal.writes()); err != nil {
+		return 0, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
+	}
+	return gameID, nil
+}
+
+// plannedOwnedItemRemoval is one already-validated record clear and, where the
+// native section owns one, the original count header that must be decremented.
+// Batch repair uses the header separately so several removals from one section
+// produce one correct count write instead of overlapping writes.
+type plannedOwnedItemRemoval struct {
+	record  byteWrite
+	countAt int64
+	count   uint32
+}
+
+func (removal plannedOwnedItemRemoval) writes() []byteWrite {
+	writes := []byteWrite{removal.record}
+	if removal.countAt >= 0 && removal.count > 0 {
+		writes = append(writes, byteWrite{at: removal.countAt, data: littleEndianUint32(removal.count - 1)})
+	}
+	return writes
+}
+
+// planOwnedItemRemovalWrite validates one removal and prepares its physical
+// writes without mutating the snapshot. It is shared by the standalone remover
+// and the one-commit repair executor.
+//
+// The caller must already hold Engine.mutex.
+func planOwnedItemRemovalWrite(
+	loaded *loadedSave,
+	locator ownedItemLocator,
+	ownedItemID string,
+) (uint32, plannedOwnedItemRemoval, error) {
 	characterID := locator.characterID
 	// The unsupported section is refused first, before anything is read: an
 	// operation this project has no write contract for may not even look like it
 	// started.
 	plan, err := planOwnedItemRemoval(locator, ownedItemID)
 	if err != nil {
-		return 0, err
+		return 0, plannedOwnedItemRemoval{}, err
 	}
 
 	records, err := readOwnedRecords(loaded, characterID, locator.container)
 	if err != nil {
-		return 0, err
+		return 0, plannedOwnedItemRemoval{}, err
 	}
 
 	target := -1
@@ -217,7 +255,7 @@ func removeOwnedItemRecord(
 		}
 	}
 	if target < 0 {
-		return 0, fmt.Errorf("ownedItemID %q no longer addresses a record of character %d",
+		return 0, plannedOwnedItemRemoval{}, fmt.Errorf("ownedItemID %q no longer addresses a record of character %d",
 			ownedItemID, characterID)
 	}
 
@@ -226,24 +264,24 @@ func removeOwnedItemRecord(
 	// against is left exactly as it is.
 	byHandle, err := readGaItemMap(loaded.snapshot, loaded.session.platform, characterID)
 	if err != nil {
-		return 0, fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
+		return 0, plannedOwnedItemRemoval{}, fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
 	}
 	gameID, err := resolveGaItemHandle(byHandle, records[target].gaItemHandle)
 	if err != nil {
-		return 0, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
+		return 0, plannedOwnedItemRemoval{}, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
 	}
 
 	if err := rejectReferencedOwnedItem(
 		loaded, locator, records[target].gaItemHandle, ownedItemID); err != nil {
-		return 0, err
+		return 0, plannedOwnedItemRemoval{}, err
 	}
 
 	recordAt, countAt, recordSize, err := ownedItemRowAndCountAt(loaded, locator)
 	if err != nil {
-		return 0, err
+		return 0, plannedOwnedItemRemoval{}, err
 	}
 	if int64(len(plan.cleared)) != recordSize {
-		return 0, fmt.Errorf(
+		return 0, plannedOwnedItemRemoval{}, fmt.Errorf(
 			"ownedItemID %q: the removal plan states %d bytes and the container stores %d",
 			ownedItemID, len(plan.cleared), recordSize)
 	}
@@ -252,17 +290,17 @@ func removeOwnedItemRecord(
 	if plan.maintainsCount {
 		count, err = loaded.snapshot.uint32At(countAt)
 		if err != nil {
-			return 0, fmt.Errorf("cannot read the record count of ownedItemID %q: %w", ownedItemID, err)
+			return 0, plannedOwnedItemRemoval{}, fmt.Errorf("cannot read the record count of ownedItemID %q: %w", ownedItemID, err)
 		}
 	} else {
 		countAt = -1
 	}
 
-	if err := writeOwnedItemRemoval(
-		loaded.snapshot, recordAt, plan.cleared, countAt, count); err != nil {
-		return 0, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
-	}
-	return gameID, nil
+	return gameID, plannedOwnedItemRemoval{
+		record:  byteWrite{at: recordAt, data: plan.cleared},
+		countAt: countAt,
+		count:   count,
+	}, nil
 }
 
 // ownedItemRemovalPlan states what one removal writes into the addressed record

@@ -1052,6 +1052,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset":         "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report":                  "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repairs/apply":                      "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
@@ -1626,8 +1627,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 83 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 83", found)
+	if found != 84 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 84", found)
 	}
 }
 
@@ -8481,6 +8482,79 @@ func TestRepairPlanRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 		t.Fatalf("openapi.json describes %s without a POST operation", path)
 	}
 	for _, name := range []string{"RepairPlan", "RepairAction", "RepairRejection", "GetRepairPlanRequest"} {
+		if _, exists := document.Comps.Schemas[name]; !exists {
+			t.Errorf("openapi.json does not describe the %s schema", name)
+		}
+	}
+}
+
+func TestApplyRepairsRouteForwardsTheSealedSelection(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	report, err := diagnostics.GetSaveValidationReport(saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("diagnostics.GetSaveValidationReport: %v", err)
+	}
+	if len(report.Issues) == 0 {
+		t.Skip("the fixture slot is clean, so it names no selected finding")
+	}
+	ids := make([]string, 0, len(report.Issues))
+	for _, issue := range report.Issues {
+		ids = append(ids, issue.ID)
+	}
+	plan, err := diagnostics.GetRepairPlan(saveEngine, gameCatalog, session.SaveSessionID, 0, report.SaveRevision, ids)
+	if err != nil {
+		t.Fatalf("diagnostics.GetRepairPlan: %v", err)
+	}
+	body, err := json.Marshal(map[string]any{
+		"issueIDs": ids, "planToken": plan.PlanToken, "expectedRevision": report.SaveRevision,
+	})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/repairs/apply"
+	request := httptest.NewRequest(http.MethodPost, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var got diagnostics.ApplyRepairsResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("decode ApplyRepairs result: %v", err)
+	}
+	if got.SaveSessionID != session.SaveSessionID || got.CharacterID != 0 {
+		t.Errorf("route result = %+v, want receipt of this session and character", got)
+	}
+	if !reflect.DeepEqual(got.Actions, plan.Actions) || !reflect.DeepEqual(got.Rejected, plan.Rejected) {
+		t.Error("route did not return the freshly derived actions and rejections")
+	}
+}
+
+func TestApplyRepairsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+	var document struct {
+		Paths map[string]map[string]any `json:"paths"`
+		Comps struct {
+			Schemas map[string]any `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+	const path = "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repairs/apply"
+	operation, exists := document.Paths[path]
+	if !exists || operation["post"] == nil {
+		t.Fatalf("openapi.json does not describe POST %s", path)
+	}
+	for _, name := range []string{"ApplyRepairsRequest", "ApplyRepairsResult", "RepairAction", "RepairRejection"} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Errorf("openapi.json does not describe the %s schema", name)
 		}

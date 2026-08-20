@@ -8,8 +8,7 @@ plan of the changes that would resolve them, bound to the exact save version the
 findings were observed at.
 
 It plans. It does not repair: building a plan writes nothing, reserves nothing
-and changes no session state. Performing a plan belongs to `ApplyRepairs`, which
-is still contract-only.
+and changes no session state. Performing a plan belongs to `ApplyRepairs`.
 
 A finding becomes an action only when confirmed data determines a single target
 state for it. Every other requested finding is returned as an explicit
@@ -133,11 +132,13 @@ identifier still points at exactly one action or one rejection.
 `PlanToken` is the SHA-256 digest, hex-encoded, of the session identifier, the
 save revision, the character, and every action in order.
 
-It is derived rather than random on purpose. `ApplyRepairs` can derive the plan
-itself, recompute the token and compare, so a plan needs no server-side storage,
-no expiry and no reservation. Any change to the save, the character, the
-selection or a single action target produces a different token, and a token can
-therefore never authorise a mutation that was not the one described.
+It is derived rather than random on purpose. `ApplyRepairs` receives the same
+selected `issueIDs`, derives the plan again, recomputes the token and compares,
+so a plan needs no server-side storage, no expiry and no reservation. The token
+seals executable actions rather than `Rejected`: refusals cannot authorise a
+mutation. Any change to the save, character or a single action produces a
+different token, and a token can therefore never authorise a mutation that was
+not the one described.
 
 ## Planned repairs
 
@@ -250,8 +251,9 @@ writable, and an unknown class rejected.
   `POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repair-plan`,
   and it exists only while the explorer runs without `-allow-external-bind`.
   No Wails binding, no CLI command and no frontend reaches the endpoint.
-- Nothing executes a plan. `ApplyRepairs` remains contract-only, so this build
-  can describe a repair but not perform one.
+- `ApplyRepairs` executes only the actions this plan derived and returns every
+  selected refusal unchanged; it never turns a policy-dependent finding into a
+  mutation.
 - Six of the fourteen issue codes carry no repair contract. Extending the planned
   set is a separate task per code, each needing the confirmed rule that makes its
   target state unique.

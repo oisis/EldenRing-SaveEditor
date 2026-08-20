@@ -240,6 +240,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/diagnostics/get_repair_plan.md",
                 "title": "GetRepairPlan"
+              },
+              "/apply-repairs": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/diagnostics/apply_repairs.md",
+                "title": "ApplyRepairs"
               }
             }
           },

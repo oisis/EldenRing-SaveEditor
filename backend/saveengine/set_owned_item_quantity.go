@@ -166,10 +166,39 @@ func writeOwnedItemQuantity(
 	expectedGameID uint32,
 	maxContainerTotal uint32,
 ) error {
+	write, err := planOwnedItemQuantityWrite(
+		loaded, locator, ownedItemID, quantity, &expectedGameID, &maxContainerTotal)
+	if err != nil {
+		return err
+	}
+	if err := applyByteWrites(loaded.snapshot, []byteWrite{write}); err != nil {
+		return fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
+	}
+	return nil
+}
+
+// planOwnedItemQuantityWrite verifies the physical owned record and prepares
+// exactly its four quantity bytes. expectedGameID and maxContainerTotal are
+// optional only for a sealed internal repair plan: public quantity changes must
+// provide both, because their limits come from GameCatalog at the endpoint
+// boundary.
+//
+// The caller must already hold Engine.mutex.
+func planOwnedItemQuantityWrite(
+	loaded *loadedSave,
+	locator ownedItemLocator,
+	ownedItemID string,
+	quantity uint32,
+	expectedGameID *uint32,
+	maxContainerTotal *uint32,
+) (byteWrite, error) {
+	if quantity == 0 || quantity > ^ownedItemQuantityFlag {
+		return byteWrite{}, fmt.Errorf("quantity %d is not representable by ownedItemID %q", quantity, ownedItemID)
+	}
 	characterID := locator.characterID
 	records, err := readOwnedRecords(loaded, characterID, locator.container)
 	if err != nil {
-		return err
+		return byteWrite{}, err
 	}
 
 	target := -1
@@ -181,88 +210,65 @@ func writeOwnedItemQuantity(
 		}
 	}
 	if target < 0 {
-		return fmt.Errorf("ownedItemID %q no longer addresses a record of character %d",
+		return byteWrite{}, fmt.Errorf("ownedItemID %q no longer addresses a record of character %d",
 			ownedItemID, characterID)
 	}
 
-	byHandle, err := readGaItemMap(loaded.snapshot, loaded.session.platform, characterID)
-	if err != nil {
-		return fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
-	}
-	gameID, err := resolveGaItemHandle(byHandle, records[target].gaItemHandle)
-	if err != nil {
-		return fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
-	}
-	if gameID != expectedGameID {
-		return fmt.Errorf(
-			"ownedItemID %q now denotes item 0x%08X, not the expected 0x%08X",
-			ownedItemID, gameID, expectedGameID)
-	}
-
-	// The limit covers the whole physical container — both of its sections —
-	// because the game counts what a character holds there, not what one row
-	// holds. Nothing is merged, deduplicated, moved or reindexed to satisfy it:
-	// the request is simply rejected when the container would end up over the
-	// limit. Records are compared by resolved game ID rather than by raw handle,
-	// so two rows of one item never escape the sum by carrying different handles.
-	total := uint64(quantity)
-	for index, record := range records {
-		if index == target {
-			continue
+	if expectedGameID != nil || maxContainerTotal != nil {
+		if expectedGameID == nil || maxContainerTotal == nil {
+			return byteWrite{}, errors.New("owned item quantity limit context is incomplete")
 		}
-		otherID, err := resolveGaItemHandle(byHandle, record.gaItemHandle)
+		byHandle, err := readGaItemMap(loaded.snapshot, loaded.session.platform, characterID)
 		if err != nil {
-			return fmt.Errorf("%s record %d of character %d: %w",
-				locator.container, record.physicalIndex, characterID, err)
+			return byteWrite{}, fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
 		}
-		if otherID != gameID {
-			continue
+		gameID, err := resolveGaItemHandle(byHandle, records[target].gaItemHandle)
+		if err != nil {
+			return byteWrite{}, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
 		}
-		// Both operands are widened to uint64, and every quantity is a masked
-		// 31-bit value, so the sum cannot wrap.
-		total += uint64(record.quantity)
-	}
-	if total > uint64(maxContainerTotal) {
-		return fmt.Errorf(
-			"quantity %d would raise the %s total of item 0x%08X to %d, above the limit of %d",
-			quantity, locator.container, gameID, total, maxContainerTotal)
+		if gameID != *expectedGameID {
+			return byteWrite{}, fmt.Errorf(
+				"ownedItemID %q now denotes item 0x%08X, not the expected 0x%08X",
+				ownedItemID, gameID, *expectedGameID)
+		}
+
+		// The limit covers the whole physical container — both of its sections —
+		// because the game counts what a character holds there, not what one row
+		// holds. Nothing is merged, deduplicated, moved or reindexed to satisfy it.
+		total := uint64(quantity)
+		for index, record := range records {
+			if index == target {
+				continue
+			}
+			otherID, err := resolveGaItemHandle(byHandle, record.gaItemHandle)
+			if err != nil {
+				return byteWrite{}, fmt.Errorf("%s record %d of character %d: %w",
+					locator.container, record.physicalIndex, characterID, err)
+			}
+			if otherID == gameID {
+				total += uint64(record.quantity)
+			}
+		}
+		if total > uint64(*maxContainerTotal) {
+			return byteWrite{}, fmt.Errorf(
+				"quantity %d would raise the %s total of item 0x%08X to %d, above the limit of %d",
+				quantity, locator.container, gameID, total, *maxContainerTotal)
+		}
 	}
 
 	offset, err := ownedItemQuantityOffset(loaded, locator)
 	if err != nil {
-		return err
+		return byteWrite{}, err
 	}
 	oldRaw, err := loaded.snapshot.uint32At(offset)
 	if err != nil {
-		return fmt.Errorf("cannot read the quantity of ownedItemID %q: %w", ownedItemID, err)
+		return byteWrite{}, fmt.Errorf("cannot read the quantity of ownedItemID %q: %w", ownedItemID, err)
 	}
 	// The stored value is read raw rather than through a reader's masked quantity,
 	// because the high bit is not part of the count and has to survive the write
 	// exactly as the game left it: never set here, never cleared here.
 	newRaw := (oldRaw & ownedItemQuantityFlag) | quantity
-
-	if err := loaded.snapshot.writeAt(offset, littleEndianUint32(newRaw)); err != nil {
-		return fmt.Errorf("cannot write the quantity of ownedItemID %q: %w", ownedItemID, err)
-	}
-	written, err := loaded.snapshot.uint32At(offset)
-	if err == nil && written == newRaw {
-		return nil
-	}
-
-	// The write is four bytes wide, so the rollback is the exact previous four
-	// bytes rather than a copy of the snapshot.
-	if rollback := loaded.snapshot.writeAt(offset, littleEndianUint32(oldRaw)); rollback != nil {
-		return fmt.Errorf(
-			"the quantity of ownedItemID %q could not be verified and could not be restored: %w",
-			ownedItemID, rollback)
-	}
-	restored, restoreErr := loaded.snapshot.uint32At(offset)
-	if restoreErr != nil || restored != oldRaw {
-		return fmt.Errorf(
-			"the quantity of ownedItemID %q could not be verified and its rollback could not be confirmed",
-			ownedItemID)
-	}
-	return fmt.Errorf("the quantity of ownedItemID %q was not stored; the record is unchanged", ownedItemID)
+	return byteWrite{at: offset, data: littleEndianUint32(newRaw)}, nil
 }
 
 // ownedRecord is the handful of record fields this mutation needs, taken from

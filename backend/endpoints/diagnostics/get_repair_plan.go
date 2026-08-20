@@ -46,9 +46,9 @@ var GetRepairPlanDefinition = contract.MustDefine(contract.Definition{
 // The repair operations a plan may contain. Each one names an existing mutating
 // contract of this backend; the plan never invents a new way to write the save.
 const (
-	RepairOperationSetOwnedItemQuantity = "set_owned_item_quantity"
-	RepairOperationRemoveOwnedItem      = "remove_owned_item"
-	RepairOperationSetCharacterStats    = "set_character_stats"
+	RepairOperationSetOwnedItemQuantity = saveengine.RepairOperationSetOwnedItemQuantity
+	RepairOperationRemoveOwnedItem      = saveengine.RepairOperationRemoveOwnedItem
+	RepairOperationSetCharacterStats    = saveengine.RepairOperationSetCharacterStats
 )
 
 // RepairAction is one planned change. It is a description, not an execution:
