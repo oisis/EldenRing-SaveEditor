@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.11] - 2026-08-21
+
+### fix(quests): keep the quest editor in place while updating a flag
+
+Changing a quest step or an individual quest flag briefly replaced the entire
+quest list with a spinner. On a long quest this shortened the view enough for
+the application to lose the current scroll position, so the list jumped away
+from the step being edited. The existing list now remains visible while the
+updated quest state is fetched, and its controls are temporarily disabled to
+prevent duplicate actions.
+
+### fix(matchmaking): persist the highest weapon level used for matchmaking
+
+Adding or editing an upgraded weapon updated its item record but left the
+character's persistent matchmaking weapon-level field unchanged. The editor
+now raises that field monotonically from eligible weapons in Inventory and
+Storage: standard upgrades map directly to 0..25 and Somber upgrades map to
+the game's equivalent 0..25 tier. Spirit Ashes and non-weapons remain ignored.
+
 ## [1.6.10] - 2026-08-19
 
 ### fix(storage): follow the game's own acquisition rules when depositing items
