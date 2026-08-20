@@ -158,4 +158,4 @@ notices and attributions.
 
 If you find this project useful, you can support its development via Bitcoin:
 
-BTC: `18FqJhKioiuxH859LU2pcpas2h46MGr9a2` [![Donate with Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-orange.svg?logo=bitcoin)](bitcoin:18FqJhKioiuxH859LU2pcpas2h46MGr9a2)
+[![Donate with Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-orange.svg?logo=bitcoin)](bitcoin:18FqJhKioiuxH859LU2pcpas2h46MGr9a2) `18FqJhKioiuxH859LU2pcpas2h46MGr9a2`
