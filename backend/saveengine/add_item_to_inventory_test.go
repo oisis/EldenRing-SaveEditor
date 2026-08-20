@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"bytes"
 	"encoding/binary"
 	"os"
 	"path/filepath"
@@ -487,7 +488,7 @@ func TestAddItemToInventorySurvivesAReload(t *testing.T) {
 	}
 }
 
-func TestAddItemToInventoryTopsUpTheFirstExistingStack(t *testing.T) {
+func TestAddItemToInventoryTopsUpExistingStack(t *testing.T) {
 	content := addItemTestFixture{
 		platform: PlatformPC, slot: 1, tailMarker: true,
 		common: []addItemTestRow{
@@ -495,10 +496,10 @@ func TestAddItemToInventoryTopsUpTheFirstExistingStack(t *testing.T) {
 			// The stored quantity carries the native high bit, which is not part of
 			// the count and has to survive the write exactly as the game left it.
 			{index: 2, handle: addItemTestGoodsHandle, rawQuantity: 0x80000000 | 3, acquisition: 13},
-			{index: 5, handle: addItemTestGoodsHandle, rawQuantity: 2, acquisition: 17},
+			{index: 5, handle: addItemTestTalismanHandle, rawQuantity: 1, acquisition: 17},
 		},
 		commonCount: 3, nextEquipIndex: 433, nextAcquisition: 968,
-		gaItemData: []uint32{addItemTestGoodsID, addItemTestOtherID},
+		gaItemData: []uint32{addItemTestGoodsID, addItemTestOtherID, addItemTestTalismanID},
 	}
 	engine := New()
 	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
@@ -933,5 +934,33 @@ func TestGaItemHandleForGameIDIsTheInverseOfResolution(t *testing.T) {
 		if _, err := gaItemHandleForGameID(gameID); err == nil {
 			t.Errorf("0x%08X received a handle it has no record for", gameID)
 		}
+	}
+}
+
+func TestAddItemToInventoryRejectsExistingDuplicateRecords(t *testing.T) {
+	content := addItemTestFixture{
+		platform: PlatformPC,
+		slot:     2,
+		common: []addItemTestRow{
+			{index: 1, handle: addItemTestGoodsHandle, rawQuantity: 0x80000005, acquisition: 450},
+			{index: 3, handle: addItemTestGoodsHandle, rawQuantity: 0x80000005, acquisition: 470},
+		},
+		commonCount: 2,
+		gaItemData:  []uint32{addItemTestGoodsID},
+	}
+	engine := New()
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	before := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
+
+	_, err = engine.AddItemToInventory(
+		loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 40, 600)
+	if err == nil || !strings.Contains(err.Error(), "already holds 2 duplicate records in Inventory") {
+		t.Fatalf("error = %v, want duplicate quantity_stack rejection", err)
+	}
+	if after := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot); !bytes.Equal(after, before) {
+		t.Error("a rejected duplicate add changed the slot")
 	}
 }

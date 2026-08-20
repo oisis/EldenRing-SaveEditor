@@ -544,3 +544,23 @@ func TestGetRepairPlan_UnknownStartingClassIsNeverRepaired(t *testing.T) {
 		t.Fatal("an unknown starting class produced no rejection")
 	}
 }
+
+func TestGetRepairPlan_DuplicateStackableRecordIsRefused(t *testing.T) {
+	engine, session, report := planFor(t, reportTestFixture{
+		inventory: []reportTestRow{
+			{index: 0, handle: reportTestGoodsSmallStack, quantity: 4},
+			{index: 1, handle: reportTestGoodsSmallStack, quantity: 4},
+		},
+	})
+
+	plan, err := diagnostics.GetRepairPlan(
+		engine, reportTestCatalog(t), session, reportTestSlot, report.SaveRevision, allIssueIDs(report))
+	if err != nil {
+		t.Fatalf("GetRepairPlan: %v", err)
+	}
+
+	rejection := requireRejection(t, plan, "duplicate_stackable_record")
+	if !strings.Contains(rejection.Reason, "no confirmed safe automatic repair contract") {
+		t.Errorf("rejection reason = %q, want safe contract message", rejection.Reason)
+	}
+}

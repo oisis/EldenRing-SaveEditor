@@ -81,6 +81,21 @@ func MoveOwnedItemToStorage(
 		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
 			"owned item %q: item 0x%08X cannot be stored", ownedItemID, gameID)
 	}
+	if !resource.Item.Storage.RecordMode.Known {
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q: item 0x%08X has an unknown record mode", ownedItemID, gameID)
+	}
+	var separateInstances bool
+	switch resource.Item.Storage.RecordMode.Value {
+	case schema.RecordModeQuantityStack:
+		separateInstances = false
+	case schema.RecordModeSeparateInstances:
+		separateInstances = true
+	default:
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q: item 0x%08X has unsupported record mode %q",
+			ownedItemID, gameID, resource.Item.Storage.RecordMode.Value)
+	}
 
 	return engine.MoveOwnedItemToStorage(
 		saveSessionID,
@@ -90,5 +105,6 @@ func MoveOwnedItemToStorage(
 		expectedRevision,
 		gameID,
 		resource.Item.Storage.MaxStorage.Value,
+		separateInstances,
 	)
 }

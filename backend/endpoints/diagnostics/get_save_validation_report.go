@@ -45,20 +45,21 @@ const (
 // The issue codes this report can emit. They are stable identifiers a caller may
 // branch on; the human-readable Message beside them is not.
 const (
-	IssueCodeUnresolvedItem          = "unresolved_item"
-	IssueCodeUnknownItem             = "unknown_item"
-	IssueCodeQuantityZero            = "quantity_zero"
-	IssueCodeQuantityAboveStackLimit = "quantity_above_stack_limit"
-	IssueCodeQuantityAboveContainer  = "quantity_above_container_limit"
-	IssueCodeItemNotAllowedInHere    = "item_not_allowed_in_container"
-	IssueCodeAttributeOutOfRange     = "attribute_out_of_range"
-	IssueCodeLevelMismatch           = "level_mismatch"
-	IssueCodeAttributeBelowClassMin  = "attribute_below_class_minimum"
-	IssueCodeSoulMemoryBelowMinimum  = "soul_memory_below_minimum"
-	IssueCodeDanglingReference       = "dangling_equipment_reference"
-	IssueCodeReservedSpellPosition   = "reserved_spell_position_occupied"
-	IssueCodeUnresolvedSpell         = "unresolved_equipped_spell"
-	IssueCodeMemorySlotsExceeded     = "memory_slots_exceeded"
+	IssueCodeUnresolvedItem           = "unresolved_item"
+	IssueCodeUnknownItem              = "unknown_item"
+	IssueCodeQuantityZero             = "quantity_zero"
+	IssueCodeQuantityAboveStackLimit  = "quantity_above_stack_limit"
+	IssueCodeQuantityAboveContainer   = "quantity_above_container_limit"
+	IssueCodeItemNotAllowedInHere     = "item_not_allowed_in_container"
+	IssueCodeAttributeOutOfRange      = "attribute_out_of_range"
+	IssueCodeLevelMismatch            = "level_mismatch"
+	IssueCodeAttributeBelowClassMin   = "attribute_below_class_minimum"
+	IssueCodeSoulMemoryBelowMinimum   = "soul_memory_below_minimum"
+	IssueCodeDanglingReference        = "dangling_equipment_reference"
+	IssueCodeDuplicateStackableRecord = "duplicate_stackable_record"
+	IssueCodeReservedSpellPosition    = "reserved_spell_position_occupied"
+	IssueCodeUnresolvedSpell          = "unresolved_equipped_spell"
+	IssueCodeMemorySlotsExceeded      = "memory_slots_exceeded"
 )
 
 // saveValidationScopes lists every scope in the order a report presents them.
@@ -324,6 +325,8 @@ func checkContainer(
 	issues := make([]SaveValidationIssue, 0)
 	totals := make(map[uint32]uint64)
 	limits := make(map[uint32]uint32)
+	stackCounts := make(map[uint32]int)
+	isStack := make(map[uint32]bool)
 
 	for _, record := range facts.Items {
 		if record.Container != container {
@@ -354,6 +357,11 @@ func checkContainer(
 				OwnedItemID: record.OwnedItemID,
 			})
 			continue
+		}
+
+		if resource.Item.Storage.RecordMode.Known && resource.Item.Storage.RecordMode.Value == schema.RecordModeQuantityStack {
+			isStack[record.GameID] = true
+			stackCounts[record.GameID]++
 		}
 
 		if record.Quantity == 0 {
@@ -399,6 +407,25 @@ func checkContainer(
 		}
 		totals[record.GameID] += uint64(record.Quantity)
 		limits[record.GameID] = containerTotal
+	}
+
+	// Duplicate records for a quantity_stack item are reported once per game ID,
+	// keeping stored order of first appearance.
+	reportedDuplicates := make(map[uint32]bool)
+	for _, record := range facts.Items {
+		if record.Container != container || !record.Resolved || reportedDuplicates[record.GameID] {
+			continue
+		}
+		if isStack[record.GameID] && stackCounts[record.GameID] > 1 {
+			reportedDuplicates[record.GameID] = true
+			issues = append(issues, SaveValidationIssue{
+				Code:     IssueCodeDuplicateStackableRecord,
+				Severity: SaveValidationSeverityError,
+				Scope:    container,
+				Message: fmt.Sprintf("game ID 0x%08X holds %d duplicate stack records in the %s",
+					record.GameID, stackCounts[record.GameID], container),
+			})
+		}
 	}
 
 	// The container total is a property of the game ID, not of one record, so it

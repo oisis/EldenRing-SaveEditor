@@ -35,6 +35,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 	expectedRevision string,
 	expectedGameID uint32,
 	maxInventory uint32,
+	separateInstances bool,
 ) (MoveOwnedItemToInventoryResult, error) {
 	if targetPosition < 0 {
 		return MoveOwnedItemToInventoryResult{}, fmt.Errorf(
@@ -66,7 +67,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 			return err
 		}
 		moved, err = moveOwnedItemToInventoryRecord(
-			loaded, locator, ownedItemID, targetPosition, expectedGameID, maxInventory)
+			loaded, locator, ownedItemID, targetPosition, expectedGameID, maxInventory, separateInstances)
 		return err
 	})
 	if err != nil {
@@ -109,6 +110,7 @@ func moveOwnedItemToInventoryRecord(
 	targetPosition int,
 	expectedGameID uint32,
 	maxInventory uint32,
+	separateInstances bool,
 ) (movedInventoryRecord, error) {
 	if locator.container != ownedContainerStorage {
 		return movedInventoryRecord{}, fmt.Errorf(
@@ -173,6 +175,11 @@ func moveOwnedItemToInventoryRecord(
 			return movedInventoryRecord{}, fmt.Errorf(
 				"item 0x%08X already holds an Inventory key record of character %d;"+
 					" this mutation writes common records only", gameID, locator.characterID)
+		}
+		if !separateInstances {
+			return movedInventoryRecord{}, fmt.Errorf(
+				"item 0x%08X already holds a stack record in Inventory; moving duplicate quantity_stack records is not supported",
+				gameID)
 		}
 		total += uint64(record.Quantity)
 	}

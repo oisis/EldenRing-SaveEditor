@@ -160,6 +160,7 @@ judged against the same GameCatalog limits the mutating endpoints enforce.
 | `quantity_zero` | error | A non-empty record stores the quantity `0`. |
 | `quantity_above_stack_limit` | error | One record holds more than `min(maxPerStack, container total)`, or more than one instance of a `separate_instances` item. |
 | `quantity_above_container_limit` | error | The sum of one game ID across the container exceeds `maxInventory` or `maxStorage`. Judged once per item, never once per record. |
+| `duplicate_stackable_record` | error | Multiple physical records exist in the container for an item whose recordMode is `quantity_stack`. |
 | `item_not_allowed_in_container` | error | The item's confirmed limit for this container is `0`, so it does not belong there at all. |
 
 ### Scope `stats`

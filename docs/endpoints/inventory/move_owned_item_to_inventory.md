@@ -44,6 +44,9 @@ quantity of that `gameID` already present in both Inventory sections, plus the
 complete quantity of the moved record, must not exceed that limit. No Safe Mode
 or `-sfv` fallback limit is used.
 
+`item.storage.recordMode` must be known and must be either `quantity_stack` or
+`separate_instances`. An unknown or unsupported record mode is rejected fail-closed.
+
 ## Mutation contract
 
 Only `Storage common -> Inventory common` is supported. Storage key records are
@@ -74,8 +77,10 @@ Duplicate or allocator-inconsistent acquisition indices are rejected instead
 of being silently normalised.
 
 There is no quantity merge, handle rewrite, GaItem allocation, GaItemData
-change, rehandle, repack or cascade. Records with a shared handle remain
-separate physical instances, subject to the catalog Inventory limit.
+change, rehandle, repack or cascade. If the item's recordMode is `quantity_stack`
+and Inventory already holds a record for that game ID, the move is rejected
+fail-closed. Records of `separate_instances` items remain separate physical
+instances, subject to the catalog Inventory limit.
 
 All validation completes before the first write. The non-overlapping write
 ranges are verified together and restored on failure. A rejection does not

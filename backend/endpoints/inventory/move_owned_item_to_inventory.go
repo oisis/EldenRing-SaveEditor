@@ -95,6 +95,21 @@ func MoveOwnedItemToInventory(
 		return MoveOwnedItemToInventoryResult{}, fmt.Errorf(
 			"owned item %q: item 0x%08X cannot be carried in Inventory", ownedItemID, gameID)
 	}
+	if !resource.Item.Storage.RecordMode.Known {
+		return MoveOwnedItemToInventoryResult{}, fmt.Errorf(
+			"owned item %q: item 0x%08X has an unknown record mode", ownedItemID, gameID)
+	}
+	var separateInstances bool
+	switch resource.Item.Storage.RecordMode.Value {
+	case schema.RecordModeQuantityStack:
+		separateInstances = false
+	case schema.RecordModeSeparateInstances:
+		separateInstances = true
+	default:
+		return MoveOwnedItemToInventoryResult{}, fmt.Errorf(
+			"owned item %q: item 0x%08X has unsupported record mode %q",
+			ownedItemID, gameID, resource.Item.Storage.RecordMode.Value)
+	}
 
 	return engine.MoveOwnedItemToInventory(
 		saveSessionID,
@@ -104,5 +119,6 @@ func MoveOwnedItemToInventory(
 		expectedRevision,
 		gameID,
 		resource.Item.Storage.MaxInventory.Value,
+		separateInstances,
 	)
 }

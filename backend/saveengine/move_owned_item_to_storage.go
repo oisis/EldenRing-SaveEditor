@@ -33,6 +33,7 @@ func (engine *Engine) MoveOwnedItemToStorage(
 	expectedRevision string,
 	expectedGameID uint32,
 	maxStorage uint32,
+	separateInstances bool,
 ) (MoveOwnedItemToStorageResult, error) {
 	if targetPosition < 0 {
 		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
@@ -64,7 +65,7 @@ func (engine *Engine) MoveOwnedItemToStorage(
 			return err
 		}
 		moved, err = moveOwnedItemToStorageRecord(
-			loaded, locator, ownedItemID, targetPosition, expectedGameID, maxStorage)
+			loaded, locator, ownedItemID, targetPosition, expectedGameID, maxStorage, separateInstances)
 		return err
 	})
 	if err != nil {
@@ -101,6 +102,7 @@ func moveOwnedItemToStorageRecord(
 	targetPosition int,
 	expectedGameID uint32,
 	maxStorage uint32,
+	separateInstances bool,
 ) (movedStorageRecord, error) {
 	if locator.container != ownedContainerInventory {
 		return movedStorageRecord{}, fmt.Errorf(
@@ -166,6 +168,11 @@ func moveOwnedItemToStorageRecord(
 				record.ContainerSection, record.PhysicalIndex, locator.characterID, err)
 		}
 		if storedGameID == gameID {
+			if !separateInstances {
+				return movedStorageRecord{}, fmt.Errorf(
+					"item 0x%08X already holds a stack record in Storage; moving duplicate quantity_stack records is not supported",
+					gameID)
+			}
 			total += uint64(record.Quantity)
 		}
 	}

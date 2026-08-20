@@ -8354,7 +8354,7 @@ func TestSaveValidationReportRouteIsDescribedInTheOpenAPIDocument(t *testing.T) 
 					Enum []string `json:"enum"`
 				} `json:"schema"`
 			} `json:"parameters"`
-			Schemas map[string]any `json:"schemas"`
+			Schemas map[string]json.RawMessage `json:"schemas"`
 		} `json:"components"`
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
@@ -8373,6 +8373,45 @@ func TestSaveValidationReportRouteIsDescribedInTheOpenAPIDocument(t *testing.T) 
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Errorf("openapi.json does not describe the %s schema", name)
 		}
+	}
+
+	rawIssueSchema, exists := document.Comps.Schemas["SaveValidationIssue"]
+	if !exists {
+		t.Fatal("openapi.json does not describe the SaveValidationIssue schema")
+	}
+	var issueSchema struct {
+		Properties struct {
+			Code struct {
+				Enum []string `json:"enum"`
+			} `json:"code"`
+		} `json:"properties"`
+	}
+	if err := json.Unmarshal(rawIssueSchema, &issueSchema); err != nil {
+		t.Fatalf("decode SaveValidationIssue schema: %v", err)
+	}
+	codeProp := issueSchema.Properties.Code
+	if len(codeProp.Enum) == 0 {
+		t.Fatal("SaveValidationIssue schema has no code property or empty enum")
+	}
+	wantCodes := []string{
+		"unresolved_item",
+		"unknown_item",
+		"quantity_zero",
+		"quantity_above_stack_limit",
+		"quantity_above_container_limit",
+		"duplicate_stackable_record",
+		"item_not_allowed_in_container",
+		"attribute_out_of_range",
+		"level_mismatch",
+		"attribute_below_class_minimum",
+		"soul_memory_below_minimum",
+		"dangling_equipment_reference",
+		"reserved_spell_position_occupied",
+		"unresolved_equipped_spell",
+		"memory_slots_exceeded",
+	}
+	if !reflect.DeepEqual(codeProp.Enum, wantCodes) {
+		t.Errorf("SaveValidationIssue code enum = %v, want %v", codeProp.Enum, wantCodes)
 	}
 
 	scope, exists := document.Comps.Parameters["ValidationScope"]

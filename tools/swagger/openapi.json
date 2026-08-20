@@ -5246,6 +5246,7 @@
               "quantity_zero",
               "quantity_above_stack_limit",
               "quantity_above_container_limit",
+              "duplicate_stackable_record",
               "item_not_allowed_in_container",
               "attribute_out_of_range",
               "level_mismatch",

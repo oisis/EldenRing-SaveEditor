@@ -176,6 +176,7 @@ than leaving it to be discovered on apply.
 |---|---|
 | `unresolved_item`, `unknown_item`, `unresolved_equipped_spell` | This build cannot resolve the stored data. Deriving a repair would mean guessing what it was meant to be, and unknown data must never become a deletion or a different valid item. |
 | `quantity_above_container_limit` | The finding names a container total, not one record. No confirmed rule selects which of the records holding that item is reduced. |
+| `duplicate_stackable_record` | Duplicate stackable records have no confirmed safe automatic repair contract. |
 | `item_not_allowed_in_container` | No confirmed rule states whether an item stored in a container that does not accept it is moved or destroyed. |
 | `memory_slots_exceeded` | No confirmed rule selects which of the equipped spells is unequipped to fit the available capacity. |
 | `level_mismatch`, `soul_memory_below_minimum` | Neither value has a repair contract of its own. SaveEngine writes the stored level and the lifetime runes only as derived consequences of `SetCharacterStats`. Whether this build may rewrite a stored level to match its attributes is an unresolved contract decision: SaveForge 1.5.8 and 1.6.10 both rated the mismatch a *warning* and marked it explicitly not automatically repairable, while 2.0 rates it an error. Until that is settled, a plan does not settle it. A selected attribute repair still moves both values as the side effect described above. |
@@ -254,7 +255,7 @@ writable, and an unknown class rejected.
 - `ApplyRepairs` executes only the actions this plan derived and returns every
   selected refusal unchanged; it never turns a policy-dependent finding into a
   mutation.
-- Six of the fourteen issue codes carry no repair contract. Extending the planned
+- Seven of the fifteen issue codes carry no repair contract. Extending the planned
   set is a separate task per code, each needing the confirmed rule that makes its
   target state unique.
 - `quantity_above_container_limit` is refused partly because 2.0 and 1.x disagree

@@ -270,6 +270,7 @@ func addItemToInventoryRecord(
 	// engine cannot decode.
 	target := -1
 	total := uint64(quantity)
+	stackRecordCount := 0
 	for index, record := range records {
 		recordID, err := resolveGaItemHandle(byHandle, record.GaItemHandle)
 		if err != nil {
@@ -285,9 +286,17 @@ func addItemToInventoryRecord(
 				"item 0x%08X already holds a key record of character %d, and this mutation never"+
 					" writes the key section", gameID, characterID)
 		}
-		if target < 0 && !separateInstances {
-			target = index
+		if !separateInstances {
+			stackRecordCount++
+			if target < 0 {
+				target = index
+			}
 		}
+	}
+	if !separateInstances && stackRecordCount > 1 {
+		return addedInventoryRecord{}, fmt.Errorf(
+			"item 0x%08X already holds %d duplicate records in Inventory; adding to duplicate quantity_stack records is not supported",
+			gameID, stackRecordCount)
 	}
 	if total > uint64(maxContainerTotal) {
 		return addedInventoryRecord{}, fmt.Errorf(

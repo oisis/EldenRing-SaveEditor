@@ -41,6 +41,9 @@ limit.
 
 No Safe Mode, `-sfv` or inferred fallback limit is used.
 
+`item.storage.recordMode` must be known and must be either `quantity_stack` or
+`separate_instances`. An unknown or unsupported record mode is rejected fail-closed.
+
 ## Mutation contract
 
 Only `Inventory common -> Storage common` is supported. Inventory key records
@@ -65,8 +68,10 @@ the record at `targetPosition`. Existing gaps and rows outside that span are
 not normalised.
 
 There is no quantity merge, duplicate-handle rewrite, GaItem allocation,
-rehandle, repack or cascade. A duplicate item in Storage remains a separate
-physical record and still participates in the catalog storage limit.
+rehandle, repack or cascade. If the item's recordMode is `quantity_stack`
+and Storage already holds a record for that game ID, the move is rejected
+fail-closed. Records of `separate_instances` items remain separate physical
+records and still participate in the catalog storage limit.
 
 Equipment, Quick Items and Pouch references address an Inventory common
 instance by its physical row and handle. If any of those structures still

@@ -353,6 +353,9 @@ func planRepairAction(
 	case IssueCodeQuantityAboveContainer:
 		return RepairAction{}, "the finding names a container total, not one record, and no confirmed rule selects which of the records holding this item is reduced"
 
+	case IssueCodeDuplicateStackableRecord:
+		return RepairAction{}, "duplicate stackable records have no confirmed safe automatic repair contract"
+
 	case IssueCodeItemNotAllowedInHere:
 		return RepairAction{}, "no confirmed rule states whether an item stored in a container that does not accept it is moved or destroyed"
 

@@ -558,3 +558,29 @@ func TestAddItemToStorageRecomputesStaleNextEquipIndex(t *testing.T) {
 	}
 	assertNoStorageBucketCollision(t, engine, loaded.SaveSessionID, content.slot)
 }
+
+func TestAddItemToStorageRejectsExistingDuplicateRecords(t *testing.T) {
+	content := addItemTestFixture{
+		platform: PlatformPC, slot: 2,
+		storage: []addItemTestRow{
+			{index: 0, handle: addItemTestGoodsHandle, rawQuantity: 5, acquisition: 2},
+			{index: 1, handle: addItemTestGoodsHandle, rawQuantity: 5, acquisition: 4},
+		},
+		storageCount: 2, gaItemData: []uint32{addItemTestGoodsID},
+	}
+	engine := New()
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	before := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
+
+	_, err = engine.AddItemToStorage(
+		loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 600)
+	if err == nil || !strings.Contains(err.Error(), "already holds 2 duplicate records in Storage") {
+		t.Fatalf("error = %v, want duplicate quantity_stack rejection", err)
+	}
+	if after := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot); !bytes.Equal(after, before) {
+		t.Error("a rejected duplicate add changed the slot")
+	}
+}

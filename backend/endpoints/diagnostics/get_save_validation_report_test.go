@@ -431,6 +431,26 @@ func TestGetSaveValidationReport_ContainerLimits(t *testing.T) {
 		}
 	})
 
+	t.Run("duplicate quantity_stack records under container limit", func(t *testing.T) {
+		engine, session := loadReportFixture(t, reportTestFixture{
+			inventory: []reportTestRow{
+				{index: 0, handle: reportTestGoodsSmallStack, quantity: 4},
+				{index: 1, handle: reportTestGoodsSmallStack, quantity: 4},
+			},
+		})
+
+		result, err := diagnostics.GetSaveValidationReport(engine, gameCatalog, session, reportTestSlot, "")
+		if err != nil {
+			t.Fatalf("GetSaveValidationReport: %v", err)
+		}
+		issue := requireIssue(t, result, "duplicate_stackable_record", "error")
+		if !strings.Contains(issue.Message, "2 duplicate stack records") {
+			t.Errorf("message = %q, want duplicate count", issue.Message)
+		}
+		requireNoIssue(t, result, "quantity_above_container_limit")
+		requireNoIssue(t, result, "quantity_above_stack_limit")
+	})
+
 	t.Run("separate-instance record holding more than one", func(t *testing.T) {
 		engine, session := loadReportFixture(t, reportTestFixture{
 			inventory: []reportTestRow{{index: 0, handle: reportTestAccessory, quantity: 2}},

@@ -61,7 +61,7 @@ func TestMoveOwnedItemToInventoryWritesBothPlatformsAndReloads(t *testing.T) {
 
 			result, err := engine.MoveOwnedItemToInventory(
 				sessionID, moveInventoryTestSlot, ownedItemID, 1, "0",
-				addItemTestGoodsID, 99)
+				addItemTestGoodsID, 99, false)
 			if err != nil {
 				t.Fatalf("MoveOwnedItemToInventory: %v", err)
 			}
@@ -172,7 +172,7 @@ func TestMoveOwnedItemToInventoryRejectsInvalidPlansWithoutMutation(t *testing.T
 			before := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveInventoryTestSlot)
 			_, err := engine.MoveOwnedItemToInventory(
 				sessionID, moveInventoryTestSlot, ownedItemID, testCase.targetPosition, "0",
-				addItemTestGoodsID, testCase.maxInventory)
+				addItemTestGoodsID, testCase.maxInventory, false)
 			if err == nil || !strings.Contains(err.Error(), testCase.want) {
 				t.Fatalf("error = %v, want %q", err, testCase.want)
 			}
@@ -206,8 +206,28 @@ func TestMoveOwnedItemToInventoryRejectsStorageKey(t *testing.T) {
 	}
 	_, err = engine.MoveOwnedItemToInventory(
 		loaded.SaveSessionID, moveInventoryTestSlot, storage.Records[0].OwnedItemID,
-		0, "0", addItemTestGoodsID, 99)
+		0, "0", addItemTestGoodsID, 99, false)
 	if err == nil || !strings.Contains(err.Error(), "Storage key record") {
 		t.Fatalf("error = %v, want key-record rejection", err)
+	}
+}
+
+func TestMoveOwnedItemToInventoryRejectsExistingQuantityStack(t *testing.T) {
+	content := moveInventoryTestFixture()
+	// Add the same goods item to common inventory as well.
+	content.common = append(content.common, addItemTestRow{
+		index: 4, handle: addItemTestGoodsHandle, rawQuantity: 0x80000005, acquisition: 480,
+	})
+	content.commonCount = 3
+	engine, sessionID, ownedItemID := moveInventoryTestTarget(t, PlatformPC, content)
+	before := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveInventoryTestSlot)
+
+	_, err := engine.MoveOwnedItemToInventory(
+		sessionID, moveInventoryTestSlot, ownedItemID, 0, "0", addItemTestGoodsID, 99, false)
+	if err == nil || !strings.Contains(err.Error(), "already holds a stack record in Inventory") {
+		t.Fatalf("error = %v, want duplicate quantity_stack rejection", err)
+	}
+	if after := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveInventoryTestSlot); !bytes.Equal(after, before) {
+		t.Error("a rejected duplicate move changed the slot")
 	}
 }

@@ -60,7 +60,7 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 
 			result, err := engine.MoveOwnedItemToStorage(
 				sessionID, moveStorageTestSlot, ownedItemID, 1, "0",
-				addItemTestGoodsID, 99)
+				addItemTestGoodsID, 99, false)
 			if err != nil {
 				t.Fatalf("MoveOwnedItemToStorage: %v", err)
 			}
@@ -182,7 +182,7 @@ func TestMoveOwnedItemToStorageMatchesAddItemAllocatorCounters(t *testing.T) {
 			setAddStorageTestCounters(t, engine, sessionID, platform, moveStorageTestSlot, 133, 7)
 
 			result, err := engine.MoveOwnedItemToStorage(
-				sessionID, moveStorageTestSlot, ownedItemID, 6, "0", addItemTestGoodsID, 99)
+				sessionID, moveStorageTestSlot, ownedItemID, 6, "0", addItemTestGoodsID, 99, false)
 			if err != nil {
 				t.Fatalf("MoveOwnedItemToStorage: %v", err)
 			}
@@ -222,7 +222,7 @@ func TestMoveOwnedItemToStorageRejectsReferencesAndInvalidPlans(t *testing.T) {
 		before := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveStorageTestSlot)
 
 		_, err := engine.MoveOwnedItemToStorage(
-			sessionID, moveStorageTestSlot, ownedItemID, 0, "0", addItemTestGoodsID, 99)
+			sessionID, moveStorageTestSlot, ownedItemID, 0, "0", addItemTestGoodsID, 99, false)
 		if err == nil || !strings.Contains(err.Error(), "unequip it first") {
 			t.Fatalf("error = %v, want active-reference rejection", err)
 		}
@@ -245,7 +245,7 @@ func TestMoveOwnedItemToStorageRejectsReferencesAndInvalidPlans(t *testing.T) {
 			before := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveStorageTestSlot)
 			_, err := engine.MoveOwnedItemToStorage(
 				sessionID, moveStorageTestSlot, ownedItemID, testCase.targetPosition, "0",
-				addItemTestGoodsID, testCase.maxStorage)
+				addItemTestGoodsID, testCase.maxStorage, false)
 			if err == nil || !strings.Contains(err.Error(), testCase.want) {
 				t.Fatalf("error = %v, want %q", err, testCase.want)
 			}
@@ -279,7 +279,7 @@ func TestMoveOwnedItemToStorageRejectsInventoryKey(t *testing.T) {
 	}
 	_, err = engine.MoveOwnedItemToStorage(
 		loaded.SaveSessionID, moveStorageTestSlot, inventory.Records[0].OwnedItemID,
-		0, "0", addItemTestGoodsID, 99)
+		0, "0", addItemTestGoodsID, 99, false)
 	if err == nil || !strings.Contains(err.Error(), "key record") {
 		t.Fatalf("error = %v, want key-record rejection", err)
 	}
@@ -326,7 +326,7 @@ func TestMoveOwnedItemToStorageDerivesNextEquipIndexFromPhysicalLayout(t *testin
 					sparseStorageEquip, uint32(sparseStorageHighest+2))
 
 				result, err := engine.MoveOwnedItemToStorage(sessionID, moveStorageTestSlot,
-					ownedItemID, testCase.targetPosition, "0", addItemTestGoodsID, 99)
+					ownedItemID, testCase.targetPosition, "0", addItemTestGoodsID, 99, false)
 				if err != nil {
 					t.Fatalf("MoveOwnedItemToStorage: %v", err)
 				}
@@ -346,5 +346,25 @@ func TestMoveOwnedItemToStorageDerivesNextEquipIndexFromPhysicalLayout(t *testin
 				assertNoStorageBucketCollision(t, engine, sessionID, moveStorageTestSlot)
 			})
 		}
+	}
+}
+
+func TestMoveOwnedItemToStorageRejectsExistingQuantityStack(t *testing.T) {
+	content := moveStorageTestFixture()
+	// Add the same goods item to common storage as well.
+	content.storage = append(content.storage, addItemTestRow{
+		index: 4, handle: addItemTestGoodsHandle, rawQuantity: 0x80000005, acquisition: 480,
+	})
+	content.storageCount = 3
+	engine, sessionID, ownedItemID := moveStorageTestTarget(t, PlatformPC, content)
+	before := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveStorageTestSlot)
+
+	_, err := engine.MoveOwnedItemToStorage(
+		sessionID, moveStorageTestSlot, ownedItemID, 0, "0", addItemTestGoodsID, 99, false)
+	if err == nil || !strings.Contains(err.Error(), "already holds a stack record in Storage") {
+		t.Fatalf("error = %v, want duplicate quantity_stack rejection", err)
+	}
+	if after := addItemTestSlotData(t, engine, sessionID, PlatformPC, moveStorageTestSlot); !bytes.Equal(after, before) {
+		t.Error("a rejected duplicate move changed the slot")
 	}
 }
