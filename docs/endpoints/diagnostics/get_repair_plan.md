@@ -261,5 +261,5 @@ writable, and an unknown class rejected.
   about what `maxInventory`/`maxStorage` means. 1.5.8 and 1.6.8 treated it as a
   per-record cap only; 2.0 also enforces it as a cross-record container total, in
   `AddItemToInventory` and therefore in the report. Resolving that divergence is
-  tracked in `tmp/app-se/TODO.md` and is not this endpoint's to settle.
+  deliberately out of scope for this endpoint.
 - It plans one character slot per call, matching the report it consumes.

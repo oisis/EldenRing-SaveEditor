@@ -53,9 +53,9 @@ that value is:
 | `backend/endpoints/equipment/set_equipped_talismans.go` | `SetEquippedTalismans` | `orderedOwnedItemIDs` |
 
 `SetEquippedTalismans` is an existing contract file in
-`backend/endpoints/equipment/`, not merely a row in the `tmp/app-se` spec. It is
-the only one of the twelve outside `backend/endpoints/inventory/`, which is why
-this contract is shared by the Inventory *and* Equipment surfaces.
+`backend/endpoints/equipment/`. It is the only one of the twelve outside
+`backend/endpoints/inventory/`, which is why this contract is shared by the
+Inventory *and* Equipment surfaces.
 
 The need is therefore not speculative. It is already declared in those twelve
 files and locked by `backend/endpoints/contract/endpoint_structure_test.go`,
@@ -78,16 +78,14 @@ the rule locally:
   parallel-implementation pattern `AGENTS.md` forbids;
 - `SetInventoryOrder` and `SetStorageOrder` accept a *complete ordered list* of
   IDs produced by a getter, so producer and consumer must agree byte for byte;
-- `tmp/app-se/endpoints.md` §"Niezależność endpointów" states that an endpoint
-  never calls another endpoint and that a shared need is served by the owner of
-  the data. An identity defined inside `GetOwnedItem` would force either
+- an endpoint never calls another endpoint, and a shared need is served by the
+  owner of the data. An identity defined inside `GetOwnedItem` would force either
   duplication or a forbidden endpoint-to-endpoint call.
 
 ### 1.3 Rule owner
 
 The proposed owner is **one component inside `backend/saveengine`**, the same
-component that already owns session lifecycle and raw record reading. The
-argument is the one already recorded in `tmp/app-se/architecture.md` §3:
+component that already owns session lifecycle and raw record reading.
 `SaveEngine` is the single source of truth for reading and mutating a save, and
 endpoints are thin. Concretely:
 
@@ -251,9 +249,10 @@ is preferred it is because it carries the test, not because it is newer.
 ### 2.5 Hypotheses and open questions
 
 - **H1.** Whether a quantity-stacked goods row (`recordMode = quantity_stack`,
-  see `tmp/app-se/stackable_items.md`) can legitimately appear as two separate
-  rows of the same item in the same container. Legacy tolerated duplicates
-  (L3) but that is tolerance, not proof. **Still open as a format question, and
+  where item quantities stack in a single record rather than separate
+  instances) can legitimately appear as two separate rows of the same item in
+  the same container. Legacy tolerated duplicates (L3) but that is tolerance,
+  not proof. **Still open as a format question, and
   deliberately not answered by the quantity setter.** No available evidence shows
   two `quantity_stack` rows of one item in one container, and this document does
   **not** claim that the layout is natively impossible. `SetOwnedItemQuantity` is
@@ -570,7 +569,7 @@ answer.
 
 This is a deliberately conservative, fail-closed invalidation. `WriteSave`
 serialises, reloads and validates the result before writing it
-(`tmp/app-se/endpoints-2.0.md` line 98), and a reload re-derives handles and
+([`backend/saveengine/write_save.go`](../backend/saveengine/write_save.go)), and a reload re-derives handles and
 acquisition indices (L5, L6, I1, I2). Deciding case by case whether the reloaded
 result becomes the active snapshot would make identity validity depend on an
 implementation detail of the writer — exactly the kind of implicit contract that
@@ -598,7 +597,7 @@ The proposed order inside one mutation:
    return the stale-revision error and **stop before reading the plan**;
 3. resolve every `ownedItemID` through the registry; on unknown/stale/ambiguous,
    stop;
-4. build and validate the complete plan (`tmp/app-se/architecture.md` §5);
+4. build and validate the complete plan;
 5. apply atomically;
 6. on failure, roll back and leave `saveRevision` and the registry untouched;
 7. on success, increment `saveRevision`, clear the identity registry for the
