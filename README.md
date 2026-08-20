@@ -153,3 +153,6 @@ This project is not affiliated with FromSoftware or Bandai Namco.
 Portions of this project are derived from third-party MIT-licensed code. See
 [THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) for the required license
 notices and attributions.
+
+## Contact:
+- [Discord](https://discord.gg/Ur2XhwqM9e)
