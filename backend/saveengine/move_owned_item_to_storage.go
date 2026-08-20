@@ -217,19 +217,14 @@ func moveOwnedItemToStorageRecord(
 	}
 
 	countersAt := storageAt + storageKeyAt + storageKeySize
-	nextEquip, err := loaded.snapshot.uint32At(countersAt)
-	if err != nil {
-		return movedStorageRecord{}, fmt.Errorf("cannot read Storage NextEquipIndex of character %d: %w",
-			locator.characterID, err)
-	}
 	storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
 	if err != nil {
 		return movedStorageRecord{}, fmt.Errorf(
 			"cannot read Storage NextAcquisitionSortId of character %d: %w", locator.characterID, err)
 	}
 
-	acquisitionIndex, nextAcquisition, updatedEquip, err := nextStorageAcquisitionAndCounters(
-		storedNext, nextEquip, stored, locator.characterID)
+	acquisitionIndex, nextAcquisition, err := nextStorageAcquisitionAndCounters(
+		storedNext, stored, locator.characterID)
 	if err != nil {
 		return movedStorageRecord{}, err
 	}
@@ -240,6 +235,10 @@ func moveOwnedItemToStorageRecord(
 	if err != nil {
 		return movedStorageRecord{}, fmt.Errorf("character %d: %w", locator.characterID, err)
 	}
+	// The insertion rotates physical rows, so the counter is derived from the
+	// planned image of the section and not from the record count or the stored
+	// value.
+	updatedEquip := storageNextEquipIndex(updatedCommon, physicalIndex)
 
 	inventoryCount, err := loaded.snapshot.uint32At(inventoryCountAt)
 	if err != nil {

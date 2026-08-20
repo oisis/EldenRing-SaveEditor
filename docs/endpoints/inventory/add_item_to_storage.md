@@ -111,10 +111,15 @@ allocator confirmed by native T310 and T330 evidence:
    common records below `50000`.
 2. Assigns the even index `2 * effectiveBucket` with stride 2 to the new record.
 3. Advances `NextAcquisitionSortId` to `effectiveBucket + 1`.
-4. Advances `NextEquipIndex` to `max(storedNextEquipIndex, 127) + 1` (starting
-   at `128` for an initial deposit).
+4. Sets `NextEquipIndex` to `128 + highestOccupiedPhysicalRow`, where the row is
+   the highest physically occupied index of the common section after the
+   insertion. The stored value is never carried over: a record filling a hole
+   below that row leaves the counter unchanged, and only a record extending the
+   table raises it by one. An initial deposit into row 0 therefore yields `128`.
+   Removing a record never recomputes this counter.
 
-An allocator that cannot advance without wrapping is rejected before mutation.
+An acquisition allocator that cannot advance without wrapping is rejected before
+mutation.
 
 ## Response
 

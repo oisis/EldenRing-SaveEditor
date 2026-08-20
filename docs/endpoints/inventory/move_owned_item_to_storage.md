@@ -56,7 +56,9 @@ The operation moves the complete twelve-byte record:
 - the Inventory common count is lowered when it is non-zero;
 - the Storage common count is raised by one;
 - Storage `NextAcquisitionSortId` advances to the next free bucket;
-- Storage `NextEquipIndex` advances on deposit (starting at 128 for an initial deposit).
+- Storage `NextEquipIndex` is set to `128 + highestOccupiedPhysicalRow` of the
+  common section as the insertion leaves it, so a rotation that consumes a hole
+  below the highest occupied row keeps the counter unchanged.
 
 The destination insertion rotates one contiguous physical span needed to place
 the record at `targetPosition`. Existing gaps and rows outside that span are
@@ -117,10 +119,11 @@ The request is rejected before mutation when, among other cases:
 SaveForge 1.5.8 and 1.6.8 agree on the relevant direct-transfer rules: an
 Inventory-to-Storage move preserves the record handle and quantity, rejects an
 equipped item, assigns a fresh Storage index and advances `NextAcquisitionSortId`.
-In 2.0, every deposit into Storage also advances `NextEquipIndex` in accordance
-with native T310/T330 evidence. Version 1.6.8 changed allocator details
-for duplicate instance handles, but this endpoint deliberately does not invoke
-that retired allocation/repack path.
+In 2.0, every deposit into Storage also updates `NextEquipIndex`, which follows
+the physical layout of the common section rather than the number of deposits, in
+accordance with the native Test 3 evidence confirmed in 1.6.10. Version 1.6.8
+changed allocator details for duplicate instance handles, but this endpoint
+deliberately does not invoke that retired allocation/repack path.
 
 The legacy workspace accepted a requested list position and later rewrote a
 whole container. SaveForge 2.0 instead applies one direct, verified mutation to

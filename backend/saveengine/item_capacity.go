@@ -328,18 +328,15 @@ func capacityAllocatorAvailable(
 		_, err = nextAcquisitionIndex(next, characterID)
 		return err == nil, nil
 	case ItemCapacityDestinationStorage:
+		// NextEquipIndex is bounded by the physical section and can never block a
+		// deposit, so only the acquisition allocator is probed here.
 		countersAt := storageAt + storageKeyAt + storageKeySize
-		nextEquip, err := loaded.snapshot.uint32At(countersAt)
-		if err != nil {
-			return false, fmt.Errorf("cannot read Storage NextEquipIndex of character %d: %w",
-				characterID, err)
-		}
 		storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
 		if err != nil {
 			return false, fmt.Errorf(
 				"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 		}
-		_, _, _, err = nextStorageAcquisitionAndCounters(storedNext, nextEquip, storage, characterID)
+		_, _, err = nextStorageAcquisitionAndCounters(storedNext, storage, characterID)
 		return err == nil, nil
 	default:
 		return false, nil

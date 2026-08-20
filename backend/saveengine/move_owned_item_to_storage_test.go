@@ -116,9 +116,12 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 			}
 			storageNextEquipAt := base + addItemTestStorageAt +
 				addItemTestStorageKeyAt + 0x80*addItemTestRecordSize
+			// The fixture occupies rows 1 and 4; the insertion rotates row 4 up to
+			// row 5 and writes the moved record on row 4, so the highest occupied
+			// row becomes 5: 128 + 5.
 			if got := binary.LittleEndian.Uint32(removeTestBytes(
-				t, engine, sessionID, storageNextEquipAt, 4)); got != 128 {
-				t.Errorf("Storage NextEquipIndex = %d, want 128", got)
+				t, engine, sessionID, storageNextEquipAt, 4)); got != 133 {
+				t.Errorf("Storage NextEquipIndex = %d, want 133", got)
 			}
 			storageNextAcqAt := storageNextEquipAt + 4
 			if got := binary.LittleEndian.Uint32(removeTestBytes(
@@ -279,5 +282,69 @@ func TestMoveOwnedItemToStorageRejectsInventoryKey(t *testing.T) {
 		0, "0", addItemTestGoodsID, 99)
 	if err == nil || !strings.Contains(err.Error(), "key record") {
 		t.Fatalf("error = %v, want key-record rejection", err)
+	}
+}
+
+// TestMoveOwnedItemToStorageDerivesNextEquipIndexFromPhysicalLayout is the
+// transfer half of the TODO 19.1 regression. The transfer rotates physical rows,
+// so the counter must be derived from the layout the insertion actually
+// produces: a rotation that consumes the hole on row 315 leaves the highest
+// occupied row at 346, while an append extends it to 347.
+func TestMoveOwnedItemToStorageDerivesNextEquipIndexFromPhysicalLayout(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		for _, testCase := range []struct {
+			name           string
+			targetPosition int
+			wantRow        int
+			wantEquip      uint32
+		}{
+			{
+				name:           "rotation into the hole keeps the counter",
+				targetPosition: 10,
+				wantRow:        10,
+				wantEquip:      sparseStorageEquip,
+			},
+			{
+				name:           "append past the last row raises the counter",
+				targetPosition: sparseStorageHighest,
+				wantRow:        sparseStorageHighest + 1,
+				wantEquip:      sparseStorageEquip + 1,
+			},
+		} {
+			t.Run(string(platform)+"/"+testCase.name, func(t *testing.T) {
+				content := addItemTestFixture{
+					common: []addItemTestRow{{
+						index: 2, handle: addItemTestGoodsHandle,
+						rawQuantity: 0x80000001, acquisition: 17,
+					}},
+					storage:      sparseStorageRows(),
+					commonCount:  1,
+					storageCount: uint32(sparseStorageHighest),
+				}
+				engine, sessionID, ownedItemID := moveStorageTestTarget(t, platform, content)
+				setAddStorageTestCounters(t, engine, sessionID, platform, moveStorageTestSlot,
+					sparseStorageEquip, uint32(sparseStorageHighest+2))
+
+				result, err := engine.MoveOwnedItemToStorage(sessionID, moveStorageTestSlot,
+					ownedItemID, testCase.targetPosition, "0", addItemTestGoodsID, 99)
+				if err != nil {
+					t.Fatalf("MoveOwnedItemToStorage: %v", err)
+				}
+				if result.PhysicalIndex != testCase.wantRow {
+					t.Errorf("moved to row %d, want %d", result.PhysicalIndex, testCase.wantRow)
+				}
+
+				equipAt := storageCountersAt(t, platform, moveStorageTestSlot)
+				raw := removeTestBytes(t, engine, sessionID, equipAt, 4)
+				if got := binary.LittleEndian.Uint32(raw); got != testCase.wantEquip {
+					t.Errorf("Storage NextEquipIndex = %d, want %d", got, testCase.wantEquip)
+				}
+				if !bytes.Equal(raw, littleEndianUint32(testCase.wantEquip)) {
+					t.Errorf("raw NextEquipIndex bytes = % X, want % X",
+						raw, littleEndianUint32(testCase.wantEquip))
+				}
+				assertNoStorageBucketCollision(t, engine, sessionID, moveStorageTestSlot)
+			})
+		}
 	}
 }

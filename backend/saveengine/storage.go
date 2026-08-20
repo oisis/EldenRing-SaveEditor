@@ -446,19 +446,18 @@ func nextStorageEffectiveBucket(storedNextBucket uint32, maxOccupiedBucket uint6
 	return effectiveBucket
 }
 
-// nextStorageAcquisitionAndCounters derives the assigned acquisition index, the
-// updated NextAcquisitionSortId and the updated NextEquipIndex for one deposit
-// into common Storage.
+// nextStorageAcquisitionAndCounters derives the assigned acquisition index and
+// the updated NextAcquisitionSortId for one deposit into common Storage.
 //
 // Native Storage indices are even with stride 2 starting at 2 (bucket 1).
-// NextAcquisitionSortId holds the next free bucket (Index/2 + 1).
-// NextEquipIndex advances on each deposit (starting at 128 on initial deposit).
+// NextAcquisitionSortId holds the next free bucket (Index/2 + 1). NextEquipIndex
+// is not derived here: it follows the physical layout, not the allocator, and is
+// owned by storageNextEquipIndex.
 func nextStorageAcquisitionAndCounters(
 	storedNextAcquisition uint32,
-	storedNextEquip uint32,
 	records []StorageRecord,
 	characterID int,
-) (assignedIndex uint32, newNextAcquisition uint32, newNextEquip uint32, err error) {
+) (assignedIndex uint32, newNextAcquisition uint32, err error) {
 	var maxBucket uint64
 	var hasBucket bool
 	for _, record := range records {
@@ -476,25 +475,45 @@ func nextStorageAcquisitionAndCounters(
 
 	assigned := effectiveBucket * 2
 	if assigned >= uint64(^uint32(0)) {
-		return 0, 0, 0, fmt.Errorf(
+		return 0, 0, fmt.Errorf(
 			"Storage acquisition index of character %d would overflow uint32", characterID)
 	}
 
 	nextAcq := effectiveBucket + 1
 	if nextAcq > uint64(^uint32(0)) {
-		return 0, 0, 0, fmt.Errorf(
+		return 0, 0, fmt.Errorf(
 			"Storage NextAcquisitionSortId of character %d cannot be advanced", characterID)
 	}
 
-	equipBase := uint64(storedNextEquip)
-	if equipBase < 127 {
-		equipBase = 127
-	}
-	nextEquipVal := equipBase + 1
-	if nextEquipVal > uint64(^uint32(0)) {
-		return 0, 0, 0, fmt.Errorf(
-			"Storage NextEquipIndex of character %d cannot be advanced", characterID)
-	}
+	return uint32(assigned), uint32(nextAcq), nil
+}
 
-	return uint32(assigned), uint32(nextAcq), uint32(nextEquipVal), nil
+// storageNextEquipIndex derives the Storage NextEquipIndex the game keeps after
+// one record has been created in the common section: 128 plus the highest
+// physically occupied row of that section, counted from 0.
+//
+// The counter follows the physical layout, never the record count and never the
+// stored value: deleting a record zeroes it in place without closing the table,
+// so holes are a normal state. A new record landing in a hole below the highest
+// occupied row therefore leaves the counter unchanged, while a record extending
+// the table raises it by one.
+//
+// common is the common section as it will look after the planned insertion, and
+// insertedRow is the row the new record occupies. Passing both makes the result
+// independent of whether the caller holds the pre-image (AddItemToStorage writes
+// one row into it) or the already rotated image (MoveOwnedItemToStorage builds
+// it), because insertedRow is occupied in either case.
+//
+// The result cannot overflow: the section holds storageCommonRecords rows, so
+// the highest value is 128 + storageCommonRecords - 1.
+func storageNextEquipIndex(common []byte, insertedRow int) uint32 {
+	highest := insertedRow
+	for row := storageCommonRecords - 1; row > highest; row-- {
+		handle := binary.LittleEndian.Uint32(common[row*storageRecordSize:])
+		if handle != storageEmptyHandle && handle != storageInvalidHandle {
+			highest = row
+			break
+		}
+	}
+	return uint32(128 + highest)
 }

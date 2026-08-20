@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"bytes"
 	"encoding/binary"
 	"strings"
 	"testing"
@@ -114,8 +115,10 @@ func TestAddItemToStorageUsesPopulatedStorageAllocator(t *testing.T) {
 	if got := addItemTestUint32(after, row+8); got != 8 {
 		t.Errorf("acquisition index = %d, want 8", got)
 	}
-	if got := addItemTestUint32(after, counters); got != 128 {
-		t.Errorf("NextEquipIndex = %d, want 128", got)
+	// The section keeps a record on physical row 3 and the new one lands in the
+	// hole on row 0, so the highest occupied row stays 3: 128 + 3.
+	if got := addItemTestUint32(after, counters); got != 131 {
+		t.Errorf("NextEquipIndex = %d, want 131", got)
 	}
 	if got := addItemTestUint32(after, counters+4); got != 5 {
 		t.Errorf("NextAcquisitionSortId = %d, want 5", got)
@@ -289,9 +292,6 @@ func TestAddItemToStorageRejectsBeforeMutation(t *testing.T) {
 		{name: "allocator acq overflow", content: base, quantity: 1, revision: "0", limit: 600,
 			nextEquip: 7, nextAcq: ^uint32(0),
 			want: "overflow uint32"},
-		{name: "allocator equip overflow", content: base, quantity: 1, revision: "0", limit: 600,
-			nextEquip: ^uint32(0), nextAcq: 4,
-			want: "cannot be advanced"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
@@ -316,4 +316,169 @@ func TestAddItemToStorageRejectsBeforeMutation(t *testing.T) {
 			}
 		})
 	}
+}
+
+// sparseStorageRows builds the physical common Storage of the confirmed Test 3
+// fixture: rows 0..346 occupied except for the hole on row 315, every bucket
+// distinct. Its NextEquipIndex is 128 + 346 = 474.
+func sparseStorageRows() []addItemTestRow {
+	rows := make([]addItemTestRow, 0, 346)
+	for index := 0; index <= 346; index++ {
+		if index == sparseStorageHole {
+			continue
+		}
+		rows = append(rows, addItemTestRow{
+			index:       index,
+			handle:      addItemTestFillHandleBase + uint32(index),
+			rawQuantity: 1,
+			acquisition: uint32((index + 1) * 2),
+		})
+	}
+	return rows
+}
+
+const (
+	sparseStorageHole    = 315
+	sparseStorageHighest = 346
+	sparseStorageEquip   = 128 + sparseStorageHighest
+)
+
+// assertNoStorageBucketCollision proves the hard criterion of TODO 19.4: no two
+// common Storage records share an acquisition bucket after the mutation.
+func assertNoStorageBucketCollision(t *testing.T, engine *Engine, sessionID string, slot int) {
+	t.Helper()
+	storage, err := engine.GetStorage(sessionID, slot, StorageSectionCommon, 1, 1<<16)
+	if err != nil {
+		t.Fatalf("GetStorage: %v", err)
+	}
+	seen := make(map[uint32]int, len(storage.Records))
+	for _, record := range storage.Records {
+		bucket := record.AcquisitionIndex >> 1
+		if other, clash := seen[bucket]; clash {
+			t.Errorf("rows %d and %d share acquisition bucket %d",
+				other, record.PhysicalIndex, bucket)
+		}
+		seen[bucket] = record.PhysicalIndex
+	}
+}
+
+// storageCountersAt reports the absolute offset of the two trailing Storage
+// counters of the fixture slot, so an assertion can read the raw four bytes.
+func storageCountersAt(t *testing.T, platform Platform, slot int) int64 {
+	t.Helper()
+	return addItemTestSlotBase(t, platform, slot) + addItemTestAnchorAt +
+		addItemTestStorageAt + addItemTestStorageSize - 8
+}
+
+// TestAddItemToStorageDerivesNextEquipIndexFromPhysicalLayout is the regression
+// test of TODO 19.1. The counter is 128 plus the highest occupied physical row,
+// so a record filling a hole below that row leaves it unchanged and only a
+// record extending the table raises it. A single case cannot tell the two models
+// apart, so both sides of the boundary are asserted on the same sparse fixture.
+func TestAddItemToStorageDerivesNextEquipIndexFromPhysicalLayout(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := addItemTestFixture{
+				platform:     platform,
+				slot:         2,
+				storage:      sparseStorageRows(),
+				storageCount: uint32(sparseStorageHighest),
+			}
+			engine := New()
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+			setAddStorageTestCounters(t, engine, loaded.SaveSessionID, platform, content.slot,
+				sparseStorageEquip, uint32(sparseStorageHighest+2))
+			counters := int64(addItemTestStorageAt + addItemTestStorageSize - 8)
+
+			// The hole on row 315 is the first free row, so the new record lands
+			// below the highest occupied row and the counter must not move.
+			hole, err := engine.AddItemToStorage(
+				loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 600)
+			if err != nil {
+				t.Fatalf("AddItemToStorage into the hole: %v", err)
+			}
+			if !hole.CreatedRecord || hole.PhysicalIndex != sparseStorageHole {
+				t.Errorf("hole add = %+v, want a new record on row %d", hole, sparseStorageHole)
+			}
+			after := addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
+			if got := addItemTestUint32(after, counters); got != sparseStorageEquip {
+				t.Errorf("NextEquipIndex after the hole add = %d, want unchanged %d",
+					got, sparseStorageEquip)
+			}
+			if raw := removeTestBytes(t, engine, loaded.SaveSessionID,
+				storageCountersAt(t, platform, content.slot), 4); !bytes.Equal(
+				raw, littleEndianUint32(sparseStorageEquip)) {
+				t.Errorf("raw NextEquipIndex bytes = % X, want % X",
+					raw, littleEndianUint32(sparseStorageEquip))
+			}
+			assertNoStorageBucketCollision(t, engine, loaded.SaveSessionID, content.slot)
+
+			// The table is dense up to 346 now, so the next record extends it to
+			// 347 and the counter follows exactly one step.
+			extend, err := engine.AddItemToStorage(
+				loaded.SaveSessionID, content.slot, addItemTestOtherID, 1, "1", false, 600)
+			if err != nil {
+				t.Fatalf("AddItemToStorage past the last row: %v", err)
+			}
+			if !extend.CreatedRecord || extend.PhysicalIndex != sparseStorageHighest+1 {
+				t.Errorf("extending add = %+v, want a new record on row %d",
+					extend, sparseStorageHighest+1)
+			}
+			after = addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
+			if got := addItemTestUint32(after, counters); got != sparseStorageEquip+1 {
+				t.Errorf("NextEquipIndex after the extending add = %d, want %d",
+					got, sparseStorageEquip+1)
+			}
+			if raw := removeTestBytes(t, engine, loaded.SaveSessionID,
+				storageCountersAt(t, platform, content.slot), 4); !bytes.Equal(
+				raw, littleEndianUint32(sparseStorageEquip+1)) {
+				t.Errorf("raw NextEquipIndex bytes = % X, want % X",
+					raw, littleEndianUint32(sparseStorageEquip+1))
+			}
+			assertNoStorageBucketCollision(t, engine, loaded.SaveSessionID, content.slot)
+		})
+	}
+}
+
+// TestAddItemToStorageRecomputesStaleNextEquipIndex covers the counter the game
+// leaves behind on deletion: it is never carried over, so even a saturated
+// stored value is replaced by the value the physical layout dictates.
+func TestAddItemToStorageRecomputesStaleNextEquipIndex(t *testing.T) {
+	content := addItemTestFixture{
+		platform: PlatformPC, slot: 2,
+		storage: []addItemTestRow{{
+			index: 0, handle: addItemTestOtherHandle, rawQuantity: 2, acquisition: 5,
+		}},
+		storageCount: 1, gaItemData: []uint32{addItemTestOtherID},
+	}
+	engine := New()
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	setAddStorageTestCounters(
+		t, engine, loaded.SaveSessionID, PlatformPC, content.slot, ^uint32(0), 4)
+
+	result, err := engine.AddItemToStorage(
+		loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 600)
+	if err != nil {
+		t.Fatalf("AddItemToStorage: %v", err)
+	}
+	if !result.CreatedRecord || result.PhysicalIndex != 1 {
+		t.Errorf("AddItemToStorage = %+v, want a new record on row 1", result)
+	}
+	after := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
+	counters := int64(addItemTestStorageAt + addItemTestStorageSize - 8)
+	if got := addItemTestUint32(after, counters); got != 129 {
+		t.Errorf("NextEquipIndex = %d, want 129 derived from row 1", got)
+	}
+	if raw := removeTestBytes(t, engine, loaded.SaveSessionID,
+		storageCountersAt(t, PlatformPC, content.slot), 4); !bytes.Equal(
+		raw, littleEndianUint32(129)) {
+		t.Errorf("raw NextEquipIndex bytes = % X, want % X", raw, littleEndianUint32(129))
+	}
+	assertNoStorageBucketCollision(t, engine, loaded.SaveSessionID, content.slot)
 }

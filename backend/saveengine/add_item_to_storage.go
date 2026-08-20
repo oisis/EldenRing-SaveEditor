@@ -270,22 +270,20 @@ func createStorageRecord(
 	}
 
 	countersAt := sectionAt + storageKeyAt + storageKeySize
-	nextEquip, err := loaded.snapshot.uint32At(countersAt)
-	if err != nil {
-		return addedStorageRecord{}, fmt.Errorf(
-			"cannot read Storage NextEquipIndex of character %d: %w", characterID, err)
-	}
 	storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
 	if err != nil {
 		return addedStorageRecord{}, fmt.Errorf(
 			"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 	}
 
-	acquisitionIndex, nextAcquisition, updatedEquip, err := nextStorageAcquisitionAndCounters(
-		storedNext, nextEquip, records, characterID)
+	acquisitionIndex, nextAcquisition, err := nextStorageAcquisitionAndCounters(
+		storedNext, records, characterID)
 	if err != nil {
 		return addedStorageRecord{}, err
 	}
+	// The new record lands in row, so the layout behind the planned write is the
+	// one that was read plus that row; the stored counter is never carried over.
+	updatedEquip := storageNextEquipIndex(common, row)
 
 	var gaItemData []byteWrite
 	if !owned {
