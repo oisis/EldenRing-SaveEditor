@@ -551,6 +551,14 @@ func (a *App) SaveInventoryWorkspaceChanges(sessionID string) (editor.InventoryW
 		return editor.InventoryWorkspaceSnapshot{}, err
 	}
 
+	if err := core.SyncMatchmakingWeaponLevel(slot); err != nil {
+		core.RestoreSlot(slot, rollback)
+		if debug {
+			a.journalGameItemsMutationFinished(actionGameItemsWorkspaceSave, sess.CharacterIndex, characterChangeError, stageGameItemsWorkspaceSave, savePlans, slot)
+		}
+		return editor.InventoryWorkspaceSnapshot{}, fmt.Errorf("SaveInventoryWorkspaceChanges: sync matchmaking level: %w", err)
+	}
+
 	// Build a fresh snapshot from the reparsed slot.
 	fresh, err := editor.BuildSnapshot(slot, sess.ID, sess.CharacterIndex)
 	if err != nil {

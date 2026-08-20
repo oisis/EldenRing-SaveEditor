@@ -10,24 +10,25 @@ const FallbackMagicBase = 0x15420 + 432
 // Offsets relative to MagicOffset (negative = before the pattern).
 // Source: SPEC.md §5.2 PlayerGameData.
 const (
-	OffLevel               = -335
-	OffVigor               = -379
-	OffMind                = -375
-	OffEndurance           = -371
-	OffStrength            = -367
-	OffDexterity           = -363
-	OffIntelligence        = -359
-	OffFaith               = -355
-	OffArcane              = -351
-	OffSouls               = -331
-	OffGender              = -249
-	OffClass               = -248
-	OffGreatRuneOn         = -184 // GreatRuneActive (PGD 0xF7, u8 bool, 0=off 1=on)
-	OffTalismanSlots       = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
-	OffScadutreeBlessing   = -187
-	OffShadowRealmBlessing = -186
-	OffVoiceType           = -245   // Voice type (0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2)
-	OffCharacterName       = -0x11B // 16 x uint16 UTF-16LE
+	OffLevel                  = -335
+	OffVigor                  = -379
+	OffMind                   = -375
+	OffEndurance              = -371
+	OffStrength               = -367
+	OffDexterity              = -363
+	OffIntelligence           = -359
+	OffFaith                  = -355
+	OffArcane                 = -351
+	OffSouls                  = -331
+	OffGender                 = -249
+	OffClass                  = -248
+	OffGreatRuneOn            = -184 // GreatRuneActive (PGD 0xF7, u8 bool, 0=off 1=on)
+	OffTalismanSlots          = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
+	OffScadutreeBlessing      = -187
+	OffShadowRealmBlessing    = -186
+	OffVoiceType              = -245   // Voice type (0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2)
+	OffCharacterName          = -0x11B // 16 x uint16 UTF-16LE
+	OffMatchmakingWeaponLevel = -0xD5  // Matchmaking max weapon upgrade level (u8, dynamic relative to MagicOffset)
 
 	// MagicOffset must be at least this value; otherwise negative stat offsets
 	// would access memory before the start of the slot buffer.

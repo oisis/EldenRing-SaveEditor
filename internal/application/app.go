@@ -1387,6 +1387,19 @@ func (a *App) addItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		}
 		return result, err
 	}
+	if err := core.SyncMatchmakingWeaponLevel(slot); err != nil {
+		core.RestoreSlot(slot, snapshot)
+		if len(giPlans) > 0 || len(giInventoryHeaderPlans) > 0 || len(giFlagPlans) > 0 || len(giBolsteringPlans) > 0 || len(giTutorialPlans) > 0 || len(giContainerPlans) > 0 || len(giStorageHeaderPlans) > 0 {
+			finished := append(gameItemFinishedRecords(giPlans, slot), gameItemSideEffectFinishedRecords(giInventoryHeaderPlans, slot)...)
+			finished = append(finished, gameItemSideEffectFinishedRecords(giFlagPlans, slot)...)
+			finished = append(finished, gameItemSideEffectFinishedRecords(giBolsteringPlans, slot)...)
+			finished = append(finished, gameItemSideEffectFinishedRecords(giTutorialPlans, slot)...)
+			finished = append(finished, gameItemSideEffectFinishedRecords(giContainerPlans, slot)...)
+			finished = append(finished, gameItemSideEffectFinishedRecords(giStorageHeaderPlans, slot)...)
+			a.journalGameItemChangeFinished(actionGameItemsAdd, charIdx, characterChangeError, stageGameItemsApplyAddPlan, finished)
+		}
+		return result, err
+	}
 	// T350: only a successful real mutation commits the series decision — a
 	// failed call (handled by the branch above, before this line) leaves
 	// a.storageAddSessions[charIdx] exactly as it was, so no partially-applied
