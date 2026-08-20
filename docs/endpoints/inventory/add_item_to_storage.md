@@ -86,9 +86,10 @@ rejects the common-only operation.
 
 ## Mutation rules
 
-A top-up changes only the four quantity bytes of the selected row. The stored
-high bit is preserved exactly; counts, allocators and GaItemData remain
-unchanged.
+A top-up changes the four quantity bytes and the four AcquisitionIndex bytes of
+the selected row, and advances Storage NextAcquisitionSortId to the next free
+bucket. The stored high bit of the quantity is preserved exactly; common count,
+NextEquipIndex, physical row and GaItemData remain unchanged.
 
 A new record changes:
 

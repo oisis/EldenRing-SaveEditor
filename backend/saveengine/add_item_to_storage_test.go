@@ -3,6 +3,7 @@ package saveengine
 import (
 	"bytes"
 	"encoding/binary"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -223,39 +224,105 @@ func TestAddItemToStorageT330ShapeSingleAndAccumulationOnPCAndPS4(t *testing.T) 
 	}
 }
 
-func TestAddItemToStorageTopUpChangesOnlyQuantity(t *testing.T) {
-	content := addItemTestFixture{
-		platform: PlatformPC,
-		slot:     2,
-		storage: []addItemTestRow{{
-			index: 4, handle: addItemTestGoodsHandle,
-			rawQuantity: ownedItemQuantityFlag | 5, acquisition: 12,
-		}},
-		storageCount: 1,
-		gaItemData:   []uint32{addItemTestGoodsID},
-	}
-	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
-	if err != nil {
-		t.Fatalf("LoadSave: %v", err)
-	}
-	setAddStorageTestCounters(t, engine, loaded.SaveSessionID, PlatformPC, content.slot, 9, 14)
-	before := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
+func TestAddItemToStorageTopUpRefreshesAcquisitionIndex(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := addItemTestFixture{
+				platform: platform,
+				slot:     2,
+				storage: []addItemTestRow{{
+					index: 4, handle: addItemTestGoodsHandle,
+					rawQuantity: ownedItemQuantityFlag | 5, acquisition: 12,
+				}},
+				storageCount: 1,
+				gaItemData:   []uint32{addItemTestGoodsID},
+			}
+			engine := New()
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+			setAddStorageTestCounters(t, engine, loaded.SaveSessionID, platform, content.slot, 9, 14)
+			before := addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
 
-	result, err := engine.AddItemToStorage(
-		loaded.SaveSessionID, content.slot, addItemTestGoodsID, 3, "0", false, 600)
-	if err != nil {
-		t.Fatalf("AddItemToStorage: %v", err)
-	}
-	if result.CreatedRecord || result.PhysicalIndex != 4 || result.Quantity != 8 {
-		t.Errorf("AddItemToStorage = %+v, want row 4 topped up to 8", result)
-	}
-	after := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
-	quantityAt := int64(addItemTestStorageAt+addItemTestStorageCommonAt) +
-		4*addItemTestRecordSize + 4
-	addItemTestAssertChanged(t, before, after, [][2]int64{{quantityAt, quantityAt + 4}})
-	if got := addItemTestUint32(after, quantityAt); got != ownedItemQuantityFlag|8 {
-		t.Errorf("raw quantity = 0x%08X, want preserved flag and 8", got)
+			result, err := engine.AddItemToStorage(
+				loaded.SaveSessionID, content.slot, addItemTestGoodsID, 3, "0", false, 600)
+			if err != nil {
+				t.Fatalf("AddItemToStorage: %v", err)
+			}
+			if result.CreatedRecord || result.PhysicalIndex != 4 || result.Quantity != 8 ||
+				result.SaveRevision != "1" || result.ContainerSection != StorageSectionCommon {
+				t.Errorf("AddItemToStorage = %+v, want row 4 topped up to 8", result)
+			}
+
+			after := addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
+			storageRow := int64(addItemTestStorageAt+addItemTestStorageCommonAt) + 4*addItemTestRecordSize
+			quantityAt := storageRow + 4
+			acquisitionAt := storageRow + 8
+			countersAt := int64(addItemTestStorageAt + addItemTestStorageSize - 8)
+			nextAcqAt := countersAt + 4
+
+			// Top-up writes the new quantity, the refreshed AcquisitionIndex and the
+			// advanced NextAcquisitionSortId; NextEquipIndex, count, GaItemData and handle
+			// stay unchanged.
+			addItemTestAssertChanged(t, before, after, [][2]int64{
+				{quantityAt, quantityAt + 4},
+				{acquisitionAt, acquisitionAt + 4},
+				{nextAcqAt, nextAcqAt + 4},
+			})
+
+			if got := addItemTestUint32(after, storageRow); got != addItemTestGoodsHandle {
+				t.Errorf("handle = 0x%08X, want 0x%08X", got, addItemTestGoodsHandle)
+			}
+			if got := addItemTestUint32(after, quantityAt); got != ownedItemQuantityFlag|8 {
+				t.Errorf("raw quantity = 0x%08X, want preserved flag and 8", got)
+			}
+			// Stored next was 14, max bucket was 12/2 = 6. Effective bucket = max(14, 7, 1) = 14.
+			// Assigned index = 14 * 2 = 28. NextAcquisitionSortId = 14 + 1 = 15.
+			if got := addItemTestUint32(after, acquisitionAt); got != 28 {
+				t.Errorf("acquisition index = %d, want 28", got)
+			}
+			if got := addItemTestUint32(after, countersAt); got != 9 {
+				t.Errorf("NextEquipIndex = %d, want unchanged 9", got)
+			}
+			if got := addItemTestUint32(after, nextAcqAt); got != 15 {
+				t.Errorf("NextAcquisitionSortId = %d, want 15", got)
+			}
+			if got := addItemTestUint32(after, addItemTestStorageAt); got != 1 {
+				t.Errorf("Storage count = %d, want unchanged 1", got)
+			}
+			if got := addItemTestUint32(after, addItemTestGaItemDataAt); got != 1 {
+				t.Errorf("GaItemData count = %d, want unchanged 1", got)
+			}
+
+			assertNoStorageBucketCollision(t, engine, loaded.SaveSessionID, content.slot)
+
+			// Persist through WriteSave and verify identical state on fresh reload.
+			target := filepath.Join(t.TempDir(), "topped_up.sl2")
+			if _, err := engine.WriteSave(loaded.SaveSessionID, "1", target); err != nil {
+				t.Fatalf("WriteSave: %v", err)
+			}
+			reloadedEngine := New()
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave after WriteSave: %v", err)
+			}
+			reloadedStorage, err := reloadedEngine.GetStorage(
+				reloaded.SaveSessionID, content.slot, StorageSectionCommon, 0, 0)
+			if err != nil {
+				t.Fatalf("GetStorage after reload: %v", err)
+			}
+			if len(reloadedStorage.Records) != 1 {
+				t.Fatalf("reloaded Storage record count = %d, want 1", len(reloadedStorage.Records))
+			}
+			rec := reloadedStorage.Records[0]
+			if rec.PhysicalIndex != 4 || rec.Quantity != 8 || rec.AcquisitionIndex != 28 ||
+				rec.GaItemHandle != addItemTestGoodsHandle {
+				t.Errorf("reloaded Storage record = %+v, want row 4 qty 8 acq 28 handle 0x%08X",
+					rec, addItemTestGoodsHandle)
+			}
+			assertNoStorageBucketCollision(t, reloadedEngine, reloaded.SaveSessionID, content.slot)
+		})
 	}
 }
 
@@ -266,6 +333,13 @@ func TestAddItemToStorageRejectsBeforeMutation(t *testing.T) {
 			index: 0, handle: addItemTestOtherHandle, rawQuantity: 2, acquisition: 5,
 		}},
 		storageCount: 1, gaItemData: []uint32{addItemTestOtherID},
+	}
+	topUpFixture := addItemTestFixture{
+		platform: PlatformPC, slot: 2,
+		storage: []addItemTestRow{{
+			index: 0, handle: addItemTestGoodsHandle, rawQuantity: 580, acquisition: 5,
+		}},
+		storageCount: 1, gaItemData: []uint32{addItemTestGoodsID},
 	}
 	key := base
 	key.storageKey = []addItemTestRow{{
@@ -287,6 +361,8 @@ func TestAddItemToStorageRejectsBeforeMutation(t *testing.T) {
 			want: "Storage key record"},
 		{name: "container limit", content: base, quantity: 601, revision: "0", limit: 600, nextEquip: 7, nextAcq: 4,
 			want: "exceeds the limit"},
+		{name: "top-up record limit", content: topUpFixture, quantity: 25, revision: "0", limit: 600, nextEquip: 7, nextAcq: 4,
+			want: "above the limit"},
 		{name: "stale revision", content: base, quantity: 1, revision: "1", limit: 600, nextEquip: 7, nextAcq: 4,
 			want: "does not match"},
 		{name: "allocator acq overflow", content: base, quantity: 1, revision: "0", limit: 600,

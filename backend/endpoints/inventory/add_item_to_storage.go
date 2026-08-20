@@ -7,7 +7,7 @@ Supported resource types: Depositable ItemDocument of family goods or talisman, 
 Input variables: saveSessionID, characterID, kind, key, variantID, quantity, expectedRevision.
 Variant selection: the optional variantID selects the base item document when it is absent and exactly one stored variant of the same (kind, key) pair when it is present; gamecatalog.Catalog.ResourceByKindKeyAndVariant is the single implementation of that rule.
 GameCatalog variables read: item.family, item.gameID, item.category, item.subcategory, item.storage.recordMode, item.storage.maxStorage, item.capabilities.stack, and item.goods.isDepositable for goods.
-Save variables processed: for a top-up the quantity bytes of the first matching common Storage record; for a new record the first free common row, common count, Storage acquisition allocators and one active GaItemData entry when needed. SaveEngine validates the complete plan and finishes with full success or rollback.
+Save variables processed: for a top-up the quantity and AcquisitionIndex of the first matching common Storage record and NextAcquisitionSortId; for a new record the first free common row, common count, Storage acquisition allocators and one active GaItemData entry when needed. SaveEngine validates the complete plan and finishes with full success or rollback.
 Implementation status: implemented
 */
 package inventory

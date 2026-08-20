@@ -185,7 +185,7 @@ func addItemToStorageRecord(
 	}
 	if target >= 0 {
 		return topUpStorageRecord(
-			loaded, characterID, storage[target], gameID, quantity, maxStorage)
+			loaded, characterID, storage[target], gameID, quantity, maxStorage, storage)
 	}
 	return createStorageRecord(loaded, characterID, handle, gameID, quantity, owned, storage)
 }
@@ -197,6 +197,7 @@ func topUpStorageRecord(
 	gameID uint32,
 	quantity uint32,
 	maxStorage uint32,
+	records []StorageRecord,
 ) (addedStorageRecord, error) {
 	stacked := uint64(record.Quantity) + uint64(quantity)
 	if stacked > uint64(maxStorage) {
@@ -208,17 +209,32 @@ func topUpStorageRecord(
 	if err != nil {
 		return addedStorageRecord{}, err
 	}
-	quantityAt := sectionAt + storageCommonAt + int64(record.PhysicalIndex)*storageRecordSize + 4
+	recordAt := sectionAt + storageCommonAt + int64(record.PhysicalIndex)*storageRecordSize
+	quantityAt := recordAt + 4
 	raw, err := loaded.snapshot.uint32At(quantityAt)
 	if err != nil {
 		return addedStorageRecord{}, fmt.Errorf(
 			"cannot read the quantity of Storage record %d of character %d: %w",
 			record.PhysicalIndex, characterID, err)
 	}
+	countersAt := sectionAt + storageKeyAt + storageKeySize
+	storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
+	if err != nil {
+		return addedStorageRecord{}, fmt.Errorf(
+			"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
+	}
+	acquisitionIndex, nextAcquisition, err := nextStorageAcquisitionAndCounters(
+		storedNext, records, characterID)
+	if err != nil {
+		return addedStorageRecord{}, err
+	}
 	updated := uint32(stacked)
-	if err := applyByteWrites(loaded.snapshot, []byteWrite{{
-		at: quantityAt, data: littleEndianUint32((raw & ownedItemQuantityFlag) | updated),
-	}}); err != nil {
+	writes := []byteWrite{
+		{at: quantityAt, data: littleEndianUint32((raw & ownedItemQuantityFlag) | updated)},
+		{at: recordAt + 8, data: littleEndianUint32(acquisitionIndex)},
+		{at: countersAt + 4, data: littleEndianUint32(nextAcquisition)},
+	}
+	if err := applyByteWrites(loaded.snapshot, writes); err != nil {
 		return addedStorageRecord{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
 	}
 	return addedStorageRecord{physicalIndex: record.PhysicalIndex, quantity: updated}, nil
