@@ -220,26 +220,45 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
         catch { setQuestProgress(null); }
         finally { setQuestLoading(false); }
     };
-    const handleSelectNPC = (npc: string) => { setSelectedNPC(npc); loadQuestProgress(npc, true); };
+    const handleSelectNPC = (npc: string) => {
+        setSelectedNPC(npc);
+        setQuestProgress(null);
+        loadQuestProgress(npc, true);
+    };
     const handleSetQuestStep = async (stepIndex: number) => {
-        if (!selectedNPC) return;
-        await runWorldAction('quest_set_step', 1, () => SetQuestStep(charIdx, selectedNPC, stepIndex));
-        await loadQuestProgress(selectedNPC);
-        onMutate?.();
+        if (!selectedNPC || questLoading) return;
+        setQuestLoading(true);
+        try {
+            await runWorldAction('quest_set_step', 1, () => SetQuestStep(charIdx, selectedNPC, stepIndex));
+            await loadQuestProgress(selectedNPC);
+            onMutate?.();
+        } finally {
+            setQuestLoading(false);
+        }
     };
     const handleUnsetQuestStep = async (step: db.QuestStep) => {
-        if (!selectedNPC || !step.flags?.length) return;
-        await runWorldAction('quest_unset_step', step.flags.length, async () => {
-            for (const flag of step.flags) await SetMapFlag(charIdx, flag.id, flag.target !== 1);
-        });
-        await loadQuestProgress(selectedNPC);
-        onMutate?.();
+        if (!selectedNPC || !step.flags?.length || questLoading) return;
+        setQuestLoading(true);
+        try {
+            await runWorldAction('quest_unset_step', step.flags.length, async () => {
+                for (const flag of step.flags) await SetMapFlag(charIdx, flag.id, flag.target !== 1);
+            });
+            await loadQuestProgress(selectedNPC);
+            onMutate?.();
+        } finally {
+            setQuestLoading(false);
+        }
     };
     const handleQuestFlagToggle = async (flag: db.QuestFlagState) => {
-        if (!selectedNPC) return;
-        await runWorldAction('quest_toggle_flag', 1, () => SetMapFlag(charIdx, flag.id, !flag.current));
-        await loadQuestProgress(selectedNPC);
-        onMutate?.();
+        if (!selectedNPC || questLoading) return;
+        setQuestLoading(true);
+        try {
+            await runWorldAction('quest_toggle_flag', 1, () => SetMapFlag(charIdx, flag.id, !flag.current));
+            await loadQuestProgress(selectedNPC);
+            onMutate?.();
+        } finally {
+            setQuestLoading(false);
+        }
     };
     const questCompletedSteps = questProgress?.steps?.filter(s => s.complete).length ?? 0;
     const questTotalSteps = questProgress?.steps?.length ?? 0;
@@ -610,11 +629,12 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                     <AccordionSection id="world-quests" title="NPC Quests" badge={`${questNPCs.length} NPCs`}
                         resetSignal={saveLoadKey}
                         actions={<>
-                            <select value={selectedNPC} onChange={e => handleSelectNPC(e.target.value)}
-                                className="bg-background border border-border rounded px-2 py-0.5 text-[10px] font-bold text-foreground focus:outline-none focus:border-primary max-w-[200px]">
+                            <select value={selectedNPC} onChange={e => handleSelectNPC(e.target.value)} disabled={questLoading}
+                                className="bg-background border border-border rounded px-2 py-0.5 text-[10px] font-bold text-foreground focus:outline-none focus:border-primary max-w-[200px] disabled:opacity-50">
                                 <option value="">Select NPC...</option>
                                 {questNPCs.map(n => <option key={n} value={n}>{n}</option>)}
                             </select>
+                            {questLoading && <div className="w-3.5 h-3.5 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />}
                             {questProgress && <span className="text-[11px] font-bold text-muted-foreground">{questCompletedSteps}/{questTotalSteps}</span>}
                         </>}>
                         <RiskSectionBanner riskKey="quest_step_skip" className="mb-3" />
@@ -623,12 +643,12 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Select an NPC to view quest progress</p>
                             </div>
                         )}
-                        {questLoading && (
+                        {selectedNPC && !questProgress && questLoading && (
                             <div className="py-6 flex justify-center">
                                 <div className="w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
                             </div>
                         )}
-                        {selectedNPC && questProgress && !questLoading && (
+                        {selectedNPC && questProgress && (
                             <div className="space-y-1">
                                 {questProgress.steps.map((step, idx) => {
                                     const isExpanded = !!expandedSteps[idx];
@@ -653,8 +673,8 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                                             {matchedFlags}/{totalFlags}
                                                         </button>
                                                     )}
-                                                    {!step.complete && <RiskActionButton riskKey="quest_step_skip" onConfirm={() => handleSetQuestStep(idx)} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Set</RiskActionButton>}
-                                                    {matchedFlags > 0 && <RiskActionButton riskKey="quest_step_skip" onConfirm={() => handleUnsetQuestStep(step)} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Unset</RiskActionButton>}
+                                                    {!step.complete && <RiskActionButton riskKey="quest_step_skip" onConfirm={() => handleSetQuestStep(idx)} disabled={questLoading} className={`${btnSm} hover:text-primary hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed`}>Set</RiskActionButton>}
+                                                    {matchedFlags > 0 && <RiskActionButton riskKey="quest_step_skip" onConfirm={() => handleUnsetQuestStep(step)} disabled={questLoading} className={`${btnSm} hover:text-red-400 hover:border-red-400/50 disabled:opacity-50 disabled:cursor-not-allowed`}>Unset</RiskActionButton>}
                                                 </div>
                                             </div>
                                             {isExpanded && step.flags && step.flags.length > 0 && (
@@ -662,8 +682,8 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                                     {step.flags.map((f, fi) => {
                                                         const matches = f.current === (f.target === 1);
                                                         return (
-                                                            <button key={fi} type="button" onClick={() => handleQuestFlagToggle(f)}
-                                                                className="flex items-center gap-1.5 py-0.5 rounded text-left hover:bg-muted/20 focus:outline-none focus:ring-1 focus:ring-primary/50">
+                                                            <button key={fi} type="button" onClick={() => handleQuestFlagToggle(f)} disabled={questLoading}
+                                                                className="flex items-center gap-1.5 py-0.5 rounded text-left hover:bg-muted/20 focus:outline-none focus:ring-1 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 <span className={`w-1.5 h-1.5 rounded-full ${matches ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
                                                                 <span className="text-[11px] font-mono text-muted-foreground/70">{f.id}</span>
                                                                 <span className={`text-[11px] font-black uppercase ${matches ? 'text-primary' : 'text-muted-foreground/50'}`}>{f.current ? 'ON' : 'OFF'}</span>
