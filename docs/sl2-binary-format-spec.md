@@ -47,7 +47,7 @@ The `.sl2` file (Elden Ring save file) is a binary container holding up to 10 ch
 | PC header (BND4) | `0x300` (768 B) |
 | PS4 header | `0x70` (112 B) |
 | UserData10 (data) | `0x60000` (393,216 B) |
-| UserData11 (data) | `0x240000` (2,359,296 B) |
+| UserData11 regulation blob (native PC samples) | `0x240000` (2,359,296 B) |
 | Number of slots | 10 |
 
 ### PC file layout
@@ -63,10 +63,16 @@ Offset          Size         Section
   ...           ...          ... (repeat for slots 2-9)
 0x19003A0       0x10         MD5 checksum UserData10
 0x19003B0       0x60000      UserData10 data
-0x1F003B0       0x10         MD5 checksum UserData11
-0x1F003C0       0x240000     UserData11 data
+0x19603B0       0x10         MD5 checksum UserData11
+0x19603C0       0x10         UserData11 regulation header
+0x19603D0       variable     Encrypted UserData11 regulation blob
 ─────────────────────────────────────────────────────
 ```
+
+The BND4 entry table is authoritative for the variable UserData11 length. All
+verified native PC samples declare an entry length of `0x240020`: the MD5
+prefix, the `0x10`-byte regulation header, and a `0x240000`-byte encrypted
+regulation blob.
 
 **Formula for slot N offset (PC)**:
 - Checksum: `0x300 + N * 0x280010`
@@ -444,12 +450,15 @@ padding:         7B
 ### Layout
 
 ```
+[PC only: 16B MD5 prefix]
 [16B unk header]
 [0x1C5F70 regulation data]  ← encrypted AES-256-CBC + compressed DCX/zlib
 [0x7A090 rest data]
 ```
 
-Total size: `0x240000` bytes.
+For PC, the MD5 covers every byte after its prefix: the regulation header and
+the encrypted regulation blob. The BND4 entry length is variable; verified
+native samples use `0x240020` bytes in total.
 
 ### Regulation decryption (AES-256-CBC)
 
@@ -478,7 +487,7 @@ Standard MD5 (`crypto/md5` in Go, `hashlib.md5` in Python).
 |---|---|---|---|
 | Slot N | Slot data (0x280000 B) | 2,621,440 B | 16B immediately before slot data |
 | UserData10 | UD10 data (0x60000 B) | 393,216 B | 16B immediately before UD10 data |
-| UserData11 | UD11 data | variable | 16B immediately before UD11 data |
+| UserData11 | Regulation header and encrypted blob (all bytes after the prefix) | variable | First 16B of the UserData11 BND4 entry |
 
 ### Empty slot detection
 
@@ -486,7 +495,9 @@ If all 16 checksum bytes = 0x00 → slot is empty.
 
 ### Recalculation
 
-After **every modification of slot data**, the MD5 must be recalculated and the new checksum written. All 3 reference editors do this.
+After **every modification of a checksummed PC payload**, its MD5 must be
+recalculated and written. In particular, a UserData11 mutation recalculates
+the MD5 of the whole block after its 16-byte prefix.
 
 ---
 
@@ -631,7 +642,7 @@ return (loH | (hiH << 16)) × 2
    - Parse active_slots, profile_summaries, SteamID
 
 6. USERDATA11:
-   PC:  skip 0x10 (MD5), read rest
+   PC:  read 0x10 (MD5), then read the regulation header and the remaining blob
    PS4: read rest
 ```
 
@@ -661,7 +672,7 @@ return (loH | (hiH << 16)) × 2
    - BND4 header (0x300)
    - For each slot: MD5(slot.Data) + slot.Data
    - MD5(UD10.Data) + UD10.Data
-   - MD5(UD11) + UD11
+   - MD5(UD11[0x10:]) + UD11[0x10:]
    
    PS4:
    - PS4 header (0x70)
