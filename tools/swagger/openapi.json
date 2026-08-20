@@ -1781,6 +1781,35 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/diagnostic-log": {
+      "get": {
+        "operationId": "getDiagnosticLog",
+        "tags": ["Diagnostics"],
+        "summary": "GetDiagnosticLog",
+        "description": "Returns a safe portion of the current session's structured diagnostic log, without mutating save or session state. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          { "$ref": "#/components/parameters/SaveSessionID" },
+          { "$ref": "#/components/parameters/DiagnosticLogCursor" },
+          { "$ref": "#/components/parameters/DiagnosticLogLimit" },
+          { "$ref": "#/components/parameters/DiagnosticLogSeverity" },
+          { "$ref": "#/components/parameters/DiagnosticLogScope" }
+        ],
+        "responses": {
+          "200": {
+            "description": "The diagnostic log page and pagination state",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetDiagnosticLogResult" }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty or unknown session identifier, invalid cursor format, limit outside 0..200, or unknown severity or scope",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells": {
       "get": {
         "operationId": "getEquippedSpells",
@@ -4849,6 +4878,53 @@
           "enum": ["inventory", "storage", "stats", "equipment", "spells"]
         },
         "example": "inventory"
+      },
+      "DiagnosticLogCursor": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "description": "Exclusive sequence token. Must be a canonical decimal uint64. Omitted or empty reads from the oldest available record.",
+        "schema": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "example": "42"
+      },
+      "DiagnosticLogLimit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Maximum entries to return. Omitted, empty or 0 means 50. Accepted range is 0..200.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 50
+        },
+        "example": 50
+      },
+      "DiagnosticLogSeverity": {
+        "name": "severity",
+        "in": "query",
+        "required": false,
+        "description": "Restricts the log to one severity level. Accepted values are \"\", \"info\", \"warning\", \"error\". In v1, only \"info\" events are emitted; \"warning\" and \"error\" return empty matches.",
+        "schema": {
+          "type": "string",
+          "enum": ["", "info", "warning", "error"]
+        },
+        "example": "info"
+      },
+      "DiagnosticLogScope": {
+        "name": "scope",
+        "in": "query",
+        "required": false,
+        "description": "Restricts the log to one diagnostic scope. Accepted values are \"\", \"session\", \"repairs\".",
+        "schema": {
+          "type": "string",
+          "enum": ["", "session", "repairs"]
+        },
+        "example": "session"
       }
     },
     "schemas": {
@@ -4893,6 +4969,119 @@
           "expectedRevision": {
             "type": "string",
             "description": "The exact saveRevision returned by GetRepairPlan. A changed session is rejected rather than reinterpreted.",
+            "example": "1"
+          }
+        }
+      },
+      "DiagnosticRecord": {
+        "type": "object",
+        "description": "One safe, structured diagnostic event recorded by SaveEngine.",
+        "required": ["seq", "timestamp", "severity", "scope", "event", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Monotonic sequence number of the diagnostic event within the session.",
+            "example": 1
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC3339 UTC timestamp of the event.",
+            "example": "2026-08-20T12:00:00Z"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warning", "error"],
+            "description": "Severity level of the event.",
+            "example": "info"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["session", "repairs"],
+            "description": "Domain of the diagnostic event.",
+            "example": "session"
+          },
+          "event": {
+            "type": "string",
+            "enum": ["session_loaded", "save_written", "repairs_applied"],
+            "description": "Stable snake_case event identifier.",
+            "example": "session_loaded"
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "save session loaded and validated",
+              "save snapshot written and verified",
+              "repair plan actions executed"
+            ],
+            "description": "Fixed human-readable description of the event.",
+            "example": "save session loaded and validated"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "Character slot index (0..9) if the event belongs to a character slot.",
+            "example": 0
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Save revision associated with the event.",
+            "example": "0"
+          }
+        }
+      },
+      "GetDiagnosticLogResult": {
+        "type": "object",
+        "description": "A page of diagnostic records and pagination state.",
+        "required": [
+          "saveSessionID",
+          "records",
+          "nextCursor",
+          "hasMore",
+          "totalBuffered",
+          "cursorExpired",
+          "oldestAvailableCursor"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session.",
+            "example": "4f8a3c2e1b0d"
+          },
+          "records": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DiagnosticRecord" }
+          },
+          "nextCursor": {
+            "type": "string",
+            "description": "Sequence token to pass as cursor in the next request.",
+            "example": "42"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "True if more matching entries exist in the buffer.",
+            "example": false
+          },
+          "totalBuffered": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of records currently buffered for this session.",
+            "example": 1
+          },
+          "cursorExpired": {
+            "type": "boolean",
+            "description": "True if the requested cursor was overwritten by ring buffer rollover.",
+            "example": false
+          },
+          "oldestAvailableCursor": {
+            "type": "string",
+            "description": "Sequence token of the oldest record currently buffered.",
             "example": "1"
           }
         }

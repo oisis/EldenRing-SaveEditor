@@ -1053,6 +1053,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset":         "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report":                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repairs/apply":                      "post",
+		"/api/v1/save-sessions/{saveSessionID}/diagnostic-log":                                              "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
@@ -1627,8 +1628,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 84 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 84", found)
+	if found != 85 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 85", found)
 	}
 }
 
@@ -8557,6 +8558,233 @@ func TestApplyRepairsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 	for _, name := range []string{"ApplyRepairsRequest", "ApplyRepairsResult", "RepairAction", "RepairRejection"} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Errorf("openapi.json does not describe the %s schema", name)
+		}
+	}
+}
+
+func TestGetDiagnosticLogRouteReturnsDiagnosticLog(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log"
+
+	want, err := diagnostics.GetDiagnosticLog(saveEngine, session.SaveSessionID, "", 50, "", "")
+	if err != nil {
+		t.Fatalf("diagnostics.GetDiagnosticLog: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("diagnostic log route body differs from the GetDiagnosticLog result")
+	}
+}
+
+func TestGetDiagnosticLogRouteForwardsParameters(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?cursor=0&limit=10&severity=info&scope=session"
+
+	want, err := diagnostics.GetDiagnosticLog(saveEngine, session.SaveSessionID, "0", 10, "info", "session")
+	if err != nil {
+		t.Fatalf("diagnostics.GetDiagnosticLog: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("diagnostic log route body differs from the parameterized GetDiagnosticLog result")
+	}
+}
+
+func TestGetDiagnosticLogRouteRejectsInvalidParameters(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	handler := newHandler(gameCatalog, testApplicationVersion, saveEngine)
+
+	for _, invalidTarget := range []string{
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?cursor=01",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?cursor=+1",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?limit=201",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?limit=-1",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?limit=abc",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?severity=unknown",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/diagnostic-log?scope=unknown",
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, invalidTarget, nil))
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("target %s status = %d, want %d: %s", invalidTarget, recorder.Code, http.StatusBadRequest, recorder.Body.String())
+		}
+	}
+}
+
+func TestGetDiagnosticLogRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+	var document struct {
+		Paths map[string]map[string]struct {
+			Responses map[string]struct {
+				Description string `json:"description"`
+			} `json:"responses"`
+		} `json:"paths"`
+		Comps struct {
+			Parameters map[string]struct {
+				Name   string `json:"name"`
+				In     string `json:"in"`
+				Schema struct {
+					Type    string   `json:"type"`
+					Pattern string   `json:"pattern"`
+					Minimum *float64 `json:"minimum"`
+					Maximum *float64 `json:"maximum"`
+					Default *float64 `json:"default"`
+					Enum    []string `json:"enum"`
+				} `json:"schema"`
+			} `json:"parameters"`
+			Schemas map[string]struct {
+				Properties map[string]struct {
+					Type    string `json:"type"`
+					Format  string `json:"format"`
+					Pattern string `json:"pattern"`
+					Enum    []any  `json:"enum"`
+				} `json:"properties"`
+				Required []string `json:"required"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+	const path = "/api/v1/save-sessions/{saveSessionID}/diagnostic-log"
+	operation, exists := document.Paths[path]
+	if !exists {
+		t.Fatalf("openapi.json does not describe path %s", path)
+	}
+	getOp, exists := operation["get"]
+	if !exists {
+		t.Fatalf("openapi.json does not describe GET %s", path)
+	}
+
+	// 1. Validate 400 response description mentions 0..200
+	resp400, exists := getOp.Responses["400"]
+	if !exists {
+		t.Fatal("GET diagnostic-log is missing 400 response")
+	}
+	if !strings.Contains(resp400.Description, "0..200") {
+		t.Errorf("400 response description %q does not mention 0..200", resp400.Description)
+	}
+
+	// 2. Validate DiagnosticLogCursor parameter
+	cursorParam, exists := document.Comps.Parameters["DiagnosticLogCursor"]
+	if !exists {
+		t.Fatal("openapi.json is missing DiagnosticLogCursor parameter")
+	}
+	if cursorParam.Schema.Pattern != "^(0|[1-9][0-9]*)$" {
+		t.Errorf("cursor pattern = %q, want ^(0|[1-9][0-9]*)$", cursorParam.Schema.Pattern)
+	}
+
+	// 3. Validate DiagnosticLogLimit parameter
+	limitParam, exists := document.Comps.Parameters["DiagnosticLogLimit"]
+	if !exists {
+		t.Fatal("openapi.json is missing DiagnosticLogLimit parameter")
+	}
+	if limitParam.Schema.Minimum == nil || *limitParam.Schema.Minimum != 0 {
+		t.Errorf("limit minimum = %v, want 0", limitParam.Schema.Minimum)
+	}
+	if limitParam.Schema.Maximum == nil || *limitParam.Schema.Maximum != 200 {
+		t.Errorf("limit maximum = %v, want 200", limitParam.Schema.Maximum)
+	}
+	if limitParam.Schema.Default == nil || *limitParam.Schema.Default != 50 {
+		t.Errorf("limit default = %v, want 50", limitParam.Schema.Default)
+	}
+
+	// 4. Validate DiagnosticLogSeverity enum
+	severityParam, exists := document.Comps.Parameters["DiagnosticLogSeverity"]
+	if !exists {
+		t.Fatal("openapi.json is missing DiagnosticLogSeverity parameter")
+	}
+	wantSeverityEnum := []string{"", "info", "warning", "error"}
+	if !reflect.DeepEqual(severityParam.Schema.Enum, wantSeverityEnum) {
+		t.Errorf("severity enum = %v, want %v", severityParam.Schema.Enum, wantSeverityEnum)
+	}
+
+	// 5. Validate DiagnosticLogScope enum
+	scopeParam, exists := document.Comps.Parameters["DiagnosticLogScope"]
+	if !exists {
+		t.Fatal("openapi.json is missing DiagnosticLogScope parameter")
+	}
+	wantScopeEnum := []string{"", "session", "repairs"}
+	if !reflect.DeepEqual(scopeParam.Schema.Enum, wantScopeEnum) {
+		t.Errorf("scope enum = %v, want %v", scopeParam.Schema.Enum, wantScopeEnum)
+	}
+
+	// 6. Validate DiagnosticRecord schema
+	recordSchema, exists := document.Comps.Schemas["DiagnosticRecord"]
+	if !exists {
+		t.Fatal("openapi.json does not describe the DiagnosticRecord schema")
+	}
+	tsProp, exists := recordSchema.Properties["timestamp"]
+	if !exists || tsProp.Format != "date-time" {
+		t.Errorf("DiagnosticRecord.timestamp format = %q, want date-time", tsProp.Format)
+	}
+	eventProp, exists := recordSchema.Properties["event"]
+	if !exists {
+		t.Fatal("DiagnosticRecord missing event property")
+	}
+	wantEventEnum := []any{"session_loaded", "save_written", "repairs_applied"}
+	if !reflect.DeepEqual(eventProp.Enum, wantEventEnum) {
+		t.Errorf("DiagnosticRecord.event enum = %v, want %v", eventProp.Enum, wantEventEnum)
+	}
+	msgProp, exists := recordSchema.Properties["message"]
+	if !exists {
+		t.Fatal("DiagnosticRecord missing message property")
+	}
+	wantMsgEnum := []any{
+		"save session loaded and validated",
+		"save snapshot written and verified",
+		"repair plan actions executed",
+	}
+	if !reflect.DeepEqual(msgProp.Enum, wantMsgEnum) {
+		t.Errorf("DiagnosticRecord.message enum = %v, want %v", msgProp.Enum, wantMsgEnum)
+	}
+	revProp, exists := recordSchema.Properties["revision"]
+	if !exists || revProp.Pattern != "^(0|[1-9][0-9]*)$" {
+		t.Errorf("DiagnosticRecord.revision pattern = %q, want ^(0|[1-9][0-9]*)$", revProp.Pattern)
+	}
+
+	// 7. Validate GetDiagnosticLogResult schema
+	resultSchema, exists := document.Comps.Schemas["GetDiagnosticLogResult"]
+	if !exists {
+		t.Fatal("openapi.json does not describe the GetDiagnosticLogResult schema")
+	}
+	for _, field := range []string{
+		"saveSessionID",
+		"records",
+		"nextCursor",
+		"hasMore",
+		"totalBuffered",
+		"cursorExpired",
+		"oldestAvailableCursor",
+	} {
+		if _, exists := resultSchema.Properties[field]; !exists {
+			t.Errorf("GetDiagnosticLogResult missing property %q", field)
 		}
 	}
 }

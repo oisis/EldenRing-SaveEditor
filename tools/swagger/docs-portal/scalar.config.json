@@ -245,6 +245,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/diagnostics/apply_repairs.md",
                 "title": "ApplyRepairs"
+              },
+              "/get-diagnostic-log": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/diagnostics/get_diagnostic_log.md",
+                "title": "GetDiagnosticLog"
               }
             }
           },

@@ -1825,6 +1825,31 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/diagnostic-log",
+		func(writer http.ResponseWriter, request *http.Request) {
+			query := request.URL.Query()
+			limit, err := parsePagingValue(query.Get("limit"), "limit")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := diagnostics.GetDiagnosticLog(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				query.Get("cursor"),
+				limit,
+				query.Get("severity"),
+				query.Get("scope"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))

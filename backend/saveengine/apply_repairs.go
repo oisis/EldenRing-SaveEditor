@@ -60,21 +60,38 @@ func (engine *Engine) ApplyRepairPlan(
 		return engine.confirmNoRepairActions(saveSessionID, characterID, expectedRevision)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opApplyRepairs, characterID, func(loaded *loadedSave) error {
-		if expectedRevision != loaded.session.revisionString() {
-			return fmt.Errorf("expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, loaded.session.revisionString())
-		}
-		if err := requireActiveCharacter(loaded, characterID); err != nil {
-			return err
-		}
+	saveRevision, err := engine.commitCharacterRevisionWithHook(
+		saveSessionID,
+		opApplyRepairs,
+		characterID,
+		func(loaded *loadedSave) error {
+			if expectedRevision != loaded.session.revisionString() {
+				return fmt.Errorf("expectedRevision %q does not match the current saveRevision %q",
+					expectedRevision, loaded.session.revisionString())
+			}
+			if err := requireActiveCharacter(loaded, characterID); err != nil {
+				return err
+			}
 
-		writes, err := planRepairWrites(loaded, characterID, actions)
-		if err != nil {
-			return err
-		}
-		return applyByteWrites(loaded.snapshot, writes)
-	})
+			writes, err := planRepairWrites(loaded, characterID, actions)
+			if err != nil {
+				return err
+			}
+			return applyByteWrites(loaded.snapshot, writes)
+		},
+		func(loaded *loadedSave, rev string) {
+			slot := characterID
+			loaded.session.appendDiagnosticRecord(
+				engine.nowUTC(),
+				DiagnosticScopeRepairs,
+				DiagnosticSeverityInfo,
+				DiagnosticEventRepairsApplied,
+				DiagnosticMessageRepairsApplied,
+				&slot,
+				rev,
+			)
+		},
+	)
 	if err != nil {
 		return ApplyRepairPlanResult{}, err
 	}

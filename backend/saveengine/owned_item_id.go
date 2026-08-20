@@ -206,6 +206,21 @@ func (engine *Engine) commitCharacterRevision(
 	return engine.commit(saveSessionID, operationID, characterID, commit)
 }
 
+// commitCharacterRevisionWithHook runs commitCharacterRevision and executes
+// afterCommit under the engine mutex immediately after the revision advances.
+func (engine *Engine) commitCharacterRevisionWithHook(
+	saveSessionID string,
+	operationID string,
+	characterID int,
+	commit func(*loadedSave) error,
+	afterCommit func(*loadedSave, string),
+) (string, error) {
+	if operationID == "" {
+		return "", errors.New("operationID is required")
+	}
+	return engine.commitWithHook(saveSessionID, operationID, characterID, commit, afterCommit)
+}
+
 // commit is the one implementation behind both entry points. An empty
 // operationID marks a global mutation, which records no undo point.
 func (engine *Engine) commit(
@@ -213,6 +228,16 @@ func (engine *Engine) commit(
 	operationID string,
 	characterID int,
 	commit func(*loadedSave) error,
+) (string, error) {
+	return engine.commitWithHook(saveSessionID, operationID, characterID, commit, nil)
+}
+
+func (engine *Engine) commitWithHook(
+	saveSessionID string,
+	operationID string,
+	characterID int,
+	commit func(*loadedSave) error,
+	afterCommit func(*loadedSave, string),
 ) (string, error) {
 	if saveSessionID == "" {
 		return "", errors.New("saveSessionID is required")
@@ -253,6 +278,9 @@ func (engine *Engine) commit(
 	revision := session.advanceRevision()
 	if session.undo != nil {
 		session.undo.revision = session.revision
+	}
+	if afterCommit != nil {
+		afterCommit(loaded, revision)
 	}
 	return revision, nil
 }

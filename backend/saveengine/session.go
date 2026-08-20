@@ -47,6 +47,10 @@ type Session struct {
 	// undo.go. It starts nil, holds at most one character mutation, and is
 	// never serialized.
 	undo *undoPoint
+	// journal is the private ring buffer of diagnostic records for this session.
+	journal []DiagnosticRecord
+	// journalSeq numbers the diagnostic records appended to this session.
+	journalSeq uint64
 }
 
 // SessionInfo is the safe, public metadata of a session. It is the only session

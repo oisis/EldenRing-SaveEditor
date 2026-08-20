@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
 // magicLength is the number of leading bytes needed to recognise a container.
@@ -19,6 +20,7 @@ const magicLength = 4
 type Engine struct {
 	mutex    sync.Mutex
 	sessions map[string]*loadedSave
+	now      func() time.Time
 }
 
 // loadedSave is the private state of one session: its metadata model and mutable
@@ -31,7 +33,17 @@ type loadedSave struct {
 
 // New returns an engine holding no session.
 func New() *Engine {
-	return &Engine{sessions: make(map[string]*loadedSave)}
+	return &Engine{
+		sessions: make(map[string]*loadedSave),
+		now:      time.Now,
+	}
+}
+
+func (engine *Engine) nowUTC() time.Time {
+	if engine.now == nil {
+		return time.Now().UTC()
+	}
+	return engine.now().UTC()
 }
 
 // LoadSave reads the local file at path read-only, recognises its platform,
@@ -94,6 +106,15 @@ func (engine *Engine) LoadSave(path string, expectedPlatform string) (SessionInf
 	}
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
+	session.appendDiagnosticRecord(
+		engine.nowUTC(),
+		DiagnosticScopeSession,
+		DiagnosticSeverityInfo,
+		DiagnosticEventSessionLoaded,
+		DiagnosticMessageSessionLoaded,
+		nil,
+		"0",
+	)
 	engine.sessions[session.id] = &loadedSave{session: session, snapshot: source}
 
 	return session.Info(), nil

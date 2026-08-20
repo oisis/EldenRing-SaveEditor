@@ -66,9 +66,19 @@ func (engine *Engine) WriteSave(
 	// mutation is retired together with the revision it belonged to. A failed
 	// write returns above and leaves it untouched.
 	loaded.session.undo = nil
+	newRevision := loaded.session.advanceRevision()
+	loaded.session.appendDiagnosticRecord(
+		engine.nowUTC(),
+		DiagnosticScopeSession,
+		DiagnosticSeverityInfo,
+		DiagnosticEventSaveWritten,
+		DiagnosticMessageSaveWritten,
+		nil,
+		newRevision,
+	)
 	return WriteSaveResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  loaded.session.advanceRevision(),
+		SaveRevision:  newRevision,
 	}, nil
 }
 
