@@ -158,4 +158,4 @@ notices and attributions.
 
 If you find this project useful, you can support its development via Bitcoin:
 
-![https://img.shields.io/badge/Donate-Bitcoin-orange.svg?logo=bitcoin](https://www.blockonomics.co/#/search?q=18FqJhKioiuxH859LU2pcpas2h46MGr9a2)
+[BTC:18FqJhKioiuxH859LU2pcpas2h46MGr9a2](https://www.blockonomics.co/#/search?q=18FqJhKioiuxH859LU2pcpas2h46MGr9a2)
