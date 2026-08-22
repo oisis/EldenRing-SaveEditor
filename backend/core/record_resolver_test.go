@@ -486,3 +486,59 @@ func TestScanRepairIssuesFromRecords_SharesResolution(t *testing.T) {
 		}
 	}
 }
+
+// Cold Dueling Shield +5: an affinity anchor row that is itself a DB entry,
+// upgraded. The resolver must hand every consumer the canonical family base so
+// affinity and upgrade decode from the same origin.
+const (
+	coldDuelingShieldPlus5     = uint32(0x03B9ACA0 + 905)
+	duelingShieldCanonicalBase = uint32(0x03B9ACA0)
+)
+
+// TestResolveRecord_AffinityWeaponUsesCanonicalBase is the shared-resolution
+// regression: scanner, coverage report and editor workspace all read BaseID
+// from this one record, so it must be the family base and not the affinity
+// anchor the raw itemID happens to sit on.
+func TestResolveRecord_AffinityWeaponUsesCanonicalBase(t *testing.T) {
+	const handle = uint32(0x80800042)
+	slot := &SaveSlot{GaMap: map[uint32]uint32{handle: coldDuelingShieldPlus5}}
+
+	for _, scope := range []string{repairScopeInventoryCommon, repairScopeStorageCommon} {
+		rec := ResolveRecord(slot, scope, 0, handle, 1, 700)
+		if rec.Resolution != ResolutionKnownDB {
+			t.Fatalf("%s: resolution = %q, want known_db", scope, rec.Resolution)
+		}
+		if rec.ItemID != coldDuelingShieldPlus5 {
+			t.Errorf("%s: raw ItemID = 0x%08X, want it preserved as 0x%08X",
+				scope, rec.ItemID, coldDuelingShieldPlus5)
+		}
+		if rec.BaseID != duelingShieldCanonicalBase {
+			t.Errorf("%s: BaseID = 0x%08X, want the canonical base 0x%08X",
+				scope, rec.BaseID, duelingShieldCanonicalBase)
+		}
+		if rec.Name != "Dueling Shield" {
+			t.Errorf("%s: name = %q, want %q", scope, rec.Name, "Dueling Shield")
+		}
+		if rec.Category != "shields" {
+			t.Errorf("%s: category = %q, want shields", scope, rec.Category)
+		}
+	}
+}
+
+// TestResolveRecord_AffinityWeaponDeterministic pins the reported symptom: the
+// same record resolved repeatedly must not change identity between runs.
+func TestResolveRecord_AffinityWeaponDeterministic(t *testing.T) {
+	const handle = uint32(0x80800043)
+	slot := &SaveSlot{GaMap: map[uint32]uint32{handle: coldDuelingShieldPlus5}}
+	first := ResolveRecord(slot, repairScopeInventoryCommon, 0, handle, 1, 700)
+	for i := 0; i < 200; i++ {
+		got := ResolveRecord(slot, repairScopeInventoryCommon, 0, handle, 1, 700)
+		if got.BaseID != first.BaseID || got.Name != first.Name {
+			t.Fatalf("iteration %d: BaseID 0x%08X (%q), want 0x%08X (%q)",
+				i, got.BaseID, got.Name, first.BaseID, first.Name)
+		}
+	}
+	if _, want := db.GetItemDataFuzzy(coldDuelingShieldPlus5); first.BaseID != want {
+		t.Errorf("BaseID = 0x%08X, want db.GetItemDataFuzzy agreement 0x%08X", first.BaseID, want)
+	}
+}

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.12] - 2026-08-22
+
+### fix(ashes of war): Great Spears accept their compatible Ashes of War again
+
+Great Spears were checked against a weapon-class flag that no Ash of War in the
+game ever sets, so every Ash of War appeared incompatible with every Great Spear
+and none could be mounted. They are now checked against the flag the game
+actually uses, and the compatible arts are shown and accepted as expected.
+
+### fix(weapons): infused weapons keep their affinity after saving and reloading
+
+For weapon families whose infused versions are separate database entries — the
+Thrusting Shields among them — the editor could identify a saved weapon by its
+infused entry instead of the family it belongs to. The affinity was then shown
+as Standard, the choice varied between refreshes, and a further affinity change
+could store an item that does not exist in the game. Weapon identity now comes
+from the game's own family reference, so the affinity and upgrade level are
+stable across saving, reloading and further edits.
+
 ## [1.6.11] - 2026-08-21
 
 ### fix(quests): keep the quest editor in place while updating a flag

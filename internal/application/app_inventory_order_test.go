@@ -745,3 +745,48 @@ func TestReorderWeaponInventory_NextItemSortsAfter(t *testing.T) {
 			nextIdx, maxReorderedIdx)
 	}
 }
+
+// TestGetWeaponInventoryOrder_AffinityVariantRowDecoded is the user-facing DTO
+// regression. Dueling Shield materializes each affinity as its own DB entry, so
+// the previous range scan could resolve a Cold row to itself and report the
+// weapon as "Standard". Both the exact anchor (+0) and an upgraded anchor must
+// report the canonical name with the affinity carried separately.
+func TestGetWeaponInventoryOrder_AffinityVariantRowDecoded(t *testing.T) {
+	const duelingShieldBase = uint32(0x03B9ACA0)
+	weapons := []testInvWeapon{
+		{0x80800001, duelingShieldBase, 3000},        // Standard +0
+		{0x80800002, duelingShieldBase + 900, 3002},  // Cold +0 — an anchor row with its own DB entry
+		{0x80800003, duelingShieldBase + 905, 3004},  // Cold +5
+		{0x80800004, duelingShieldBase + 1225, 3006}, // Occult +25
+	}
+	app := inventoryOrderFixture(weapons)
+	items, err := app.GetWeaponInventoryOrder(0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(items) != 4 {
+		t.Fatalf("want 4 items, got %d", len(items))
+	}
+	want := []struct {
+		infusion string
+		upgrade  int
+	}{
+		{"", 0},
+		{"Cold", 0},
+		{"Cold", 5},
+		{"Occult", 25},
+	}
+	for i, w := range want {
+		it := items[i]
+		if it.Name != "Dueling Shield" {
+			t.Errorf("item %d: name = %q, want %q", i, it.Name, "Dueling Shield")
+		}
+		if it.InfusionName != w.infusion || it.CurrentUpgrade != w.upgrade {
+			t.Errorf("item %d (0x%08X): infusion=%q upgrade=%d, want %q/%d",
+				i, it.ItemID, it.InfusionName, it.CurrentUpgrade, w.infusion, w.upgrade)
+		}
+		if it.ItemID != weapons[i].itemID {
+			t.Errorf("item %d: raw ItemID = 0x%08X, want it preserved as 0x%08X", i, it.ItemID, weapons[i].itemID)
+		}
+	}
+}

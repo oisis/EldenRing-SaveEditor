@@ -3,6 +3,8 @@ package editor
 import (
 	"strings"
 	"testing"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/db"
 )
 
 // Real DB IDs used in weapon tests.
@@ -639,5 +641,57 @@ func TestClampUpgrade(t *testing.T) {
 				t.Errorf("ClampUpgrade(%d, %d) = %d, want %d", c.req, c.max, got, c.want)
 			}
 		})
+	}
+}
+
+// TestUpdateWeapon_AffinitySwitchUsesCanonicalBase is the mutating half of the
+// canonical-identity contract. encodeWeaponItemID adds the affinity offset to
+// BaseItemID, so resolving a Cold Dueling Shield to its own affinity anchor
+// instead of the family base wrote base+900+1200+level — an item ID with no
+// EquipParamWeapon row behind it.
+func TestUpdateWeapon_AffinitySwitchUsesCanonicalBase(t *testing.T) {
+	const (
+		duelingShieldBase = uint32(0x03B9ACA0)
+		coldAnchor        = duelingShieldBase + 900
+		coldPlus5         = duelingShieldBase + 905
+		handle            = uint32(0x80800021)
+	)
+	slot, invStart, _ := fixtureSlot(t)
+	slot.GaMap[handle] = coldPlus5
+	fakeRecord(slot.Data, invStart, handle, 1, 1000)
+
+	built, err := BuildSnapshot(slot, "ses-mut", 0)
+	if err != nil {
+		t.Fatalf("BuildSnapshot: %v", err)
+	}
+	snap := &built
+	if len(snap.InventoryItems) != 1 {
+		t.Fatalf("want one editable item, got %d", len(snap.InventoryItems))
+	}
+	uid := snap.InventoryItems[0].UID
+
+	if err := UpdateWeapon(snap, uid, WeaponPatch{SetInfusionName: true, InfusionName: "Occult"}); err != nil {
+		t.Fatalf("UpdateWeapon: %v", err)
+	}
+	it := snap.InventoryItems[0]
+
+	want := duelingShieldBase + 1200 + 5
+	if it.ItemID != want {
+		t.Errorf("ItemID = 0x%08X, want 0x%08X (canonical base + Occult + level)", it.ItemID, want)
+	}
+	if never := coldAnchor + 1200 + 5; it.ItemID == never {
+		t.Errorf("ItemID = 0x%08X: affinity offset applied on top of the Cold anchor", it.ItemID)
+	}
+	if it.BaseItemID != duelingShieldBase {
+		t.Errorf("BaseItemID = 0x%08X, want 0x%08X", it.BaseItemID, duelingShieldBase)
+	}
+	if it.InfusionName != "Occult" || it.CurrentUpgrade != 5 {
+		t.Errorf("infusion/level = %q/%d, want Occult/5", it.InfusionName, it.CurrentUpgrade)
+	}
+	// The rewritten ID must round-trip: it is a real Dueling Shield again.
+	back, base := db.GetItemDataFuzzy(it.ItemID)
+	if back.Name != "Dueling Shield" || base != duelingShieldBase {
+		t.Errorf("re-resolved ID 0x%08X = %q base 0x%08X, want Dueling Shield base 0x%08X",
+			it.ItemID, back.Name, base, duelingShieldBase)
 	}
 }

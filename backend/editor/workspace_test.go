@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
 // fakeRecord places a 12-byte inventory record at the given offset.
@@ -225,5 +226,82 @@ func TestBuildSnapshot_DuplicateHandlePushedToPassthrough(t *testing.T) {
 	if snap.UnsupportedInventoryRecords[0].Reason != ReasonDuplicateHandle {
 		t.Errorf("Reason = %q, want %q",
 			snap.UnsupportedInventoryRecords[0].Reason, ReasonDuplicateHandle)
+	}
+}
+
+// TestBuildSnapshot_AffinityWeaponCanonicalMetadata covers the workspace half of
+// the canonical-identity contract, in both containers, on the existing public
+// EditableItem fields. Cold Dueling Shield +5 is an affinity anchor row that is
+// itself a DB entry — the case the old range scan resolved non-deterministically
+// and, when it picked the anchor, decoded as "Standard +5".
+func TestBuildSnapshot_AffinityWeaponCanonicalMetadata(t *testing.T) {
+	const (
+		duelingShieldBase = uint32(0x03B9ACA0)
+		coldPlus5         = duelingShieldBase + 905
+		invHandle         = uint32(0x80800011)
+		stoHandle         = uint32(0x80800012)
+	)
+	slot, invStart, storageStart := fixtureSlot(t)
+	slot.GaMap[invHandle] = coldPlus5
+	slot.GaMap[stoHandle] = coldPlus5
+	fakeRecord(slot.Data, invStart, invHandle, 1, 1000)
+	fakeRecord(slot.Data, storageStart, stoHandle, 1, 2000)
+
+	snap, err := BuildSnapshot(slot, "ses-aff", 0)
+	if err != nil {
+		t.Fatalf("BuildSnapshot: %v", err)
+	}
+	if len(snap.InventoryItems) != 1 || len(snap.StorageItems) != 1 {
+		t.Fatalf("want one editable item per container, got inv=%d sto=%d",
+			len(snap.InventoryItems), len(snap.StorageItems))
+	}
+
+	wantSort := data.ItemSortKeys[duelingShieldBase]
+	wantAoWID, wantAoWName := defaultAoWForBaseID(duelingShieldBase)
+	for _, c := range []struct {
+		container string
+		it        EditableItem
+	}{
+		{"inventory", snap.InventoryItems[0]},
+		{"storage", snap.StorageItems[0]},
+	} {
+		it := c.it
+		if it.ItemID != coldPlus5 {
+			t.Errorf("%s: ItemID = 0x%08X, want the raw ID preserved as 0x%08X", c.container, it.ItemID, coldPlus5)
+		}
+		if it.BaseItemID != duelingShieldBase {
+			t.Errorf("%s: BaseItemID = 0x%08X, want 0x%08X", c.container, it.BaseItemID, duelingShieldBase)
+		}
+		if it.Name != "Dueling Shield" {
+			t.Errorf("%s: Name = %q, want %q", c.container, it.Name, "Dueling Shield")
+		}
+		if it.InfusionName != "Cold" {
+			t.Errorf("%s: InfusionName = %q, want %q", c.container, it.InfusionName, "Cold")
+		}
+		if it.CurrentUpgrade != 5 {
+			t.Errorf("%s: CurrentUpgrade = %d, want 5", c.container, it.CurrentUpgrade)
+		}
+		if it.MaxUpgrade != 25 {
+			t.Errorf("%s: MaxUpgrade = %d, want 25", c.container, it.MaxUpgrade)
+		}
+		// Sorting stays keyed on the canonical base, matching every affinity row
+		// that has no DB entry of its own.
+		if it.SortID != wantSort.SortId || it.SortGroupID != wantSort.SortGroupId {
+			t.Errorf("%s: sort key = {%d,%d}, want the canonical base key {%d,%d}",
+				c.container, it.SortID, it.SortGroupID, wantSort.SortId, wantSort.SortGroupId)
+		}
+		if it.Weight != data.ItemWeights[duelingShieldBase] {
+			t.Errorf("%s: Weight = %v, want %v", c.container, it.Weight, data.ItemWeights[duelingShieldBase])
+		}
+		if it.WepType != 90 {
+			t.Errorf("%s: WepType = %d, want 90 (Dueling / Thrusting Shields)", c.container, it.WepType)
+		}
+		if !it.CanChangeAffinity {
+			t.Errorf("%s: CanChangeAffinity = false, want true", c.container)
+		}
+		if it.DefaultAoWID != wantAoWID || it.DefaultAoWName != wantAoWName {
+			t.Errorf("%s: default AoW = %d %q, want %d %q",
+				c.container, it.DefaultAoWID, it.DefaultAoWName, wantAoWID, wantAoWName)
+		}
 	}
 }

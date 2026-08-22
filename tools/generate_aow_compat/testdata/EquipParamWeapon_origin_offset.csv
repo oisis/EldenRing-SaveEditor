@@ -1,2 +1,4 @@
 Row ID;wepType;gemMountType;disableGemAttr;swordArtsParamId;originEquipWep
-1000;70000;2;0;500;-1
+900;92;2;0;500;1000
+1000;92;2;0;500;-1
+2300;92;2;0;500;1000

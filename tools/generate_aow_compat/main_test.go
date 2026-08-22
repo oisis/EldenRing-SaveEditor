@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -135,7 +136,7 @@ func TestGenerate_WepTypeMappingMatchesEngineCategories(t *testing.T) {
 	expected := map[uint16]uint8{
 		1: 0, 3: 1, 5: 2, 7: 3, 9: 4, 11: 5, 13: 6, 14: 7,
 		15: 8, 16: 9, 17: 10, 19: 11, 21: 12, 23: 13, 24: 14,
-		25: 15, 28: 16, 32: 17, 29: 18, 33: 18, 31: 19, 35: 20,
+		25: 15, 28: 17, 32: 17, 29: 18, 33: 18, 31: 19, 35: 20,
 		37: 21, 39: 22, 41: 23, 50: 24, 51: 25, 53: 26, 55: 27,
 		56: 28, 57: 29, 61: 30, 65: 32, 67: 33, 69: 34, 87: 35,
 		88: 36, 89: 37, 90: 38, 91: 39, 92: 40, 93: 41, 94: 42, 95: 43,
@@ -258,5 +259,135 @@ func TestGenerate_ProvenanceHeader(t *testing.T) {
 	}
 	if !strings.Contains(res.tsSource, res.gemHash) || !strings.Contains(res.tsSource, res.gemParamHash) {
 		t.Error("TS mirror missing gem source hashes")
+	}
+}
+
+// TestGenerate_WeaponOriginEquipWep covers the confirmed-family relation the
+// canonical weapon-identity resolver depends on: the base row points at itself,
+// affinity anchors point back at the base, and the +1200 (Occult) boundary is
+// inclusive.
+func TestGenerate_WeaponOriginEquipWep(t *testing.T) {
+	paramPath := writeGemParamFixture(t, map[uint32]uint64{
+		10: 0x3, 100: 0xF000000000, 200: 0, 300: uint64(1) << 38,
+	})
+	res, err := generate(gemCSVFixture, paramPath, "testdata/EquipParamWeapon_origin.csv")
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	// Row 1000 → 0x3E8 (self-origin), 1100 → 0x44C (+100), 2200 → 0x898 (+1200).
+	for _, want := range []string{
+		"0x000003E8: {WepType: 92, GemMountType: 2, CanChangeAffinity: true, OriginEquipWep: 0x000003E8}",
+		"0x0000044C: {WepType: 92, GemMountType: 2, CanChangeAffinity: true, OriginEquipWep: 0x000003E8}",
+		"0x00000898: {WepType: 92, GemMountType: 2, CanChangeAffinity: true, OriginEquipWep: 0x000003E8}",
+	} {
+		if !strings.Contains(res.weaponGo, want) {
+			t.Errorf("generated WeaponGemMounts missing %q", want)
+		}
+	}
+}
+
+// TestGenerate_WeaponOriginRequiresColumn proves originEquipWep is a required
+// input: silently defaulting it would emit a WeaponGemMounts whose relations are
+// all "unconfirmed", which the resolver cannot distinguish from real data.
+func TestGenerate_WeaponOriginRequiresColumn(t *testing.T) {
+	paramPath := writeGemParamFixture(t, map[uint32]uint64{
+		10: 0x3, 100: 0xF000000000, 200: 0, 300: uint64(1) << 38,
+	})
+	_, err := generate(gemCSVFixture, paramPath, "testdata/EquipParamWeapon_origin_missingcol.csv")
+	if err == nil {
+		t.Fatal("expected error for missing originEquipWep column")
+	}
+	if !strings.Contains(err.Error(), "originEquipWep") {
+		t.Errorf("error = %q, want mention of originEquipWep", err)
+	}
+}
+
+// TestGenerate_WeaponOriginUnconfirmed is the fail-closed half of the contract:
+// every relation the data does not prove must emit 0 ("no confirmed relation")
+// and must never be converted into a hypothesis. -1 in particular must not wrap
+// into a uint32 row ID.
+func TestGenerate_WeaponOriginUnconfirmed(t *testing.T) {
+	cases := []struct {
+		name    string
+		weapon  string
+		absent  []string
+		present []string
+	}{
+		{
+			// The shared fixture carries originEquipWep = -1 on every row.
+			name:    "negative one is not a row ID",
+			weapon:  weaponFixture,
+			absent:  []string{", OriginEquipWep:"},
+			present: []string{"0x000003E8: {WepType: 92, GemMountType: 2, CanChangeAffinity: true}"},
+		},
+		{
+			// Row 1100 points at 1050, which is not a materialized row.
+			name:   "origin outside the materialized rows",
+			weapon: "testdata/EquipParamWeapon_origin_unmaterialized.csv",
+			absent: []string{", OriginEquipWep:"},
+			present: []string{
+				"0x0000044C: {WepType: 92, GemMountType: 2, CanChangeAffinity: true}",
+			},
+		},
+		{
+			// Row 900 sits below its origin; row 2300 is +1300 above it.
+			name:   "offset outside 0..1200",
+			weapon: "testdata/EquipParamWeapon_origin_offset.csv",
+			absent: []string{", OriginEquipWep:"},
+			present: []string{
+				"0x00000384: {WepType: 92, GemMountType: 2, CanChangeAffinity: true}",
+				"0x000008FC: {WepType: 92, GemMountType: 2, CanChangeAffinity: true}",
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			paramPath := writeGemParamFixture(t, map[uint32]uint64{
+				10: 0x3, 100: 0xF000000000, 200: 0, 300: uint64(1) << 38,
+			})
+			res, err := generate(gemCSVFixture, paramPath, c.weapon)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			for _, sub := range c.absent {
+				if strings.Contains(res.weaponGo, sub) {
+					t.Errorf("generated WeaponGemMounts must not emit %q for unconfirmed relations", sub)
+				}
+			}
+			for _, sub := range c.present {
+				if !strings.Contains(res.weaponGo, sub) {
+					t.Errorf("generated WeaponGemMounts missing %q", sub)
+				}
+			}
+		})
+	}
+}
+
+// TestGenerate_WeaponOriginStableEmission pins the emitted field order so a
+// regeneration cannot reorder WeaponGemMount literals into a churn-only diff.
+func TestGenerate_WeaponOriginStableEmission(t *testing.T) {
+	paramPath := writeGemParamFixture(t, map[uint32]uint64{
+		10: 0x3, 100: 0xF000000000, 200: 0, 300: uint64(1) << 38,
+	})
+	a, err := generate(gemCSVFixture, paramPath, "testdata/EquipParamWeapon_origin.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := generate(gemCSVFixture, paramPath, "testdata/EquipParamWeapon_origin.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.weaponGo != b.weaponGo {
+		t.Error("WeaponGemMounts emission is not reproducible across runs")
+	}
+	if !regexp.MustCompile(`OriginEquipWep\s+uint32`).MatchString(a.weaponGo) {
+		t.Error("WeaponGemMount struct is missing the generated OriginEquipWep field")
+	}
+	// Keys stay in ascending Row ID order.
+	iBase := strings.Index(a.weaponGo, "0x000003E8:")
+	iMid := strings.Index(a.weaponGo, "0x0000044C:")
+	iLast := strings.Index(a.weaponGo, "0x00000898:")
+	if iBase < 0 || iMid < iBase || iLast < iMid {
+		t.Errorf("WeaponGemMounts keys are not in ascending Row ID order (%d, %d, %d)", iBase, iMid, iLast)
 	}
 }

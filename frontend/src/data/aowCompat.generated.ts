@@ -22,7 +22,7 @@ export const WEP_TYPE_TO_BITS: Record<number, number[]> = {
     23: [13],
     24: [14],
     25: [15],
-    28: [16],
+    28: [17],
     29: [18],
     31: [19],
     32: [17],

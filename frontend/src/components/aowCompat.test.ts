@@ -23,6 +23,15 @@ describe('generated wepType → bit mapping (parity with backend)', () => {
         expect(WEP_TYPE_TO_BITS[67]).toEqual([33]); // Medium Shield
     });
 
+    it('maps Great Spears to canMountWep_SpearHeavy, not the never-set SpearLarge', () => {
+        // Bit 16 (canMountWep_SpearLarge) is zero on every EquipParamGem row, so
+        // the old 28 -> 16 mapping made every Ash of War incompatible with every
+        // Great Spear. Bit 17 is the column the engine actually checks.
+        expect(WEP_TYPE_TO_BITS[28]).toEqual([17]); // Great Spear
+        expect(WEP_TYPE_TO_BITS[25]).toEqual([15]); // Spear, unchanged
+        expect(WEP_TYPE_TO_BITS[32]).toEqual([17]); // Heavy Spear engine category, unchanged
+    });
+
     it('maps the fixed DLC / torch wepTypes to the corrected bits', () => {
         expect(WEP_TYPE_TO_BITS[87]).toEqual([35]); // Torch (was Bow bit 25)
         expect(WEP_TYPE_TO_BITS[88]).toEqual([36]); // Hand-to-Hand
@@ -74,6 +83,15 @@ describe('getAoWCompatStatus', () => {
         expect(getAoWCompatStatus(0x80002CEC, bit(1), 93)).toBe('incompatible'); // Square Off
         expect(getAoWCompatStatus(0x800631F0, bit(43), 95)).toBe('compatible'); // Raging Beast
         expect(getAoWCompatStatus(0x800631F0, bit(43), 41)).toBe('incompatible');
+    });
+
+    it('mounts a SpearHeavy AoW on a Great Spear and rejects one without the bit', () => {
+        // Impaling Thrust sets canMountWep_SpearHeavy; Sword Dance does not
+        // ("great spears excepted"). wepType 28 is Lance and other Great Spears.
+        expect(getAoWCompatStatus(0x80002774, bit(17), 28)).toBe('compatible');
+        expect(getAoWCompatStatus(0x80003070, bit(15) + bit(18), 28)).toBe('incompatible');
+        // Plain Spears keep using bit 15, so the fix does not leak across classes.
+        expect(getAoWCompatStatus(0x80003070, bit(15) + bit(18), 25)).toBe('compatible');
     });
 
     it('fail-closes on unknown data', () => {

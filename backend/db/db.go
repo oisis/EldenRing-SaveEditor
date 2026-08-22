@@ -555,10 +555,19 @@ func findAshBase(baseName string, idPrefix uint32) (data.ItemData, uint32) {
 // GetItemDataFuzzy returns item metadata for an exact ID, or falls back to:
 //   - Handle→ItemID conversion: for stackable items read from inventory (0xA0→0x20, 0xB0→0x40)
 //   - Spirit ashes: finds base (+0) entry so currentUpgrade can be computed from ID difference.
-//   - Upgraded/infused weapons: byte-masked base search for 0x00... weapon IDs.
+//   - Upgraded/infused weapons: canonical family resolution via ResolveWeaponIdentity.
 //
 // The returned ItemData.Name is the base name without "+N" (caller appends "+N" if needed).
 func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
+	// Weapons resolve through the canonical family resolver first. This has to
+	// precede the exact lookup: an affinity anchor row (e.g. Cold Dueling Shield)
+	// is itself a DB entry, so an exact hit would return the anchor as the base
+	// and the affinity would decode as Standard. Non-weapon IDs, and weapon IDs
+	// the regulation data cannot confirm, fall through unchanged.
+	if wi, ok := ResolveWeaponIdentity(id); ok {
+		return GetItemData(wi.BaseID), wi.BaseID
+	}
+
 	exact := GetItemData(id)
 	if exact.Name != "" {
 		// Spirit ashes store each upgrade level as a separate DB entry with "+N" in the name.
@@ -609,25 +618,7 @@ func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 		}
 	}
 
-	// Weapon fuzzy search: upgraded/infused weapons (prefixes 0x00, 0x01, 0x02).
-	// Range-based: any id in [baseID, baseID+1225] maps to its base entry.
-	// 1225 = max infusion offset (Occult=1200) + max upgrade level (25).
-	// This handles byte-carry cases where (id & 0xFFFFFF00) != (baseID & 0xFFFFFF00),
-	// which occurs for bows/greatbows/seals/staves when upgrade+infuse >= 0x100 - (baseID & 0xFF).
-	if prefix == 0 || prefix == 0x01000000 || prefix == 0x02000000 {
-		const maxCombinedOffset = uint32(1225)
-		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.RangedAndCatalysts, data.Shields}
-		for _, m := range weaponMaps {
-			for baseID, item := range m {
-				if item.Name == "" || baseID&0xF0000000 != prefix {
-					continue
-				}
-				if id >= baseID && id-baseID <= maxCombinedOffset {
-					return GetItemData(baseID), baseID
-				}
-			}
-		}
-	}
+	// Upgraded and infused weapons are handled by ResolveWeaponIdentity above.
 
 	return data.ItemData{}, id
 }

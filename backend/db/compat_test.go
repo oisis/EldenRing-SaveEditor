@@ -433,3 +433,59 @@ func TestIsAoWCompatibleWithWepType_DLCSpecificAoWsDoNotLeakToBaseClasses(t *tes
 		})
 	}
 }
+
+// Great Spear references:
+//
+//	Lance             0x010450A0  wepType 28, gemMountType 2 (real, mountable Great Spear)
+//	Impaling Thrust   0x80002774  canMountWep_SpearHeavy = 1
+//	Sword Dance       0x80003070  canMountWep_SpearHeavy = 0 ("great spears excepted")
+//	Bolt of Gransax   0x00F58390  wepType 25 (Spear), gemMountType 0 — somber, mounts nothing
+//
+// wepType 28 must test bit 17 (canMountWep_SpearHeavy). Bit 16
+// (canMountWep_SpearLarge) is zero on every EquipParamGem row, so the previous
+// 28 → 16 mapping made every Ash of War incompatible with every Great Spear.
+
+func TestIsAshOfWarCompatibleWithWeapon_GreatSpearMountsSpearHeavyAoW(t *testing.T) {
+	compatible, known := IsAshOfWarCompatibleWithWeapon(0x80002774, 0x010450A0)
+	if !known {
+		t.Fatal("expected known=true for Lance + Impaling Thrust")
+	}
+	if !compatible {
+		t.Error("expected compatible=true: Impaling Thrust sets canMountWep_SpearHeavy and Lance is wepType 28")
+	}
+}
+
+func TestIsAshOfWarCompatibleWithWeapon_GreatSpearRejectsNonSpearHeavyAoW(t *testing.T) {
+	compatible, known := IsAshOfWarCompatibleWithWeapon(0x80003070, 0x010450A0)
+	if !known {
+		t.Fatal("expected known=true for Lance + Sword Dance")
+	}
+	if compatible {
+		t.Error("expected compatible=false: Sword Dance has canMountWep_SpearHeavy = 0")
+	}
+}
+
+func TestIsAoWCompatibleWithWepType_GreatSpearUsesSpearHeavyBit(t *testing.T) {
+	if bits, ok := data.CanMountBitsForWepType(28); !ok || len(bits) != 1 || bits[0] != 17 {
+		t.Fatalf("wepType 28 maps to bits %v (known=%v), want [17] (canMountWep_SpearHeavy)", bits, ok)
+	}
+	compatible, known := IsAoWCompatibleWithWepType(0x80002774, 28)
+	if !known || !compatible {
+		t.Errorf("Impaling Thrust + wepType 28: compatible=%v known=%v, want true/true", compatible, known)
+	}
+}
+
+// TestIsAshOfWarCompatibleWithWeapon_SomberSpearStillBlocked pins the unrelated
+// gate: Bolt of Gransax is a somber Spear (wepType 25, gemMountType 0) and must
+// keep rejecting every Ash of War regardless of the bit mapping.
+func TestIsAshOfWarCompatibleWithWeapon_SomberSpearStillBlocked(t *testing.T) {
+	for _, aow := range []uint32{0x80002774, 0x80003070} {
+		compatible, known := IsAshOfWarCompatibleWithWeapon(aow, 0x00F58390)
+		if !known {
+			t.Errorf("AoW 0x%08X + Bolt of Gransax: expected known=true", aow)
+		}
+		if compatible {
+			t.Errorf("AoW 0x%08X + Bolt of Gransax: expected compatible=false (gemMountType 0)", aow)
+		}
+	}
+}

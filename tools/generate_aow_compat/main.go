@@ -108,7 +108,7 @@ var wepTypeToBit = map[uint16]uint8{
 	23: 13, // Great Hammer
 	24: 14, // Flail
 	25: 15, // Spear
-	28: 16, // Great Spear
+	28: 17, // Great Spear (engine checks canMountWep_SpearHeavy; canMountWep_SpearLarge is unset on every gem row)
 	32: 17, // Heavy Spear engine category
 	29: 18, // Halberd
 	33: 18, // Legacy halberd engine category (no mountable app weapon)
@@ -142,6 +142,15 @@ var wepTypeToBit = map[uint16]uint8{
 
 const maskBits = 44
 
+// EquipParamWeapon materializes only the +0 row of each affinity: a family base
+// row and its 12 affinity anchors are spaced materializedRowStep apart, and the
+// last one (Occult) sits maxAffinityRowOffset above the base. Upgrade levels
+// 1..25 are derived through ReinforceParamWeapon and have no rows of their own.
+const (
+	materializedRowStep  = 100
+	maxAffinityRowOffset = 1200
+)
+
 const (
 	paramRowCountOffset = 0x0A
 	paramRowTableOffset = 0x40
@@ -164,6 +173,8 @@ type weapon struct {
 	gm                uint8
 	canChangeAffinity bool
 	sap               int
+	originRaw         int    // EquipParamWeapon.originEquipWep verbatim (signed; -1 = none)
+	origin            uint32 // originRaw once confirmed against the materialized rows; 0 = no confirmed relation
 }
 
 type result struct {
@@ -463,7 +474,7 @@ func readWeapons(path string) ([]weapon, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	if err := requireColumns(path, header, []string{"Row ID", "wepType", "gemMountType", "disableGemAttr", "swordArtsParamId"}); err != nil {
+	if err := requireColumns(path, header, []string{"Row ID", "wepType", "gemMountType", "disableGemAttr", "swordArtsParamId", "originEquipWep"}); err != nil {
 		return nil, "", err
 	}
 	var weapons []weapon
@@ -505,16 +516,63 @@ func readWeapons(path string) ([]weapon, string, error) {
 		if err != nil {
 			return nil, "", err
 		}
+		// originEquipWep is read as a signed integer on purpose: rows without a
+		// family relation carry -1, which must never wrap into a uint32 row ID.
+		originRaw, err := rr.reqInt("originEquipWep") // -1 allowed
+		if err != nil {
+			return nil, "", err
+		}
 		weapons = append(weapons, weapon{
 			rid:               rid,
 			wepType:           uint16(wepType),
 			gm:                uint8(gm),
 			canChangeAffinity: gm == 2 && !disableGemAttr,
 			sap:               sap,
+			originRaw:         originRaw,
 		})
 	}
 	sort.Slice(weapons, func(i, j int) bool { return weapons[i].rid < weapons[j].rid })
+	resolveWeaponOrigins(weapons)
 	return weapons, hash, nil
+}
+
+// resolveWeaponOrigins turns each row's raw originEquipWep back-pointer into a
+// confirmed canonical family base row, or into 0 when the data does not prove
+// the relation. It is deliberately fail-soft rather than fatal: regulation.bin
+// legitimately contains rows with no family (originEquipWep == -1, e.g. the
+// Unarmed placeholder row 110000) alongside rows pointing outside the
+// materialized set. Emitting 0 records "no confirmed relation"; it never
+// substitutes a hypothesis for missing evidence.
+func resolveWeaponOrigins(weapons []weapon) {
+	materialized := make(map[uint32]bool, len(weapons))
+	for _, w := range weapons {
+		if w.rid%materializedRowStep == 0 {
+			materialized[w.rid] = true
+		}
+	}
+	for i := range weapons {
+		weapons[i].origin = confirmedOrigin(weapons[i].rid, weapons[i].originRaw, materialized)
+	}
+}
+
+// confirmedOrigin accepts a family relation only when every condition holds:
+// the pointer is non-negative and inside the uint32 row-ID range, it names a
+// materialized row, the row it is attached to is not below it, and the distance
+// between them is one of the 13 affinity offsets {0, 100, ..., 1200}. Anything
+// else returns 0.
+func confirmedOrigin(rid uint32, originRaw int, materialized map[uint32]bool) uint32 {
+	if originRaw < 0 || int64(originRaw) > math.MaxUint32 {
+		return 0
+	}
+	origin := uint32(originRaw)
+	if !materialized[origin] || rid < origin {
+		return 0
+	}
+	offset := rid - origin
+	if offset > maxAffinityRowOffset || offset%materializedRowStep != 0 {
+		return 0
+	}
+	return origin
 }
 
 func renderAoWGo(res *result, gemPath, gemParamPath, weaponPath string) (string, error) {
@@ -591,6 +649,7 @@ func renderWeaponGo(res *result, weaponPath string) (string, error) {
 	b.WriteString("\tWepType          uint16 // EquipParamWeapon.wepType (weapon category integer)\n")
 	b.WriteString("\tGemMountType     uint8  // EquipParamWeapon.gemMountType: 2 permits custom AoW mounting\n")
 	b.WriteString("\tCanChangeAffinity bool   // gemMountType == 2 && disableGemAttr == 0\n")
+	b.WriteString("\tOriginEquipWep uint32 // EquipParamWeapon.originEquipWep: canonical family base row, confirmed against the materialized rows. 0 means no confirmed relation.\n")
 	b.WriteString("}\n\n")
 	b.WriteString("// WeaponGemMounts maps every EquipParamWeapon Row ID to its AoW/affinity metadata.\n")
 	b.WriteString("// Rows with gemMountType == 0 are deliberately retained: they are required to\n")
@@ -600,13 +659,14 @@ func renderWeaponGo(res *result, weaponPath string) (string, error) {
 		if w.rid%100 != 0 {
 			continue
 		}
+		fields := fmt.Sprintf("WepType: %d, GemMountType: %d", w.wepType, w.gm)
 		if w.canChangeAffinity {
-			fmt.Fprintf(&b, "\t0x%08X: {WepType: %d, GemMountType: %d, CanChangeAffinity: true},\n",
-				w.rid, w.wepType, w.gm)
-		} else {
-			fmt.Fprintf(&b, "\t0x%08X: {WepType: %d, GemMountType: %d},\n",
-				w.rid, w.wepType, w.gm)
+			fields += ", CanChangeAffinity: true"
 		}
+		if w.origin != 0 {
+			fields += fmt.Sprintf(", OriginEquipWep: 0x%08X", w.origin)
+		}
+		fmt.Fprintf(&b, "\t0x%08X: {%s},\n", w.rid, fields)
 	}
 	b.WriteString("}\n")
 	return gofmt(b.String())

@@ -399,8 +399,11 @@ func classifyRecord(slot *core.SaveSlot, container ContainerKind, slotIdx int, h
 	}
 
 	// Editable known-DB item: fetch full metadata (MaxUpgrade / icon / weapon
-	// mount fields) not carried on the lightweight ResolvedRecord.
-	itemData, _ := db.GetItemDataFuzzy(rec.DisplayID)
+	// mount fields) not carried on the lightweight ResolvedRecord. The exact
+	// lookup on rec.BaseID reuses the identity core.ResolveRecord already
+	// resolved — resolving a second time would re-derive the same answer and
+	// risk the two drifting apart.
+	itemData := db.GetItemData(rec.BaseID)
 	level, infusion := decodeWeaponUpgradeInfusion(itemID, baseID)
 	isWeapon := isWeaponCategory(itemData.Category)
 	isArmor := isArmorCategory(itemData.Category)

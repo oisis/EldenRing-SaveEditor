@@ -291,7 +291,7 @@ var WepTypeToCanMountBit = map[uint16]uint8{
 	23: 13, // canMountWep_HammerLarge (bit 13)
 	24: 14, // canMountWep_Flail (bit 14)
 	25: 15, // canMountWep_SpearNormal (bit 15)
-	28: 16, // canMountWep_SpearLarge (bit 16)
+	28: 17, // canMountWep_SpearHeavy (bit 17)
 	29: 18, // canMountWep_SpearAxe (bit 18)
 	31: 19, // canMountWep_Sickle (bit 19)
 	32: 17, // canMountWep_SpearHeavy (bit 17)
