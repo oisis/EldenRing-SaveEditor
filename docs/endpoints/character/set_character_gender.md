@@ -61,7 +61,8 @@ The endpoint performs four steps:
 1. Resolve the confirmed default preset for the requested body type from the
    loaded GameCatalog.
 2. Resolve its eight UI-facing model selections through the same confirmed
-   Type A/Type B PartsId mapping used by `ApplyAppearancePreset`.
+   Type A/Type B PartsId mapping used by `ApplyAppearancePreset`, including the
+   shared Face / Bone Structure table where UI 1-6 map to PartsIds 0 to 50.
 3. Build the complete appearance assignment: gender, voice type, model IDs,
    face shape, body and skin.
 4. Pass that assignment and `expectedRevision` to

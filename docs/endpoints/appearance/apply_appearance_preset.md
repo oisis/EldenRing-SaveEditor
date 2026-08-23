@@ -55,9 +55,11 @@ The endpoint performs four steps:
 1. Read an independent copy of the appearance presets from GameCatalog.
 2. Resolve exactly one `presetID`.
 3. Convert the preset's eight UI-facing model selections to confirmed raw
-   PartsIds. Type A hair uses its confirmed non-sequential map; Type B uses the
-   finite confirmed maps for each model field. An absent mapping is an error,
-   never a guessed value.
+   PartsIds. Face / Bone Structure uses one shared table for both body types:
+   UI 1-6 map to PartsIds 0, 10, 20, 30, 40 and 50. Type A hair uses its
+   confirmed non-sequential map; the remaining Type B fields use the finite
+   confirmed maps for each model field. An absent mapping is an error, never a
+   guessed value.
 4. Pass the complete gender, voice type, raw model IDs, face shape, body and
    skin model plus `expectedRevision` to
    `SaveEngine.ApplyCharacterAppearancePreset`.
@@ -66,9 +68,11 @@ SaveEngine remains the single owner of validation, atomicity, revision handling,
 rollback and the PC/PS4 DFLT/ZSTD write paths. The endpoint never merges a
 preset with the current save and never applies only selected fields.
 
-The model mappings reproduce the behavior shared by SaveForge 1.5.8 and 1.6.10,
-but the 2.0 implementation fails closed where legacy Type A hair code had a
-one-based fallback for an unknown value.
+The model mappings reproduce the confirmed legacy behavior, with two deliberate
+differences. Face / Bone Structure follows the shared 1-6 to 0-50 table
+confirmed in SaveForge 1.6.13, not the one-based Type A conversion and partial
+Type B table of 1.5.8 and 1.6.10. The 2.0 implementation also fails closed where
+legacy Type A hair code had a one-based fallback for an unknown value.
 
 ## Result
 

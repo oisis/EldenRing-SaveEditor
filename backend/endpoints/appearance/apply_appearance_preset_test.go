@@ -63,6 +63,14 @@ func TestApplyAppearancePresetCommitsStoredTypeAAndTypeBPresets(t *testing.T) {
 			modelIDs: [8]uint32{0, 101, 0, 1, 3, 0, 6, 2},
 		},
 		{
+			presetID: "sekiro-the-wolf-shinobi",
+			modelIDs: [8]uint32{50, 9, 0, 7, 1, 0, 1, 2},
+		},
+		{
+			presetID: "red-skull-a-mutated-humanoid",
+			modelIDs: [8]uint32{10, 0, 0, 0, 0, 0, 0, 0},
+		},
+		{
 			presetID: "yennefer-sorceress-from-the-witcher",
 			modelIDs: [8]uint32{50, 106, 0, 14, 0, 0, 8, 3},
 		},
@@ -132,7 +140,7 @@ func TestApplyAppearancePresetRejectsInvalidPresetWithoutMutation(t *testing.T) 
 func TestApplyAppearancePresetRejectsUnconfirmedCatalogMapping(t *testing.T) {
 	preset := gamecatalog.AppearancePreset{
 		ID: "unconfirmed", Name: "Unconfirmed", Image: "unconfirmed.jpg",
-		BodyType: 0, FaceModel: 4, HairModel: 1, EyebrowModel: 1,
+		BodyType: 0, FaceModel: 7, HairModel: 1, EyebrowModel: 1,
 		BeardModel: 1, EyepatchModel: 1, DecalModel: 1, EyelashModel: 1,
 		Tags: []string{},
 	}
@@ -150,10 +158,18 @@ func TestApplyAppearancePresetRejectsUnconfirmedCatalogMapping(t *testing.T) {
 
 	result, err := ApplyAppearancePreset(
 		engine, gameCatalog, loaded.SaveSessionID, 0, preset.ID, "0")
-	if err == nil || !strings.Contains(err.Error(), "unsupported Type B faceModel value 4") {
+	if err == nil || !strings.Contains(err.Error(), "unsupported faceModel value 7") {
 		t.Fatalf("error = %v, want unsupported mapping", err)
 	}
 	if !reflect.DeepEqual(result, ApplyAppearancePresetResult{}) {
 		t.Fatalf("result = %+v, want zero value", result)
+	}
+
+	info, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Fatalf("session = %+v, want unchanged dirty state", info)
 	}
 }
