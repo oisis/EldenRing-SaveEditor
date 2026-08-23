@@ -13,13 +13,15 @@ import (
 // regression for the normal WriteSelectedToFavorites path (replaces the old
 // save-file-dependent FaceModel test). It builds an entirely in-memory App and
 // verifies a Type A preset lands in the Mirror slot with the exact expected
-// bytes, including the FaceModel=6 → raw 5 (UI-1) A1 fix and the hair lookup.
+// bytes, including the FaceModel UI 6 → raw 50 shared Face / Bone Structure
+// mapping and the hair lookup.
 func TestWriteSelectedToFavorites_TypeA_InMemory(t *testing.T) {
 	const charIdx = 0
 	const testName = "A3b In-Memory Type A Preset"
 
 	// Distinct, non-zero UI values for all eight models. HairModel=37 exercises
-	// the male hair lookup table (UI 37 → PartsId 124); the rest use UI-1.
+	// the male hair lookup table (UI 37 → PartsId 124), FaceModel=6 the shared
+	// Face / Bone Structure table (UI 6 → PartsId 50); the rest use UI-1.
 	preset := data.AppearancePreset{
 		Name:          testName,
 		BodyType:      1, // Type A (male)
@@ -50,10 +52,10 @@ func TestWriteSelectedToFavorites_TypeA_InMemory(t *testing.T) {
 		t.Fatalf("LookupMaleHairPartsID(%d) = (%d, %v), want (%d, true)", preset.HairModel, got, ok, wantHairPartsID)
 	}
 
-	// Expected raw Model IDs in the written slot: UI-1 for all except hair,
-	// which is the literal reference PartsId 124.
+	// Expected raw Model IDs in the written slot: UI-1 for all except face and
+	// hair, which are the literal reference PartsIds 50 and 124.
 	wantModels := [8]uint32{
-		uint32(preset.FaceModel - 1),     // 5
+		50,                               // face UI 6 → shared Face/Bone PartsId
 		wantHairPartsID,                  // 124 (literal reference)
 		uint32(preset.EyeModel - 1),      // 1
 		uint32(preset.EyebrowModel - 1),  // 2

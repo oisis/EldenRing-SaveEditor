@@ -26,13 +26,15 @@ type resolvedAppearance struct {
 
 // resolveAppearance converts a preset's UI model values into raw save-file
 // PartsIds, validating BEFORE any mutation:
-//   - Type A (BodyType 1): UI-1 for every model, hair via LookupMaleHairPartsID
-//     (UI-1 fallback for unmapped styles) — byte-identical to the prior behavior.
+//   - Type A (BodyType 1): Face via data.LookupFaceBonePartsID (the shared
+//     Face / Bone Structure table, rejecting anything outside UI 1-6), hair via
+//     LookupMaleHairPartsID (UI-1 fallback for unmapped styles), UI-1 for the
+//     six remaining models.
 //   - Type B (BodyType 0): data.LookupFemaleModelIDs, which rejects any value
 //     outside the verified UI→PartsId table with NO fallback.
 //
-// An unmapped Type B preset returns an error and a zero payload, so callers can
-// fail closed before touching Undo, a snapshot, or the save.
+// An unmapped Face value or Type B preset returns an error and a zero payload,
+// so callers can fail closed before touching Undo, a snapshot, or the save.
 func resolveAppearance(preset *data.AppearancePreset) (resolvedAppearance, error) {
 	r := resolvedAppearance{
 		FaceShape: preset.FaceShape,
@@ -49,7 +51,11 @@ func resolveAppearance(preset *data.AppearancePreset) (resolvedAppearance, error
 			}
 			return 0
 		}
-		r.Models[0] = ui1(preset.FaceModel)
+		faceID, ok := data.LookupFaceBonePartsID(preset.FaceModel)
+		if !ok {
+			return resolvedAppearance{}, fmt.Errorf("preset %q has Face/Bone Structure UI value %d outside the verified 1-6 mapping", preset.Name, preset.FaceModel)
+		}
+		r.Models[0] = faceID
 		if partsID, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
 			r.Models[1] = partsID
 		} else {

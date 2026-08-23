@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.13] - 2026-08-23
+
+### fix(appearance): Type A presets keep their Face / Bone Structure
+
+Applying a Type A preset, or adding one to Mirror Favorites, wrote the wrong
+face bone structure: the zero-based UI index was stored without converting it
+to the raw game ID, so a preset built on face 6 stored 5 instead of 50, which
+could leave the character with a wrong or invisible model.
+Face bone structures are now resolved through a single table shared by Type A
+and Type B, which stores the six positions as 0, 10, 20, 30, 40 and 50, and a
+preset with a face value outside that range is rejected before anything is
+written. Presets such as "Sekiro, the Wolf Shinobi", "Lord Voldemort, the Dark
+Wizard" and "Red Skull, a Mutated Humanoid" now match their intended faces.
+
 ### fix(items): Rotten Staff and Rain of Fire are listed in the right categories
 
 Rotten Staff is a Colossal Weapon, but it was listed among the Ranged Weapons /

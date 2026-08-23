@@ -12,7 +12,6 @@ package data
 // converted Type B presets "Casca, Berserk's Band of the Falcon Commander" and
 // "Fire Keeper, the Dark Souls 3 NPC".
 var (
-	femaleFaceUIToPartsID     = map[uint8]uint8{3: 20, 5: 40, 6: 50}
 	femaleHairUIToPartsID     = map[uint8]uint8{1: 0, 6: 100, 22: 106, 24: 109, 31: 116, 37: 124}
 	femaleEyeUIToPartsID      = map[uint8]uint8{0: 0}
 	femaleEyebrowUIToPartsID  = map[uint8]uint8{1: 0, 3: 2, 10: 9, 15: 14, 16: 15}
@@ -26,6 +25,9 @@ var (
 // verified raw save-file PartsIds. The returned tuple order is
 // Face, Hair, Eye, Eyebrow, Beard, Eyepatch, Decal, Eyelash.
 //
+// Face uses faceBoneUIToPartsID, the shared Face / Bone Structure table that
+// Type A resolves through as well; the seven other tables stay female-only.
+//
 // It returns (tuple, true) only when every model maps within the verified table;
 // if any single value is unmapped it returns (zero, false) with no fallback, so
 // callers never write a guessed or scrambled female appearance.
@@ -35,7 +37,7 @@ func LookupFemaleModelIDs(p AppearancePreset) ([8]uint8, bool) {
 		table map[uint8]uint8
 		ui    uint8
 	}{
-		{femaleFaceUIToPartsID, p.FaceModel},
+		{faceBoneUIToPartsID, p.FaceModel},
 		{femaleHairUIToPartsID, p.HairModel},
 		{femaleEyeUIToPartsID, p.EyeModel},
 		{femaleEyebrowUIToPartsID, p.EyebrowModel},
