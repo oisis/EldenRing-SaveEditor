@@ -26,18 +26,18 @@
     },
     "category": {
       "known": true,
-      "value": "ranged_and_catalysts",
+      "value": "melee_armaments",
       "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Category"
+        "source": "curated_category",
+        "method": "curated category correction (EquipParamWeapon:23140000 wepType=41): wepType 41 is a Colossal Weapon; the staff name drove a wrong tab placement"
       }
     },
     "subcategory": {
       "known": true,
-      "value": "Glintstone Staffs",
+      "value": "Colossal Weapons",
       "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.SubCategory"
+        "source": "curated_category",
+        "method": "curated category correction (EquipParamWeapon:23140000 wepType=41): wepType 41 is a Colossal Weapon; the staff name drove a wrong tab placement"
       }
     },
     "presentation": {
@@ -75,10 +75,10 @@
       },
       "iconPath": {
         "known": true,
-        "value": "assets/icons/items/ranged_and_catalysts/rotten_staff.png",
+        "value": "assets/icons/items/melee_armaments/rotten_staff.png",
         "provenance": {
-          "source": "legacy_item_icons",
-          "method": "copied once from the shared legacy item asset"
+          "source": "curated_category",
+          "method": "curated category correction (EquipParamWeapon:23140000 wepType=41): wepType 41 is a Colossal Weapon; the staff name drove a wrong tab placement"
         }
       },
       "textMetadata": {

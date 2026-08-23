@@ -218,7 +218,7 @@
         "rules": {
           "mode": "custom",
           "weaponType": "Great Spears",
-          "compatibilityBit": 16
+          "compatibilityBit": 17
         },
         "provenance": {
           "source": "regulation_equip_param_weapon",
@@ -229,8 +229,8 @@
         },
         "rulesEvidence": [
           {
-            "source": "legacy_db_data",
-            "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+            "source": "curated_aow_mount_bits",
+            "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
           }
         ]
       },
@@ -655,7 +655,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -666,8 +666,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -1757,7 +1757,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -1768,8 +1768,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -2859,7 +2859,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -2870,8 +2870,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -3961,7 +3961,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -3972,8 +3972,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -5063,7 +5063,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -5074,8 +5074,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -6165,7 +6165,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -6176,8 +6176,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -7267,7 +7267,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -7278,8 +7278,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -8369,7 +8369,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -8380,8 +8380,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -9471,7 +9471,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -9482,8 +9482,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -10661,7 +10661,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -10672,8 +10672,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -11851,7 +11851,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -11862,8 +11862,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },
@@ -13041,7 +13041,7 @@
               "rules": {
                 "mode": "custom",
                 "weaponType": "Great Spears",
-                "compatibilityBit": 16
+                "compatibilityBit": 17
               },
               "provenance": {
                 "source": "regulation_equip_param_weapon",
@@ -13052,8 +13052,8 @@
               },
               "rulesEvidence": [
                 {
-                  "source": "legacy_db_data",
-                  "method": "copied from the reviewed WepTypeToCanMountBit game-mechanics mapping"
+                  "source": "curated_aow_mount_bits",
+                  "method": "curated SaveForge 2.0 mount bit 17 replacing legacy bit 16: EquipParamGem:0x800058AC (Chilling Mist) has canMountWep_SpearHeavy (bit 17) set and canMountWep_SpearLarge (bit 16) clear; SaveForge 1.6.13 confirmed the game accepts it on Lance (0x010450A0) and Messmer Soldier's Spear (0x010B2E70)"
                 }
               ]
             },

@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 16,
-    "dataVersion": "509a91ca6e22bf69330f2f1f02b90306a3622c7b189119c4459db96d11fdd200",
+    "dataVersion": "fc8e8c0ea31130ba537cd145079893f37ebce8e0694e82489356a6a7815a09fa",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -264,7 +264,7 @@
         "id": "game_text_gr_menu_text_base",
         "kind": "game_text_fmg_extract",
         "location": "regulation.bin/msg/engus/menu.msgbnd/GR_MenuText.fmg",
-        "version": "6851600087f553ef58701850d245a7a43932e540bb08669ab205a39e702c7023",
+        "version": "7d6ed4dfcc194e14aad330886a462ef1e7485217b0effac6bff78e9f7021feb4",
         "evidence": "game_data",
         "reviewed": true
       },
@@ -273,6 +273,22 @@
         "kind": "curated_safety_overrides",
         "location": "archive/saveforge-1.6.8/backend/gamecatalog/migration/safety_curation.go",
         "version": "0466c76dce87e5fc6fe5eb9913ebe57e5d1ed56609a376e5fbd14a5f5d67fa4e",
+        "evidence": "curated",
+        "reviewed": true
+      },
+      {
+        "id": "curated_category",
+        "kind": "curated_category_overrides",
+        "location": "saveforge-2.0/gamecatalog/curation/category",
+        "version": "2b414c4dca447c0fbd73e2b0966f336312f146a27e14b614ec0462134171431e",
+        "evidence": "curated",
+        "reviewed": true
+      },
+      {
+        "id": "curated_aow_mount_bits",
+        "kind": "curated_aow_mount_bits",
+        "location": "saveforge-2.0/gamecatalog/curation/ash_of_war_mount_bits",
+        "version": "179d0d596b8f795f3a4487a0a7181410a621752baa5cc3e98ac2b44600728648",
         "evidence": "curated",
         "reviewed": true
       },
@@ -288,7 +304,7 @@
         "id": "legacy_item_icons",
         "kind": "legacy_item_assets",
         "location": "archive/saveforge-1.6.8/frontend/public/items",
-        "version": "406f7bedcac1c7d3017d217ab81ef2f9d9529bf953f5bba1e4ce9ade9198263d",
+        "version": "5864731eec377cb33713bdb2a1afff09f0b7eb0f525a65f1b341f5bcfeda2508",
         "evidence": "curated",
         "reviewed": true
       },

@@ -26,10 +26,10 @@
     },
     "category": {
       "known": true,
-      "value": "sorceries",
+      "value": "incantations",
       "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Category"
+        "source": "curated_category",
+        "method": "curated category correction (Magic:1075901186 / GoodsName.fmg incantation listing): Rain of Fire is an incantation and ships its own incantation icon"
       }
     },
     "subcategory": {
@@ -75,10 +75,10 @@
       },
       "iconPath": {
         "known": true,
-        "value": "assets/icons/items/sorceries/rain_of_fire.png",
+        "value": "assets/icons/items/incantations/rain_of_fire.png",
         "provenance": {
-          "source": "legacy_item_icons",
-          "method": "copied once from the shared legacy item asset"
+          "source": "curated_category",
+          "method": "curated category correction (Magic:1075901186 / GoodsName.fmg incantation listing): Rain of Fire is an incantation and ships its own incantation icon"
         }
       },
       "textMetadata": {
