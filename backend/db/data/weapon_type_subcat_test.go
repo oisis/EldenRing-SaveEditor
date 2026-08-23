@@ -196,16 +196,29 @@ func TestWeaponSubcat_WepTypeTableComplete(t *testing.T) {
 	}
 }
 
-//  3. Documented discrepancy: "Rotten Staff" lives in the Ranged/Catalysts tab
-//     but its canonical wepType is 41 (Colossal Weapon — a melee type). Since 41
-//     is not a ranged sub-group it is intentionally NOT remapped; fixing it needs
-//     a Category move, out of scope for sub-category labeling. This test pins the
-//     current behavior so the discrepancy is not silently "fixed" the wrong way.
-func TestWeaponSubcat_RottenStaffDiscrepancy(t *testing.T) {
-	const rottenStaff = 0x016116A0 // wepType 41, Category ranged_and_catalysts
-	item, ok := RangedAndCatalysts[rottenStaff]
+//  3. Category-level fix: "Rotten Staff" has canonical wepType 41 (Colossal
+//     Weapon, a melee type), so it belongs to the Melee Armaments map and must
+//     receive the Colossal Weapons sub-group through the wepType SSOT. This test
+//     pins the whole chain — map ownership, Category, SubCategory and the
+//     wepType tables — so the item cannot drift back into the ranged tab.
+func TestWeaponSubcat_RottenStaffIsMeleeColossal(t *testing.T) {
+	const rottenStaff = 0x016116A0 // wepType 41, Category melee_armaments
+
+	if _, ok := RangedAndCatalysts[rottenStaff]; ok {
+		t.Fatalf("Rotten Staff (%#x) must not be in RangedAndCatalysts", rottenStaff)
+	}
+	item, ok := Weapons[rottenStaff]
 	if !ok {
-		t.Skip("Rotten Staff not in RangedAndCatalysts under expected ID")
+		t.Fatalf("Rotten Staff (%#x) missing from Weapons", rottenStaff)
+	}
+	if item.Name != "Rotten Staff" {
+		t.Errorf("Weapons[%#x].Name = %q, want %q", rottenStaff, item.Name, "Rotten Staff")
+	}
+	if item.Category != "melee_armaments" {
+		t.Errorf("Rotten Staff Category = %q, want %q", item.Category, "melee_armaments")
+	}
+	if item.SubCategory != SubcatMeleeColossalWeapons {
+		t.Errorf("Rotten Staff SubCategory = %q, want %q", item.SubCategory, SubcatMeleeColossalWeapons)
 	}
 	if wt := weaponWepType[rottenStaff]; wt != 41 {
 		t.Fatalf("Rotten Staff wepType = %d, expected canonical 41 (Colossal Weapon)", wt)
@@ -213,8 +226,21 @@ func TestWeaponSubcat_RottenStaffDiscrepancy(t *testing.T) {
 	if _, mapped := rangedWepTypeSubcat[41]; mapped {
 		t.Fatalf("wepType 41 must not be a ranged sub-group")
 	}
-	// It keeps the name-fallback classification, NOT a melee sub-category.
-	if item.SubCategory == SubcatMeleeColossalWeapons {
-		t.Errorf("Rotten Staff must not receive melee sub-category %q while in the ranged tab", SubcatMeleeColossalWeapons)
+
+	// Adjacent negative case: the similarly named "Rotten Crystal Staff" is a
+	// genuine Glintstone Staff and must stay in the ranged tab.
+	const rottenCrystalStaff = 0x01FBA8F0
+	if _, ok := Weapons[rottenCrystalStaff]; ok {
+		t.Errorf("Rotten Crystal Staff (%#x) must not be in Weapons", rottenCrystalStaff)
+	}
+	rcs, ok := RangedAndCatalysts[rottenCrystalStaff]
+	if !ok {
+		t.Fatalf("Rotten Crystal Staff (%#x) missing from RangedAndCatalysts", rottenCrystalStaff)
+	}
+	if rcs.Category != "ranged_and_catalysts" {
+		t.Errorf("Rotten Crystal Staff Category = %q, want %q", rcs.Category, "ranged_and_catalysts")
+	}
+	if rcs.SubCategory != SubcatRangedGlintstoneStaffs {
+		t.Errorf("Rotten Crystal Staff SubCategory = %q, want %q", rcs.SubCategory, SubcatRangedGlintstoneStaffs)
 	}
 }

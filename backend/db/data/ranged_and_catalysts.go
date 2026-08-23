@@ -32,7 +32,6 @@ var RangedAndCatalysts = map[uint32]ItemData{
 	0x0291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ranged_and_catalysts/crepuss_black_key_crossbow.png"},
 	0x029F8A10: {Name: "Jar Cannon", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ranged_and_catalysts/jar_cannon.png"},
 	0x02A70420: {Name: "Rabbath's Cannon", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ranged_and_catalysts/rabbaths_cannon.png", Flags: []string{"dlc"}},
-	0x016116A0: {Name: "Rotten Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ranged_and_catalysts/rotten_staff.png"},
 	0x01F78A40: {Name: "Glintstone Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/glintstone_staff.png"},
 	0x01F82680: {Name: "Crystal Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ranged_and_catalysts/crystal_staff.png"},
 	0x01F84D90: {Name: "Gelmir Glintstone Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/gelmir_glintstone_staff.png"},

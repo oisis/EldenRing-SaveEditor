@@ -392,6 +392,7 @@ var Weapons = map[uint32]ItemData{
 	0x0160A170: {Name: "Giant-Crusher", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/giant_crusher.png"},
 	0x0160C880: {Name: "Golem's Halberd", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/golems_halberd.png"},
 	0x0160EF90: {Name: "Troll's Hammer", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/trolls_hammer.png"},
+	0x016116A0: {Name: "Rotten Staff", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/rotten_staff.png"},
 	0x01613DB0: {Name: "Rotten Greataxe", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/rotten_greataxe.png"},
 	0x016694E0: {Name: "Devonia's Hammer", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/devonias_hammer.png", Flags: []string{"dlc"}},
 	0x0166BBF0: {Name: "Shadow Sunflower Blossom", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/shadow_sunflower_blossom.png", Flags: []string{"dlc"}},

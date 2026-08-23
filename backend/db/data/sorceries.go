@@ -84,6 +84,5 @@ var Sorceries = map[uint32]ItemData{
 	0x401E97A4: {Name: "Mantle of Thorns", Category: "sorceries", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/sorceries/mantle_of_thorns.png", Flags: []string{"dlc"}},
 	0x40001216: {Name: "Thops's Barrier", Category: "sorceries", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/sorceries/thopss_barrier.png"},
 	0x40001964: {Name: "Night Maiden's Mist", Category: "sorceries", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/sorceries/night_maidens_mist.png"},
-	0x401EA302: {Name: "Rain of Fire", Category: "sorceries", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/sorceries/rain_of_fire.png", Flags: []string{"dlc"}},
 	0x40001220: {Name: "Carian Retaliation", Category: "sorceries", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/sorceries/carian_retaliation.png"},
 }

@@ -9,11 +9,9 @@ package data
 // for items missing from the wepType table.
 //
 // Maps are split per tab so a wepType can only resolve to a sub-group that
-// actually belongs to that tab. This deliberately leaves cross-category source
-// mislabels untouched: e.g. "Rotten Staff" sits in the Ranged/Catalysts tab but
-// its canonical wepType is 41 (Colossal Weapon, a melee type). Since 41 is not a
-// ranged sub-group it is not remapped here — that is a Category-level fix,
-// outside the scope of sub-category labeling.
+// actually belongs to that tab. A cross-category source mislabel is therefore
+// never repaired here: it has to be fixed at the Category level, by moving the
+// item to the map that owns its canonical wepType.
 
 // meleeWepTypeSubcat maps melee EquipParamWeapon.wepType values to Melee
 // Armaments sub-groups. wepType 33 (Unarmed) is intentionally absent — it has no

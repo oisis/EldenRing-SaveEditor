@@ -122,6 +122,7 @@ var Incantations = map[uint32]ItemData{
 	0x401E9FE2: {Name: "Bayle's Flame Lightning", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/bayles_flame_lightning.png", Flags: []string{"dlc"}},
 	0x401E9EB6: {Name: "Multilayered Ring of Light", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/multilayered_ring_of_light.png", Flags: []string{"dlc"}},
 	0x401E9E98: {Name: "Land of Shadow", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/land_of_shadow.png", Flags: []string{"dlc"}},
+	0x401EA302: {Name: "Rain of Fire", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/rain_of_fire.png", Flags: []string{"dlc"}},
 	0x401E9D1C: {Name: "Furious Blade of Ansbach", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/furious_blade_of_ansbach.png", Flags: []string{"dlc"}},
 	0x401E9E7A: {Name: "Aspects of the Crucible: Thorns", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/aspects_of_the_crucible_thorns.png", Flags: []string{"dlc"}},
 	0x401E9F7E: {Name: "Dragonbolt of Florissax", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/dragonbolt_of_florissax.png", Flags: []string{"dlc"}},

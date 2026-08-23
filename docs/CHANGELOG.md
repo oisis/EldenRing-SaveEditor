@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### fix(items): Rotten Staff and Rain of Fire are listed in the right categories
+
+Rotten Staff is a Colossal Weapon, but it was listed among the Ranged Weapons /
+Catalysts and shown there as a Glintstone Staff. It now appears under Melee
+Armaments as a Colossal Weapon. Rain of Fire is an incantation and was listed
+among the Sorceries; it now appears under Incantations. Both icons moved to
+their new category folders and the stale copies were removed. Existing build
+templates that still name the old categories keep importing unchanged, since
+items are identified by their item ID.
+
 ## [1.6.12] - 2026-08-22
 
 ### fix(ashes of war): Great Spears accept their compatible Ashes of War again

@@ -32,7 +32,7 @@ var somberWeapons = []struct {
 	{0x01E11C10, 31530000, "Golden Lion Shield", Shields, "Shields", "shields", 8300},
 	{0x0175FE30, 24510000, "Lamenting Visage", Shields, "Shields", "shields", 2200},
 
-	// --- Ranged / Catalysts (24) ---
+	// --- Ranged / Catalysts (23) ---
 	// Bows / Greatbows
 	{0x0262CF30, 40030000, "Harp Bow", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2200},
 	{0x02721170, 41030000, "Erdtree Bow", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2200},
@@ -50,7 +50,6 @@ var somberWeapons = []struct {
 	{0x0291CE70, 43110000, "Crepus's Black-Key Crossbow", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 3200},
 	{0x029F8A10, 44010000, "Jar Cannon", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 3200},
 	// Glintstone staves
-	{0x016116A0, 23140000, "Rotten Staff", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2200},
 	{0x01F82680, 33040000, "Crystal Staff", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 	{0x01F8E9D0, 33090000, "Carian Regal Scepter", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 	{0x01FB0CB0, 33230000, "Azur's Glintstone Staff", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
@@ -62,7 +61,7 @@ var somberWeapons = []struct {
 	{0x0207DDF0, 34070000, "Erdtree Seal", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 	{0x02080500, 34080000, "Dragon Communion Seal", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 
-	// --- Melee armaments (16) ---
+	// --- Melee armaments (17) ---
 	{0x0026C1E0, 2540000, "Stone-Sheathed Sword", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x007270E0, 7500000, "Spirit Sword", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x00A8C320, 11060000, "Varr's Bouquet", Weapons, "Weapons", "melee_armaments", 2200},
@@ -79,11 +78,12 @@ var somberWeapons = []struct {
 	{0x00BA2840, 12200000, "Devourer's Scepter", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x015F1AD0, 23010000, "Watchdog's Staff", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x01600530, 23070000, "Staff of the Avatar", Weapons, "Weapons", "melee_armaments", 2200},
+	{0x016116A0, 23140000, "Rotten Staff", Weapons, "Weapons", "melee_armaments", 2200},
 }
 
 func TestSomberWeapons_MaxUpgradeIs10(t *testing.T) {
 	if got := len(somberWeapons); got != 45 {
-		t.Fatalf("table size: got %d entries, want 45 (5 shields + 24 ranged/catalysts + 16 melee)", got)
+		t.Fatalf("table size: got %d entries, want 45 (5 shields + 23 ranged/catalysts + 17 melee)", got)
 	}
 	for _, sw := range somberWeapons {
 		t.Run(sw.Name, func(t *testing.T) {

@@ -61,9 +61,9 @@ func init() {
 		if item.SubCategory != "" {
 			continue
 		}
-		// Canonical wepType wins; name heuristic is the fallback. Cross-category
-		// source mislabels (e.g. Rotten Staff, wepType 41) are not in
-		// rangedWepTypeSubcat and stay on the name fallback by design.
+		// Canonical wepType wins; name heuristic is the fallback. A melee
+		// wepType is not in rangedWepTypeSubcat, so a cross-category source
+		// mislabel stays on the name fallback until its Category is fixed.
 		if sc, ok := wepTypeSubcat(id, rangedWepTypeSubcat); ok {
 			item.SubCategory = sc
 		} else {
