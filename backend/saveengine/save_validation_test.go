@@ -445,6 +445,13 @@ func TestGetSaveValidationFacts_StatsRules(t *testing.T) {
 	lowSoulMemory := uint32(0)
 	unknownClass := byte(200)
 
+	// One level above the Vagabond base of 9, bought with one extra point of
+	// Vigor. Unlike the untouched base build, this character did pay for a
+	// level, so a stored zero is genuinely below the minimum.
+	oneLevelAboveBase := validationTestVagabond
+	oneLevelAboveBase[0] = 16
+	oneLevelAboveBaseLevel := validationTestVagabondLevel + 1
+
 	tests := []struct {
 		name                  string
 		fixture               validationTestFixture
@@ -472,8 +479,22 @@ func TestGetSaveValidationFacts_StatsRules(t *testing.T) {
 			wantExpectedLevelZero: true,
 		},
 		{
-			name:                "lifetime runes below the level minimum",
+			// The native vanilla save stores exactly this: a freshly created
+			// class sitting at its own base level with TotalGetSoul zero. The
+			// minimum is counted from that base level, so nothing is owed and
+			// the untouched character must not be reported.
+			name:                "a freshly created class at its base level owes nothing",
 			fixture:             validationTestFixture{platform: PlatformPC, soulMemory: &lowSoulMemory},
+			wantBelowSoulMemory: false,
+		},
+		{
+			name: "lifetime runes below the minimum the levels above the class base require",
+			fixture: validationTestFixture{
+				platform:   PlatformPC,
+				attributes: &oneLevelAboveBase,
+				level:      &oneLevelAboveBaseLevel,
+				soulMemory: &lowSoulMemory,
+			},
 			wantBelowSoulMemory: true,
 		},
 		{

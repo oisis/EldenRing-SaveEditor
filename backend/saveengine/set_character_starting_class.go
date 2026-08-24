@@ -9,42 +9,63 @@ import (
 
 // SetCharacterStartingClassResult reports one committed starting-class mutation.
 // It returns the session ID, the new revision, the character ID, the applied
-// startingClassID, the eight resulting attributes, the resulting level, the
-// resulting SoulMemory, and a boolean indicating whether any attribute was
-// raised to meet the new class's minima.
+// startingClassID, the eight base attributes of that class, its base level and
+// the SoulMemory the character keeps, which this mutation never changes.
 type SetCharacterStartingClassResult struct {
-	SaveSessionID    string              `json:"saveSessionID"`
-	SaveRevision     string              `json:"saveRevision"`
-	CharacterID      int                 `json:"characterID"`
-	StartingClassID  uint8               `json:"startingClassID"`
-	Attributes       CharacterAttributes `json:"attributes"`
-	Level            uint32              `json:"level"`
-	SoulMemory       uint32              `json:"soulMemory"`
-	AttributesRaised bool                `json:"attributesRaised"`
+	SaveSessionID   string              `json:"saveSessionID"`
+	SaveRevision    string              `json:"saveRevision"`
+	CharacterID     int                 `json:"characterID"`
+	StartingClassID uint8               `json:"startingClassID"`
+	Attributes      CharacterAttributes `json:"attributes"`
+	Level           uint32              `json:"level"`
+	SoulMemory      uint32              `json:"soulMemory"`
 }
 
 // SetCharacterStartingClass atomically assigns the starting class of one active
 // character, synchronising both the PlayerGameData and ProfileSummary copies.
 //
-// If any of the character's current attributes are below the base values of the
-// new starting class, they are raised to meet the new class's minima; attributes
-// at or above the minima are never lowered. The level is recalculated from the
-// resulting attributes (level = sum - 79) and written to both PlayerGameData
-// and ProfileSummary. If the recalculated level requires a higher TotalGetSoul
-// (SoulMemory) than currently stored, TotalGetSoul is raised to that level's
-// minimum and never lowered.
+// This is a destructive build reset, not a class relabel. The eight attributes
+// become exactly the base attributes of the target class and the level becomes
+// exactly its ClassDocument.Level, both taken from the embedded GameCatalog.
+// Points the player distributed are discarded, attributes are lowered as freely
+// as they are raised, and the level is never derived from the attribute sum
+// here: the class carries its own confirmed soulLv.
+//
+// Because the reset destroys the current build, it runs only when the caller
+// sets confirmReset. A missing or false confirmReset is rejected before anything
+// is read or written, so the save and the revision stay exactly as they were.
+//
+// A committed reset leaves the ordinary single undo point of the session under
+// opSetCharacterStartingClass, so UndoCharacterChanges restores the previous
+// class, level, attributes, SoulMemory and held runes. That point is one level
+// deep and not durable: the next mutation replaces it and WriteSave ends the
+// possibility of undoing, exactly as for every other character mutation.
+//
+// TotalGetSoul (SoulMemory) and the held runes are preserved byte for byte. A
+// class change earns and spends nothing, so neither the lifetime-rune floor nor
+// the rune purse belongs to this mutation; SetCharacterStats remains the only
+// path that raises TotalGetSoul.
+//
+// Nothing else changes: the name, gender, appearance, inventory, storage,
+// equipment, spells and every unrelated byte are preserved.
 func (engine *Engine) SetCharacterStartingClass(
 	saveSessionID string,
 	characterID int,
 	startingClassID uint8,
+	confirmReset bool,
 	expectedRevision string,
 ) (SetCharacterStartingClassResult, error) {
+	if !confirmReset {
+		return SetCharacterStartingClassResult{}, errors.New(
+			"confirmReset must be true: changing the starting class resets all eight attributes " +
+				"and the level to the base values of the target class")
+	}
 	if !isCanonicalRevision(expectedRevision) {
 		return SetCharacterStartingClassResult{}, fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
-	newMinima, err := startingClassMinima(startingClassID)
+	definition, err := startingClass(startingClassID)
 	if err != nil {
 		return SetCharacterStartingClassResult{}, err
 	}
@@ -53,7 +74,6 @@ func (engine *Engine) SetCharacterStartingClass(
 		resultingAttributes CharacterAttributes
 		resultingLevel      uint32
 		resultingSoulMemory uint32
-		attributesRaised    bool
 	)
 
 	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterStartingClass, characterID, func(loaded *loadedSave) error {
@@ -106,35 +126,21 @@ func (engine *Engine) SetCharacterStartingClass(
 			return fmt.Errorf("cannot read profile summary class of character %d: %w", characterID, err)
 		}
 
-		var values [characterAttributeCount]uint32
-		raised := false
-		for index := 0; index < characterAttributeCount; index++ {
-			val := binary.LittleEndian.Uint32(blockBefore[index*4:])
-			if val < newMinima[index] {
-				val = newMinima[index]
-				raised = true
-			}
-			values[index] = val
-		}
+		// The reset copies the class definition verbatim. Whatever the eight
+		// stored attributes were, legal or not, they are replaced rather than
+		// carried forward, so a build cannot survive the change in any form.
+		values := definition.attributes
+		level := definition.level
 
-		level, err := recalculateCharacterLevel(values)
-		if err != nil {
-			return err
-		}
-
-		requiredSoulMemory := minimumSoulMemoryForLevel(level)
-		storedSoulMemory := binary.LittleEndian.Uint32(blockBefore[statsBlockTotalGetSoulPosition:])
-		sm := storedSoulMemory
-		if sm < requiredSoulMemory {
-			sm = requiredSoulMemory
-		}
+		// TotalGetSoul is read only to report it. It stays inside the cloned
+		// block untouched, together with the held runes.
+		sm := binary.LittleEndian.Uint32(blockBefore[statsBlockTotalGetSoulPosition:])
 
 		blockAfter := bytes.Clone(blockBefore)
 		for index, value := range values {
 			binary.LittleEndian.PutUint32(blockAfter[index*4:], value)
 		}
 		binary.LittleEndian.PutUint32(blockAfter[statsBlockLevelPosition:], level)
-		binary.LittleEndian.PutUint32(blockAfter[statsBlockTotalGetSoulPosition:], sm)
 
 		classAfter := []byte{startingClassID}
 
@@ -153,7 +159,6 @@ func (engine *Engine) SetCharacterStartingClass(
 			}
 			resultingLevel = level
 			resultingSoulMemory = sm
-			attributesRaised = raised
 			return nil
 		}
 
@@ -195,7 +200,6 @@ func (engine *Engine) SetCharacterStartingClass(
 			}
 			resultingLevel = level
 			resultingSoulMemory = sm
-			attributesRaised = raised
 			return nil
 		}
 
@@ -209,14 +213,13 @@ func (engine *Engine) SetCharacterStartingClass(
 	}
 
 	return SetCharacterStartingClassResult{
-		SaveSessionID:    saveSessionID,
-		SaveRevision:     saveRevision,
-		CharacterID:      characterID,
-		StartingClassID:  startingClassID,
-		Attributes:       resultingAttributes,
-		Level:            resultingLevel,
-		SoulMemory:       resultingSoulMemory,
-		AttributesRaised: attributesRaised,
+		SaveSessionID:   saveSessionID,
+		SaveRevision:    saveRevision,
+		CharacterID:     characterID,
+		StartingClassID: startingClassID,
+		Attributes:      resultingAttributes,
+		Level:           resultingLevel,
+		SoulMemory:      resultingSoulMemory,
 	}, nil
 }
 

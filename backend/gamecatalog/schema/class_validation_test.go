@@ -1,6 +1,7 @@
 package schema_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/prototype"
@@ -19,6 +20,7 @@ func classFixture(t *testing.T) (schema.Resource, map[schema.SourceID]struct{}) 
 		Class: &schema.ClassDocument{
 			StartingClassID: schema.Fact[uint32]{Known: true, Value: 0, Provenance: provenance},
 			Name:            schema.Fact[string]{Known: true, Value: "Vagabond", Provenance: provenance},
+			Level:           schema.Fact[uint32]{Known: true, Value: 9, Provenance: provenance},
 			Vigor:           schema.Fact[uint32]{Known: true, Value: 15, Provenance: provenance},
 			Mind:            schema.Fact[uint32]{Known: true, Value: 10, Provenance: provenance},
 			Endurance:       schema.Fact[uint32]{Known: true, Value: 11, Provenance: provenance},
@@ -58,6 +60,15 @@ func TestValidateClassResourceFailsClosed(t *testing.T) {
 			resource.Class.Name.Known = false
 		},
 		"empty name": func(resource *schema.Resource) { resource.Class.Name.Value = "" },
+		"missing level fact provenance": func(resource *schema.Resource) {
+			resource.Class.Level = schema.Fact[uint32]{Known: true, Value: 9}
+		},
+		"unknown level": func(resource *schema.Resource) {
+			resource.Class.Level.Known = false
+		},
+		"zero level": func(resource *schema.Resource) {
+			resource.Class.Level.Value = 0
+		},
 		"missing vigor fact provenance": func(resource *schema.Resource) {
 			resource.Class.Vigor = schema.Fact[uint32]{Known: true, Value: 15}
 		},
@@ -114,6 +125,66 @@ func TestValidateClassResourceFailsClosed(t *testing.T) {
 		break_(&resource)
 		if err := schema.ValidateResource(resource, sources); err == nil {
 			t.Errorf("%s was accepted", name)
+		}
+	}
+}
+
+// TestValidateClassResourceEnforcesTheWritableRanges pins the ranges that make a
+// class document safe to copy verbatim into a save: the level must stay inside
+// 1..713 and every base attribute inside 1..99. The rejections are checked by
+// message, so a class document can never be refused for the wrong field.
+func TestValidateClassResourceEnforcesTheWritableRanges(t *testing.T) {
+	_, sources := classFixture(t)
+
+	for name, accepted := range map[string]func(*schema.Resource){
+		"lowest legal level":     func(resource *schema.Resource) { resource.Class.Level.Value = 1 },
+		"highest legal level":    func(resource *schema.Resource) { resource.Class.Level.Value = 713 },
+		"lowest legal attribute": func(resource *schema.Resource) { resource.Class.Vigor.Value = 1 },
+		"highest legal attribute": func(resource *schema.Resource) {
+			resource.Class.Arcane.Value = 99
+		},
+	} {
+		resource, _ := classFixture(t)
+		accepted(&resource)
+		if err := schema.ValidateResource(resource, sources); err != nil {
+			t.Errorf("%s was rejected: %v", name, err)
+		}
+	}
+
+	for name, rejected := range map[string]struct {
+		break_ func(*schema.Resource)
+		want   string
+	}{
+		"level 0": {
+			func(resource *schema.Resource) { resource.Class.Level.Value = 0 },
+			"class.level 0 lies outside the range 1..713",
+		},
+		"level 714": {
+			func(resource *schema.Resource) { resource.Class.Level.Value = 714 },
+			"class.level 714 lies outside the range 1..713",
+		},
+		"vigor 0": {
+			func(resource *schema.Resource) { resource.Class.Vigor.Value = 0 },
+			"class.vigor 0 lies outside the range 1..99",
+		},
+		"vigor 100": {
+			func(resource *schema.Resource) { resource.Class.Vigor.Value = 100 },
+			"class.vigor 100 lies outside the range 1..99",
+		},
+		"arcane 100": {
+			func(resource *schema.Resource) { resource.Class.Arcane.Value = 100 },
+			"class.arcane 100 lies outside the range 1..99",
+		},
+	} {
+		resource, _ := classFixture(t)
+		rejected.break_(&resource)
+		err := schema.ValidateResource(resource, sources)
+		if err == nil {
+			t.Errorf("%s was accepted", name)
+			continue
+		}
+		if !strings.Contains(err.Error(), rejected.want) {
+			t.Errorf("%s reported %q, want it to name %q", name, err, rejected.want)
 		}
 	}
 }

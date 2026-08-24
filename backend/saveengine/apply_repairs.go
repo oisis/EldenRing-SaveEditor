@@ -211,11 +211,11 @@ func planRepairWrites(loaded *loadedSave, characterID int, actions []RepairActio
 				return nil, fmt.Errorf("repair action %d: set_character_stats requires exactly one attributes value", index)
 			}
 			statsPlanned = true
-			values, level, requiredSoulMemory, err := prepareCharacterAttributes(*action.Attributes)
+			values, level, err := prepareCharacterAttributes(*action.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			ctx, err := planCharacterStatsState(loaded, characterID, values, level, requiredSoulMemory)
+			ctx, err := planCharacterStatsState(loaded, characterID, values, level)
 			if err != nil {
 				return nil, err
 			}

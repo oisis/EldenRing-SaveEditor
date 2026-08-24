@@ -486,9 +486,12 @@ type setCharacterStatsRequest struct {
 
 // setCharacterStartingClassRequest is the strict JSON body of the starting-class
 // route. A pointer distinguishes an omitted startingClassID from the valid
-// Vagabond value zero.
+// Vagabond value zero, and an omitted confirmReset from an explicit false, so an
+// unconfirmed destructive reset is rejected by name instead of silently reading
+// as a refusal to confirm.
 type setCharacterStartingClassRequest struct {
 	StartingClassID  *uint8 `json:"startingClassID"`
+	ConfirmReset     *bool  `json:"confirmReset"`
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
@@ -1271,11 +1274,16 @@ func registerSaveSessionRoutes(
 				writeError(writer, http.StatusBadRequest, errors.New("startingClassID is required"))
 				return
 			}
+			if body.ConfirmReset == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("confirmReset is required"))
+				return
+			}
 			result, err := character.SetCharacterStartingClass(
 				saveEngine,
 				request.PathValue("saveSessionID"),
 				characterID,
 				*body.StartingClassID,
+				*body.ConfirmReset,
 				body.ExpectedRevision,
 			)
 			if err != nil {

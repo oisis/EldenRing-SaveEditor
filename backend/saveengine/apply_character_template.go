@@ -63,10 +63,10 @@ func (engine *Engine) ApplyCharacterTemplate(
 	}
 
 	var attrValues [characterAttributeCount]uint32
-	var plannedLevel, requiredSoulMemory uint32
+	var plannedLevel uint32
 	if plan.Attributes != nil {
 		var err error
-		attrValues, plannedLevel, requiredSoulMemory, err = prepareCharacterAttributes(*plan.Attributes)
+		attrValues, plannedLevel, err = prepareCharacterAttributes(*plan.Attributes)
 		if err != nil {
 			return ApplyCharacterTemplateResult{}, err
 		}
@@ -132,7 +132,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 
 		// 2. Prepare statistics writes if planned.
 		if plan.Attributes != nil {
-			ctx, err := planCharacterStatsState(loaded, characterID, attrValues, plannedLevel, requiredSoulMemory)
+			ctx, err := planCharacterStatsState(loaded, characterID, attrValues, plannedLevel)
 			if err != nil {
 				return err
 			}

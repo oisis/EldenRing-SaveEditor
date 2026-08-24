@@ -271,7 +271,8 @@ func isAttributeIssue(code string) bool {
 //
 // The action carries a deliberate consequence, stated in its description because
 // it is not optional: SetCharacterStats always recalculates the level from the
-// attributes it writes and raises the lifetime runes to that level's minimum.
+// attributes it writes and raises the lifetime runes to the minimum the levels
+// above the base level of the character's own starting class require.
 // Repairing an attribute therefore moves the level too. There is no confirmed
 // contract in this build that writes attributes without doing so.
 func planAttributeRepair(
@@ -292,7 +293,7 @@ func planAttributeRepair(
 		Scope:       issue.Scope,
 		Operation:   RepairOperationSetCharacterStats,
 		Attributes:  &repaired,
-		Description: "set the eight attributes to the nearest set satisfying the range 1..99 and the minima of the character's starting class; this also recalculates the stored level from them and raises the lifetime runes to that level's minimum, which SetCharacterStats always does",
+		Description: "set the eight attributes to the nearest set satisfying the range 1..99 and the minima of the character's starting class; this also recalculates the stored level from them and raises the lifetime runes to the minimum the levels above the base level of the character's own starting class require, which SetCharacterStats always does",
 	}, ""
 }
 

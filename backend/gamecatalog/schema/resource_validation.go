@@ -518,9 +518,26 @@ func validateQuestResource(resource Resource, sources map[SourceID]struct{}) err
 	return nil
 }
 
+// ClassLevelMin, ClassLevelMax, ClassAttributeMin and ClassAttributeMax bound
+// the values a class document may carry. The starting-class reset copies a class
+// document verbatim into the save, so this is the only place that keeps the
+// catalog from producing a level or an attribute the game cannot hold: 99 is the
+// per-attribute maximum and 713 is the level the eight maxima reach.
+const (
+	ClassLevelMin     uint32 = 1
+	ClassLevelMax     uint32 = 713
+	ClassAttributeMin uint32 = 1
+	ClassAttributeMax uint32 = 99
+)
+
 // validateClassResource requires the stable starting-class ID, the official
-// non-empty class name and the eight non-zero base attributes used to present
-// the resource. The key is the decimal class ID as a string, "0" through "9".
+// non-empty class name, the in-range base level and the eight in-range base
+// attributes used to present the resource. The key is the decimal class ID as a
+// string, "0" through "9".
+//
+// class.level is checked as its own fact and is never compared against the
+// attribute sum: it is the regulation's soulLv, not a value derived from the
+// eight attributes.
 func validateClassResource(resource Resource, sources map[SourceID]struct{}) error {
 	if len(resource.Key) != 1 || resource.Key[0] < '0' || resource.Key[0] > '9' {
 		return fmt.Errorf("resource %q: class key must be a single decimal digit 0..9", resource.Key)
@@ -550,6 +567,17 @@ func validateClassResource(resource Resource, sources map[SourceID]struct{}) err
 	if !name.Known || name.Value == "" {
 		return fmt.Errorf("resource %q: class.name must be known and non-empty", resource.Key)
 	}
+	level := resource.Class.Level
+	if err := validateFact("class.level", level, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !level.Known {
+		return fmt.Errorf("resource %q: class.level must be known", resource.Key)
+	}
+	if level.Value < ClassLevelMin || level.Value > ClassLevelMax {
+		return fmt.Errorf("resource %q: class.level %d lies outside the range %d..%d",
+			resource.Key, level.Value, ClassLevelMin, ClassLevelMax)
+	}
 	attributes := []struct {
 		name string
 		fact Fact[uint32]
@@ -567,8 +595,12 @@ func validateClassResource(resource Resource, sources map[SourceID]struct{}) err
 		if err := validateFact(attr.name, attr.fact, sources); err != nil {
 			return fmt.Errorf("resource %q: %w", resource.Key, err)
 		}
-		if !attr.fact.Known || attr.fact.Value == 0 {
-			return fmt.Errorf("resource %q: %s must be known and non-zero", resource.Key, attr.name)
+		if !attr.fact.Known {
+			return fmt.Errorf("resource %q: %s must be known", resource.Key, attr.name)
+		}
+		if attr.fact.Value < ClassAttributeMin || attr.fact.Value > ClassAttributeMax {
+			return fmt.Errorf("resource %q: %s %d lies outside the range %d..%d",
+				resource.Key, attr.name, attr.fact.Value, ClassAttributeMin, ClassAttributeMax)
 		}
 	}
 	return nil

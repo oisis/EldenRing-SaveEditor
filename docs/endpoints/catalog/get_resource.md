@@ -18,7 +18,7 @@ visibility event flag ID, a `TutorialDocument` for kind `tutorial` with its
 `TutorialParam` row ID and official title, a `QuestDocument` for kind `quest`
 with its name, supported steps, locations, descriptions and canonical event
 flag plans, or a `ClassDocument` for kind `class` with its starting-class ID,
-official name and eight base attributes. It returns no relations; those belong to
+official name, base Rune Level and eight base attributes. It returns no relations; those belong to
 [`GetResourceRelations`](get_resource_relations.md).
 
 | | |
@@ -131,7 +131,7 @@ kind.
 | `mapRegion` | `MapRegionDocument` | The complete curated safe map visibility document. Present only for kind `map_region`. |
 | `tutorial` | `TutorialDocument` | The complete user-facing tutorial document. Present only for kind `tutorial`. |
 | `quest` | `QuestDocument` | The complete curated quest document. Present only for kind `quest`. |
-| `class` | `ClassDocument` | The complete playable starting class document. Present only for kind `class`. |
+| `class` | `ClassDocument` | The complete playable starting class document: starting-class ID, name, base Rune Level (`level`, the `CharaInitParam` `soulLv` fact, never derived from the attribute sum) and the eight base attributes, each with its own provenance. Present only for kind `class`. |
 
 `schema.Resource` is a union over those kinds: exactly one document field is
 present and the others are omitted from the JSON entirely.

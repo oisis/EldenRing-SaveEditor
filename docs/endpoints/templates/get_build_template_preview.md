@@ -76,7 +76,10 @@ type GetBuildTemplatePreviewRequest struct {
 3. **`stats`**:
    - Evaluates full 8 attributes using `saveengine.PlanCharacterStats`, checking starting-class minima and attribute ranges `1..99`.
    - Any attribute range violation or starting-class minima violation produces `code: "invalid_stats"`.
-   - Reports resulting `resultLevel` and `resultSoulMemory`.
+   - Reports resulting `resultLevel` and `resultSoulMemory`. The SoulMemory floor
+     comes from the shared SaveEngine rule and is counted from the base level of
+     the character's own starting class, so a preview can never disagree with the
+     value `ApplyBuildTemplate` writes.
 4. **`spells`**:
    - Confirms that physical save positions 13 and 14 are empty; if occupied, generates `code: "invalid_spell_loadout"`.
    - Constructs a 12-position state from current and template values, compacts it to remove gaps, and validates the compact loadout against GameCatalog.

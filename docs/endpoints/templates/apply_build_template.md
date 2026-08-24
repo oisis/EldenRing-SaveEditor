@@ -70,7 +70,7 @@ type ApplyBuildTemplateRequest struct {
    - Any blocking issue (`executable == false`) prevents mutation entirely.
 2. **Supported Sections**:
    - `profile.name`: writes both 16-unit UTF-16LE copies (PlayerGameData and ProfileSummary).
-   - `stats`: writes the 8 attributes, recalculated level (`sum(attributes) - 79`), SoulMemory (TotalGetSoul adjusted to level minimum if needed), and ProfileSummary level. Attributes below starting-class minima are rejected.
+   - `stats`: writes the 8 attributes, recalculated level (`sum(attributes) - 79`), SoulMemory (TotalGetSoul raised to the minimum the levels above the base level of the character's own starting class require, never lowered), and ProfileSummary level. Attributes below starting-class minima are rejected.
    - `spells`: replaces the first 12 spell memory positions with the validated compact sequence and updates active index. Physical positions 13-14 must be empty in the native save and remain byte-for-byte untouched.
 3. **Unsupported Sections & Options**:
    - Selecting `inventory.workspace`, `equipment`, `items`, `inventoryLayout`, `storageLayout`, or any non-empty `ApplyOptions` produces a blocking issue and aborts the request before any byte is written.

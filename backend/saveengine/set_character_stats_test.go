@@ -43,8 +43,15 @@ var setStatsTestAttributes = CharacterAttributes{
 }
 
 const (
-	setStatsTestLevel              = uint32(44)
-	setStatsTestRequiredSoulMemory = uint32(177_486)
+	setStatsTestLevel = uint32(44)
+
+	// setStatsTestVagabondBaseLevel is the confirmed base level of the class
+	// every fixture in this file stores, and setStatsTestRequiredSoulMemory is
+	// the lifetime-rune floor counted from it. The absolute total from level 1
+	// is 177486; a Vagabond never paid the 473 runes of its own base level 9,
+	// so the floor it actually owes is that total minus those 473.
+	setStatsTestVagabondBaseLevel  = uint32(9)
+	setStatsTestRequiredSoulMemory = uint32(177_486 - 473)
 )
 
 // classID is the authoritative PlayerGameData class the mutation validates
@@ -276,8 +283,14 @@ func TestSetCharacterStatsAcceptsTheMaximumAttributesAndLevel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetCharacterStats: %v", err)
 	}
-	if result.Level != 713 || result.SoulMemory != 1_692_560_963 {
-		t.Errorf("result = %+v, want level 713 and soulMemory 1692560963", result)
+	// The maximum level costs the absolute total 1692560963 minus the 473 runes
+	// of the Vagabond base level the fixture starts from.
+	wantSoulMemory := uint32(1_692_560_963 - 473)
+	if result.Level != 713 || result.SoulMemory != wantSoulMemory {
+		t.Errorf("result = %+v, want level 713 and soulMemory %d", result, wantSoulMemory)
+	}
+	if wantSoulMemory != minimumSoulMemoryForLevel(713, setStatsTestVagabondBaseLevel) {
+		t.Errorf("the expected floor no longer matches the shared class-relative rule")
 	}
 }
 
@@ -415,7 +428,9 @@ func TestSetCharacterStatsIdempotentAssignmentAdvancesRevision(t *testing.T) {
 	content.summaryClassID = setStatsTestWretch
 	content.attributes = setStatsTestAttributes
 	content.level = setStatsTestLevel
-	content.soulMemory = setStatsTestRequiredSoulMemory
+	// This fixture is a Wretch, whose base level is 1, so its floor is the full
+	// absolute total rather than the Vagabond-relative one the other fixtures use.
+	content.soulMemory = minimumSoulMemoryForLevel(setStatsTestLevel, 1)
 	engine, sessionID := loadSetStatsSession(t, content)
 	before := bytes.Clone(engine.sessions[sessionID].snapshot.data)
 
@@ -494,6 +509,10 @@ func TestSetCharacterStatsPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 // its own reference tests, so this reimplementation cannot drift from it. 1.5.8
 // summed the same per-level cost in float64, so its results are not a reference:
 // they depend on the host's floating-point behaviour and may differ.
+//
+// The reference vectors are counted from base level 1, which is the base level
+// of Wretch and the lower bound of the class-relative rule, so they remain the
+// exact totals the confirmed evaluation produces.
 func TestMinimumSoulMemoryForLevelReproducesTheConfirmedVectors(t *testing.T) {
 	for _, testCase := range []struct {
 		level uint32
@@ -506,10 +525,41 @@ func TestMinimumSoulMemoryForLevelReproducesTheConfirmedVectors(t *testing.T) {
 		{150, 7_106_585},
 		{713, 1_692_560_963},
 	} {
-		if got := minimumSoulMemoryForLevel(testCase.level); got != testCase.want {
-			t.Errorf("minimumSoulMemoryForLevel(%d) = %d, want %d",
+		if got := minimumSoulMemoryForLevel(testCase.level, 1); got != testCase.want {
+			t.Errorf("minimumSoulMemoryForLevel(%d, 1) = %d, want %d",
 				testCase.level, got, testCase.want)
 		}
+	}
+}
+
+// TestMinimumSoulMemoryForLevelCountsFromTheClassBaseLevel pins the class-relative
+// rule. A character sitting at or below the base level of its own class owes
+// nothing, which is what the native vanilla save shows for all ten freshly
+// created classes, and above it the requirement is exactly the difference of the
+// two absolute totals, so the per-level boundary corrections stay attached to
+// their own level.
+func TestMinimumSoulMemoryForLevelCountsFromTheClassBaseLevel(t *testing.T) {
+	for _, testCase := range []struct {
+		name      string
+		level     uint32
+		baseLevel uint32
+		want      uint32
+	}{
+		{"Wretch at its base level", 1, 1, 0},
+		{"Vagabond at its base level", 9, 9, 0},
+		{"Confessor at its base level", 10, 10, 0},
+		{"below the base level", 3, 9, 0},
+		{"Confessor one level above its base", 11, 10, minimumSoulMemoryForLevel(11, 1) - minimumSoulMemoryForLevel(10, 1)},
+		{"Vagabond well above its base", 150, 9, minimumSoulMemoryForLevel(150, 1) - minimumSoulMemoryForLevel(9, 1)},
+		{"across a corrected boundary", 50, 9, minimumSoulMemoryForLevel(50, 1) - minimumSoulMemoryForLevel(9, 1)},
+		{"at the maximum level", 713, 10, minimumSoulMemoryForLevel(713, 1) - minimumSoulMemoryForLevel(10, 1)},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			if got := minimumSoulMemoryForLevel(testCase.level, testCase.baseLevel); got != testCase.want {
+				t.Errorf("minimumSoulMemoryForLevel(%d, %d) = %d, want %d",
+					testCase.level, testCase.baseLevel, got, testCase.want)
+			}
+		})
 	}
 }
 
@@ -525,7 +575,7 @@ func TestPlanCharacterStats_ReadOnly(t *testing.T) {
 			Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7,
 		},
 		level:      9,
-		soulMemory: 473,
+		soulMemory: 0,
 	})
 
 	engine := New()

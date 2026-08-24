@@ -4260,7 +4260,7 @@
         "operationId": "setCharacterStats",
         "tags": ["Character"],
         "summary": "SetCharacterStats",
-        "description": "Atomically assigns the eight attributes of one active character under expectedRevision control. All eight attributes are mandatory and must lie in 1..99 and at or above the base value of the character's own starting class; an unknown starting class is rejected. levelPolicy accepts exactly the value \"recalculate\": the level is never an input, it is always recalculated as the attribute sum minus 79 and written to PlayerGameData and to the character's profile summary. TotalGetSoul, the lifetime-runes value the legacy implementation calls SoulMemory, is raised to the minimum that level requires and otherwise left unchanged. HP, FP and SP with their maximum and base maximum, the held runes, the starting class and every unrelated field remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Atomically assigns the eight attributes of one active character under expectedRevision control. All eight attributes are mandatory and must lie in 1..99 and at or above the base value of the character's own starting class; an unknown starting class is rejected. levelPolicy accepts exactly the value \"recalculate\": the level is never an input, it is always recalculated as the attribute sum minus 79 and written to PlayerGameData and to the character's profile summary. TotalGetSoul, the lifetime-runes value the legacy implementation calls SoulMemory, is raised to the minimum the levels gained above the base level of the character's own starting class require and otherwise left unchanged; it is never an absolute cost counted from level 1, so a character at its own class base level owes nothing. HP, FP and SP with their maximum and base maximum, the held runes, the starting class and every unrelated field remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -4308,7 +4308,7 @@
         "operationId": "setCharacterStartingClass",
         "tags": ["Character"],
         "summary": "SetCharacterStartingClass",
-        "description": "Atomically changes the starting class of one active character under expectedRevision control. If any current attribute is below the new class's minimum, it is raised to that minimum; attributes above the minimum are never lowered. The level is recalculated from the resulting attributes (sum minus 79) and written to PlayerGameData and to the character's profile summary. TotalGetSoul (SoulMemory) is raised to the minimum the recalculated level requires and otherwise left untouched. Both the PlayerGameData class byte (offset -248) and the ProfileSummary class byte (offset 0x243) are written and kept synchronised. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Atomically changes the starting class of one active character under expectedRevision control. This is a destructive build reset and runs only when confirmReset is true: the eight attributes become exactly the base attributes of the target class and the level becomes exactly its base Rune Level, both read from the class document of the embedded GameCatalog. Distributed points are discarded, attributes are lowered as freely as they are raised, and the level is never derived from the attribute sum here. TotalGetSoul (SoulMemory) and the held runes are preserved unchanged. Both the PlayerGameData class byte (offset -248) and the ProfileSummary class byte (offset 0x243) are written and kept synchronised, as are the PlayerGameData and profile-summary level copies. A missing or false confirmReset is rejected before any read or write, so the save and its revision stay untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -4339,7 +4339,7 @@
             }
           },
           "400": {
-            "description": "A malformed request, missing or unknown field, unknown startingClassID, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "description": "A malformed request, missing or unknown field, missing or refused confirmReset, unknown startingClassID, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
             "content": {
               "application/json": {
                 "schema": {
@@ -5146,7 +5146,7 @@
           },
           "attributes": {
             "type": "object",
-            "description": "The corrected attribute set of a set_character_stats action: the nearest set satisfying both the absolute range 1..99 and the per-attribute minima of the character's own starting class, each attribute moved the smallest legal distance. Absent for every other operation. Applying it also recalculates the stored level from these attributes and raises the lifetime runes to that level's minimum, which SetCharacterStats always does.",
+            "description": "The corrected attribute set of a set_character_stats action: the nearest set satisfying both the absolute range 1..99 and the per-attribute minima of the character's own starting class, each attribute moved the smallest legal distance. Absent for every other operation. Applying it also recalculates the stored level from these attributes and raises the lifetime runes to the minimum the levels above the base level of the character's own starting class require, which SetCharacterStats always does.",
             "required": ["vigor", "mind", "endurance", "strength", "dexterity", "intelligence", "faith", "arcane"],
             "properties": {
               "vigor": { "type": "integer", "format": "int64" },
@@ -5930,7 +5930,7 @@
       "SetCharacterStartingClassRequest": {
         "type": "object",
         "additionalProperties": false,
-        "description": "Starting class assignment and optimistic-concurrency revision.",
+        "description": "Starting class assignment, the explicit confirmation of the destructive build reset it performs, and the optimistic-concurrency revision.",
         "properties": {
           "startingClassID": {
             "type": "integer",
@@ -5939,17 +5939,21 @@
             "maximum": 9,
             "description": "Target starting class identifier (0..9)."
           },
+          "confirmReset": {
+            "type": "boolean",
+            "description": "Explicit confirmation that all eight attributes and the Rune Level may be reset to the base values of the target class. Only true performs the mutation; false or an omitted field is rejected and leaves the save and its revision unchanged."
+          },
           "expectedRevision": {
             "type": "string",
             "pattern": "^(0|[1-9][0-9]*)$",
             "description": "Canonical decimal revision that must equal the session's current revision."
           }
         },
-        "required": ["startingClassID", "expectedRevision"]
+        "required": ["startingClassID", "confirmReset", "expectedRevision"]
       },
       "SetCharacterStartingClassResult": {
         "type": "object",
-        "description": "Receipt for one committed starting-class mutation. Reports the resulting attributes, level, SoulMemory, and whether any attribute was raised.",
+        "description": "Receipt for one committed starting-class mutation. Reports the base attributes and the base Rune Level of the applied class together with the SoulMemory the mutation left unchanged.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -5977,16 +5981,13 @@
           "soulMemory": {
             "type": "integer",
             "format": "int64",
-            "minimum": 0
-          },
-          "attributesRaised": {
-            "type": "boolean",
-            "description": "True if any attribute was raised to meet the new class's minima."
+            "minimum": 0,
+            "description": "Lifetime runes (TotalGetSoul) exactly as stored. This mutation never changes them."
           }
         },
         "required": [
           "saveSessionID", "saveRevision", "characterID",
-          "startingClassID", "attributes", "level", "soulMemory", "attributesRaised"
+          "startingClassID", "attributes", "level", "soulMemory"
         ]
       },
       "CharacterStats": {
@@ -9789,7 +9790,7 @@
       },
       "ClassDocument": {
         "type": "object",
-        "description": "schema.ClassDocument. The starting class ID, official English class name and eight base attributes are separate known facts with independent provenance.",
+        "description": "schema.ClassDocument. The starting class ID, official English class name, base Rune Level and eight base attributes are separate known facts with independent provenance.",
         "properties": {
           "startingClassID": {
             "type": "object",
@@ -9807,6 +9808,16 @@
             "properties": {
               "known": {"type": "boolean", "enum": [true]},
               "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "level": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the base Rune Level of the class, taken directly from the CharaInitParam soulLv field and never derived from the attribute sum.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 713},
               "provenance": {"type": "object", "additionalProperties": true}
             },
             "required": ["known", "value", "provenance"]
@@ -9895,6 +9906,7 @@
         "required": [
           "startingClassID",
           "name",
+          "level",
           "vigor",
           "mind",
           "endurance",

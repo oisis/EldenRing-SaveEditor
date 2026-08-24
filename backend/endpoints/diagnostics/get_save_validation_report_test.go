@@ -282,6 +282,18 @@ func issueCodes(result diagnostics.GetSaveValidationReportResult) []string {
 	return codes
 }
 
+// reportTestOneLevelAboveBase is the Vagabond base build with one extra point of
+// Vigor, so it sits exactly one level above the class base level of 9. Unlike
+// the untouched base build, this character did pay for a level, so a stored
+// TotalGetSoul of zero is genuinely below the class-relative minimum.
+var reportTestOneLevelAboveBase = func() [8]uint32 {
+	attributes := reportTestVagabond
+	attributes[0]++
+	return attributes
+}()
+
+const reportTestOneLevelAboveBaseLevel = uint32(10)
+
 func requireIssue(t *testing.T, result diagnostics.GetSaveValidationReportResult, code, severity string) diagnostics.SaveValidationIssue {
 	t.Helper()
 
@@ -533,6 +545,9 @@ func TestGetSaveValidationReport_StatsRules(t *testing.T) {
 	wrongLevel := uint32(40)
 	noSoulMemory := uint32(0)
 
+	oneLevelAboveBase := reportTestOneLevelAboveBase
+	oneLevelAboveBaseLevel := reportTestOneLevelAboveBaseLevel
+
 	tests := []struct {
 		name    string
 		fixture reportTestFixture
@@ -558,9 +573,22 @@ func TestGetSaveValidationReport_StatsRules(t *testing.T) {
 			absent: "level_mismatch",
 		},
 		{
-			name:    "lifetime runes below the level minimum",
+			// The minimum is counted from the base level of the character's own
+			// class. A freshly created Vagabond sitting at its base level 9 with
+			// zero lifetime runes is exactly what the native vanilla save
+			// stores, so the report must stay silent about it.
+			name:    "a class at its own base level with no lifetime runes is legal",
 			fixture: reportTestFixture{soulMemory: &noSoulMemory},
-			want:    "soul_memory_below_minimum",
+			absent:  "soul_memory_below_minimum",
+		},
+		{
+			name: "lifetime runes below the minimum the levels above the class base require",
+			fixture: reportTestFixture{
+				attributes: &oneLevelAboveBase,
+				level:      &oneLevelAboveBaseLevel,
+				soulMemory: &noSoulMemory,
+			},
+			want: "soul_memory_below_minimum",
 		},
 	}
 
@@ -573,7 +601,9 @@ func TestGetSaveValidationReport_StatsRules(t *testing.T) {
 			if err != nil {
 				t.Fatalf("GetSaveValidationReport: %v", err)
 			}
-			requireIssue(t, result, tc.want, "error")
+			if tc.want != "" {
+				requireIssue(t, result, tc.want, "error")
+			}
 			if tc.absent != "" {
 				requireNoIssue(t, result, tc.absent)
 			}

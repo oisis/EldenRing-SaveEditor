@@ -901,7 +901,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/gender", `{"gender":0,"expectedRevision":"0"}`},
-		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/starting-class", `{"startingClassID":0,"expectedRevision":"0"}`},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/starting-class", `{"startingClassID":0,"confirmReset":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/undo", ""},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/undo", `{"undoToken":"any-token","expectedRevision":"0"}`},
@@ -2650,7 +2650,7 @@ func TestSetCharacterStatsRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	}
 }
 
-const setCharacterStartingClassRouteBody = `{"startingClassID":4,"expectedRevision":"0"}`
+const setCharacterStartingClassRouteBody = `{"startingClassID":4,"confirmReset":true,"expectedRevision":"0"}`
 
 func TestSetCharacterStartingClassRoute(t *testing.T) {
 	saveEngine := saveengine.New()
@@ -2679,7 +2679,7 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
 		want, err := character.SetCharacterStartingClass(
-			saveEngine, directSession.SaveSessionID, 0, 4, "0")
+			saveEngine, directSession.SaveSessionID, 0, 4, true, "0")
 		if err != nil {
 			t.Fatalf("character.SetCharacterStartingClass: %v", err)
 		}
@@ -2696,10 +2696,15 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 		}
 		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/starting-class"
 		for name, body := range map[string]string{
-			"missing startingClassID":  `{"expectedRevision":"0"}`,
-			"unknown startingClassID":  `{"startingClassID":99,"expectedRevision":"0"}`,
-			"unknown top-level field":  `{"startingClassID":4,"expectedRevision":"0","extra":true}`,
-			"invalid expectedRevision": `{"startingClassID":4,"expectedRevision":"stale"}`,
+			"missing startingClassID":  `{"confirmReset":true,"expectedRevision":"0"}`,
+			"unknown startingClassID":  `{"startingClassID":99,"confirmReset":true,"expectedRevision":"0"}`,
+			"unknown top-level field":  `{"startingClassID":4,"confirmReset":true,"expectedRevision":"0","extra":true}`,
+			"invalid expectedRevision": `{"startingClassID":4,"confirmReset":true,"expectedRevision":"stale"}`,
+			// The destructive reset needs an explicit confirmation. An omitted
+			// confirmReset is rejected by name rather than read as false, and an
+			// explicit false is rejected by SaveEngine; neither mutates.
+			"missing confirmReset": `{"startingClassID":4,"expectedRevision":"0"}`,
+			"refused confirmReset": `{"startingClassID":4,"confirmReset":false,"expectedRevision":"0"}`,
 		} {
 			t.Run(name, func(t *testing.T) {
 				request := httptest.NewRequest(http.MethodPatch, base, strings.NewReader(body))
@@ -8825,5 +8830,65 @@ func TestGetDiagnosticLogRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 		if _, exists := resultSchema.Properties[field]; !exists {
 			t.Errorf("GetDiagnosticLogResult missing property %q", field)
 		}
+	}
+}
+
+// TestOpenAPIClassDocumentBoundsMatchTheBackend protects the one place the class
+// level and the class attributes must not share a bound. The backend accepts
+// 1..713 for class.level and 1..99 for each base attribute
+// (backend/gamecatalog/schema/resource_validation.go), and the published contract
+// once copied the attribute maximum onto the level. Copying it again is caught
+// here instead of by a frontend that refuses a legal Rune Level.
+func TestOpenAPIClassDocumentBoundsMatchTheBackend(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	type fact struct {
+		Properties struct {
+			Value struct {
+				Minimum *int `json:"minimum"`
+				Maximum *int `json:"maximum"`
+			} `json:"value"`
+		} `json:"properties"`
+	}
+	var document struct {
+		Comps struct {
+			Schemas struct {
+				ClassDocument struct {
+					Properties map[string]fact `json:"properties"`
+				} `json:"ClassDocument"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	properties := document.Comps.Schemas.ClassDocument.Properties
+	bounds := map[string][2]int{
+		"level":        {1, 713},
+		"vigor":        {1, 99},
+		"mind":         {1, 99},
+		"endurance":    {1, 99},
+		"strength":     {1, 99},
+		"dexterity":    {1, 99},
+		"intelligence": {1, 99},
+		"faith":        {1, 99},
+		"arcane":       {1, 99},
+	}
+	for name, want := range bounds {
+		value := properties[name].Properties.Value
+		if value.Minimum == nil || value.Maximum == nil {
+			t.Fatalf("ClassDocument.%s.value declares no minimum/maximum", name)
+		}
+		if *value.Minimum != want[0] || *value.Maximum != want[1] {
+			t.Errorf("ClassDocument.%s.value = %d..%d, want %d..%d",
+				name, *value.Minimum, *value.Maximum, want[0], want[1])
+		}
+	}
+	if level := properties["level"].Properties.Value; level.Maximum != nil && *level.Maximum == 99 {
+		t.Error("ClassDocument.level.value carries the attribute maximum 99; the level range is 1..713")
 	}
 }

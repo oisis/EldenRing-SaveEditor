@@ -119,6 +119,10 @@ func allIssueIDs(report diagnostics.GetSaveValidationReportResult) []string {
 func TestSaveValidationReport_IssueIdentity(t *testing.T) {
 	gameCatalog := reportTestCatalog(t)
 	engine, session := loadReportFixture(t, reportTestFixture{
+		// One level above the Vagabond base, so the stored zero really is below
+		// the class-relative lifetime-rune minimum, while the stored level 40
+		// still disagrees with the level the attributes produce.
+		attributes: &reportTestOneLevelAboveBase,
 		level:      func() *uint32 { level := uint32(40); return &level }(),
 		soulMemory: func() *uint32 { memory := uint32(0); return &memory }(),
 		inventory: []reportTestRow{
@@ -174,6 +178,10 @@ func TestSaveValidationReport_IssueIdentity(t *testing.T) {
 // policy is refused with a reason instead.
 func TestGetRepairPlan_PlansOnlyConfirmedRepairs(t *testing.T) {
 	engine, session, report := planFor(t, reportTestFixture{
+		// One level above the Vagabond base, so the stored zero really is below
+		// the class-relative lifetime-rune minimum, while the stored level 40
+		// still disagrees with the level the attributes produce.
+		attributes: &reportTestOneLevelAboveBase,
 		level:      func() *uint32 { level := uint32(40); return &level }(),
 		soulMemory: func() *uint32 { memory := uint32(0); return &memory }(),
 		inventory: []reportTestRow{

@@ -37,9 +37,14 @@ func newRealCatalog(t *testing.T) *gamecatalog.Catalog {
 func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 	cat := newRealCatalog(t)
 
+	// level is the CharaInitParam soulLv fact of each class, confirmed against a
+	// native vanilla save holding all ten freshly created classes. It is a fact
+	// in its own right and is deliberately not asserted as sum(attributes)-79:
+	// that formula belongs to SetCharacterStats, not to this document.
 	expectedClasses := map[string]struct {
 		id           uint32
 		name         string
+		level        uint32
 		vigor        uint32
 		mind         uint32
 		endurance    uint32
@@ -49,16 +54,16 @@ func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 		faith        uint32
 		arcane       uint32
 	}{
-		"0": {0, "Vagabond", 15, 10, 11, 14, 13, 9, 9, 7},
-		"1": {1, "Warrior", 11, 12, 11, 10, 16, 10, 8, 9},
-		"2": {2, "Hero", 14, 9, 12, 16, 9, 7, 8, 11},
-		"3": {3, "Bandit", 10, 11, 10, 9, 13, 9, 8, 14},
-		"4": {4, "Astrologer", 9, 15, 9, 8, 12, 16, 7, 9},
-		"5": {5, "Prophet", 10, 14, 8, 11, 10, 7, 16, 10},
-		"6": {6, "Confessor", 10, 13, 10, 12, 12, 9, 14, 9},
-		"7": {7, "Samurai", 12, 11, 13, 12, 15, 9, 8, 8},
-		"8": {8, "Prisoner", 11, 12, 11, 11, 14, 14, 6, 9},
-		"9": {9, "Wretch", 10, 10, 10, 10, 10, 10, 10, 10},
+		"0": {0, "Vagabond", 9, 15, 10, 11, 14, 13, 9, 9, 7},
+		"1": {1, "Warrior", 8, 11, 12, 11, 10, 16, 10, 8, 9},
+		"2": {2, "Hero", 7, 14, 9, 12, 16, 9, 7, 8, 11},
+		"3": {3, "Bandit", 5, 10, 11, 10, 9, 13, 9, 8, 14},
+		"4": {4, "Astrologer", 6, 9, 15, 9, 8, 12, 16, 7, 9},
+		"5": {5, "Prophet", 7, 10, 14, 8, 11, 10, 7, 16, 10},
+		"6": {6, "Confessor", 10, 10, 13, 10, 12, 12, 9, 14, 9},
+		"7": {7, "Samurai", 9, 12, 11, 13, 12, 15, 9, 8, 8},
+		"8": {8, "Prisoner", 9, 11, 12, 11, 11, 14, 14, 6, 9},
+		"9": {9, "Wretch", 1, 10, 10, 10, 10, 10, 10, 10, 10},
 	}
 
 	for key, expected := range expectedClasses {
@@ -78,6 +83,12 @@ func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 		}
 		if !doc.Name.Known || doc.Name.Value != expected.name {
 			t.Fatalf("key %q: name = %v, want %q", key, doc.Name, expected.name)
+		}
+		if !doc.Level.Known || doc.Level.Value != expected.level {
+			t.Fatalf("key %q: level = %v, want %d", key, doc.Level, expected.level)
+		}
+		if doc.Level.Provenance.Source == "" {
+			t.Fatalf("key %q: level provenance source is empty", key)
 		}
 		if !doc.Vigor.Known || doc.Vigor.Value != expected.vigor {
 			t.Fatalf("key %q: vigor = %v, want %d", key, doc.Vigor, expected.vigor)
@@ -108,18 +119,24 @@ func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 	// Explicitly assert the critical 6 Confessor, 7 Samurai, 8 Prisoner mappings
 	// so that create-character menu display order (297130-297139) is never accidentally used.
 	confessor, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "6")
-	if err != nil || confessor.Resource.Class.Name.Value != "Confessor" || confessor.Resource.Class.StartingClassID.Value != 6 {
-		t.Fatalf("class 6 mapping failed: got %+v, want Confessor (ID 6)", confessor)
+	if err != nil || confessor.Resource.Class.Name.Value != "Confessor" ||
+		confessor.Resource.Class.StartingClassID.Value != 6 ||
+		confessor.Resource.Class.Level.Value != 10 {
+		t.Fatalf("class 6 mapping failed: got %+v, want Confessor (ID 6, level 10)", confessor)
 	}
 
 	samurai, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "7")
-	if err != nil || samurai.Resource.Class.Name.Value != "Samurai" || samurai.Resource.Class.StartingClassID.Value != 7 {
-		t.Fatalf("class 7 mapping failed: got %+v, want Samurai (ID 7)", samurai)
+	if err != nil || samurai.Resource.Class.Name.Value != "Samurai" ||
+		samurai.Resource.Class.StartingClassID.Value != 7 ||
+		samurai.Resource.Class.Level.Value != 9 {
+		t.Fatalf("class 7 mapping failed: got %+v, want Samurai (ID 7, level 9)", samurai)
 	}
 
 	prisoner, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "8")
-	if err != nil || prisoner.Resource.Class.Name.Value != "Prisoner" || prisoner.Resource.Class.StartingClassID.Value != 8 {
-		t.Fatalf("class 8 mapping failed: got %+v, want Prisoner (ID 8)", prisoner)
+	if err != nil || prisoner.Resource.Class.Name.Value != "Prisoner" ||
+		prisoner.Resource.Class.StartingClassID.Value != 8 ||
+		prisoner.Resource.Class.Level.Value != 9 {
+		t.Fatalf("class 8 mapping failed: got %+v, want Prisoner (ID 8, level 9)", prisoner)
 	}
 }
 
@@ -170,10 +187,14 @@ func TestGetResourceReturnsIndependentClassDocument(t *testing.T) {
 	if result.Resource.Class.Name.Value != "Vagabond" {
 		t.Fatalf("name = %q, want Vagabond", result.Resource.Class.Name.Value)
 	}
+	if !result.Resource.Class.Level.Known || result.Resource.Class.Level.Value != 9 {
+		t.Fatalf("level = %v, want the known value 9", result.Resource.Class.Level)
+	}
 
 	// Mutate to verify deep-copy immutability.
 	result.Resource.Class.Name.Value = "Mutated"
 	result.Resource.Class.StartingClassID.Value = 999
+	result.Resource.Class.Level.Value = 999
 
 	again, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "0")
 	if err != nil {
@@ -184,6 +205,9 @@ func TestGetResourceReturnsIndependentClassDocument(t *testing.T) {
 	}
 	if again.Resource.Class.StartingClassID.Value != 0 {
 		t.Fatalf("catalog class ID was mutated: %d", again.Resource.Class.StartingClassID.Value)
+	}
+	if again.Resource.Class.Level.Value != 9 {
+		t.Fatalf("catalog class level was mutated: %d", again.Resource.Class.Level.Value)
 	}
 }
 
@@ -208,6 +232,7 @@ func TestValidateClassResourceRejectsMalformed(t *testing.T) {
 		return &schema.ClassDocument{
 			StartingClassID: schema.Fact[uint32]{Known: true, Value: 0, Provenance: validProvenance},
 			Name:            schema.Fact[string]{Known: true, Value: "Vagabond", Provenance: validProvenance},
+			Level:           schema.Fact[uint32]{Known: true, Value: 9, Provenance: validProvenance},
 			Vigor:           schema.Fact[uint32]{Known: true, Value: 15, Provenance: validProvenance},
 			Mind:            schema.Fact[uint32]{Known: true, Value: 10, Provenance: validProvenance},
 			Endurance:       schema.Fact[uint32]{Known: true, Value: 11, Provenance: validProvenance},

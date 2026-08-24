@@ -34,7 +34,10 @@ func TestSetCharacterStatsReturnsTheSaveEngineReceipt(t *testing.T) {
 		CharacterID:   getCharacterStatsSlot,
 		Attributes:    setCharacterStatsAttributes,
 		Level:         44,
-		SoulMemory:    177_486,
+		// The fixture is a Vagabond, whose base level is 9. The absolute total
+		// for level 44 is 177486; the 473 runes of the class base level are not
+		// owed, so the floor SaveEngine writes is 177013.
+		SoulMemory: 177_486 - 473,
 	}
 	if result != want {
 		t.Errorf("result = %+v, want %+v", result, want)

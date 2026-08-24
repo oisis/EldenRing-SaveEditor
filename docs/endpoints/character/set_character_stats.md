@@ -119,16 +119,27 @@ every attribute at its base `10`) and the maximum is `713` (every attribute at
 `99`).
 
 **SoulMemory.** `TotalGetSoul` is the lifetime-runes field of `PlayerGameData`,
-called `SoulMemory` by the legacy implementation. The minimum a character at a
-given level must carry is the sum of the per-level costs
+called `SoulMemory` by the legacy implementation. The minimum a character must
+carry is the sum of the per-level costs
 
 ```
 cost(n) = floor(0.02*n^3 + 3.06*n^2 + 105.6*n - 895)
 ```
 
-clamped to zero, summed for `n = 2..level`. When the stored value is below that
-minimum it is raised to exactly the minimum; when it already equals or exceeds
-it, it is left untouched. The endpoint never lowers it.
+clamped to zero, summed for `n = classBaseLevel+1 .. level`, where
+`classBaseLevel` is the base Rune Level of the character's own starting class as
+declared by its GameCatalog class document.
+
+The minimum is therefore **relative to the class, not absolute from level 1**. A
+character at or below its class base level owes nothing, so the minimum is `0`.
+This is not a tolerance: the native vanilla save stores every one of the ten
+freshly created classes at its own base level `1..10` with `TotalGetSoul` exactly
+`0`, and a floor summed from level 1 would report those untouched characters as
+illegal.
+
+When the stored value is below that minimum it is raised to exactly the minimum;
+when it already equals or exceeds it, it is left untouched. The endpoint never
+lowers it.
 
 The sum is evaluated in integer arithmetic, so the result cannot depend on the
 host's floating-point behaviour. Six per-level costs are corrected by one to
@@ -136,8 +147,10 @@ reproduce the established results at the boundaries where the historical
 floating-point evaluation rounded down. The reference vectors are those of the
 1.6.10 integer evaluation and its own reference tests; the 1.5.8 `float64` sum is
 not a reference, because its results depend on the host. They are level `1` →
-`0`, `9` → `473`, `50` → `256598`, `150` → `7106585` and `713` → `1692560963`;
-the maximum fits into `uint32`, so no clamp is needed.
+`0`, `9` → `473`, `50` → `256598`, `150` → `7106585` and `713` → `1692560963`,
+each counted from base level `1`; the maximum fits into `uint32`, so no clamp is
+needed. Each per-level correction stays attached to its own level, so a sum that
+starts above level 1 applies exactly the corrections it covers.
 
 ## Save mutation
 
@@ -194,6 +207,11 @@ floating-point behaviour. 1.6.10 replaced it with integer arithmetic that
 reproduces the established results. This endpoint reimplements the 1.6.10
 integer evaluation and pins its confirmed reference vectors in a test.
 
+Both legacy versions summed that cost from level 1 regardless of class. This
+endpoint does not: the sum starts above the base level of the character's own
+class, because the native save proves a freshly created class owes nothing at its
+base level. The reference vectors are unchanged for a base level of `1`.
+
 They also differ on an unknown `StartingClassID`. 1.x downgraded it to a warning
 and skipped the class check. This endpoint rejects it: an unknown class has no
 confirmed minima, and silently skipping the check would write a save under a
@@ -215,14 +233,17 @@ because the public values are unsigned.
 
 - The endpoint delegates to `backend/saveengine` and calls no other endpoint.
 - It uses embedded GameCatalog data: the starting-class minima are resolved from
-  the GameCatalog `class` resources (`backend/gamecatalog/data/classes/`).
+  the GameCatalog `class` resources (`backend/gamecatalog/data/classes/`), which
+  also supply the base level the SoulMemory minimum is counted from.
 - It creates no runtime or build dependency on the legacy SaveForge tree.
 
 ## Verification coverage
 
 Synthetic PC and PS4 coverage verifies the exact set of mutated bytes,
 preservation of all unrelated bytes including the held runes, the required
-SoulMemory raise, an already sufficient SoulMemory left untouched, the maximum
+SoulMemory raise counted from the class base level, an already sufficient
+SoulMemory left untouched, a class sitting at its own base level with
+`SoulMemory` `0` accepted as legal, the maximum
 attributes with level `713`, rejection of `0`, `100` and a value below the class
 minimum, rejection of a value that is legal for a stale `ProfileSummary` class
 but below the real `PlayerGameData` class minimum, rejection of an unknown class

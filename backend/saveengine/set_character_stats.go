@@ -60,18 +60,30 @@ var characterAttributeNames = [characterAttributeCount]string{
 	"dexterity", "intelligence", "faith", "arcane",
 }
 
+// startingClassDefinition is the complete, immutable definition of one starting
+// class as the embedded GameCatalog declares it: the eight base attributes in
+// the confirmed save order and the base level of the class.
+//
+// It is the single source of truth for both. Nothing in SaveEngine keeps a
+// second class table, and Level is the catalog fact, never the value the level
+// formula would derive from the attributes.
+type startingClassDefinition struct {
+	attributes [characterAttributeCount]uint32
+	level      uint32
+}
+
 var (
-	startingClassMinimaOnce  sync.Once
-	startingClassMinimaTable map[uint8][characterAttributeCount]uint32
-	startingClassMinimaErr   error
+	startingClassOnce  sync.Once
+	startingClassTable map[uint8]startingClassDefinition
+	startingClassErr   error
 )
 
-func loadStartingClassMinima() (map[uint8][characterAttributeCount]uint32, error) {
+func loadStartingClassDefinitions() (map[uint8]startingClassDefinition, error) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
 		return nil, fmt.Errorf("load embedded catalog data: %w", err)
 	}
-	table := make(map[uint8][characterAttributeCount]uint32)
+	table := make(map[uint8]startingClassDefinition)
 	for _, res := range data.Resources() {
 		if res.Kind != schema.ResourceKindClass || res.Class == nil {
 			continue
@@ -94,34 +106,44 @@ func loadStartingClassMinima() (map[uint8][characterAttributeCount]uint32, error
 			!classDoc.Arcane.Known || classDoc.Arcane.Value == 0 {
 			return nil, fmt.Errorf("class resource %q has missing, unknown or zero attribute fact", res.Key)
 		}
-		table[uint8(id)] = [characterAttributeCount]uint32{
-			classDoc.Vigor.Value,
-			classDoc.Mind.Value,
-			classDoc.Endurance.Value,
-			classDoc.Strength.Value,
-			classDoc.Dexterity.Value,
-			classDoc.Intelligence.Value,
-			classDoc.Faith.Value,
-			classDoc.Arcane.Value,
+		if !classDoc.Level.Known || classDoc.Level.Value == 0 {
+			return nil, fmt.Errorf("class resource %q has missing, unknown or zero level fact", res.Key)
+		}
+		table[uint8(id)] = startingClassDefinition{
+			attributes: [characterAttributeCount]uint32{
+				classDoc.Vigor.Value,
+				classDoc.Mind.Value,
+				classDoc.Endurance.Value,
+				classDoc.Strength.Value,
+				classDoc.Dexterity.Value,
+				classDoc.Intelligence.Value,
+				classDoc.Faith.Value,
+				classDoc.Arcane.Value,
+			},
+			level: classDoc.Level.Value,
 		}
 	}
 	return table, nil
 }
 
-func startingClassMinima(startingClassID uint8) ([characterAttributeCount]uint32, error) {
-	startingClassMinimaOnce.Do(func() {
-		startingClassMinimaTable, startingClassMinimaErr = loadStartingClassMinima()
+// startingClass resolves the shared definition of one starting class. An
+// identifier outside the ten confirmed classes is an error, never a skipped
+// check: an unknown class carries neither confirmed minima nor a confirmed base
+// level, so no rule that needs them may proceed.
+func startingClass(startingClassID uint8) (startingClassDefinition, error) {
+	startingClassOnce.Do(func() {
+		startingClassTable, startingClassErr = loadStartingClassDefinitions()
 	})
-	if startingClassMinimaErr != nil {
-		return [characterAttributeCount]uint32{}, startingClassMinimaErr
+	if startingClassErr != nil {
+		return startingClassDefinition{}, startingClassErr
 	}
-	minima, exists := startingClassMinimaTable[startingClassID]
+	definition, exists := startingClassTable[startingClassID]
 	if !exists {
-		return [characterAttributeCount]uint32{}, fmt.Errorf(
+		return startingClassDefinition{}, fmt.Errorf(
 			"starting class %d is unknown; its attribute minima are not confirmed",
 			startingClassID)
 	}
-	return minima, nil
+	return definition, nil
 }
 
 // LegalAttributesFor returns the attribute set closest to the supplied one that
@@ -147,10 +169,11 @@ func LegalAttributesFor(
 	attributes CharacterAttributes,
 	startingClassID uint8,
 ) (CharacterAttributes, error) {
-	minima, err := startingClassMinima(startingClassID)
+	definition, err := startingClass(startingClassID)
 	if err != nil {
 		return CharacterAttributes{}, err
 	}
+	minima := definition.attributes
 
 	values := attributes.ordered()
 	for index, value := range values {
@@ -233,7 +256,7 @@ func (engine *Engine) SetCharacterStats(
 			"levelPolicy must be %q; got %q", LevelPolicyRecalculate, levelPolicy)
 	}
 
-	values, level, requiredSoulMemory, err := prepareCharacterAttributes(attributes)
+	values, level, err := prepareCharacterAttributes(attributes)
 	if err != nil {
 		return SetCharacterStatsResult{}, err
 	}
@@ -247,7 +270,7 @@ func (engine *Engine) SetCharacterStats(
 				expectedRevision, current)
 		}
 
-		ctx, err := planCharacterStatsState(loaded, characterID, values, level, requiredSoulMemory)
+		ctx, err := planCharacterStatsState(loaded, characterID, values, level)
 		if err != nil {
 			return err
 		}
@@ -301,14 +324,20 @@ func (engine *Engine) SetCharacterStats(
 	}, nil
 }
 
-// prepareCharacterAttributes is a pure validator for ordered values, recalculated level and minimum SoulMemory.
-func prepareCharacterAttributes(attributes CharacterAttributes) (values [characterAttributeCount]uint32, level uint32, requiredSoulMemory uint32, err error) {
+// prepareCharacterAttributes is a pure validator for ordered values and the
+// recalculated level.
+//
+// The minimum SoulMemory is deliberately not derived here: it depends on the
+// base level of the character's own starting class, which is known only once the
+// class byte has been read from the locked snapshot. It is therefore computed in
+// planCharacterStatsState, next to that read.
+func prepareCharacterAttributes(attributes CharacterAttributes) (values [characterAttributeCount]uint32, level uint32, err error) {
 	values = attributes.ordered()
 	lvl, err := recalculateCharacterLevel(values)
 	if err != nil {
-		return [characterAttributeCount]uint32{}, 0, 0, err
+		return [characterAttributeCount]uint32{}, 0, err
 	}
-	return values, lvl, minimumSoulMemoryForLevel(lvl), nil
+	return values, lvl, nil
 }
 
 type plannedStatsContext struct {
@@ -325,7 +354,6 @@ func planCharacterStatsState(
 	characterID int,
 	values [characterAttributeCount]uint32,
 	level uint32,
-	requiredSoulMemory uint32,
 ) (plannedStatsContext, error) {
 	if characterID < 0 || characterID >= characterSlotCount {
 		return plannedStatsContext{}, fmt.Errorf("characterID %d is outside the range 0..%d",
@@ -353,6 +381,11 @@ func planCharacterStatsState(
 	if err := validateAgainstStartingClass(values, rawClass[0]); err != nil {
 		return plannedStatsContext{}, err
 	}
+	definition, err := startingClass(rawClass[0])
+	if err != nil {
+		return plannedStatsContext{}, err
+	}
+	requiredSoulMemory := minimumSoulMemoryForLevel(level, definition.level)
 
 	summary := base + userData10SummaryOffset + int64(characterID)*userData10SummaryStride
 	blockAt := anchor + statsWritableBlockOffset
@@ -392,7 +425,7 @@ func (engine *Engine) PlanCharacterStats(
 		return 0, 0, errors.New("saveSessionID is required")
 	}
 
-	values, lvl, requiredSoulMemory, err := prepareCharacterAttributes(attributes)
+	values, lvl, err := prepareCharacterAttributes(attributes)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -404,7 +437,7 @@ func (engine *Engine) PlanCharacterStats(
 		return 0, 0, fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 
-	ctx, err := planCharacterStatsState(loaded, characterID, values, lvl, requiredSoulMemory)
+	ctx, err := planCharacterStatsState(loaded, characterID, values, lvl)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -439,10 +472,11 @@ func recalculateCharacterLevel(values [characterAttributeCount]uint32) (uint32, 
 // classes is a hard rejection, not a skipped check: an unknown class carries no
 // known minima, so its save must not be written.
 func validateAgainstStartingClass(values [characterAttributeCount]uint32, startingClassID uint8) error {
-	minima, err := startingClassMinima(startingClassID)
+	definition, err := startingClass(startingClassID)
 	if err != nil {
 		return err
 	}
+	minima := definition.attributes
 	for index, value := range values {
 		if value < minima[index] {
 			return fmt.Errorf("attributes.%s %d is below the starting-class minimum %d",
@@ -453,18 +487,28 @@ func validateAgainstStartingClass(values [characterAttributeCount]uint32, starti
 }
 
 // minimumSoulMemoryForLevel returns the total runes a character must have earned
-// to reach the given level: the sum of the per-level costs
-// cost(n) = floor(0.02*n^3 + 3.06*n^2 + 105.6*n - 895), clamped to zero.
+// to climb from the base level of its own starting class to the given level: the
+// sum of the per-level costs
+// cost(n) = floor(0.02*n^3 + 3.06*n^2 + 105.6*n - 895), clamped to zero, taken
+// over the levels classBaseLevel+1 .. level.
+//
+// The base level of the class is the floor of that sum because a character never
+// paid for it: the native vanilla save shows every freshly created class sitting
+// at its own base level 1..10 with TotalGetSoul exactly zero. A level at or below
+// that base therefore requires nothing, and summing from level 1 would report a
+// legal untouched character as being below the minimum.
 //
 // The sum is evaluated in integers so the result cannot depend on the host's
 // floating-point behaviour. Six per-level costs are corrected by one to keep the
 // established results at the boundaries where the historical floating-point
 // evaluation rounded down; without them the totals from level 45 upwards would
-// drift from the confirmed reference values. The maximum possible result,
-// 1692560963 at level 713, fits into uint32, so no clamp is needed.
-func minimumSoulMemoryForLevel(level uint32) uint32 {
+// drift from the confirmed reference values. Each correction stays attached to
+// its own level, so a partial sum applies exactly the ones it covers. The
+// maximum possible result, 1692560963 at level 713 above base level 1, fits into
+// uint32, so no clamp is needed.
+func minimumSoulMemoryForLevel(level uint32, classBaseLevel uint32) uint32 {
 	total := int64(0)
-	for step := int64(2); step <= int64(level); step++ {
+	for step := int64(classBaseLevel) + 1; step <= int64(level); step++ {
 		cost := (2*step*step*step + 306*step*step + 10_560*step - 89_500) / 100
 		switch step {
 		case 45, 205, 257, 282, 410, 707:

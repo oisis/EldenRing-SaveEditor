@@ -56,7 +56,9 @@ type ValidationReference struct {
 // The derivation happens here and nowhere else: ExpectedLevel,
 // MinimumSoulMemory and ClassMinimumError come from the same functions
 // SetCharacterStats enforces, so a report can never accept a state the setter
-// rejects or reject a state the setter accepts.
+// rejects or reject a state the setter accepts. MinimumSoulMemory is therefore
+// counted from the base level of the character's own starting class, and stays
+// zero when that class is unknown.
 //
 // LevelError and ClassMinimumError hold the reason a rule could not be
 // satisfied, empty when it was. ExpectedLevel is meaningful only when LevelError
@@ -327,11 +329,18 @@ func readValidationStats(loaded *loadedSave, characterID int) (ValidationStats, 
 		StoredLevel:      level,
 		StoredSoulMemory: soulMemory,
 	}
+	definition, classErr := startingClass(rawClass[0])
 	if expected, err := recalculateCharacterLevel(values); err != nil {
 		stats.LevelError = err.Error()
 	} else {
 		stats.ExpectedLevel = expected
-		stats.MinimumSoulMemory = minimumSoulMemoryForLevel(expected)
+		// An unknown class has no confirmed base level, so no minimum can be
+		// derived for it. The gap is reported through ClassMinimumError below
+		// instead of being guessed from level 1, which would invent a floor the
+		// character may never have owed.
+		if classErr == nil {
+			stats.MinimumSoulMemory = minimumSoulMemoryForLevel(expected, definition.level)
+		}
 	}
 	if err := validateAgainstStartingClass(values, rawClass[0]); err != nil {
 		stats.ClassMinimumError = err.Error()

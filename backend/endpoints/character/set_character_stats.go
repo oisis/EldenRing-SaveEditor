@@ -2,10 +2,10 @@
 Endpoint: SetCharacterStats
 EndpointID: set_character_stats
 Purpose: Atomically sets the eight character attributes and recalculates the values the save keeps consistent with them.
-How it works: The runtime handler delegates the complete request to SaveEngine, which validates the attribute ranges, the starting-class minima, the level policy and the expected revision, then atomically writes the attributes, the recalculated level and, when required, a raised TotalGetSoul.
+How it works: The runtime handler delegates the complete request to SaveEngine, which validates the attribute ranges, the starting-class minima, the level policy and the expected revision, then atomically writes the attributes, the recalculated level and, when required, a raised TotalGetSoul. The lifetime-rune floor is class-relative: only the levels gained above the base level of the character's own starting class are charged, so a character sitting at its own base level owes nothing.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, attributes, levelPolicy, expectedRevision.
-GameCatalog variables read: none required by the current contract.
+GameCatalog variables read: class resources (the base attributes SaveEngine validates against and the base level the lifetime-rune floor is counted from).
 Save variables processed: the active-slot flag, the PlayerGameData starting class, attribute, level and TotalGetSoul fields, and the ProfileSummary level; HP/FP/SP, held runes and every unrelated field remain untouched.
 Implementation status: implemented
 */
@@ -40,6 +40,11 @@ type SetCharacterStatsResult = saveengine.SetCharacterStatsResult
 // SetCharacterStats assigns the eight attributes of one active character of an
 // existing save session. SaveEngine owns the range, starting-class, level,
 // SoulMemory, revision and binary-format rules.
+//
+// The SoulMemory rule is class-relative: the floor covers only the levels gained
+// above the base level of the character's own starting class, which SaveEngine
+// reads from the same GameCatalog class document the attribute minima come
+// from.
 func SetCharacterStats(
 	engine *saveengine.Engine,
 	saveSessionID string,
