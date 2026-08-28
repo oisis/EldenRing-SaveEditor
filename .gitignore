@@ -205,6 +205,14 @@ save/
 
 # Wails bindings under frontend/wailsjs/ are generated but tracked by design.
 
+# Wails records the frontend manifest hash here to decide whether to rerun
+# frontend:install. It is build state, not source.
+/frontend/package.json.md5
+
+# Lingui compiled catalogs are build output of `pnpm run i18n:compile`.
+# The .po sources are the tracked exchange format.
+/frontend/src/locales/*.js
+
 # Ignore AI files
 .claude/
 .geminiignore

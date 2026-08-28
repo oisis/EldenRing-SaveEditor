@@ -1,0 +1,3 @@
+# Wails owns this generated model file and emits whitespace that must remain
+# byte-for-byte reproducible across `wails generate module` runs.
+frontend/wailsjs/go/models.ts -whitespace

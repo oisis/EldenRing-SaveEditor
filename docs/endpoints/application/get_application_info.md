@@ -11,7 +11,7 @@ the backend supports, and the capabilities the backend currently declares.
 | Kind | Getter |
 | Domain | `application` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/application/info` of the local OpenAPI explorer (`tools/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — the Wails bridge method `GetApplicationInfo` of the desktop application, and `GET /api/v1/application/info` of the local OpenAPI explorer (`tools/swagger`). No permanent CLI command reaches it. |
 | Implementation source | [../../../backend/endpoints/application/get_application_info.go](../../../backend/endpoints/application/get_application_info.go) |
 | Test source | [../../../backend/endpoints/application/get_application_info_test.go](../../../backend/endpoints/application/get_application_info_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -41,6 +41,13 @@ That argument is a backend dependency, not a transport parameter:
   does not import it.
 - The frontend never passes this parameter and never influences the reported
   version.
+
+In the desktop application the caller is `internal/desktop.Bridge`. It receives
+the version from the composition root in `main.go`, whose `applicationVersion`
+variable a production build overrides from the `Makefile` `VERSION` through
+`-ldflags "-X main.applicationVersion=$(VERSION)"`. The bridge holds no version
+constant, declares no capability or schema version of its own, and returns the
+endpoint result and error unchanged.
 
 ## Output
 
@@ -119,6 +126,12 @@ From the repository root:
 go test ./backend/endpoints/application -run '^TestGetApplicationInfo' -count=1 -v
 ```
 
+The desktop bridge that exposes the endpoint over Wails has its own tests:
+
+```bash
+go test ./internal/desktop -run '^TestGetApplicationInfo' -count=1 -v
+```
+
 ### Call the route
 
 Start the explorer:
@@ -160,9 +173,9 @@ repository.
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/application/info` of the local OpenAPI
-  explorer in `tools/swagger`, a developer tool.
+  explorer in `tools/swagger`, a developer tool. The desktop application itself
+  starts no HTTP server: its transport is the Wails bridge method.
 - There is no permanent CLI command for it.
 - The getter does not determine the application version. It requires the version
   from its backend caller.

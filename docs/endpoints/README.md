@@ -70,7 +70,7 @@ Transport status:
 
 | Name | EndpointID | Kind | Domain | Implementation status | Transport status | Document |
 |---|---|---|---|---|---|---|
-| `GetApplicationInfo` | `get_application_info` | Getter | `application` | implemented | transport-exposed — `GET /api/v1/application/info` of the local explorer | [application/get_application_info.md](application/get_application_info.md) |
+| `GetApplicationInfo` | `get_application_info` | Getter | `application` | implemented | transport-exposed — Wails bridge method `GetApplicationInfo`, and `GET /api/v1/application/info` of the local explorer | [application/get_application_info.md](application/get_application_info.md) |
 | `GetCatalogInfo` | `get_catalog_info` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/info` of the local explorer | [catalog/get_catalog_info.md](catalog/get_catalog_info.md) |
 | `GetResource` | `get_resource` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resource` of the local explorer | [catalog/get_resource.md](catalog/get_resource.md) |
 | `GetItemVariants` | `get_item_variants` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/item-variants` of the local explorer | [catalog/get_item_variants.md](catalog/get_item_variants.md) |
