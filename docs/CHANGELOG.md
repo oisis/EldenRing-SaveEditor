@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### data(regulation): four new Regulation 1.17 armor sets available in the editor
+
+The Silver Grooved, Steel, Leontiel's and Gold Tattoo sets — sixteen armor
+pieces in total — can now be added and edited. Their real icons will follow in
+a separate change; placeholders are shown for now.
+
 ### data(regulation): eight new Regulation 1.17 armaments available in the editor
 
 Six melee armaments (Reverse-Bladed Sword, Hefty Scimitar, Idus Sword, Reed

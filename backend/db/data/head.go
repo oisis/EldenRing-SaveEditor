@@ -129,7 +129,7 @@ var Helms = map[uint32]ItemData{
 	0x100F4240: {Name: "Haima Glintstone Crown", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/haima_glintstone_crown.png"},
 	0x100F6950: {Name: "Snow Witch Hat", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/snow_witch_hat.png"},
 	0x100FDE80: {Name: "Radiant Gold Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/radiant_gold_mask.png"},
-0x10102CA0: {Name: "Albinauric Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/albinauric_mask.png"},
+	0x10102CA0: {Name: "Albinauric Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/albinauric_mask.png"},
 	0x101053B0: {Name: "Zamor Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/zamor_mask.png"},
 	0x1010A1D0: {Name: "Silver Tear Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/silver_tear_mask.png"},
 	0x1010C8E0: {Name: "Chain Coif", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/chain_coif.png"},
@@ -213,4 +213,8 @@ var Helms = map[uint32]ItemData{
 	0x100975E0: {Name: "Prophet Blindfold", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/prophet_blindfold.png"},
 	0x10108E48: {Name: "Imp Head (Elder)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/imp_head_elder.png"},
 	0x10113E10: {Name: "Mushroom Head", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/mushroom_head.png"},
+	0x1051A270: {Name: "Silver Grooved Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051F090: {Name: "Steel Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051C980: {Name: "Leontiel's Hat", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
+	0x10517B60: {Name: "Broken Gold Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
 }

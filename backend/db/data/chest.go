@@ -253,4 +253,8 @@ var Chest = map[uint32]ItemData{
 	0x10113E74: {Name: "Mushroom Body", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/mushroom_body.png"},
 	0x100FDEE4: {Name: "Goldmask's Rags", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/goldmask_s_rags.png"},
 	0x104F7FF4: {Name: "Ascetic's Loincloth", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/ascetic_s_loincloth.png", Flags: []string{"dlc"}},
+	0x1051A2D4: {Name: "Silver Grooved Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051F0F4: {Name: "Steel Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051C9E4: {Name: "Leontiel's Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/missing_icon.png", Flags: []string{"dlc"}},
+	0x10517BC4: {Name: "Gold Tattoo (Chest)", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/missing_icon.png", Flags: []string{"dlc"}},
 }

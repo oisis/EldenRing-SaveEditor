@@ -2,12 +2,12 @@
 //
 // Sources (SHA256 captured at generation time):
 //   backend/db/data/descriptions.go  sha256:c58f6d513d2ea7cef0683233c789a137aa0e1ff9864fae2a75956798372af296
-//   tmp/item-audit/app_items.csv  sha256:3a95cc6f7eaa3830c4826195f6a7e58bf7452250f3443842ae6f961949fd135c
+//   tmp/item-audit/app_items.csv  sha256:bcb1b626781dd5c6833e4768bad3b04786967fa3d1793652e8c0a4a18277504b
 //   tmp/regulation-bin-dump/msg/captions_mapping.csv  sha256:ad6fde814411503790dcdc828c0d58bbe24ff687bdeb30856d6a6da5d5ac7e21
 //   tmp/regulation-bin-dump/msg/descriptions_mapping.csv  sha256:7225ae1f3a93d25511938b2b2c78c75ab6b911b10dcd4ec45ea4b4b320a229a6
 //   tmp/regulation-bin-dump/msg/name_mapping.csv  sha256:46df7c18a39147d5c8e192332d3558cc817f081c97fcf7b638ff2bcb4928e964
 //
-// Entries: 3913
+// Entries: 3929
 //
 // Regenerate: `go run tmp/scripts/generate_item_text.go`.
 // No body timestamps — re-running with identical inputs yields
@@ -1556,6 +1556,22 @@ func init() {
 		0x10510630: {DisplayName: "Crucible Hammer-Helm", CanonicalName: "Crucible Hammer-Helm", Caption: "Helm worn by Devonia, longest-serving of the Crucible Knights.\n\nHolds the power of the crucible of life, the primordial form of the Erdtree. Strengthens Aspects of the Crucible incantations.\n\nIt is said Devonia quested in search of the Crucible's origin, and departed from the lands of the Erdtree alone.", Description: "Helm worn by Devonia, longest-serving of the Crucible Knights.\n\nHolds the power of the crucible of life, the primordial form of the Erdtree. Strengthens Aspects of the Crucible incantations.\n\nIt is said Devonia quested in search of the Crucible's origin, and departed from the lands of the Erdtree alone.", Location: "Location unknown or not yet indexed.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, DescriptionSource: TextSourceCurated, LocationSource: TextSourceCurated, DLCSource: "dlc01"},
 		0x10512D40: {DisplayName: "Greatjar", CanonicalName: "Greatjar", Caption: "A greatjar which fits comfortably over the head when upturned. Attire of the shamans who perform their worship at gaols.\n\nIncreases the power of thrown pots of all sizes.\n\nThey offer their prayers to the innards of the greatjars, such that they might be reborn one day into sainthood. This is the cycle of death and rebirth, taken into the hands of mortal men.", Description: "A greatjar which fits comfortably over the head when upturned.\n\nAttire of the shamans who perform their worship at gaols.\n\nIncreases the power of thrown pots of all sizes.\n\nThey offer their prayers to the innards of the greatjars,\n\nsuch that they might be reborn one day into sainthood.\n\nThis is the cycle of death and rebirth, taken into the hands of mortal men.", Location: "Location unknown or not yet indexed.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, DescriptionSource: TextSourceCurated, LocationSource: TextSourceCurated, DLCSource: "dlc01"},
 		0x10515450: {DisplayName: "Imp Head (Lion)", CanonicalName: "Imp Head (Lion)", Caption: "Head covering made from the largely unaltered head of an impish golem.\n\nResembling a lion in appearance, life force faintly clings to it.", Location: "Location unknown or not yet indexed.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, LocationSource: TextSourceCurated, DLCSource: "dlc01"},
+		0x10517B60: {DisplayName: "Broken Gold Mask", DisplayNameSource: TextSourceApp},
+		0x10517BC4: {DisplayName: "Gold Tattoo (Chest)", DisplayNameSource: TextSourceApp},
+		0x10517C28: {DisplayName: "Gold Tattoo (Arm)", DisplayNameSource: TextSourceApp},
+		0x10517C8C: {DisplayName: "Gold Tattoo (Leg)", DisplayNameSource: TextSourceApp},
+		0x1051A270: {DisplayName: "Silver Grooved Helm", DisplayNameSource: TextSourceApp},
+		0x1051A2D4: {DisplayName: "Silver Grooved Armor", DisplayNameSource: TextSourceApp},
+		0x1051A338: {DisplayName: "Silver Grooved Gauntlets", DisplayNameSource: TextSourceApp},
+		0x1051A39C: {DisplayName: "Silver Grooved Greaves", DisplayNameSource: TextSourceApp},
+		0x1051C980: {DisplayName: "Leontiel's Hat", DisplayNameSource: TextSourceApp},
+		0x1051C9E4: {DisplayName: "Leontiel's Armor", DisplayNameSource: TextSourceApp},
+		0x1051CA48: {DisplayName: "Leontiel's Leather Gloves", DisplayNameSource: TextSourceApp},
+		0x1051CAAC: {DisplayName: "Leontiel's Boots", DisplayNameSource: TextSourceApp},
+		0x1051F090: {DisplayName: "Steel Helm", DisplayNameSource: TextSourceApp},
+		0x1051F0F4: {DisplayName: "Steel Armor", DisplayNameSource: TextSourceApp},
+		0x1051F158: {DisplayName: "Steel Gauntlets", DisplayNameSource: TextSourceApp},
+		0x1051F1BC: {DisplayName: "Steel Greaves", DisplayNameSource: TextSourceApp},
 		0x200003E8: {DisplayName: "Crimson Amber Medallion", CanonicalName: "Crimson Amber Medallion", Caption: "A medallion with crimson amber inlaid.\nBoosts maximum HP.\n\nThe Erdtree's old sap becomes amber, treasured as the most precious of jewels in the age of Godfrey, the first Elden Lord.\n\nA primordial life energy resides inside.", Description: "Raises maximum HP", Location: "Purchased from the Nomadic Merchant at the eastern side of Weeping Peninsula.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, DescriptionSource: TextSourceMixed, LocationSource: TextSourceCurated, DLCSource: "base"},
 		0x200003E9: {DisplayName: "Crimson Amber Medallion +1", CanonicalName: "Crimson Amber Medallion +1", Caption: "A medallion with crimson amber inlaid.\nGreatly boosts maximum HP.\n\nThe Erdtree's old sap becomes amber, treasured as the most precious of jewels in the age of Godfrey, the first Elden Lord.\n\nA primordial life energy resides inside.", Description: "Greatly raises maximum HP", Location: "Volcano Manor: Found on a body in a room requiring a Stonesword Key near Prison Town Church.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, DescriptionSource: TextSourceMixed, LocationSource: TextSourceCurated, DLCSource: "base"},
 		0x200003EA: {DisplayName: "Crimson Amber Medallion +2", CanonicalName: "Crimson Amber Medallion +2", Caption: "A medallion with crimson amber inlaid.\nVastly boosts maximum HP.\n\nThe Erdtree's old sap becomes amber, treasured as the most precious of jewels in the age of Godfrey, the first Elden Lord.\n\nA primordial life energy resides inside.", Description: "Vastly raises maximum HP", Location: "Leyndell, Ashen Capital: Found by dropping down the open sewer grate to the beam below.", DisplayNameSource: TextSourceApp, CanonicalSource: TextSourceFMG, CaptionSource: TextSourceFMG, DescriptionSource: TextSourceMixed, LocationSource: TextSourceCurated, DLCSource: "base"},

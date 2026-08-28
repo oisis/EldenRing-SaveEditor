@@ -15,7 +15,7 @@ var Legs = map[uint32]ItemData{
 	0x102DC7EC: {Name: "Dryleaf Cuissardes", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/dryleaf_cuissardes.png", Flags: []string{"dlc"}},
 	0x104D5DDC: {Name: "Soiled Loincloth", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/soiled_loincloth.png", Flags: []string{"dlc"}},
 	0x104DD30C: {Name: "Igon's Loincloth", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/igon_s_loincloth.png", Flags: []string{"dlc"}},
-0x104FCEDC: {Name: "Gravebird Anklets", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/gravebird_anklets.png", Flags: []string{"dlc"}},
+	0x104FCEDC: {Name: "Gravebird Anklets", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/gravebird_anklets.png", Flags: []string{"dlc"}},
 	0x10009D6C: {Name: "Leather Trousers", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/leather_trousers.png"},
 	0x1000C47C: {Name: "Kaiden Trousers", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/kaiden_trousers.png"},
 	0x1000EB8C: {Name: "Drake Knight Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/drake_knight_greaves.png"},
@@ -138,4 +138,8 @@ var Legs = map[uint32]ItemData{
 	0x100FDFAC: {Name: "Gold Waistwrap", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/gold_waistwrap.png"},
 	0x10113F3C: {Name: "Mushroom Legs", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/mushroom_legs.png"},
 	0x101D743C: {Name: "Deathbed Smalls", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/deathbed_smalls.png", Flags: []string{"cut_content", "ban_risk"}},
+	0x1051A39C: {Name: "Silver Grooved Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051F1BC: {Name: "Steel Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051CAAC: {Name: "Leontiel's Boots", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
+	0x10517C8C: {Name: "Gold Tattoo (Leg)", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
 }
