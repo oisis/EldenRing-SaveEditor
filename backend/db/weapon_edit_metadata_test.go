@@ -74,11 +74,11 @@ func TestWeaponEditingMetadata_CoversAllApplicationWeapons(t *testing.T) {
 		}
 	}
 
-	if covered != 668 {
-		t.Fatalf("covered %d application weapon records, want 668", covered)
+	if covered != 748 {
+		t.Fatalf("covered %d application weapon records, want 748", covered)
 	}
-	if changeable != 416 {
-		t.Fatalf("changeable affinity records=%d, want 416 (blocked=%d, want 252)",
+	if changeable != 494 {
+		t.Fatalf("changeable affinity records=%d, want 494 (blocked=%d, want 254)",
 			changeable, covered-changeable)
 	}
 }

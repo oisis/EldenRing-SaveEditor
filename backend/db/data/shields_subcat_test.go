@@ -3,7 +3,7 @@ package data
 import "testing"
 
 // Thrusting Shields (Issue #6) are classified by canonical wepType == 90, not
-// by name (covers the Dueling Shield + Carian Thrusting Shield families).
+// by name (covers the Dueling, Carian Thrusting and Ritual Thrusting Shield families).
 
 // 1. Every wepType == 90 shield resolves to the Thrusting Shields sub-group.
 func TestThrustingShields_AllVariantsClassified(t *testing.T) {
@@ -18,8 +18,8 @@ func TestThrustingShields_AllVariantsClassified(t *testing.T) {
 				item.Name, id, item.SubCategory, SubcatShieldsThrusting)
 		}
 	}
-	if count != 26 {
-		t.Errorf("found %d wepType-90 shields, want 26 (13 Dueling + 13 Carian Thrusting)", count)
+	if count != 39 {
+		t.Errorf("found %d wepType-90 shields, want 39 (13 Dueling + 13 Carian + 13 Ritual)", count)
 	}
 }
 

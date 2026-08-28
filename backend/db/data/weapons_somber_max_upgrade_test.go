@@ -61,7 +61,7 @@ var somberWeapons = []struct {
 	{0x0207DDF0, 34070000, "Erdtree Seal", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 	{0x02080500, 34080000, "Dragon Communion Seal", RangedAndCatalysts, "RangedAndCatalysts", "ranged_and_catalysts", 2400},
 
-	// --- Melee armaments (17) ---
+	// --- Melee armaments (19) ---
 	{0x0026C1E0, 2540000, "Stone-Sheathed Sword", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x007270E0, 7500000, "Spirit Sword", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x00A8C320, 11060000, "Varr's Bouquet", Weapons, "Weapons", "melee_armaments", 2200},
@@ -79,11 +79,13 @@ var somberWeapons = []struct {
 	{0x015F1AD0, 23010000, "Watchdog's Staff", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x01600530, 23070000, "Staff of the Avatar", Weapons, "Weapons", "melee_armaments", 2200},
 	{0x016116A0, 23140000, "Rotten Staff", Weapons, "Weapons", "melee_armaments", 2200},
+	{0x00365240, 3560000, "Leontiel's Greatsword", Weapons, "Weapons", "melee_armaments", 2200},
+	{0x00CE2570, 13510000, "Golden Order Flail", Weapons, "Weapons", "melee_armaments", 2200},
 }
 
 func TestSomberWeapons_MaxUpgradeIs10(t *testing.T) {
-	if got := len(somberWeapons); got != 45 {
-		t.Fatalf("table size: got %d entries, want 45 (5 shields + 23 ranged/catalysts + 17 melee)", got)
+	if got := len(somberWeapons); got != 47 {
+		t.Fatalf("table size: got %d entries, want 47 (5 shields + 23 ranged/catalysts + 19 melee)", got)
 	}
 	for _, sw := range somberWeapons {
 		t.Run(sw.Name, func(t *testing.T) {

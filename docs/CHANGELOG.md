@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### data(regulation): eight new Regulation 1.17 armaments available in the editor
+
+Six melee armaments (Reverse-Bladed Sword, Hefty Scimitar, Idus Sword, Reed
+Great Katana, Leontiel's Greatsword, Golden Order Flail) and two shields
+(Ritual Thrusting Shield, Silver Grooved Shield) can now be added and edited,
+including the full affinity range for the standard-smithing families. Their
+real icons will follow in a separate change; placeholders are shown for now.
+
 ### data(regulation): weapon and shield stats refreshed to Regulation 1.17
 
 The displayed weapon and shield statistics, item weights and in-game sort
