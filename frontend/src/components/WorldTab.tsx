@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions, RecordDiagnosticWorldAction, GetSpectralSteedAttire, SetSpectralSteedAttire, AddItemsToCharacter} from '../../wailsjs/go/main/App';
+import {createPortal} from 'react-dom';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions, RecordDiagnosticWorldAction, GetSpectralSteedAttire, SetSpectralSteedAttire, LockAllSpectralSteedAttires, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import type {AddSettings} from '../App';
 import {db} from '../../wailsjs/go/models';
 import toast from '../lib/toast';
@@ -79,6 +80,8 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
     const [bellBearings, setBellBearings] = useState<db.BellBearingEntry[]>([]);
     const [whetblades, setWhetblades] = useState<db.WhetbladeEntry[]>([]);
     const [attire, setAttire] = useState<db.SpectralSteedAttireState | null>(null);
+    const [attireAddWarningAcknowledged, setAttireAddWarningAcknowledged] = useState(false);
+    const [zoomedAttire, setZoomedAttire] = useState<{name: string; path: string} | null>(null);
     const [regionEntries, setRegionEntries] = useState<db.RegionEntry[]>([]);
     const [expandedBBCategories, setExpandedBBCategories] = useState<Record<string, boolean>>({});
     const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
@@ -221,6 +224,10 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
     const attireMutationBlocked = platform !== 'PC';
     const attireBlockedTitle = attireMutationBlocked ? `Not yet verified for ${platform || 'this platform'}` : undefined;
     const attireActiveId = attire?.status === 'resolved' ? attire.activeId : 0;
+    const attireOwnedCount = attire?.entries.filter(e => e.owned).length ?? 0;
+    const attireTotalCount = attire?.entries.length ?? 0;
+    const missingAttires = attire?.entries.filter(e => e.itemId !== 0 && !e.owned) ?? [];
+    const ownedDlcAttires = attire?.entries.filter(e => e.itemId !== 0 && e.owned) ?? [];
     const refreshAttire = async () => { setAttire(await GetSpectralSteedAttire(charIdx)); };
     const handleAttireAdd = async (e: db.SpectralSteedAttireEntry) => {
         try {
@@ -245,6 +252,40 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
             toast.error(`Failed to activate ${e.name}: ${String(err)}`);
         }
     };
+    const handleAttireUnlockAll = async () => {
+        if (!missingAttires.length) return;
+        try {
+            const itemIDs = missingAttires.map(e => e.itemId);
+            await runWorldAction('spectral_steed_attire_unlock_all', itemIDs.length, async () => {
+                const res = await AddItemsToCharacter(charIdx, itemIDs, 0, 0, 0, 0, 1, 0);
+                if (!res || res.added < itemIDs.length) throw new Error(res?.capHit || 'not all attire items were added');
+            });
+            await refreshAttire();
+            onMutate?.();
+            toast.success('All Spectral Steed Attire unlocked');
+        } catch (err) {
+            toast.error(`Failed to unlock all Spectral Steed Attire: ${String(err)}`);
+        }
+    };
+    const handleAttireLockAll = async () => {
+        if (!ownedDlcAttires.length) return;
+        try {
+            await runWorldAction('spectral_steed_attire_lock_all', ownedDlcAttires.length, () => LockAllSpectralSteedAttires(charIdx));
+            await refreshAttire();
+            onMutate?.();
+            toast.success('Spectral Steed Attire reset to default');
+        } catch (err) {
+            toast.error(`Failed to lock all Spectral Steed Attire: ${String(err)}`);
+        }
+    };
+    const acknowledgeAttireAddWarning = (action: () => void | Promise<void>) => {
+        setAttireAddWarningAcknowledged(true);
+        void action();
+    };
+
+    useEffect(() => {
+        setAttireAddWarningAcknowledged(false);
+    }, [charIdx, saveLoadKey]);
 
     // --- Quest logic ---
     const loadQuestProgress = async (npc: string, resetExpanded = false) => {
@@ -396,6 +437,23 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                         </div>
                     </div>
                 </div>
+            )}
+
+            {zoomedAttire && createPortal(
+                <div role="dialog" aria-label="Spectral Steed Attire preview"
+                    className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-black/85 backdrop-blur-sm"
+                    onClick={() => setZoomedAttire(null)}>
+                    <img src={zoomedAttire.path} alt={zoomedAttire.name}
+                        className="h-96 w-96 max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl animate-in zoom-in-90 duration-300"
+                        onClick={event => event.stopPropagation()} />
+                    <button type="button" aria-label="Close attire preview" onClick={() => setZoomedAttire(null)}
+                        className="absolute right-6 top-6 text-white/70 transition-colors hover:text-white">
+                        <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>,
+                document.body,
             )}
 
             {/* Sub-tab selector */}
@@ -865,7 +923,17 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                     </AccordionSection>
 
                     {/* Spectral Steed Attire (Regulation 1.17) */}
-                    <AccordionSection id="world-spectral-steed-attire" title="Spectral Steed Attire" resetSignal={saveLoadKey}>
+                    <AccordionSection id="world-spectral-steed-attire" title="Spectral Steed Attire"
+                        progress={{current: attireOwnedCount, total: attireTotalCount}} resetSignal={saveLoadKey}
+                        actions={<>
+                            <RiskActionButton riskKey={attireAddWarningAcknowledged ? null : 'tarnished_edition_dlc'}
+                                onConfirm={() => acknowledgeAttireAddWarning(handleAttireUnlockAll)}
+                                disabled={!missingAttires.length || attireMutationBlocked} title={attireBlockedTitle}
+                                className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
+                            <button type="button" onClick={handleAttireLockAll}
+                                disabled={!ownedDlcAttires.length || attireMutationBlocked} title={attireBlockedTitle}
+                                className={`${btnSm} disabled:opacity-40 hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        </>}>
                         <div className="space-y-2">
                             <RiskSectionBanner riskKey="tarnished_edition_dlc" />
                             <p className="text-[10px] leading-relaxed text-muted-foreground px-1">
@@ -888,12 +956,17 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                     return (
                                         <div key={e.id} data-testid={`attire-row-${e.id}`} className="flex items-center gap-2 py-1 px-1 rounded hover:bg-muted/30">
                                             {e.iconPath
-                                                ? <img src={e.iconPath} alt="" className="w-6 h-6 object-contain" />
+                                                ? <button type="button" aria-label={`Preview ${e.name}`}
+                                                    onClick={() => setZoomedAttire({name: e.name, path: e.iconPath})}
+                                                    className="w-6 h-6 flex-shrink-0 cursor-zoom-in rounded hover:bg-muted/50">
+                                                    <img src={e.iconPath} alt="" className="w-full h-full object-contain" />
+                                                </button>
                                                 : <span className="w-6 h-6" />}
                                             <span className={`text-[10px] font-semibold flex-1 min-w-0 truncate ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{e.name}</span>
                                             {isActive && <span className="text-[9px] font-black uppercase tracking-widest text-primary">Active</span>}
                                             {!isDefault && (
-                                                <RiskActionButton riskKey="tarnished_edition_dlc" onConfirm={() => handleAttireAdd(e)}
+                                                <RiskActionButton riskKey={attireAddWarningAcknowledged ? null : 'tarnished_edition_dlc'}
+                                                    onConfirm={() => acknowledgeAttireAddWarning(() => handleAttireAdd(e))}
                                                     disabled={e.owned || attireMutationBlocked} title={attireBlockedTitle}
                                                     className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Add</RiskActionButton>
                                             )}

@@ -7,7 +7,7 @@ import (
 
 func TestAppFacadePreservesWailsMethodSet(t *testing.T) {
 	appType := reflect.TypeOf(NewApp())
-	const expectedMethods = 179
+	const expectedMethods = 180
 	if appType.NumMethod() != expectedMethods {
 		t.Fatalf("App exported method count = %d, want %d", appType.NumMethod(), expectedMethods)
 	}

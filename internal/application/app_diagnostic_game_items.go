@@ -44,6 +44,9 @@ const (
 	// actionGameItemsSetSpectralSteedAttire tags the World-tab Spectral Steed
 	// Attire activation, which owns event flags 6700-6703.
 	actionGameItemsSetSpectralSteedAttire = "set_spectral_steed_attire"
+	// actionGameItemsLockAllSpectralSteedAttires tags the atomic reset to the
+	// default appearance plus removal of all three attire key items.
+	actionGameItemsLockAllSpectralSteedAttires = "lock_all_spectral_steed_attires"
 )
 
 // stageGameItemsApplyAddPlan is the finished-phase stage reported when the real

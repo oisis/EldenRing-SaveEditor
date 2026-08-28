@@ -212,6 +212,8 @@ export function ListSaveBackups(arg1:string):Promise<Array<deploy.SaveBackupEntr
 
 export function LoadSaveFromPath(arg1:string):Promise<string>;
 
+export function LockAllSpectralSteedAttires(arg1:number):Promise<void>;
+
 export function MoveInventoryWorkspaceItem(arg1:string,arg2:string,arg3:string,arg4:number):Promise<editor.InventoryWorkspaceSnapshot>;
 
 export function MoveItemsBetweenInventoryAndStorage(arg1:number,arg2:Array<number>,arg3:string):Promise<core.TransferResult>;

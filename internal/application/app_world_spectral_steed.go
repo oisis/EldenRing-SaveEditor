@@ -130,6 +130,44 @@ func (a *App) SetSpectralSteedAttire(slotIndex int, flagID uint32) error {
 	})
 }
 
+// LockAllSpectralSteedAttires removes all three attire key items and restores
+// the default Torrent appearance as one atomic mutation. It is intentionally a
+// dedicated operation: composing the generic remove endpoint with
+// SetSpectralSteedAttire in the frontend could leave the save half-mutated if
+// the second call failed.
+func (a *App) LockAllSpectralSteedAttires(slotIndex int) error {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	if a.save.Platform != spectralSteedAttirePlatform {
+		return fmt.Errorf("spectral steed attire is not yet verified for %s saves", a.save.Platform)
+	}
+
+	a.slotMu[slotIndex].Lock()
+	defer a.slotMu[slotIndex].Unlock()
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	// Validate every owned flag before taking an undo snapshot or touching an
+	// inventory record. A truncated flag region therefore fails without mutation.
+	flags := slot.Data[slot.EventFlagsOffset:]
+	for _, attire := range data.SpectralSteedAttires {
+		if _, err := db.GetEventFlag(flags, attire.FlagID); err != nil {
+			return fmt.Errorf("read spectral steed attire flag %d: %w", attire.FlagID, err)
+		}
+	}
+
+	a.pushUndoLocked(slotIndex)
+	return a.journalUnlockMutation(actionGameItemsLockAllSpectralSteedAttires, slotIndex, slot, spectralSteedAttireFlagIDs(), applyLockAllSpectralSteedAttires)
+}
+
 // spectralSteedAttireFlagIDs returns the flags the operation owns.
 func spectralSteedAttireFlagIDs() []uint32 {
 	ids := make([]uint32, 0, len(data.SpectralSteedAttires))
@@ -157,6 +195,51 @@ func applySpectralSteedAttire(slot *core.SaveSlot, flagID uint32) error {
 		}
 	}
 	if err := db.SetEventFlag(flags, flagID, true); err != nil {
+		core.RestoreSlot(slot, snapshot)
+		return err
+	}
+	return nil
+}
+
+// applyLockAllSpectralSteedAttires is the shared real/diagnostic-clone writer
+// for LockAllSpectralSteedAttires. It removes the exact physical inventory
+// handles found for the three attire item IDs, then selects Default Appearance.
+// The outer snapshot covers both operations, including a rebuild performed by
+// the item-removal path.
+func applyLockAllSpectralSteedAttires(slot *core.SaveSlot) error {
+	snapshot := core.SnapshotSlot(slot)
+	wanted := make(map[uint32]struct{}, len(data.SpectralSteedAttires)-1)
+	for _, attire := range data.SpectralSteedAttires {
+		if attire.ItemID != 0 {
+			wanted[attire.ItemID] = struct{}{}
+		}
+	}
+
+	seen := make(map[uint32]struct{})
+	handles := make([]uint32, 0, len(wanted))
+	collect := func(items []core.InventoryItem) {
+		for _, item := range items {
+			if item.GaItemHandle == 0 || item.GaItemHandle == core.GaHandleEmpty || item.Quantity == 0 {
+				continue
+			}
+			if _, ok := wanted[db.HandleToItemID(item.GaItemHandle)]; !ok {
+				continue
+			}
+			if _, duplicate := seen[item.GaItemHandle]; duplicate {
+				continue
+			}
+			seen[item.GaItemHandle] = struct{}{}
+			handles = append(handles, item.GaItemHandle)
+		}
+	}
+	collect(slot.Inventory.CommonItems)
+	collect(slot.Inventory.KeyItems)
+
+	if err := core.RemoveItemsFromSlot(slot, handles, true, false); err != nil {
+		core.RestoreSlot(slot, snapshot)
+		return err
+	}
+	if err := applySpectralSteedAttire(slot, data.SpectralSteedAttireDefaultFlag); err != nil {
 		core.RestoreSlot(slot, snapshot)
 		return err
 	}

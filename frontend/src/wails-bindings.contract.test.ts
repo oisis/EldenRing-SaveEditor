@@ -50,6 +50,7 @@ describe('Wails binding contract: App methods', () => {
     it('exposes the Spectral Steed Attire read/write pair and its DTO', () => {
         expect(typeof App.GetSpectralSteedAttire).toBe('function');
         expect(typeof App.SetSpectralSteedAttire).toBe('function');
+        expect(typeof App.LockAllSpectralSteedAttires).toBe('function');
         const entry = db.SpectralSteedAttireEntry.createFrom({});
         expect('id' in entry).toBe(true);
         expect('name' in entry).toBe(true);

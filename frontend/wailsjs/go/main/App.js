@@ -410,6 +410,10 @@ export function LoadSaveFromPath(arg1) {
   return window['go']['main']['App']['LoadSaveFromPath'](arg1);
 }
 
+export function LockAllSpectralSteedAttires(arg1) {
+  return window['go']['main']['App']['LockAllSpectralSteedAttires'](arg1);
+}
+
 export function MoveInventoryWorkspaceItem(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['MoveInventoryWorkspaceItem'](arg1, arg2, arg3, arg4);
 }

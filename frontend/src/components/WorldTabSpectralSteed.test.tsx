@@ -52,6 +52,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     RecordDiagnosticWorldAction: vi.fn().mockResolvedValue(undefined),
     GetSpectralSteedAttire: vi.fn(),
     SetSpectralSteedAttire: vi.fn().mockResolvedValue(undefined),
+    LockAllSpectralSteedAttires: vi.fn().mockResolvedValue(undefined),
     AddItemsToCharacter: vi.fn(),
 }));
 
@@ -66,6 +67,7 @@ vi.mock('../state/safetyMode', () => ({
 import {
     AddItemsToCharacter,
     GetSpectralSteedAttire,
+    LockAllSpectralSteedAttires,
     SetSpectralSteedAttire,
 } from '../../wailsjs/go/main/App';
 import { RISK_INFO } from '../data/riskInfo';
@@ -102,6 +104,11 @@ async function openAttireSection(platform = 'PC') {
 const row = (id: number) => within(screen.getByTestId(`attire-row-${id}`));
 const addButton = (id: number) => row(id).getByRole('button', { name: 'Add' });
 const setButton = (id: number) => row(id).getByRole('button', { name: 'Set' });
+const attireHeader = () => {
+    const header = screen.getByText('Spectral Steed Attire').closest('button');
+    if (!header) throw new Error('missing Spectral Steed Attire header button');
+    return within(header);
+};
 
 describe('WorldTab — Spectral Steed Attire', () => {
     beforeEach(() => {
@@ -120,6 +127,16 @@ describe('WorldTab — Spectral Steed Attire', () => {
         expect(screen.queryByTestId('attire-row-6704')).toBeNull();
     });
 
+    it('shows owned progress and bulk actions in the collapsed section header', async () => {
+        vi.mocked(GetSpectralSteedAttire).mockResolvedValue(attireState());
+        render(<WorldTab charIdx={0} platform="PC" />);
+        fireEvent.click(await screen.findByRole('button', { name: /unlocks/i }));
+        await screen.findByText('Spectral Steed Attire');
+        expect(attireHeader().getByText('1/4')).toBeTruthy();
+        expect(attireHeader().getByRole('button', { name: 'Unlock All' })).toBeTruthy();
+        expect(attireHeader().getByRole('button', { name: 'Lock All' })).toBeTruthy();
+    });
+
     it('gives the default appearance no Add button and no DLC confirmation', async () => {
         await openAttireSection();
         expect(row(6700).queryByRole('button', { name: 'Add' })).toBeNull();
@@ -127,6 +144,17 @@ describe('WorldTab — Spectral Steed Attire', () => {
         // that RiskActionButton renders next to a risk-carrying button.
         expect(row(6700).queryByLabelText(/why is this risky/i)).toBeNull();
         expect(row(6701).getByRole('button', { name: 'Add' })).toBeTruthy();
+    });
+
+    it('opens and closes an enlarged attire preview from the thumbnail', async () => {
+        await openAttireSection();
+        fireEvent.click(row(6701).getByRole('button', { name: 'Preview Tree Sentinel Spectral Steed Attire' }));
+        const dialog = screen.getByRole('dialog', { name: 'Spectral Steed Attire preview' });
+        const image = within(dialog).getByRole('img', { name: 'Tree Sentinel Spectral Steed Attire' });
+        expect(image.getAttribute('src')).toBe('items/key_items/tree_sentinel_spectral_steed_attire.png');
+        expect(image).toHaveClass('h-96', 'w-96');
+        fireEvent.click(within(dialog).getByRole('button', { name: 'Close attire preview' }));
+        expect(screen.queryByRole('dialog', { name: 'Spectral Steed Attire preview' })).toBeNull();
     });
 
     it('disables Add for an owned attire and Set without the item', async () => {
@@ -150,6 +178,34 @@ describe('WorldTab — Spectral Steed Attire', () => {
         await waitFor(() => expect(AddItemsToCharacter).toHaveBeenCalledTimes(1));
         expect(vi.mocked(AddItemsToCharacter).mock.calls[0]).toEqual([0, [FUNEREAL_NIGHT_ITEM], 0, 0, 0, 0, 1, 0]);
         await waitFor(() => expect(vi.mocked(GetSpectralSteedAttire).mock.calls.length).toBeGreaterThan(1));
+    });
+
+    it('acknowledges the DLC warning after the first Add operation only', async () => {
+        await openAttireSection();
+        const riskLabel = /why is this risky/i;
+        expect(row(6701).getByLabelText(riskLabel)).toBeTruthy();
+        fireEvent.click(addButton(6701));
+        await waitFor(() => expect(AddItemsToCharacter).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(row(6701).queryByLabelText(riskLabel)).toBeNull());
+        expect(row(6703).queryByLabelText(riskLabel)).toBeNull();
+    });
+
+    it('Unlock All adds every missing attire in one Inventory batch', async () => {
+        vi.mocked(AddItemsToCharacter).mockResolvedValue({ added: 2, requested: 2, capHit: '' } as never);
+        await openAttireSection();
+        fireEvent.click(attireHeader().getByRole('button', { name: 'Unlock All' }));
+        await waitFor(() => expect(AddItemsToCharacter).toHaveBeenCalledWith(
+            0,
+            [TREE_SENTINEL_ITEM, FUNEREAL_NIGHT_ITEM],
+            0, 0, 0, 0, 1, 0,
+        ));
+    });
+
+    it('Lock All uses the atomic backend reset and does not add items', async () => {
+        await openAttireSection();
+        fireEvent.click(attireHeader().getByRole('button', { name: 'Lock All' }));
+        await waitFor(() => expect(LockAllSpectralSteedAttires).toHaveBeenCalledWith(0));
+        expect(AddItemsToCharacter).not.toHaveBeenCalled();
     });
 
     it('Set calls the backend with the matching flag and refetches', async () => {

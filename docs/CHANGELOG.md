@@ -8,10 +8,12 @@ All notable changes to this project will be documented in this file.
 
 World → Unlocks now lists Torrent's four appearances (default plus the three
 Regulation 1.17 attires), shows which one is active, adds the required key item
-to the inventory and activates a single appearance flag. Every attire action
-carries a permanent warning that the content requires the Tarnished Edition
-DLC; SaveForge cannot verify DLC ownership. Attire mutations are enabled on PC
-saves only.
+to the inventory and activates a single appearance flag. The section header
+shows owned progress and provides Unlock All / Lock All controls; Lock All also
+restores Torrent's default appearance. The DLC confirmation is shown only for
+the first add operation on the loaded save, while a permanent warning explains
+that the content requires the Tarnished Edition DLC because SaveForge cannot
+verify ownership. Attire mutations are enabled on PC saves only.
 
 ### data(regulation): two new Regulation 1.17 starting classes
 

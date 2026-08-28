@@ -53,6 +53,13 @@ func giveAttireItem(app *App, itemID uint32) {
 	})
 }
 
+func addAttireItems(t *testing.T, app *App, itemIDs ...uint32) {
+	t.Helper()
+	if err := core.AddItemsToSlot(&app.save.Slots[0], itemIDs, 1, 0, false); err != nil {
+		t.Fatalf("add attire items: %v", err)
+	}
+}
+
 func spectralSteedFlagStates(t *testing.T, app *App) map[uint32]bool {
 	t.Helper()
 	flags := spectralSteedFlags(t, app)
@@ -281,6 +288,66 @@ func TestSetSpectralSteedAttireFailsClosedOnPS4(t *testing.T) {
 	// The read path stays available on PS4.
 	if _, err := app.GetSpectralSteedAttire(0); err != nil {
 		t.Fatalf("getter must still work on PS4: %v", err)
+	}
+}
+
+func TestLockAllSpectralSteedAttiresRemovesItemsAndRestoresDefault(t *testing.T) {
+	app := spectralSteedApp(t)
+	addAttireItems(t, app, treeSentinelAttireItem, silverOfCariaItem, funerealNightItem)
+	setSpectralSteedFlag(t, app, 6703, true)
+
+	if err := app.LockAllSpectralSteedAttires(0); err != nil {
+		t.Fatal(err)
+	}
+
+	state, err := app.GetSpectralSteedAttire(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Status != db.SpectralSteedAttireResolved || state.ActiveID != data.SpectralSteedAttireDefaultFlag {
+		t.Fatalf("state = %+v, want resolved default appearance", state)
+	}
+	for _, entry := range state.Entries {
+		wantOwned := entry.ID == data.SpectralSteedAttireDefaultFlag
+		if entry.Owned != wantOwned {
+			t.Fatalf("entry %d owned = %v, want %v", entry.ID, entry.Owned, wantOwned)
+		}
+	}
+}
+
+func TestLockAllSpectralSteedAttiresRejectsTruncatedFlagsWithoutMutation(t *testing.T) {
+	app := spectralSteedApp(t)
+	giveAttireItem(app, treeSentinelAttireItem)
+	setSpectralSteedFlag(t, app, 6701, true)
+	slot := &app.save.Slots[0]
+	slot.Data = slot.Data[:slot.EventFlagsOffset+8]
+	before := core.CloneSlot(slot)
+
+	if err := app.LockAllSpectralSteedAttires(0); err == nil {
+		t.Fatal("expected truncated event flags to be rejected")
+	}
+	if len(slot.Inventory.KeyItems) != len(before.Inventory.KeyItems) || slot.Inventory.KeyItems[0] != before.Inventory.KeyItems[0] {
+		t.Fatalf("failed lock mutated inventory: got %+v, want %+v", slot.Inventory.KeyItems, before.Inventory.KeyItems)
+	}
+	if string(slot.Data) != string(before.Data) {
+		t.Fatal("failed lock mutated slot data")
+	}
+}
+
+func TestLockAllSpectralSteedAttiresFailsClosedOnPS4(t *testing.T) {
+	app := spectralSteedApp(t)
+	app.save.Platform = "PS4"
+	giveAttireItem(app, treeSentinelAttireItem)
+	setSpectralSteedFlag(t, app, 6701, true)
+
+	if err := app.LockAllSpectralSteedAttires(0); err == nil {
+		t.Fatal("expected PS4 to be rejected")
+	}
+	if states := spectralSteedFlagStates(t, app); !states[6701] || states[6700] {
+		t.Fatalf("PS4 call mutated flags: %v", states)
+	}
+	if !spectralSteedItemOwned(&app.save.Slots[0], treeSentinelAttireItem) {
+		t.Fatal("PS4 call removed the attire item")
 	}
 }
 
