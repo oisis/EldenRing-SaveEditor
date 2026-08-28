@@ -69,9 +69,10 @@ func TestRegulation117_DuelingShieldSortId(t *testing.T) {
 	}
 }
 
-// TestRegulation117_NewGoodsLimits pins the three technical goods rows added
-// by 1.17. They are limits-only: the public item catalog must not gain them
-// until a later Regulation stage adds real items.
+// TestRegulation117_NewGoodsLimits pins the technical limits of the three goods
+// rows added by 1.17 (Spectral Steed Attire). The rows are now also present in
+// the public item catalog as Key Items; this test covers only their generated
+// regulation limits.
 func TestRegulation117_NewGoodsLimits(t *testing.T) {
 	for _, id := range []uint32{0x401EAA00, 0x401EAA0A, 0x401EAA14} {
 		l, ok := GameLimitsByItemID[id]

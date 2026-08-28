@@ -346,6 +346,14 @@ var KeyItems = map[uint32]ItemData{
 	0x401EAFAA: {Name: "Bloodsucking Cracked Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/bloodsucking_cracked_tear.png", Flags: []string{"dlc"}},
 	0x401EAFB4: {Name: "Glovewort Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/glovewort_crystal_tear.png", Flags: []string{"dlc"}},
 
+	// ─── Regulation 1.17 — Spectral Steed Attire (Torrent skins) ───
+	// Picking one up adds only the matching Goods record to Key Items; no
+	// separate unlock flag. Regulation isDeposit=0 → MaxStorage stays 0.
+	// Placeholder icon until real assets are extracted.
+	0x401EAA00: {Name: "Tree Sentinel Spectral Steed Attire", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/missing_icon.png", Flags: []string{"dlc"}},
+	0x401EAA0A: {Name: "Silver of Caria Spectral Steed Attire", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/missing_icon.png", Flags: []string{"dlc"}},
+	0x401EAA14: {Name: "Funereal Night Spectral Steed Attire", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/missing_icon.png", Flags: []string{"dlc"}},
+
 	// ─── World Maps — relocated from info.go (correct in-game tab is Key Items per spec/36) ───
 	// Region map fragments that reveal map sections when picked up.
 	0x40002198: {Name: "Map: Limgrave, West", Category: "key_items", SubCategory: SubcatKeyWorldMaps, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/map_limgrave_west.png", Flags: []string{"no_database"}},

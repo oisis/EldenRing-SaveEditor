@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### data(regulation): three Regulation 1.17 Spectral Steed Attire key items
+
+The Tree Sentinel, Silver of Caria and Funereal Night Spectral Steed Attire
+items are now listed in Database → Key Items and can be added to the
+inventory. They temporarily use a placeholder icon. Torrent's active
+appearance is still changed in game; this change does not add an editor for
+the appearance flags.
+
 ### data(regulation): four new Regulation 1.17 armor sets available in the editor
 
 The Silver Grooved, Steel, Leontiel's and Gold Tattoo sets — sixteen armor
