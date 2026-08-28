@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
 const (
@@ -389,5 +391,74 @@ func TestGenerate_WeaponOriginStableEmission(t *testing.T) {
 	iLast := strings.Index(a.weaponGo, "0x00000898:")
 	if iBase < 0 || iMid < iBase || iLast < iMid {
 		t.Errorf("WeaponGemMounts keys are not in ascending Row ID order (%d, %d, %d)", iBase, iMid, iLast)
+	}
+}
+
+// --- weapon_weptype_generated.go ---
+
+func TestRenderWepTypeGo_AppIDsOnlySortedAndDense(t *testing.T) {
+	weapons := []weapon{
+		{rid: 0x00000BB8, wepType: 5},
+		{rid: 0x000003E8, wepType: 1},
+		{rid: 0x0000044C, wepType: 1},
+		{rid: 0x000007D0, wepType: 90},
+		{rid: 0x00000FA0, wepType: 67}, // present in the param but not in the app DB
+		{rid: 0x00000898, wepType: 92},
+		{rid: 0x000009C4, wepType: 94},
+		{rid: 0x00000A28, wepType: 93},
+	}
+	appIDs := map[uint32]bool{
+		0x000003E8: true, 0x0000044C: true, 0x000007D0: true,
+		0x00000898: true, 0x000009C4: true, 0x00000A28: true, 0x00000BB8: true,
+	}
+
+	src, err := renderWepTypeGo(weapons, appIDs, weaponFixture)
+	if err != nil {
+		t.Fatalf("renderWepTypeGo: %v", err)
+	}
+
+	if !strings.Contains(src, "// Regenerated from "+weaponFixture+"; do not\n") {
+		t.Errorf("header does not record the EquipParamWeapon path it was given (%s):\n%s", weaponFixture, src)
+	}
+
+	if !strings.Contains(src, "var weaponWepType = map[uint32]uint16{ // 7 entries") {
+		t.Errorf("entry counter missing or wrong:\n%s", src)
+	}
+	if strings.Contains(src, "0x00000FA0") {
+		t.Error("emitted a param row that the app DB does not expose")
+	}
+	want := "\t0x000003E8: 1, 0x0000044C: 1, 0x000007D0: 90, 0x00000898: 92, 0x000009C4: 94, 0x00000A28: 93,\n\t0x00000BB8: 5,\n}\n"
+	if !strings.HasSuffix(src, want) {
+		t.Errorf("dense sorted layout mismatch:\ngot:\n%s\nwant suffix:\n%s", src, want)
+	}
+	if !strings.HasPrefix(src, "package data\n\n// weapon_weptype_generated.go —") {
+		t.Errorf("file header changed:\n%s", src)
+	}
+}
+
+func TestRenderWepTypeGo_MissingParamRowIsFatal(t *testing.T) {
+	_, err := renderWepTypeGo(
+		[]weapon{{rid: 0x000003E8, wepType: 1}},
+		map[uint32]bool{0x000003E8: true, 0x0000044C: true},
+		weaponFixture,
+	)
+	if err == nil {
+		t.Fatal("expected an error for an app item ID with no EquipParamWeapon row")
+	}
+	if !strings.Contains(err.Error(), "0x0000044C") {
+		t.Errorf("error does not name the missing ID: %v", err)
+	}
+}
+
+func TestAppWeaponIDs_CoversEveryArmamentMap(t *testing.T) {
+	ids := appWeaponIDs()
+	want := len(data.Weapons) + len(data.Shields) + len(data.RangedAndCatalysts)
+	if len(ids) != want {
+		t.Fatalf("appWeaponIDs()=%d, want %d (maps must not overlap)", len(ids), want)
+	}
+	for _, id := range []uint32{0x000F4240, 0x01C9C380, 0x02719C40} { // Dagger, Buckler, Longbow
+		if !ids[id] {
+			t.Errorf("0x%08X missing from appWeaponIDs()", id)
+		}
 	}
 }

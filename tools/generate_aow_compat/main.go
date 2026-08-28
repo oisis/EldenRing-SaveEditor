@@ -1,11 +1,13 @@
 // Command generate_aow_compat regenerates the Ash of War ↔ weapon compatibility
 // data from a regulation.bin CSV dump.
 //
-// It emits three files from a single source model (no hand-maintained duplicate):
+// It emits four files from a single source model (no hand-maintained duplicate):
 //
 //	backend/db/data/aow_compat.go       — AoWCompatMasks, WepTypeToCanMountBit,
 //	                                       AoWHeuristicWepTypes, CanMountWepNames
 //	backend/db/data/weapon_gem_mount.go — WeaponGemMounts (wepType + AoW/affinity gates)
+//	backend/db/data/weapon_weptype_generated.go — weaponWepType, restricted to the
+//	                                       item IDs the editor's DB actually exposes
 //	frontend/src/data/aowCompat.generated.ts — the Go maps mirrored for the UI
 //
 // Compatibility model:
@@ -52,6 +54,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
 // canMountColumns lists the EquipParamGem canMountWep_* columns in bit order.
@@ -197,6 +201,7 @@ func main() {
 	aowOut := flag.String("aow-out", "backend/db/data/aow_compat.go", "output path for aow_compat.go")
 	weaponOut := flag.String("weapon-out", "backend/db/data/weapon_gem_mount.go", "output path for weapon_gem_mount.go")
 	tsOut := flag.String("ts-out", "frontend/src/data/aowCompat.generated.ts", "output path for the TypeScript mirror")
+	wepTypeOut := flag.String("weptype-out", "backend/db/data/weapon_weptype_generated.go", "output path for weapon_weptype_generated.go")
 	flag.Parse()
 
 	if *gemPath == "" || *gemParamPath == "" || *weaponPath == "" {
@@ -208,12 +213,20 @@ func main() {
 		fatalf("%v", err)
 	}
 
+	appIDs := appWeaponIDs()
+	wepTypeGo, err := renderWepTypeGo(res.weapons, appIDs, *weaponPath)
+	if err != nil {
+		fatalf("%v", err)
+	}
+
 	write(*aowOut, res.aowGo)
 	write(*weaponOut, res.weaponGo)
 	write(*tsOut, res.tsSource)
+	write(*wepTypeOut, wepTypeGo)
 
 	fmt.Printf("aow_compat: %d masks, %d heuristic entries\n", len(res.masks), len(res.heuristic))
 	fmt.Printf("weapon_gem_mount: %d weapon metadata rows\n", countWeaponMetadata(res.weapons))
+	fmt.Printf("weapon_weptype: %d application weapon entries\n", len(appIDs))
 }
 
 // generate is the pure core: it reads both CSVs and returns every generated
@@ -667,6 +680,77 @@ func renderWeaponGo(res *result, weaponPath string) (string, error) {
 			fields += fmt.Sprintf(", OriginEquipWep: 0x%08X", w.origin)
 		}
 		fmt.Fprintf(&b, "\t0x%08X: {%s},\n", w.rid, fields)
+	}
+	b.WriteString("}\n")
+	return gofmt(b.String())
+}
+
+// wepTypeEntriesPerLine keeps weapon_weptype_generated.go in its established
+// dense layout; gofmt leaves multi-pair lines untouched.
+const wepTypeEntriesPerLine = 6
+
+// appWeaponIDs returns every item ID the editor's DB exposes as an armament.
+// weaponWepType is deliberately restricted to these: it drives sub-category
+// classification for items the user can actually see.
+func appWeaponIDs() map[uint32]bool {
+	maps := []map[uint32]data.ItemData{data.Weapons, data.Shields, data.RangedAndCatalysts}
+	ids := make(map[uint32]bool)
+	for _, m := range maps {
+		for id := range m {
+			ids[id] = true
+		}
+	}
+	return ids
+}
+
+// renderWepTypeGo emits weaponWepType for exactly the app item IDs, sorted by ID.
+// An app ID with no EquipParamWeapon row is a hard error: silently dropping it
+// would demote the item to the fragile name-based sub-category fallback.
+func renderWepTypeGo(weapons []weapon, appIDs map[uint32]bool, weaponPath string) (string, error) {
+	found := make(map[uint32]uint16, len(appIDs))
+	for _, w := range weapons {
+		if appIDs[w.rid] {
+			found[w.rid] = w.wepType
+		}
+	}
+	ids := make([]uint32, 0, len(found))
+	missing := make([]uint32, 0)
+	for id := range appIDs {
+		if _, ok := found[id]; ok {
+			ids = append(ids, id)
+		} else {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		sort.Slice(missing, func(i, j int) bool { return missing[i] < missing[j] })
+		return "", fmt.Errorf("weapon_weptype: %d app item IDs have no EquipParamWeapon row, first 0x%08X", len(missing), missing[0])
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+
+	var b strings.Builder
+	b.WriteString("package data\n\n")
+	b.WriteString("// weapon_weptype_generated.go — canonical EquipParamWeapon.wepType for every\n")
+	b.WriteString("// melee / ranged / shield armament defined in this editor's item DB.\n")
+	b.WriteString("// Source of truth: regulation.bin → EquipParamWeapon (field wepType).\n")
+	fmt.Fprintf(&b, "// Regenerated from %s; do not\n", weaponPath)
+	b.WriteString("// hand-edit. Used by the *_subcat.go classifiers so sub-category is driven by\n")
+	b.WriteString("// the game's authoritative weapon type, not by fragile name heuristics.\n\n")
+	fmt.Fprintf(&b, "var weaponWepType = map[uint32]uint16{ // %d entries\n", len(ids))
+	for i, id := range ids {
+		switch {
+		case i%wepTypeEntriesPerLine == 0:
+			b.WriteString("\t")
+		default:
+			b.WriteString(" ")
+		}
+		fmt.Fprintf(&b, "0x%08X: %d,", id, found[id])
+		if i%wepTypeEntriesPerLine == wepTypeEntriesPerLine-1 {
+			b.WriteString("\n")
+		}
+	}
+	if len(ids)%wepTypeEntriesPerLine != 0 {
+		b.WriteString("\n")
 	}
 	b.WriteString("}\n")
 	return gofmt(b.String())
