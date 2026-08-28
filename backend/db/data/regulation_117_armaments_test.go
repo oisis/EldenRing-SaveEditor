@@ -30,14 +30,14 @@ var regulation117Armaments = []struct {
 	items       map[uint32]ItemData
 	iconPath    string
 }{
-	{0x00365240, "Leontiel's Greatsword", "melee_armaments", SubcatMeleeGreatswords, 5, 10, false, Weapons, "items/melee_armaments/missing_icon.png"},
-	{0x00822850, "Hefty Scimitar", "melee_armaments", SubcatMeleeCurvedGreatswords, 11, 25, true, Weapons, "items/melee_armaments/missing_icon.png"},
-	{0x00CE2570, "Golden Order Flail", "melee_armaments", SubcatMeleeFlails, 24, 10, false, Weapons, "items/melee_armaments/missing_icon.png"},
-	{0x01E14320, "Silver Grooved Shield", "shields", SubcatShieldsMedium, 67, 25, true, Shields, "items/shields/missing_icon.png"},
-	{0x03B9FAC0, "Ritual Thrusting Shield", "shields", SubcatShieldsThrusting, 90, 25, true, Shields, "items/shields/missing_icon.png"},
-	{0x03D8A650, "Reverse-Bladed Sword", "melee_armaments", SubcatMeleeBackhandBlades, 92, 25, true, Weapons, "items/melee_armaments/missing_icon.png"},
-	{0x03F72AD0, "Reed Great Katana", "melee_armaments", SubcatMeleeGreatKatanas, 94, 25, true, Weapons, "items/melee_armaments/missing_icon.png"},
-	{0x04066D10, "Idus Sword", "melee_armaments", SubcatMeleeLightGreatswords, 93, 25, true, Weapons, "items/melee_armaments/missing_icon.png"},
+	{0x00365240, "Leontiel's Greatsword", "melee_armaments", SubcatMeleeGreatswords, 5, 10, false, Weapons, "items/melee_armaments/leontiels_greatsword.png"},
+	{0x00822850, "Hefty Scimitar", "melee_armaments", SubcatMeleeCurvedGreatswords, 11, 25, true, Weapons, "items/melee_armaments/hefty_scimitar.png"},
+	{0x00CE2570, "Golden Order Flail", "melee_armaments", SubcatMeleeFlails, 24, 10, false, Weapons, "items/melee_armaments/golden_order_flail.png"},
+	{0x01E14320, "Silver Grooved Shield", "shields", SubcatShieldsMedium, 67, 25, true, Shields, "items/shields/silver_grooved_shield.png"},
+	{0x03B9FAC0, "Ritual Thrusting Shield", "shields", SubcatShieldsThrusting, 90, 25, true, Shields, "items/shields/ritual_thrusting_shield.png"},
+	{0x03D8A650, "Reverse-Bladed Sword", "melee_armaments", SubcatMeleeBackhandBlades, 92, 25, true, Weapons, "items/melee_armaments/reverse_bladed_sword.png"},
+	{0x03F72AD0, "Reed Great Katana", "melee_armaments", SubcatMeleeGreatKatanas, 94, 25, true, Weapons, "items/melee_armaments/reed_great_katana.png"},
+	{0x04066D10, "Idus Sword", "melee_armaments", SubcatMeleeLightGreatswords, 93, 25, true, Weapons, "items/melee_armaments/idus_sword.png"},
 }
 
 // regulation117IDs returns every public item ID the 1.17 addition introduced.
@@ -184,7 +184,7 @@ func TestRegulation117Armaments_IconsExist(t *testing.T) {
 	const publicRoot = "../../../frontend/public"
 	for _, f := range regulation117Armaments {
 		if _, err := os.Stat(filepath.Join(publicRoot, filepath.FromSlash(f.iconPath))); err != nil {
-			t.Errorf("%s: placeholder icon missing: %s (%v)", f.name, f.iconPath, err)
+			t.Errorf("%s: icon missing: %s (%v)", f.name, f.iconPath, err)
 		}
 		ids := []uint32{f.base}
 		if f.infusable {

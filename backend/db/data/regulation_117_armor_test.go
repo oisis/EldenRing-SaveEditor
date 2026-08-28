@@ -9,7 +9,7 @@ import (
 
 // Regulation 1.17 added four armor sets. These tests pin the full shape of
 // that addition: each piece lives in exactly one category map, carries the
-// DLC flag and the category placeholder icon, and is covered by the generated
+// DLC flag and its own icon, and is covered by the generated
 // weight, sort-key and item-text tables.
 //
 // Altered variants are deliberately out of scope.
@@ -18,26 +18,27 @@ var regulation117Armor = []struct {
 	name     string
 	category string
 	items    map[uint32]ItemData
+	icon     string
 }{
-	{0x1051A270, "Silver Grooved Helm", "head", Helms},
-	{0x1051A2D4, "Silver Grooved Armor", "chest", Chest},
-	{0x1051A338, "Silver Grooved Gauntlets", "arms", Arms},
-	{0x1051A39C, "Silver Grooved Greaves", "legs", Legs},
+	{0x1051A270, "Silver Grooved Helm", "head", Helms, "items/head/silver_grooved_helm.png"},
+	{0x1051A2D4, "Silver Grooved Armor", "chest", Chest, "items/chest/silver_grooved_armor.png"},
+	{0x1051A338, "Silver Grooved Gauntlets", "arms", Arms, "items/arms/silver_grooved_gauntlets.png"},
+	{0x1051A39C, "Silver Grooved Greaves", "legs", Legs, "items/legs/silver_grooved_greaves.png"},
 
-	{0x1051F090, "Steel Helm", "head", Helms},
-	{0x1051F0F4, "Steel Armor", "chest", Chest},
-	{0x1051F158, "Steel Gauntlets", "arms", Arms},
-	{0x1051F1BC, "Steel Greaves", "legs", Legs},
+	{0x1051F090, "Steel Helm", "head", Helms, "items/head/steel_helm.png"},
+	{0x1051F0F4, "Steel Armor", "chest", Chest, "items/chest/steel_armor.png"},
+	{0x1051F158, "Steel Gauntlets", "arms", Arms, "items/arms/steel_gauntlets.png"},
+	{0x1051F1BC, "Steel Greaves", "legs", Legs, "items/legs/steel_greaves.png"},
 
-	{0x1051C980, "Leontiel's Hat", "head", Helms},
-	{0x1051C9E4, "Leontiel's Armor", "chest", Chest},
-	{0x1051CA48, "Leontiel's Leather Gloves", "arms", Arms},
-	{0x1051CAAC, "Leontiel's Boots", "legs", Legs},
+	{0x1051C980, "Leontiel's Hat", "head", Helms, "items/head/leontiel_s_hat.png"},
+	{0x1051C9E4, "Leontiel's Armor", "chest", Chest, "items/chest/leontiel_s_armor.png"},
+	{0x1051CA48, "Leontiel's Leather Gloves", "arms", Arms, "items/arms/leontiel_s_leather_gloves.png"},
+	{0x1051CAAC, "Leontiel's Boots", "legs", Legs, "items/legs/leontiel_s_boots.png"},
 
-	{0x10517B60, "Broken Gold Mask", "head", Helms},
-	{0x10517BC4, "Gold Tattoo (Chest)", "chest", Chest},
-	{0x10517C28, "Gold Tattoo (Arm)", "arms", Arms},
-	{0x10517C8C, "Gold Tattoo (Leg)", "legs", Legs},
+	{0x10517B60, "Broken Gold Mask", "head", Helms, "items/head/broken_gold_mask.png"},
+	{0x10517BC4, "Gold Tattoo (Chest)", "chest", Chest, "items/chest/gold_tattoo_chest.png"},
+	{0x10517C28, "Gold Tattoo (Arm)", "arms", Arms, "items/arms/gold_tattoo_arm.png"},
+	{0x10517C8C, "Gold Tattoo (Leg)", "legs", Legs, "items/legs/gold_tattoo_leg.png"},
 }
 
 // allArmorMaps is used to prove each ID appears in exactly one category map.
@@ -74,13 +75,13 @@ func TestRegulation117ArmorRecords(t *testing.T) {
 			t.Errorf("%#x (%q): Flags = %v, want the dlc flag", want.id, want.name, item.Flags)
 		}
 
-		wantIcon := "items/" + want.category + "/missing_icon.png"
+		wantIcon := want.icon
 		if item.IconPath != wantIcon {
 			t.Errorf("%#x (%q): IconPath = %q, want %q", want.id, want.name, item.IconPath, wantIcon)
 		}
 		iconFile := filepath.Join("../../../frontend/public", filepath.FromSlash(wantIcon))
 		if _, err := os.Stat(iconFile); err != nil {
-			t.Errorf("%#x (%q): placeholder missing on disk: %s", want.id, want.name, iconFile)
+			t.Errorf("%#x (%q): icon missing on disk: %s", want.id, want.name, iconFile)
 		}
 	}
 }

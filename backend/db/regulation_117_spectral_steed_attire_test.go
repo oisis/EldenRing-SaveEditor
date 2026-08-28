@@ -17,10 +17,11 @@ func TestRegulation117_SpectralSteedAttire(t *testing.T) {
 	cases := []struct {
 		id   uint32
 		name string
+		icon string
 	}{
-		{0x401EAA00, "Tree Sentinel Spectral Steed Attire"},
-		{0x401EAA0A, "Silver of Caria Spectral Steed Attire"},
-		{0x401EAA14, "Funereal Night Spectral Steed Attire"},
+		{0x401EAA00, "Tree Sentinel Spectral Steed Attire", "items/key_items/tree_sentinel_spectral_steed_attire.png"},
+		{0x401EAA0A, "Silver of Caria Spectral Steed Attire", "items/key_items/silver_of_caria_spectral_steed_attire.png"},
+		{0x401EAA14, "Funereal Night Spectral Steed Attire", "items/key_items/funereal_night_spectral_steed_attire.png"},
 	}
 
 	entries := GetItemsByCategory("key_items", "PC")
@@ -48,8 +49,8 @@ func TestRegulation117_SpectralSteedAttire(t *testing.T) {
 			if !slices.Contains(e.Flags, "dlc") {
 				t.Errorf("Flags = %v, want to contain \"dlc\"", e.Flags)
 			}
-			if e.IconPath != "items/key_items/missing_icon.png" {
-				t.Errorf("IconPath = %q, want items/key_items/missing_icon.png", e.IconPath)
+			if e.IconPath != tc.icon {
+				t.Errorf("IconPath = %q, want %q", e.IconPath, tc.icon)
 			}
 			// Standard add path: not routed through a World-tab unlock endpoint.
 			if e.UnlockCategory != "" || e.FlagID != 0 {

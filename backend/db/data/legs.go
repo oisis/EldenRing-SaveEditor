@@ -138,8 +138,8 @@ var Legs = map[uint32]ItemData{
 	0x100FDFAC: {Name: "Gold Waistwrap", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/gold_waistwrap.png"},
 	0x10113F3C: {Name: "Mushroom Legs", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/mushroom_legs.png"},
 	0x101D743C: {Name: "Deathbed Smalls", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/deathbed_smalls.png", Flags: []string{"cut_content", "ban_risk"}},
-	0x1051A39C: {Name: "Silver Grooved Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
-	0x1051F1BC: {Name: "Steel Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
-	0x1051CAAC: {Name: "Leontiel's Boots", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
-	0x10517C8C: {Name: "Gold Tattoo (Leg)", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051A39C: {Name: "Silver Grooved Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/silver_grooved_greaves.png", Flags: []string{"dlc"}},
+	0x1051F1BC: {Name: "Steel Greaves", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/steel_greaves.png", Flags: []string{"dlc"}},
+	0x1051CAAC: {Name: "Leontiel's Boots", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/leontiel_s_boots.png", Flags: []string{"dlc"}},
+	0x10517C8C: {Name: "Gold Tattoo (Leg)", Category: "legs", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/legs/gold_tattoo_leg.png", Flags: []string{"dlc"}},
 }

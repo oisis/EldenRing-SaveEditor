@@ -213,8 +213,8 @@ var Helms = map[uint32]ItemData{
 	0x100975E0: {Name: "Prophet Blindfold", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/prophet_blindfold.png"},
 	0x10108E48: {Name: "Imp Head (Elder)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/imp_head_elder.png"},
 	0x10113E10: {Name: "Mushroom Head", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/mushroom_head.png"},
-	0x1051A270: {Name: "Silver Grooved Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
-	0x1051F090: {Name: "Steel Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
-	0x1051C980: {Name: "Leontiel's Hat", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
-	0x10517B60: {Name: "Broken Gold Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/missing_icon.png", Flags: []string{"dlc"}},
+	0x1051A270: {Name: "Silver Grooved Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/silver_grooved_helm.png", Flags: []string{"dlc"}},
+	0x1051F090: {Name: "Steel Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/steel_helm.png", Flags: []string{"dlc"}},
+	0x1051C980: {Name: "Leontiel's Hat", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/leontiel_s_hat.png", Flags: []string{"dlc"}},
+	0x10517B60: {Name: "Broken Gold Mask", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/broken_gold_mask.png", Flags: []string{"dlc"}},
 }
