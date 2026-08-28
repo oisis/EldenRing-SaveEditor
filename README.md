@@ -97,7 +97,7 @@ Desktop application for editing Elden Ring save files (`.sl2` / `memory.dat`). B
 
 ## Building
 
-Requirements: Go 1.25+, Node.js 20+, [Wails CLI v2](https://wails.io/docs/gettingstarted/installation)
+Requirements: Go 1.25+, Node.js 20+, [Wails CLI v2.15+](https://wails.io/docs/gettingstarted/installation)
 
 ```bash
 # Install dependencies

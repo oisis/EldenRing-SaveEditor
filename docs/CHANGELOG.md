@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### build: Wails 2.15 and Go 1.27 development compatibility
+
+The Wails runtime and required CLI version are updated from 2.12 to 2.15, whose
+current Go tooling supports running `make dev` directly with Go 1.27 without a
+`GOTOOLCHAIN` override.
+
 ### feat(world): Spectral Steed Attire selector in World → Unlocks
 
 World → Unlocks now lists Torrent's four appearances (default plus the three
