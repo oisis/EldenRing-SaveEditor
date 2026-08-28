@@ -350,6 +350,10 @@ export function GetSlotStates() {
   return window['go']['main']['App']['GetSlotStates']();
 }
 
+export function GetSpectralSteedAttire(arg1) {
+  return window['go']['main']['App']['GetSpectralSteedAttire'](arg1);
+}
+
 export function GetStartingClasses() {
   return window['go']['main']['App']['GetStartingClasses']();
 }
@@ -656,6 +660,10 @@ export function SetRegionUnlocked(arg1, arg2, arg3) {
 
 export function SetSlotActivity(arg1, arg2) {
   return window['go']['main']['App']['SetSlotActivity'](arg1, arg2);
+}
+
+export function SetSpectralSteedAttire(arg1, arg2) {
+  return window['go']['main']['App']['SetSpectralSteedAttire'](arg1, arg2);
 }
 
 export function SetSteamIDFromString(arg1) {

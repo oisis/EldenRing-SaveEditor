@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### feat(world): Spectral Steed Attire selector in World → Unlocks
+
+World → Unlocks now lists Torrent's four appearances (default plus the three
+Regulation 1.17 attires), shows which one is active, adds the required key item
+to the inventory and activates a single appearance flag. Every attire action
+carries a permanent warning that the content requires the Tarnished Edition
+DLC; SaveForge cannot verify DLC ownership. Attire mutations are enabled on PC
+saves only.
+
 ### data(regulation): two new Regulation 1.17 starting classes
 
 Idus Knight and Heavy Knight are now recognized as starting classes. They are

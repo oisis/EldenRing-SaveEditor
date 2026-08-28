@@ -56,6 +56,7 @@ func validDiagnosticWorldAction(action string) bool {
 		"cookbook_set", "cookbooks_unlock_all", "cookbooks_lock_all",
 		"bell_bearing_set", "bell_bearings_unlock_all", "bell_bearings_lock_all",
 		"whetblade_set", "whetblades_unlock_all", "whetblades_lock_all",
+		"spectral_steed_attire_add", "spectral_steed_attire_set",
 		"quest_set_step", "quest_unset_step", "quest_toggle_flag",
 		"map_region_set", "map_system_flag_set", "map_system_flags_normalized", "map_reveal_all", "map_reset",
 		"invasion_region_set", "invasion_regions_unlock_area", "invasion_regions_lock_area", "invasion_regions_unlock_all", "invasion_regions_lock_all":

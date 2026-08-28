@@ -55,7 +55,9 @@ export type RiskKey =
     | 'quest_step_skip'
     | 'ng_plus_write'
     | 'character_import'
-    | 'preset_apply';
+    | 'preset_apply'
+    // Regulation 1.17 — Tarnished Edition DLC content
+    | 'tarnished_edition_dlc';
 
 export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     cut_content: {
@@ -379,6 +381,18 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
             'Risk depends on the preset source. Clean preset = low risk; preset with cap-breaking or cut-content items = high risk.',
         mitigation:
             'Review the preset preview carefully before applying. After apply, scan inventory for ban badges.',
+        sources: [],
+    },
+    tarnished_edition_dlc: {
+        tier: 2,
+        level: 'high',
+        title: 'Tarnished Edition DLC Content',
+        whyBan:
+            "Requires the Tarnished Edition DLC. Adding or activating this content without owning the DLC creates a save state that does not match the account's entitlements and may result in online penalties, including a possible ban. Use only on an account that owns the DLC.",
+        reports:
+            'SaveForge cannot check DLC ownership. Whether a given account owns the Tarnished Edition is known only to the storefront and the game, so this warning is shown for every user.',
+        mitigation:
+            'Use these items and appearances only on an account that owns the Tarnished Edition DLC. On an account without the DLC, keep the save offline or revert to the default appearance and remove the attire items.',
         sources: [],
     },
 };

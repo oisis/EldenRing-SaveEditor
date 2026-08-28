@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions, RecordDiagnosticWorldAction} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions, RecordDiagnosticWorldAction, GetSpectralSteedAttire, SetSpectralSteedAttire, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import type {AddSettings} from '../App';
 import {db} from '../../wailsjs/go/models';
 import toast from '../lib/toast';
@@ -7,7 +7,7 @@ import {AccordionSection} from './AccordionSection';
 import {RiskInfoIcon} from './RiskInfoIcon';
 import {RiskActionButton} from './RiskActionButton';
 import {RiskSectionBanner} from './RiskSectionBanner';
-import {RiskKey} from '../data/riskInfo';
+import {RISK_INFO, RiskKey} from '../data/riskInfo';
 
 interface WorldTabProps {
     charIdx: number;
@@ -78,6 +78,7 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
     const [bellBearings, setBellBearings] = useState<db.BellBearingEntry[]>([]);
     const [whetblades, setWhetblades] = useState<db.WhetbladeEntry[]>([]);
+    const [attire, setAttire] = useState<db.SpectralSteedAttireState | null>(null);
     const [regionEntries, setRegionEntries] = useState<db.RegionEntry[]>([]);
     const [expandedBBCategories, setExpandedBBCategories] = useState<Record<string, boolean>>({});
     const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
@@ -142,6 +143,11 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
             GetGestures(charIdx).then(res => setGesturesList(res || [])),
             GetBellBearings(charIdx).then(res => setBellBearings(res || [])),
             GetWhetblades(charIdx).then(res => setWhetblades(res || [])),
+            GetSpectralSteedAttire(charIdx).then(res => setAttire(res || null)).catch(err => {
+                // An unreadable flag region must not render as a valid state.
+                setAttire(null);
+                toast.error(`Failed to load Spectral Steed Attire: ${String(err)}`);
+            }),
         ]).finally(() => setLoading(false));
     }, [charIdx, saveDataRevision]);
 
@@ -207,6 +213,38 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
     const handleUnlockAllWBs = async () => { const l = whetblades.filter(w => !w.unlocked); if (!l.length) return; await runWorldAction('whetblades_unlock_all', l.length, async () => { for (const w of l) await SetWhetbladeUnlocked(charIdx, w.id, true); }); setWhetblades(prev => prev.map(w => ({...w, unlocked: true}))); onMutate?.(); };
     const handleLockAllWBs = async () => { const u = whetblades.filter(w => w.unlocked); if (!u.length) return; await runWorldAction('whetblades_lock_all', u.length, async () => { for (const w of u) await SetWhetbladeUnlocked(charIdx, w.id, false); }); setWhetblades(prev => prev.map(w => ({...w, unlocked: false}))); onMutate?.(); };
     const unlockedWBs = whetblades.filter(w => w.unlocked).length;
+
+    // --- Spectral Steed Attire logic (Regulation 1.17) ---
+    // The backend contract for event flags 6700-6703 is confirmed on PC saves
+    // only, so mutations fail closed on every other (or unknown) platform.
+    // Reading the state is safe there.
+    const attireMutationBlocked = platform !== 'PC';
+    const attireBlockedTitle = attireMutationBlocked ? `Not yet verified for ${platform || 'this platform'}` : undefined;
+    const attireActiveId = attire?.status === 'resolved' ? attire.activeId : 0;
+    const refreshAttire = async () => { setAttire(await GetSpectralSteedAttire(charIdx)); };
+    const handleAttireAdd = async (e: db.SpectralSteedAttireEntry) => {
+        try {
+            await runWorldAction('spectral_steed_attire_add', 1, async () => {
+                const res = await AddItemsToCharacter(charIdx, [e.itemId], 0, 0, 0, 0, 1, 0);
+                if (!res || res.added < 1) throw new Error(res?.capHit || 'item was not added');
+            });
+            await refreshAttire();
+            onMutate?.();
+            toast.success(`${e.name} added to inventory`);
+        } catch (err) {
+            toast.error(`Failed to add ${e.name}: ${String(err)}`);
+        }
+    };
+    const handleAttireSet = async (e: db.SpectralSteedAttireEntry) => {
+        try {
+            await runWorldAction('spectral_steed_attire_set', 1, () => SetSpectralSteedAttire(charIdx, e.id));
+            await refreshAttire();
+            onMutate?.();
+            toast.success(`${e.name} is now active`);
+        } catch (err) {
+            toast.error(`Failed to activate ${e.name}: ${String(err)}`);
+        }
+    };
 
     // --- Quest logic ---
     const loadQuestProgress = async (npc: string, resetExpanded = false) => {
@@ -823,6 +861,49 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                     <span className={`text-[10px] truncate font-semibold ${w.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{w.name}</span>
                                 </label>
                             ))}
+                        </div>
+                    </AccordionSection>
+
+                    {/* Spectral Steed Attire (Regulation 1.17) */}
+                    <AccordionSection id="world-spectral-steed-attire" title="Spectral Steed Attire" resetSignal={saveLoadKey}>
+                        <div className="space-y-2">
+                            <RiskSectionBanner riskKey="tarnished_edition_dlc" />
+                            <p className="text-[10px] leading-relaxed text-muted-foreground px-1">
+                                {RISK_INFO.tarnished_edition_dlc.whyBan}
+                            </p>
+                            {attire?.status === 'legacy' && (
+                                <p className="text-[10px] text-muted-foreground px-1">
+                                    No appearance flag is set on this save — pick one below to make the current appearance explicit.
+                                </p>
+                            )}
+                            {attire?.status === 'conflict' && (
+                                <p className="text-[10px] text-muted-foreground px-1">
+                                    More than one appearance flag is set on this save — pick one below to resolve it.
+                                </p>
+                            )}
+                            <div className="space-y-0.5">
+                                {(attire?.entries || []).map(e => {
+                                    const isActive = attireActiveId === e.id;
+                                    const isDefault = e.itemId === 0;
+                                    return (
+                                        <div key={e.id} data-testid={`attire-row-${e.id}`} className="flex items-center gap-2 py-1 px-1 rounded hover:bg-muted/30">
+                                            {e.iconPath
+                                                ? <img src={e.iconPath} alt="" className="w-6 h-6 object-contain" />
+                                                : <span className="w-6 h-6" />}
+                                            <span className={`text-[10px] font-semibold flex-1 min-w-0 truncate ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{e.name}</span>
+                                            {isActive && <span className="text-[9px] font-black uppercase tracking-widest text-primary">Active</span>}
+                                            {!isDefault && (
+                                                <RiskActionButton riskKey="tarnished_edition_dlc" onConfirm={() => handleAttireAdd(e)}
+                                                    disabled={e.owned || attireMutationBlocked} title={attireBlockedTitle}
+                                                    className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Add</RiskActionButton>
+                                            )}
+                                            <button type="button" onClick={() => handleAttireSet(e)}
+                                                disabled={isActive || !e.owned || attireMutationBlocked} title={attireBlockedTitle}
+                                                className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Set</button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </AccordionSection>
 

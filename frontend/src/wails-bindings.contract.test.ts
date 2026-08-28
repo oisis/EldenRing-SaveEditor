@@ -47,6 +47,21 @@ describe('Wails binding contract: App methods', () => {
         expect(typeof App.RecordDiagnosticWorldAction).toBe('function');
     });
 
+    it('exposes the Spectral Steed Attire read/write pair and its DTO', () => {
+        expect(typeof App.GetSpectralSteedAttire).toBe('function');
+        expect(typeof App.SetSpectralSteedAttire).toBe('function');
+        const entry = db.SpectralSteedAttireEntry.createFrom({});
+        expect('id' in entry).toBe(true);
+        expect('name' in entry).toBe(true);
+        expect('itemId' in entry).toBe(true);
+        expect('iconPath' in entry).toBe(true);
+        expect('owned' in entry).toBe(true);
+        const state = db.SpectralSteedAttireState.createFrom({});
+        expect('entries' in state).toBe(true);
+        expect('activeId' in state).toBe(true);
+        expect('status' in state).toBe(true);
+    });
+
     it('exposes the regulation-backed Full Chaos add endpoint', () => {
         expect(typeof App.AddItemsToCharacterWithGameLimits).toBe('function');
     });

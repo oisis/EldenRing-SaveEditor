@@ -2383,6 +2383,60 @@ export namespace db {
 	        this.unlocked = source["unlocked"];
 	    }
 	}
+	export class SpectralSteedAttireEntry {
+	    id: number;
+	    name: string;
+	    itemId: number;
+	    iconPath: string;
+	    owned: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new SpectralSteedAttireEntry(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.itemId = source["itemId"];
+	        this.iconPath = source["iconPath"];
+	        this.owned = source["owned"];
+	    }
+	}
+	export class SpectralSteedAttireState {
+	    entries: SpectralSteedAttireEntry[];
+	    activeId: number;
+	    status: string;
+
+	    static createFrom(source: any = {}) {
+	        return new SpectralSteedAttireState(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entries = this.convertValues(source["entries"], SpectralSteedAttireEntry);
+	        this.activeId = source["activeId"];
+	        this.status = source["status"];
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class SummoningPoolEntry {
 	    id: number;
 	    name: string;

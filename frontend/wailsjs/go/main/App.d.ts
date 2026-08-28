@@ -182,6 +182,8 @@ export function GetSlotCapacity(arg1:number):Promise<application.SlotCapacity>;
 
 export function GetSlotStates():Promise<Array<application.SlotState>>;
 
+export function GetSpectralSteedAttire(arg1:number):Promise<db.SpectralSteedAttireState>;
+
 export function GetStartingClasses():Promise<Array<db.ClassStats>>;
 
 export function GetSteamIDString():Promise<string>;
@@ -335,6 +337,8 @@ export function SetQuestStep(arg1:number,arg2:string,arg3:number):Promise<void>;
 export function SetRegionUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
+
+export function SetSpectralSteedAttire(arg1:number,arg2:number):Promise<void>;
 
 export function SetSteamIDFromString(arg1:string):Promise<void>;
 
