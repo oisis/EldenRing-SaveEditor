@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### data(regulation): weapon and shield stats refreshed to Regulation 1.17
+
+The displayed weapon and shield statistics, item weights and in-game sort
+order are regenerated from Regulation 1.17. Six weapons and thirty-six shields
+change their displayed values — for example the Carian Sorcery Sword's physical
+attack and the Dragon Towershield's guard boost and weight — and the DLC
+thrusting-shield block is renumbered in the sort order. This first Regulation
+stage refreshes technical data only; no new items, classes, icons or Torrent
+skins are added yet.
+
 ## [1.6.13] - 2026-08-23
 
 ### fix(appearance): Type A presets keep their Face / Bone Structure
