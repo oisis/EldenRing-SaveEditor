@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### data(regulation): two new Regulation 1.17 starting classes
+
+Idus Knight and Heavy Knight are now recognized as starting classes. They are
+listed in the class selector and validated against their own base stats, so
+stat consistency and class minimums no longer fall back to the unknown-class
+path.
+
 ### data(regulation): three Regulation 1.17 Spectral Steed Attire key items
 
 The Tree Sentinel, Silver of Caria and Funereal Night Spectral Steed Attire

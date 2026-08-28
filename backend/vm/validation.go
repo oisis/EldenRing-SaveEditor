@@ -66,7 +66,7 @@ type StatValidationResult struct {
 //   - Each attribute >= starting class base stat
 //   - Level == sum(attributes) - 79
 //   - Level in [1, 713]
-//   - Class ID is valid (0-9)
+//   - Class ID is valid (0-11)
 //
 // Returns validation result with errors (hard violations) and warnings (soft issues).
 func (vm *CharacterViewModel) ValidateStatsConsistency(classID uint8) StatValidationResult {

@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetClassStats_AllClasses(t *testing.T) {
-	for id := uint8(0); id <= 9; id++ {
+	for id := uint8(0); id <= 11; id++ {
 		cs := GetClassStats(id)
 		if cs == nil {
 			t.Errorf("GetClassStats(%d) returned nil", id)
@@ -37,10 +37,28 @@ func TestGetClassStats_AllClasses(t *testing.T) {
 	}
 }
 
+func TestGetClassStats_DLCClasses(t *testing.T) {
+	// Regulation 1.17 classes, confirmed against menu_dlc01.msgbnd GR_MenuText.fmg
+	// entries 288110 and 288111.
+	want := []ClassStats{
+		{ID: 10, Name: "Idus Knight", Level: 7, Vigor: 10, Mind: 12, Endurance: 11, Strength: 13, Dexterity: 15, Intelligence: 8, Faith: 11, Arcane: 6},
+		{ID: 11, Name: "Heavy Knight", Level: 10, Vigor: 14, Mind: 8, Endurance: 17, Strength: 15, Dexterity: 11, Intelligence: 7, Faith: 8, Arcane: 9},
+	}
+	for _, w := range want {
+		got := GetClassStats(w.ID)
+		if got == nil {
+			t.Fatalf("GetClassStats(%d) returned nil", w.ID)
+		}
+		if *got != w {
+			t.Errorf("GetClassStats(%d) = %+v, want %+v", w.ID, *got, w)
+		}
+	}
+}
+
 func TestGetClassStats_Unknown(t *testing.T) {
-	cs := GetClassStats(10)
+	cs := GetClassStats(12)
 	if cs != nil {
-		t.Errorf("expected nil for unknown class 10, got %v", cs)
+		t.Errorf("expected nil for unknown class 12, got %v", cs)
 	}
 	cs = GetClassStats(255)
 	if cs != nil {

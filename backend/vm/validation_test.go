@@ -273,6 +273,8 @@ func TestAllClassBaseStatsConsistent(t *testing.T) {
 		{7, 9, 11, 12, 11, 11, 14, 14, 6, 9},
 		{8, 10, 10, 13, 10, 12, 12, 9, 14, 9},
 		{9, 1, 10, 10, 10, 10, 10, 10, 10, 10},
+		{10, 7, 10, 12, 11, 13, 15, 8, 11, 6},
+		{11, 10, 14, 8, 17, 15, 11, 7, 8, 9},
 	}
 
 	for _, c := range classData {
@@ -292,5 +294,27 @@ func TestAllClassBaseStatsConsistent(t *testing.T) {
 		if !result.Valid {
 			t.Errorf("class %d base stats invalid: %v", c.classID, result.Errors)
 		}
+	}
+}
+
+func TestValidateStatsConsistency_DLCClassMinimum(t *testing.T) {
+	vm := &CharacterViewModel{
+		Level:        9,
+		Vigor:        14,
+		Mind:         8,
+		Endurance:    16, // Heavy Knight base is 17 — this is below minimum
+		Strength:     15,
+		Dexterity:    11,
+		Intelligence: 7,
+		Faith:        8,
+		Arcane:       9,
+	}
+
+	result := vm.ValidateStatsConsistency(11) // Heavy Knight
+	if result.Valid {
+		t.Error("expected invalid — Endurance below class minimum")
+	}
+	if len(result.Errors) == 0 {
+		t.Error("expected at least one error")
 	}
 }
