@@ -5,7 +5,7 @@ Purpose: Returns a paginated resource list filtered by type, family, capability,
 How it works: The runtime handler reads the already loaded GameCatalog through Catalog.ResourceSummaries, applies the declared filters in catalog order (kind, then key), counts the matches and returns one page of a light projection without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: resourceType, family, capability, endpointId, search, page, pageSize.
-GameCatalog variables read: Resource.Kind, Resource.Key, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only), Colosseum.Name, Region.Name, SummoningPool.Name, Grace.Name, Boss.Name, MapRegion.Name, Tutorial.Title, Quest.Name and Class.Name. The full resource document is never projected; it stays the responsibility of GetResource.
+GameCatalog variables read: Resource.Kind, Resource.Key, Item.Safety.NoDatabase, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only), Colosseum.Name, Region.Name, SummoningPool.Name, Grace.Name, Boss.Name, MapRegion.Name, Tutorial.Title, Quest.Name and Class.Name. The full resource document is never projected; it stays the responsibility of GetResource.
 Save variables read: none; the endpoint never opens or reads a save.
 Implementation status: implemented; GetResources is the runtime handler of this contract.
 */
@@ -71,7 +71,11 @@ type GetResourcesResult struct {
 }
 
 // GetResources returns one page of catalog resources reduced to the fields a
-// list or a picker needs. Every filter is matched exactly and case-sensitively
+// list or a picker needs. An item the catalog knows to be noDatabase is excluded
+// from the list, from the search and from Total; it remains reachable by its
+// exact kind and key through GetResource and the feature that owns it.
+//
+// Every filter is matched exactly and case-sensitively
 // except search, which is case-insensitive on Resource.Key and on the resource
 // name. The accepted resource types are item, colosseum, region, summoning_pool,
 // grace, boss, map_region, tutorial, quest and class; family and capability describe
@@ -132,6 +136,13 @@ func GetResources(
 	lowercaseSearch := strings.ToLower(search)
 	matches := make([]GetResourcesEntry, 0)
 	for _, summary := range gameCatalog.ResourceSummaries() {
+		// A resource the catalog knows to be noDatabase is reserved for the
+		// feature that owns it and is never offered through this general list or
+		// its search. It stays fully resolvable by its exact kind and key, which
+		// is how GetResource, AddItemToInventory and the owning feature reach it.
+		if summary.NoDatabaseKnown && summary.NoDatabase {
+			continue
+		}
 		if resourceType != "" && summary.Kind != schema.ResourceKind(resourceType) {
 			continue
 		}

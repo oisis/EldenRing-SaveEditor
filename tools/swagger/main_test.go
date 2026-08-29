@@ -938,6 +938,9 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bell-bearings", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/whetblades", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/spectral-steed-attires", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/spectral-steed-attires/select", `{"attireKey":"default","expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/spectral-steed-attires/lock-all", `{"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/colosseums", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/regions", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/summoning-pools", ""},
@@ -1074,6 +1077,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings":                      "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock":               "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires":             "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/select":      "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/lock-all":    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions/unlock":                     "put",
@@ -1628,8 +1634,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 85 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 85", found)
+	if found != 88 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 88", found)
 	}
 }
 
@@ -5380,6 +5386,169 @@ func TestSetBellBearingUnlockedRoute(t *testing.T) {
 			t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
 		}
 	})
+}
+
+// Spectral Steed Attire route fixture. 505 is the confirmed distance from the
+// slot anchor to the first common InventoryHeld record; it is restated here so
+// this test shares no constant with the implementation.
+const (
+	spectralSteedRouteInventoryAt   = 505
+	spectralSteedRouteTreeGameID    = uint32(0x401EAA00)
+	spectralSteedRouteTreeAttireKey = "tree_sentinel"
+)
+
+// writeSpectralSteedRouteFixture leaves every appearance flag cleared — the
+// legacy state — and places the Tree Sentinel attire item in common Inventory, so
+// the selection route has an owned appearance to activate.
+func writeSpectralSteedRouteFixture(t *testing.T) string {
+	t.Helper()
+	path := writeCookbooksFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	anchorBase := gesturesRouteSlotDataBase + gesturesRouteAnchorAt
+	binary.LittleEndian.PutUint32(
+		data[anchorBase+spectralSteedRouteInventoryAt:],
+		0xB0000000|(spectralSteedRouteTreeGameID&0x0FFFFFFF))
+	binary.LittleEndian.PutUint32(data[anchorBase+spectralSteedRouteInventoryAt+4:], 1)
+	binary.LittleEndian.PutUint32(data[anchorBase+spectralSteedRouteInventoryAt-4:], 1)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestSpectralSteedAttiresRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/spectral-steed-attires"
+
+	want, err := world.GetSpectralSteedAttires(
+		saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetSpectralSteedAttires: %v", err)
+	}
+	if !want.Active || len(want.Attires) != 4 ||
+		want.Status != world.SpectralSteedAttireStatusLegacy {
+		t.Fatalf("fixture result = active %t, %d attires, status %q; want true/4/legacy",
+			want.Active, len(want.Attires), want.Status)
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("spectral steed attires route body differs from the getter result")
+	}
+}
+
+func TestSetSpectralSteedAttireRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/spectral-steed-attires/select"
+	serve := func(body string) *httptest.ResponseRecorder {
+		t.Helper()
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	recorder := serve(`{"attireKey":"tree_sentinel","expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var got world.SetSpectralSteedAttireResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	want := world.SetSpectralSteedAttireResult{
+		SaveSessionID: session.SaveSessionID, SaveRevision: "1", CharacterID: 0,
+		AttireKey: spectralSteedRouteTreeAttireKey,
+	}
+	if got != want {
+		t.Errorf("result = %+v, want %+v", got, want)
+	}
+
+	// An unknown body field and an appearance without its item are both refused,
+	// and neither leaves the session dirty beyond the committed selection.
+	if rejected := serve(
+		`{"attireKey":"tree_sentinel","unlocked":true,"expectedRevision":"1"}`,
+	); rejected.Code != http.StatusBadRequest {
+		t.Errorf("unknown field status = %d, want 400", rejected.Code)
+	}
+	if rejected := serve(
+		`{"attireKey":"funereal_night","expectedRevision":"1"}`,
+	); rejected.Code != http.StatusBadRequest {
+		t.Errorf("missing item status = %d, want 400", rejected.Code)
+	}
+
+	state, err := world.GetSpectralSteedAttires(
+		saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetSpectralSteedAttires: %v", err)
+	}
+	if state.Status != world.SpectralSteedAttireStatusResolved ||
+		state.ActiveAttireKey != spectralSteedRouteTreeAttireKey {
+		t.Errorf("state = %s/%q, want the resolved Tree Sentinel appearance",
+			state.Status, state.ActiveAttireKey)
+	}
+}
+
+func TestLockAllSpectralSteedAttiresRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/spectral-steed-attires/lock-all"
+	request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(
+		`{"expectedRevision":"0"}`))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var got world.LockAllSpectralSteedAttiresResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	want := world.LockAllSpectralSteedAttiresResult{
+		SaveSessionID: session.SaveSessionID, SaveRevision: "1", CharacterID: 0,
+		AttireKey: "default",
+	}
+	if got != want {
+		t.Errorf("result = %+v, want %+v", got, want)
+	}
+
+	state, err := world.GetSpectralSteedAttires(
+		saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetSpectralSteedAttires: %v", err)
+	}
+	if state.Status != world.SpectralSteedAttireStatusResolved ||
+		state.ActiveAttireKey != "default" {
+		t.Errorf("state = %s/%q, want the resolved default appearance",
+			state.Status, state.ActiveAttireKey)
+	}
+	for _, attire := range state.Attires {
+		if attire.AttireKey != "default" && attire.Owned {
+			t.Errorf("attire %q survived Lock All", attire.AttireKey)
+		}
+	}
 }
 
 func writeWhetbladesRouteFixture(t *testing.T) string {

@@ -60,6 +60,7 @@ const (
 	opSetPhysickMixture         = "set_physick_mixture"
 	opSetPouchItems             = "set_pouch_items"
 	opSetQuickItems             = "set_quick_items"
+	opSetSpectralSteedAttire    = "set_spectral_steed_attire"
 	opSetSpiritAshUpgradeLevel  = "set_spirit_ash_upgrade_level"
 	opSetStorageOrder           = "set_storage_order"
 	opSetWeaponAshOfWar         = "set_weapon_ash_of_war"
@@ -85,6 +86,8 @@ const opSetFogOfWarRemoved = "set_fog_of_war_removed"
 const opSetQuestStep = "set_quest_step"
 
 const opSetTutorialUnlocked = "set_tutorial_unlocked"
+
+const opLockAllSpectralSteedAttires = "lock_all_spectral_steed_attires"
 
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and

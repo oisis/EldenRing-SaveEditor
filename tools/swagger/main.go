@@ -829,6 +829,20 @@ type setWhetbladeUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setSpectralSteedAttireRequest is the strict JSON body of the Spectral Steed
+// Attire selection. attireKey is a public appearance key; the event flag behind
+// it never appears on the wire.
+type setSpectralSteedAttireRequest struct {
+	AttireKey        string `json:"attireKey"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
+// lockAllSpectralSteedAttiresRequest is the strict JSON body of the Spectral
+// Steed Attire reset, which needs nothing but the revision it commits under.
+type lockAllSpectralSteedAttiresRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setGestureUnlockedRequest is the strict JSON body of the gesture mutation.
 type setGestureUnlockedRequest struct {
 	GestureKind      string `json:"gestureKind"`
@@ -2728,6 +2742,28 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.GetSpectralSteedAttires(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))
@@ -3137,6 +3173,75 @@ func registerSaveSessionRoutes(
 				body.WhetbladeKind,
 				body.WhetbladeKey,
 				*body.Unlocked,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/select",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setSpectralSteedAttireRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.SetSpectralSteedAttire(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.AttireKey,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/lock-all",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body lockAllSpectralSteedAttiresRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.LockAllSpectralSteedAttires(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
 				body.ExpectedRevision,
 			)
 			if err != nil {

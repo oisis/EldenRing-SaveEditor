@@ -3,7 +3,6 @@ package saveengine
 import (
 	"errors"
 	"fmt"
-	"sort"
 )
 
 // WhetbladeState is the save-side identity of one catalog Whetblade. Catalog
@@ -140,7 +139,7 @@ func (engine *Engine) SetWhetbladeUnlocked(
 			}
 		}
 		desired[aowMenuEventFlagID] = menuUnlocked
-		flagWrites, err := planWhetbladeEventFlagWrites(loaded, sectionAt, desired)
+		flagWrites, err := planEventFlagWrites(loaded, sectionAt, desired)
 		if err != nil {
 			return err
 		}
@@ -206,40 +205,4 @@ func anotherWhetbladeIsUnlocked(
 		}
 	}
 	return false, nil
-}
-
-func planWhetbladeEventFlagWrites(
-	loaded *loadedSave,
-	sectionAt int64,
-	desired map[uint32]bool,
-) ([]byteWrite, error) {
-	byOffset := make(map[int64]byte)
-	for flagID, value := range desired {
-		position, _ := resolveEventFlag(flagID)
-		at := sectionAt + position.offset
-		current, exists := byOffset[at]
-		if !exists {
-			raw, err := loaded.snapshot.readAt(at, 1)
-			if err != nil {
-				return nil, fmt.Errorf("cannot read event flag %d: %w", flagID, err)
-			}
-			current = raw[0]
-		}
-		if value {
-			current |= 1 << position.bit
-		} else {
-			current &^= 1 << position.bit
-		}
-		byOffset[at] = current
-	}
-	offsets := make([]int64, 0, len(byOffset))
-	for at := range byOffset {
-		offsets = append(offsets, at)
-	}
-	sort.Slice(offsets, func(i, j int) bool { return offsets[i] < offsets[j] })
-	writes := make([]byteWrite, 0, len(offsets))
-	for _, at := range offsets {
-		writes = append(writes, byteWrite{at: at, data: []byte{byOffset[at]}})
-	}
-	return writes, nil
 }

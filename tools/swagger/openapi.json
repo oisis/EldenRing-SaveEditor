@@ -3704,6 +3704,140 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires": {
+      "get": {
+        "operationId": "getSpectralSteedAttires",
+        "tags": ["World"],
+        "summary": "GetSpectralSteedAttires",
+        "description": "Returns the four Spectral Steed Attire appearances of Torrent in menu order: the default appearance and the three Regulation 1.17 attires. status reports resolved when exactly one of the mutually exclusive appearance flags is set, legacy when all four are cleared, which is the normal state of a save written before Regulation 1.17, and conflict when two or more are set. activeAttireKey is filled only for resolved; a cleared or contradictory set is never read as default. The default appearance is always owned, and an attire is owned only while its item has a positive-quantity record in common or key InventoryHeld. Storage does not count and a set flag is never proof of ownership. The getter never mutates and never repairs; an unreadable event flag region is an error, not a legacy state. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The four Spectral Steed Attire appearances of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSpectralSteedAttiresResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an active slot whose InventoryHeld or event flag section is malformed, an unsupported event flag block, or incomplete Spectral Steed Attire catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/select": {
+      "put": {
+        "operationId": "setSpectralSteedAttire",
+        "tags": ["World"],
+        "summary": "SetSpectralSteedAttire",
+        "description": "Activates exactly one Spectral Steed Attire appearance. attireKey accepts only default, tree_sentinel, silver_of_caria or funereal_night. The default appearance needs no item; each of the other three requires its attire item in Inventory, and a missing item is rejected before any mutation and without advancing the revision. This endpoint never adds an item: the attire is added beforehand through AddItemToInventory by its exact GameCatalog resource key. The mutation clears all four appearance flags and sets the selected one as a single verified plan, so it also resolves a legacy or conflicting flag set. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSpectralSteedAttireRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Spectral Steed Attire selection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetSpectralSteedAttireResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown attireKey, invalid expectedRevision, unknown session, inactive slot, an attire whose item is not in Inventory, incomplete Spectral Steed Attire catalog data, malformed Inventory or event flags, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/spectral-steed-attires/lock-all": {
+      "put": {
+        "operationId": "lockAllSpectralSteedAttires",
+        "tags": ["World"],
+        "summary": "LockAllSpectralSteedAttires",
+        "description": "Removes the three Spectral Steed Attire items from Inventory and restores the default appearance in one revision. Inventory records and appearance flags are planned together and applied as one verified byte plan, so the slot either reaches the complete locked state or does not move at all. Records of any other item are preserved. It is a dedicated operation rather than a client-side sequence of RemoveOwnedItem and SetSpectralSteedAttire calls, which could leave the save wearing an appearance whose item is gone. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LockAllSpectralSteedAttiresRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Spectral Steed Attire reset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LockAllSpectralSteedAttiresResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, incomplete Spectral Steed Attire catalog data, a duplicate or referenced attire record, malformed Inventory or event flags, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock": {
       "put": {
         "operationId": "setCookbookUnlocked",
@@ -7741,6 +7875,148 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "whetblades"]
+      },
+      "SpectralSteedAttireEntry": {
+        "type": "object",
+        "description": "One selectable Torrent appearance. The default appearance requires no item and therefore carries an empty resource reference and an empty icon path; nothing is invented for it. The event flag that selects the appearance is never exposed.",
+        "properties": {
+          "attireKey": {
+            "type": "string",
+            "enum": ["default", "tree_sentinel", "silver_of_caria", "funereal_night"],
+            "description": "The stable public appearance key."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The appearance name, which is deliberately not the catalog item name."
+          },
+          "owned": {
+            "type": "boolean",
+            "description": "True for the default appearance, and for an attire only while its item has a positive-quantity record in common or key InventoryHeld. Storage does not count."
+          },
+          "requiredResourceKind": {
+            "type": "string",
+            "enum": ["", "item"],
+            "description": "The GameCatalog resource kind of the required item, empty for the default appearance."
+          },
+          "requiredResourceKey": {
+            "type": "string",
+            "pattern": "^([0-9A-F]{8})?$",
+            "description": "The exact GameCatalog resource key of the required item, empty for the default appearance. It is the key AddItemToInventory accepts."
+          },
+          "iconPath": {
+            "type": "string",
+            "description": "The catalog icon path of the required item, empty for the default appearance."
+          }
+        },
+        "required": ["attireKey", "name", "owned", "requiredResourceKind", "requiredResourceKey", "iconPath"]
+      },
+      "GetSpectralSteedAttiresResult": {
+        "type": "object",
+        "description": "The four Spectral Steed Attire appearances of one character slot in menu order. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["resolved", "legacy", "conflict"],
+            "description": "resolved when exactly one appearance flag is set, legacy when all four are cleared, conflict when two or more are set."
+          },
+          "activeAttireKey": {
+            "type": "string",
+            "enum": ["", "default", "tree_sentinel", "silver_of_caria", "funereal_night"],
+            "description": "The active appearance key, filled only when status is resolved and empty otherwise."
+          },
+          "attires": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpectralSteedAttireEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "status", "activeAttireKey", "attires"]
+      },
+      "SetSpectralSteedAttireRequest": {
+        "type": "object",
+        "description": "The request body for activating one Spectral Steed Attire appearance.",
+        "additionalProperties": false,
+        "properties": {
+          "attireKey": {
+            "type": "string",
+            "enum": ["default", "tree_sentinel", "silver_of_caria", "funereal_night"],
+            "description": "The appearance to activate."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["attireKey", "expectedRevision"]
+      },
+      "SetSpectralSteedAttireResult": {
+        "type": "object",
+        "description": "The receipt returned after a successful Spectral Steed Attire selection.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "attireKey": {
+            "type": "string"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "attireKey"]
+      },
+      "LockAllSpectralSteedAttiresRequest": {
+        "type": "object",
+        "description": "The request body for removing every Spectral Steed Attire item and restoring the default appearance.",
+        "additionalProperties": false,
+        "properties": {
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["expectedRevision"]
+      },
+      "LockAllSpectralSteedAttiresResult": {
+        "type": "object",
+        "description": "The receipt returned after a successful Spectral Steed Attire reset. attireKey is always default, the only state this operation can leave behind.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "attireKey": {
+            "type": "string",
+            "enum": ["default"]
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "attireKey"]
       },
       "SetWhetbladeUnlockedRequest": {
         "type": "object",

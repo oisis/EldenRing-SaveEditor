@@ -113,17 +113,24 @@ type CapabilitySummary struct {
 // picker reads, and nothing else. It holds no pointer, map or slice, so it copies
 // no mutable catalog state and cannot be used to reach a stored document.
 type ResourceSummary struct {
-	Kind          schema.ResourceKind
-	Key           string
-	FamilyKnown   bool
-	Family        schema.ItemFamily
-	NameKnown     bool
-	Name          string
-	Upgrade       CapabilitySummary
-	Infusion      CapabilitySummary
-	AshOfWarMount CapabilitySummary
-	Stack         CapabilitySummary
-	Equipment     CapabilitySummary
+	Kind        schema.ResourceKind
+	Key         string
+	FamilyKnown bool
+	Family      schema.ItemFamily
+	NameKnown   bool
+	Name        string
+	// NoDatabaseKnown and NoDatabase carry item.safety.noDatabase, the flag that
+	// marks an item as reserved for the feature that owns it instead of being
+	// offered through the general item catalog. The two are reported separately,
+	// like every other summary fact: deciding that only a known true hides a
+	// resource belongs to the endpoint that lists them.
+	NoDatabaseKnown bool
+	NoDatabase      bool
+	Upgrade         CapabilitySummary
+	Infusion        CapabilitySummary
+	AshOfWarMount   CapabilitySummary
+	Stack           CapabilitySummary
+	Equipment       CapabilitySummary
 }
 
 // ResourceSummaries returns one summary per stored resource, ordered by kind and
@@ -143,6 +150,8 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			summary.Family = resource.Item.Family.Value
 			summary.NameKnown = resource.Item.Presentation.Name.Known
 			summary.Name = resource.Item.Presentation.Name.Value
+			summary.NoDatabaseKnown = resource.Item.Safety.NoDatabase.Known
+			summary.NoDatabase = resource.Item.Safety.NoDatabase.Value
 
 			capabilities := resource.Item.Capabilities
 			summary.Upgrade = summariseCapability(capabilities.Upgrade)

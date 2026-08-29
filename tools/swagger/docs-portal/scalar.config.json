@@ -591,6 +591,21 @@
                 "filepath": "../../../docs/endpoints/world/set_whetblade_unlocked.md",
                 "title": "SetWhetbladeUnlocked"
               },
+              "/get-spectral-steed-attires": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_spectral_steed_attires.md",
+                "title": "GetSpectralSteedAttires"
+              },
+              "/set-spectral-steed-attire": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_spectral_steed_attire.md",
+                "title": "SetSpectralSteedAttire"
+              },
+              "/lock-all-spectral-steed-attires": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/lock_all_spectral_steed_attires.md",
+                "title": "LockAllSpectralSteedAttires"
+              },
               "/set-quest-step": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_quest_step.md",

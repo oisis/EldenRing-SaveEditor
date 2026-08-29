@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"sort"
 )
 
 // Slot-data layout of the confirmed event-flag bitfield, shared by PC and PS4.
@@ -348,4 +349,48 @@ func eventFlagSlotBounds(platform Platform, characterID int) (int64, int64) {
 		return ps4EventFlagSlotBounds(characterID)
 	}
 	return pcEventFlagSlotBounds(characterID)
+}
+
+// planEventFlagWrites turns a set of wanted event-flag states into the byte
+// plan that reaches them. Flags that share a byte are merged, so the plan covers
+// every byte exactly once and stays a non-overlapping applyByteWrites input, and
+// a byte is read once before it is masked so the flags this plan does not own
+// keep their value.
+//
+// Every identifier must already be resolvable; the caller proves that before it
+// touches the slot. The caller must already hold Engine.mutex.
+func planEventFlagWrites(
+	loaded *loadedSave,
+	sectionAt int64,
+	desired map[uint32]bool,
+) ([]byteWrite, error) {
+	byOffset := make(map[int64]byte)
+	for flagID, value := range desired {
+		position, _ := resolveEventFlag(flagID)
+		at := sectionAt + position.offset
+		current, exists := byOffset[at]
+		if !exists {
+			raw, err := loaded.snapshot.readAt(at, 1)
+			if err != nil {
+				return nil, fmt.Errorf("cannot read event flag %d: %w", flagID, err)
+			}
+			current = raw[0]
+		}
+		if value {
+			current |= 1 << position.bit
+		} else {
+			current &^= 1 << position.bit
+		}
+		byOffset[at] = current
+	}
+	offsets := make([]int64, 0, len(byOffset))
+	for at := range byOffset {
+		offsets = append(offsets, at)
+	}
+	sort.Slice(offsets, func(i, j int) bool { return offsets[i] < offsets[j] })
+	writes := make([]byteWrite, 0, len(offsets))
+	for _, at := range offsets {
+		writes = append(writes, byteWrite{at: at, data: []byte{byOffset[at]}})
+	}
+	return writes, nil
 }
