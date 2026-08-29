@@ -11,6 +11,14 @@ responsibility of `GetResource`, `GetItemVariants`, and `GetResourceRelations`.
 The point of the endpoint is that a picker for any item category is one call with
 typed filters, instead of one dedicated getter per category.
 
+An item the catalog knows to be `safety.noDatabase` is reserved for the feature
+that owns it and is never offered here: it is excluded from the list, from
+`search`, and from `total`, before any filter runs. It stays fully resolvable by
+its exact `(kind, key)` pair through `GetResource`, `AddItemToInventory`, and the
+owning feature, so hiding it from the general list never makes it unreachable.
+The three Regulation 1.17 Spectral Steed Attire key items are the reason the rule
+exists; every other item carrying the same flag is treated identically.
+
 | | |
 |---|---|
 | EndpointID | `get_resources` |
@@ -56,8 +64,9 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary
 ```
 
 `ResourceSummaries` returns a value-only snapshot of exactly the fields this list
-needs — kind, key, family, name, and the `Known`/`Enabled` pair of the five
-capabilities — ordered by kind and only then by key. It copies scalars only:
+needs — kind, key, family, name, the `Known`/`Value` pair of `safety.noDatabase`,
+and the `Known`/`Enabled` pair of the five capabilities — ordered by kind and only
+then by key. It copies scalars only:
 the full documents, their variants, provenance, and capability rules are never
 deep-copied, so listing does not pay for data the projection discards. The
 summary types hold no pointer, map, or slice, so no mutable catalog state is
@@ -203,10 +212,12 @@ no `ItemDocument`.
 4. Reject a negative `page` or `pageSize`, then apply the defaults for `0`.
 5. Read every resource summary through `Catalog.ResourceSummaries`, already
    ordered by kind and then key.
-6. Apply `resourceType`, `family`, and `capability`, project the entry, then
+6. Skip every summary whose `safety.noDatabase` is both `Known` and `true`, so it
+   reaches neither a filter, nor `search`, nor `total`.
+7. Apply `resourceType`, `family`, and `capability`, project the entry, then
    apply `search` to the projected key and name.
-7. Count the matches into `total`.
-8. Slice the requested page, returning an empty array when the page lies beyond
+8. Count the matches into `total`.
+9. Slice the requested page, returning an empty array when the page lies beyond
    the last one.
 
 ## Validation and errors
@@ -347,6 +358,11 @@ go test ./backend/endpoints/catalog -run '^TestGetResources' -count=1 -v
 go test ./tools/swagger -run '^TestResourcesRoute' -count=1 -v
 ```
 
+`TestGetResourcesHidesNoDatabaseItems` and `TestGetResourceStillResolvesNoDatabaseItems`
+in `backend/endpoints/catalog/no_database_resource_test.go` are the pair that
+protects the exclusion: hidden from the list, the search and `total`, and still
+resolvable by its exact `(kind, key)` pair.
+
 The getter suite covers the unfiltered catalog order, the four-field projection,
 `resourceType` and `family` filtering including a valid but unused family, a
 known-and-enabled capability against a known-but-disabled one, case-insensitive
@@ -370,5 +386,8 @@ negative filter and paging values.
   non-item resource.
 - The result is a projection for lists and pickers. A caller that needs the full
   document calls `GetResource` for the selected `(kind, key)` pair.
+- A `noDatabase` item is hidden unconditionally; there is no parameter that opts
+  back into listing it. A caller that needs one addresses it by its exact
+  `(kind, key)` pair.
 - Filtering and paging run over the whole resource set on every call; there is no
   index and no cache.
