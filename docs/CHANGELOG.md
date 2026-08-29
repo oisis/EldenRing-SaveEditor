@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-08-29
+
 ### fix(diagnostics): accept Regulation 1.17 starting classes
 
 Save diagnostics no longer flags characters created as Idus Knight (10) or
