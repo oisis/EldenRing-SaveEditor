@@ -340,15 +340,16 @@ func TestSetCharacterStatsRejectsIllegalAttributesAndPolicies(t *testing.T) {
 }
 
 func TestSetCharacterStatsRejectsAnUnknownStartingClass(t *testing.T) {
+	// 12 is the first ID above the twelve classes Regulation 1.17 declares.
 	content := setStatsTestActiveContent(PlatformPC)
-	content.classID = 10
-	content.summaryClassID = 10
+	content.classID = 12
+	content.summaryClassID = 12
 	engine, sessionID := loadSetStatsSession(t, content)
 	before := bytes.Clone(engine.sessions[sessionID].snapshot.data)
 
 	_, err := engine.SetCharacterStats(
 		sessionID, setStatsTestSlot, setStatsTestAttributes, LevelPolicyRecalculate, "0")
-	want := "starting class 10 is unknown; its attribute minima are not confirmed"
+	want := "starting class 12 is unknown; its attribute minima are not confirmed"
 	if err == nil || err.Error() != want {
 		t.Fatalf("error = %v, want %q", err, want)
 	}
@@ -692,7 +693,7 @@ func TestLegalAttributesFor(t *testing.T) {
 		// Every confirmed class sums to at least 80, so a corrected set can never
 		// produce a level below the minimum 1. This is the invariant that lets a
 		// plan promise the executing endpoint will accept its target.
-		for class := uint8(0); class < 10; class++ {
+		for class := uint8(0); class <= 11; class++ {
 			got, err := LegalAttributesFor(CharacterAttributes{}, class)
 			if err != nil {
 				t.Fatalf("class %d: LegalAttributesFor: %v", class, err)
@@ -705,24 +706,26 @@ func TestLegalAttributesFor(t *testing.T) {
 		}
 	})
 
-	// The eighty values below are a deliberate second copy of the numbers that
-	// now live in the GameCatalog class resources, and they must stay literal.
-	// They are what pins the contract: the production path resolves the minima
-	// from backend/gamecatalog/data/classes/, so a test that read the same
+	// The ninety-six values below are a deliberate second copy of the numbers
+	// that now live in the GameCatalog class resources, and they must stay
+	// literal. They are what pins the contract: the production path resolves the
+	// minima from backend/gamecatalog/data/classes/, so a test that read the same
 	// documents would assert only that the catalog equals itself. Do not
 	// "deduplicate" this table against the catalog.
-	t.Run("all ten confirmed starting classes return their confirmed base attributes", func(t *testing.T) {
-		confirmedBaseAttributes := [10]CharacterAttributes{
-			0: {Vigor: 15, Mind: 10, Endurance: 11, Strength: 14, Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7},    // Vagabond
-			1: {Vigor: 11, Mind: 12, Endurance: 11, Strength: 10, Dexterity: 16, Intelligence: 10, Faith: 8, Arcane: 9},   // Warrior
-			2: {Vigor: 14, Mind: 9, Endurance: 12, Strength: 16, Dexterity: 9, Intelligence: 7, Faith: 8, Arcane: 11},     // Hero
-			3: {Vigor: 10, Mind: 11, Endurance: 10, Strength: 9, Dexterity: 13, Intelligence: 9, Faith: 8, Arcane: 14},    // Bandit
-			4: {Vigor: 9, Mind: 15, Endurance: 9, Strength: 8, Dexterity: 12, Intelligence: 16, Faith: 7, Arcane: 9},      // Astrologer
-			5: {Vigor: 10, Mind: 14, Endurance: 8, Strength: 11, Dexterity: 10, Intelligence: 7, Faith: 16, Arcane: 10},   // Prophet
-			6: {Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},   // Confessor
-			7: {Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},    // Samurai
-			8: {Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},   // Prisoner
-			9: {Vigor: 10, Mind: 10, Endurance: 10, Strength: 10, Dexterity: 10, Intelligence: 10, Faith: 10, Arcane: 10}, // Wretch
+	t.Run("all twelve confirmed starting classes return their confirmed base attributes", func(t *testing.T) {
+		confirmedBaseAttributes := [12]CharacterAttributes{
+			0:  {Vigor: 15, Mind: 10, Endurance: 11, Strength: 14, Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7},    // Vagabond
+			1:  {Vigor: 11, Mind: 12, Endurance: 11, Strength: 10, Dexterity: 16, Intelligence: 10, Faith: 8, Arcane: 9},   // Warrior
+			2:  {Vigor: 14, Mind: 9, Endurance: 12, Strength: 16, Dexterity: 9, Intelligence: 7, Faith: 8, Arcane: 11},     // Hero
+			3:  {Vigor: 10, Mind: 11, Endurance: 10, Strength: 9, Dexterity: 13, Intelligence: 9, Faith: 8, Arcane: 14},    // Bandit
+			4:  {Vigor: 9, Mind: 15, Endurance: 9, Strength: 8, Dexterity: 12, Intelligence: 16, Faith: 7, Arcane: 9},      // Astrologer
+			5:  {Vigor: 10, Mind: 14, Endurance: 8, Strength: 11, Dexterity: 10, Intelligence: 7, Faith: 16, Arcane: 10},   // Prophet
+			6:  {Vigor: 10, Mind: 13, Endurance: 10, Strength: 12, Dexterity: 12, Intelligence: 9, Faith: 14, Arcane: 9},   // Confessor
+			7:  {Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8},    // Samurai
+			8:  {Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9},   // Prisoner
+			9:  {Vigor: 10, Mind: 10, Endurance: 10, Strength: 10, Dexterity: 10, Intelligence: 10, Faith: 10, Arcane: 10}, // Wretch
+			10: {Vigor: 10, Mind: 12, Endurance: 11, Strength: 13, Dexterity: 15, Intelligence: 8, Faith: 11, Arcane: 6},   // Idus Knight
+			11: {Vigor: 14, Mind: 8, Endurance: 17, Strength: 15, Dexterity: 11, Intelligence: 7, Faith: 8, Arcane: 9},     // Heavy Knight
 		}
 
 		for classID, want := range confirmedBaseAttributes {
@@ -798,8 +801,8 @@ func TestLegalAttributesFor(t *testing.T) {
 		if _, err := LegalAttributesFor(CharacterAttributes{
 			Vigor: 20, Mind: 20, Endurance: 20, Strength: 20,
 			Dexterity: 20, Intelligence: 20, Faith: 20, Arcane: 20,
-		}, 10); err == nil {
-			t.Error("class 10 was accepted, but it carries no confirmed minima")
+		}, 12); err == nil {
+			t.Error("class 12 was accepted, but it carries no confirmed minima")
 		}
 	})
 }
@@ -866,19 +869,19 @@ func TestSetCharacterStats_CorrectedClassMinima(t *testing.T) {
 // embedded GameCatalog supplies. The minima are no longer a table in this
 // package: they are resolved from the class resources, so a class document that
 // is deleted, renumbered or added would change which IDs the writer accepts.
-// Exactly the ten confirmed IDs must resolve, and every other byte value must
+// Exactly the twelve confirmed IDs must resolve, and every other byte value must
 // fail closed rather than fall back to a default.
 func TestStartingClassMinimaComeFromTheCatalog(t *testing.T) {
 	for id := 0; id <= 255; id++ {
 		_, err := LegalAttributesFor(CharacterAttributes{}, uint8(id))
-		if id <= 9 {
+		if id <= 11 {
 			if err != nil {
 				t.Errorf("class %d: LegalAttributesFor: %v, want the catalog to supply its minima", id, err)
 			}
 			continue
 		}
 		if err == nil {
-			t.Errorf("class %d was accepted, but only the ten confirmed classes carry minima", id)
+			t.Errorf("class %d was accepted, but only the twelve confirmed classes carry minima", id)
 		}
 	}
 }

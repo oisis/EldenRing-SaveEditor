@@ -157,8 +157,9 @@ it: a limit is a repair target, not a defect.
 ### The statistics action and its unavoidable consequence
 
 The corrected attribute set comes from `saveengine.LegalAttributesFor`, which
-owns both the absolute range and the ten confirmed class minima. The plan keeps
-no second copy of either, so it can never propose a set `SetCharacterStats` would
+owns both the absolute range and the twelve confirmed class minima. The plan
+keeps no second copy of either, so it can never propose a set
+`SetCharacterStats` would
 reject. An unknown starting class carries no confirmed minima and is therefore
 refused, not guessed.
 
@@ -243,8 +244,8 @@ unsaved-changes flag.
 `TestLegalAttributesFor` in `backend/saveengine` covers the rule application
 below the endpoint boundary: a legal set left untouched, each attribute moving
 the smallest legal distance with the class minimum winning where it is stricter,
-every one of the ten classes summing high enough that a corrected set is always
-writable, and an unknown class rejected.
+every one of the twelve classes summing high enough that a corrected set is
+always writable, and an unknown class rejected.
 
 ## Current limitations
 

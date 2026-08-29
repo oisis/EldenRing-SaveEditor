@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 16,
-    "dataVersion": "2b0e76379f042a8c6bcb6534a366a62c15a7d5ac40c7416c8a20f92bd8049bce",
+    "dataVersion": "8b8267c948e2cbe78d5ad920ef331092d82fc582be02c4725173ec37ffa010f6",
     "gameVersion": "1.17-class",
     "sources": [
       {
@@ -89,6 +89,14 @@
         "kind": "regulation_parameter_csv",
         "location": "regulation.bin/csv/CharaInitParam.csv",
         "version": "50f8a08c1dbcb69e85f2154436ec78a093cad52a0dc90404a35cc6f9ba11d859",
+        "evidence": "regulation",
+        "reviewed": true
+      },
+      {
+        "id": "regulation_char_make_menu_list_item_param",
+        "kind": "regulation_parameter_csv",
+        "location": "regulation.bin/csv/CharMakeMenuListItemParam.csv",
+        "version": "3070db4f9f4492eebd25bb35eb45c01e1952d384046e10d61a7ce8edd722b745",
         "evidence": "regulation",
         "reviewed": true
       },
@@ -265,6 +273,14 @@
         "kind": "game_text_fmg_extract",
         "location": "regulation.bin/msg/engus/menu.msgbnd/GR_MenuText.fmg",
         "version": "7d6ed4dfcc194e14aad330886a462ef1e7485217b0effac6bff78e9f7021feb4",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_gr_menu_text_dlc02",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/menu_dlc02.msgbnd/GR_MenuText.fmg",
+        "version": "d1c625ddc26e1f474ea8b7a012cd7457e790ed9e58227fbb7ac4f2c3582ecbad",
         "evidence": "game_data",
         "reviewed": true
       },
@@ -471,6 +487,8 @@
     "classes/7.json",
     "classes/8.json",
     "classes/9.json",
+    "classes/10.json",
+    "classes/11.json",
     "colosseums/caelid_colosseum.json",
     "colosseums/limgrave_colosseum.json",
     "colosseums/royal_colosseum.json",

@@ -39,6 +39,20 @@ func TestValidateClassResourceFailsClosed(t *testing.T) {
 		t.Fatalf("ValidateResource on a complete class: %v", err)
 	}
 
+	// The Regulation 1.17 classes are two-digit keys, so the key rule has to
+	// accept 10 and 11 while still refusing everything above them.
+	for _, key := range []struct {
+		key string
+		id  uint32
+	}{{"10", 10}, {"11", 11}} {
+		resource, _ := classFixture(t)
+		resource.Key = key.key
+		resource.Class.StartingClassID.Value = key.id
+		if err := schema.ValidateResource(resource, sources); err != nil {
+			t.Fatalf("ValidateResource on class %q: %v", key.key, err)
+		}
+	}
+
 	for name, break_ := range map[string]func(*schema.Resource){
 		"missing document": func(resource *schema.Resource) { resource.Class = nil },
 		"foreign document": func(resource *schema.Resource) {
@@ -46,9 +60,17 @@ func TestValidateClassResourceFailsClosed(t *testing.T) {
 		},
 		"non-digit key": func(resource *schema.Resource) { resource.Key = "a" },
 		"empty key":     func(resource *schema.Resource) { resource.Key = "" },
-		"multi-digit key": func(resource *schema.Resource) {
-			resource.Key = "10"
-			resource.Class.StartingClassID.Value = 10
+		"key above the highest class": func(resource *schema.Resource) {
+			resource.Key = "12"
+			resource.Class.StartingClassID.Value = 12
+		},
+		"key with a leading zero": func(resource *schema.Resource) {
+			resource.Key = "01"
+			resource.Class.StartingClassID.Value = 1
+		},
+		"three-digit key": func(resource *schema.Resource) {
+			resource.Key = "100"
+			resource.Class.StartingClassID.Value = 100
 		},
 		"unknown id": func(resource *schema.Resource) {
 			resource.Class.StartingClassID.Known = false

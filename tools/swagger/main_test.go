@@ -2696,10 +2696,13 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 		}
 		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/starting-class"
 		for name, body := range map[string]string{
-			"missing startingClassID":  `{"confirmReset":true,"expectedRevision":"0"}`,
-			"unknown startingClassID":  `{"startingClassID":99,"confirmReset":true,"expectedRevision":"0"}`,
-			"unknown top-level field":  `{"startingClassID":4,"confirmReset":true,"expectedRevision":"0","extra":true}`,
-			"invalid expectedRevision": `{"startingClassID":4,"confirmReset":true,"expectedRevision":"stale"}`,
+			"missing startingClassID": `{"confirmReset":true,"expectedRevision":"0"}`,
+			"unknown startingClassID": `{"startingClassID":99,"confirmReset":true,"expectedRevision":"0"}`,
+			// 12 is the first ID above the twelve classes Regulation 1.17 declares,
+			// so it must be refused exactly like any other unknown class.
+			"startingClassID above the highest class": `{"startingClassID":12,"confirmReset":true,"expectedRevision":"0"}`,
+			"unknown top-level field":                 `{"startingClassID":4,"confirmReset":true,"expectedRevision":"0","extra":true}`,
+			"invalid expectedRevision":                `{"startingClassID":4,"confirmReset":true,"expectedRevision":"stale"}`,
 			// The destructive reset needs an explicit confirmation. An omitted
 			// confirmReset is rejected by name rather than read as false, and an
 			// explicit false is rejected by SaveEngine; neither mutates.
@@ -2726,6 +2729,66 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 			t.Errorf("session after rejected bodies = %+v, want clean", info)
 		}
 	})
+}
+
+// TestOpenAPIDeclaresTheTwelveStartingClasses pins the published bound of the
+// starting-class contract. Regulation 1.17 added 10 Idus Knight and 11 Heavy
+// Knight, so a document still advertising 0..9 would refuse two classes the
+// backend accepts, and one advertising more would promise classes GameCatalog
+// does not carry. The resource-key description is pinned in the same test
+// because a class key is that same identifier.
+func TestOpenAPIDeclaresTheTwelveStartingClasses(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Comps struct {
+			Parameters map[string]struct {
+				Description string `json:"description"`
+			} `json:"parameters"`
+			Schemas map[string]struct {
+				Properties map[string]struct {
+					Minimum     *int   `json:"minimum"`
+					Maximum     *int   `json:"maximum"`
+					Description string `json:"description"`
+				} `json:"properties"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	property, found := document.Comps.Schemas["SetCharacterStartingClassRequest"].
+		Properties["startingClassID"]
+	if !found {
+		t.Fatal("openapi.json declares no SetCharacterStartingClassRequest.startingClassID")
+	}
+	if property.Minimum == nil || *property.Minimum != 0 {
+		t.Errorf("startingClassID minimum = %v, want 0", property.Minimum)
+	}
+	if property.Maximum == nil || *property.Maximum != 11 {
+		t.Errorf("startingClassID maximum = %v, want 11", property.Maximum)
+	}
+	if !strings.Contains(property.Description, "0..11") {
+		t.Errorf("startingClassID description = %q, want it to state the range 0..11",
+			property.Description)
+	}
+	if strings.Contains(property.Description, "0..9") {
+		t.Errorf("startingClassID description = %q still advertises the old range 0..9",
+			property.Description)
+	}
+
+	key, found := document.Comps.Parameters["ResourceKey"]
+	if !found {
+		t.Fatal("openapi.json declares no ResourceKey parameter")
+	}
+	if !strings.Contains(key.Description, "class keys are the decimal starting-class ID 0..11") {
+		t.Errorf("resource key description = %q, want the class-key range 0..11",
+			key.Description)
+	}
 }
 
 func TestSetCharacterStartingClassRouteIsAbsentWithoutAnEngine(t *testing.T) {

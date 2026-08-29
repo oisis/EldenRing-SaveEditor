@@ -518,6 +518,31 @@ func validateQuestResource(resource Resource, sources map[SourceID]struct{}) err
 	return nil
 }
 
+// ClassKeyMax is the highest starting-class ID the game declares. Regulation
+// 1.17 added 10 Idus Knight and 11 Heavy Knight to the ten base classes, so the
+// key range is 0..11 and nothing above it is a class the build knows.
+const ClassKeyMax uint32 = 11
+
+// isClassKey accepts the canonical decimal spelling of a starting-class ID in
+// 0..ClassKeyMax. A leading zero, a sign, whitespace or any non-digit is
+// rejected, so "01" never becomes a second spelling of class 1.
+func isClassKey(key string) bool {
+	if key == "" || len(key) > 2 {
+		return false
+	}
+	if len(key) == 2 && key[0] == '0' {
+		return false
+	}
+	value := uint32(0)
+	for index := 0; index < len(key); index++ {
+		if key[index] < '0' || key[index] > '9' {
+			return false
+		}
+		value = value*10 + uint32(key[index]-'0')
+	}
+	return value <= ClassKeyMax
+}
+
 // ClassLevelMin, ClassLevelMax, ClassAttributeMin and ClassAttributeMax bound
 // the values a class document may carry. The starting-class reset copies a class
 // document verbatim into the save, so this is the only place that keeps the
@@ -533,14 +558,16 @@ const (
 // validateClassResource requires the stable starting-class ID, the official
 // non-empty class name, the in-range base level and the eight in-range base
 // attributes used to present the resource. The key is the decimal class ID as a
-// string, "0" through "9".
+// string, "0" through "11".
 //
 // class.level is checked as its own fact and is never compared against the
 // attribute sum: it is the regulation's soulLv, not a value derived from the
 // eight attributes.
 func validateClassResource(resource Resource, sources map[SourceID]struct{}) error {
-	if len(resource.Key) != 1 || resource.Key[0] < '0' || resource.Key[0] > '9' {
-		return fmt.Errorf("resource %q: class key must be a single decimal digit 0..9", resource.Key)
+	if !isClassKey(resource.Key) {
+		return fmt.Errorf(
+			"resource %q: class key must be the decimal starting-class ID 0..%d",
+			resource.Key, ClassKeyMax)
 	}
 	if err := validateSoleDocument(resource); err != nil {
 		return err

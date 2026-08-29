@@ -95,10 +95,10 @@ save offset, no private save byte and no starting class.
 4. The character's own `StartingClassID` is read from its `PlayerGameData`, and
    every attribute must be at or above that class's base value — the same floor
    the game enforces when respeccing. The minima are resolved directly from the
-   GameCatalog `class` resources (`0` through `9`), which serve as their single
-   source of truth. A `StartingClassID` outside the ten confirmed classes is a
-   hard rejection: an unknown class carries no known minima, so its save is not
-   written.
+   GameCatalog `class` resources (`0` through `11`), which serve as their single
+   source of truth. A `StartingClassID` outside the twelve confirmed classes
+   is a hard rejection: an unknown class carries no known minima, so its save
+   is not written.
 
    `PlayerGameData` is the authoritative copy of the class, read relative to the
    same character anchor as the attributes. The second copy in the character's
@@ -195,8 +195,10 @@ already equal the requested ones, matching the other mutation endpoints.
 ## Legacy comparison
 
 SaveForge 1.5.8 and 1.6.10 agree on the field layout, the level formula, the
-`1..99` attribute range, the `1..713` level range and the ten starting classes
-with their base attributes; the two class tables are byte-identical. Both also
+`1..99` attribute range, the `1..713` level range and the ten base starting
+classes with their base attributes; the two class tables are byte-identical.
+Neither carries the Regulation 1.17 classes `10` Idus Knight and `11` Heavy
+Knight, which this build resolves from its own GameCatalog documents. Both also
 validate the minima against the `PlayerGameData` class at offset `-248` from the
 character anchor, never against the `ProfileSummary` copy. This endpoint keeps
 that source.

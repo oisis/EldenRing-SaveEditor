@@ -126,10 +126,11 @@ information.
 1. `expectedRevision` must be a canonical decimal revision equal to the current
    session revision.
 2. `characterID` must be `0..9` and the slot must be active.
-3. `startingClassID` must resolve to one of the ten confirmed starting classes
-   (`0` Vagabond through `9` Wretch) via GameCatalog class resources. An unknown
-   class ID is a hard rejection: never defaulted, never skipped, never partially
-   written.
+3. `startingClassID` must resolve to one of the twelve confirmed starting
+   classes (`0` Vagabond through `9` Wretch plus the Regulation 1.17 pair
+   `10` Idus Knight and `11` Heavy Knight) via GameCatalog class resources.
+   An unknown class ID is a hard rejection: never defaulted, never skipped,
+   never partially written.
 
 `confirmReset` is validated before all of these.
 
@@ -170,10 +171,18 @@ Consequences of the rule:
 | 7 | Samurai | 9 | 12 | 11 | 13 | 12 | 15 | 9 | 8 | 8 |
 | 8 | Prisoner | 9 | 11 | 12 | 11 | 11 | 14 | 14 | 6 | 9 |
 | 9 | Wretch | 1 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 |
+| 10 | Idus Knight | 7 | 10 | 12 | 11 | 13 | 15 | 8 | 11 | 6 |
+| 11 | Heavy Knight | 10 | 14 | 8 | 17 | 15 | 11 | 7 | 8 | 9 |
 
 The `6` Confessor, `7` Samurai and `8` Prisoner mapping is confirmed against a
 native vanilla save holding all ten freshly created classes. The create-character
 menu display order is a different order and must never be used as the ID.
+
+`10` Idus Knight and `11` Heavy Knight are the Regulation 1.17 classes, read
+from `CharaInitParam` rows `3010` and `3011`; their names are the
+`menu_dlc02` `GR_MenuText` captions `297140` and `297141` that
+`CharMakeMenuListItemParam` rows `100210` and `100211` point to. Those menu
+rows are the create-character display order and are never the stored ID.
 
 ## Save mutation
 
@@ -242,8 +251,8 @@ a missing anchor, a truncated range, or a write/verification failure.
 ## Verification coverage
 
 Synthetic PC and PS4 coverage verifies:
-- a developed character reset to the exact base build of each of the ten classes,
-  with every other byte of the snapshot proven unchanged;
+- a developed character reset to the exact base build of each of the twelve
+  classes, with every other byte of the snapshot proven unchanged;
 - the base level moving both down (Confessor 10 to Wretch 1) and up (Wretch 1 to
   Confessor 10), taken from the class document, not from the attribute sum;
 - a stored attribute outside `1..99` overwritten by the class base rather than

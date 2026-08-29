@@ -79,7 +79,7 @@ and quest keys use lowercase letters, digits and underscores, for example
 `stormveil_castle_gateside_chamber`,
 `weeping_peninsula_tombsward_catacombs` and `brother_corhyn`. A tutorial key is
 the decimal form of its `TutorialParam` row ID, for example `2010`. A class key
-is the single decimal digit of its starting-class ID, for example `0`.
+is the decimal starting-class ID `0`..`11`, for example `0` or `11`.
 `gamecatalog.New` rejects a catalog containing the same `(kind, key)` pair
 twice, so at most one resource can match.
 

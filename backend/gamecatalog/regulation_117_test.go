@@ -636,6 +636,16 @@ func TestRegulation117ManifestDeclaresItsSources(t *testing.T) {
 			"regulation.bin/msg/engus/item.msgbnd/WeaponCaption.fmg", schema.EvidenceGameData},
 		{"game_text_protector_caption_base", "game_text_fmg_extract",
 			"regulation.bin/msg/engus/item.msgbnd/ProtectorCaption.fmg", schema.EvidenceGameData},
+		// The names of the two 1.17 starting classes are captions 297140 and
+		// 297141, which live only in the menu_dlc02 GR_MenuText, never in the
+		// base menu.msgbnd one the ten original classes are named from.
+		{"game_text_gr_menu_text_dlc02", "game_text_fmg_extract",
+			"regulation.bin/msg/engus/menu_dlc02.msgbnd/GR_MenuText.fmg", schema.EvidenceGameData},
+		// CharMakeMenuListItemParam is what ties each of those captions to a
+		// starting class ID, so the manifest has to declare it as a source of its
+		// own instead of leaving the link unattributed.
+		{"regulation_char_make_menu_list_item_param", "regulation_parameter_csv",
+			"regulation.bin/csv/CharMakeMenuListItemParam.csv", schema.EvidenceRegulation},
 		{regulation117IconSource, "product_item_assets",
 			"saveforge-1.7.1/frontend/public/items", schema.EvidenceVerifiedResearch},
 		{"curated_regulation_117", "curated_regulation_117_ingest",

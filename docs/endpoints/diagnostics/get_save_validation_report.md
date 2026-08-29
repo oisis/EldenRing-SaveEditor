@@ -174,7 +174,7 @@ state the setter rejects, or reject a state the setter accepts.
 |---|---|---|
 | `attribute_out_of_range` | error | An attribute lies outside `1..99`, or the level the formula derives lies outside the legal range. Without a legal attribute set there is no expected level, so no level mismatch is reported on top of it. |
 | `level_mismatch` | error | The stored level differs from `sum(attributes) - 79`. |
-| `attribute_below_class_minimum` | error | An attribute is below the base value of the character's own starting class, or the stored starting class is not one of the ten confirmed classes and therefore carries no known minima. |
+| `attribute_below_class_minimum` | error | An attribute is below the base value of the character's own starting class, or the stored starting class is not one of the twelve confirmed classes and therefore carries no known minima. |
 | `soul_memory_below_minimum` | error | The stored lifetime runes are below the minimum the levels above the base level of the character's own starting class require. The minimum is class-relative, so a freshly created class sitting at its own base level with `0` lifetime runes is legal and is never reported. An unknown starting class carries no confirmed base level, so no minimum is derived and the gap is reported through `attribute_below_class_minimum` instead. |
 
 ### Scope `equipment`

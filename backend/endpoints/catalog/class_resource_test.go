@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	classKind  = "class"
-	classCount = 10
+	classKind = "class"
+	// Ten base classes plus the Regulation 1.17 pair 10 Idus Knight and
+	// 11 Heavy Knight.
+	classCount = 12
 )
 
 func TestGetResourcesReturnsClassesAsNonItems(t *testing.T) {

@@ -1,6 +1,7 @@
 package gamecatalog_test
 
 import (
+	"strings"
 	"sync"
 	"testing"
 
@@ -34,13 +35,15 @@ func newRealCatalog(t *testing.T) *gamecatalog.Catalog {
 	return storedCatalog
 }
 
-func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
+func TestAllTwelveClassesLoadWithExactConfirmedMapping(t *testing.T) {
 	cat := newRealCatalog(t)
 
-	// level is the CharaInitParam soulLv fact of each class, confirmed against a
-	// native vanilla save holding all ten freshly created classes. It is a fact
-	// in its own right and is deliberately not asserted as sum(attributes)-79:
-	// that formula belongs to SetCharacterStats, not to this document.
+	// level is the CharaInitParam soulLv fact of each class: for 0..9 confirmed
+	// against a native vanilla save holding all ten freshly created classes, for
+	// the Regulation 1.17 classes 10 and 11 read from CharaInitParam rows 3010
+	// and 3011. It is a fact in its own right and is deliberately not asserted as
+	// sum(attributes)-79: that formula belongs to SetCharacterStats, not to this
+	// document.
 	expectedClasses := map[string]struct {
 		id           uint32
 		name         string
@@ -64,6 +67,10 @@ func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 		"7": {7, "Samurai", 9, 12, 11, 13, 12, 15, 9, 8, 8},
 		"8": {8, "Prisoner", 9, 11, 12, 11, 11, 14, 14, 6, 9},
 		"9": {9, "Wretch", 1, 10, 10, 10, 10, 10, 10, 10, 10},
+		// Regulation 1.17, CharaInitParam rows 3010 and 3011, names from the
+		// menu_dlc02 GR_MenuText captions 297140 and 297141.
+		"10": {10, "Idus Knight", 7, 10, 12, 11, 13, 15, 8, 11, 6},
+		"11": {11, "Heavy Knight", 10, 14, 8, 17, 15, 11, 7, 8, 9},
 	}
 
 	for key, expected := range expectedClasses {
@@ -138,20 +145,106 @@ func TestAllTenClassesLoadWithExactConfirmedMapping(t *testing.T) {
 		prisoner.Resource.Class.Level.Value != 9 {
 		t.Fatalf("class 8 mapping failed: got %+v, want Prisoner (ID 8, level 9)", prisoner)
 	}
+
+	// The same explicit pin for the two Regulation 1.17 classes: their level is
+	// the CharaInitParam soulLv of rows 3010 and 3011, never the create-character
+	// menu order of CharMakeMenuListItemParam rows 100210 and 100211.
+	idusKnight, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "10")
+	if err != nil || idusKnight.Resource.Class.Name.Value != "Idus Knight" ||
+		idusKnight.Resource.Class.StartingClassID.Value != 10 ||
+		idusKnight.Resource.Class.Level.Value != 7 {
+		t.Fatalf("class 10 mapping failed: got %+v, want Idus Knight (ID 10, level 7)", idusKnight)
+	}
+
+	heavyKnight, err := catalog.GetResource(cat, string(schema.ResourceKindClass), "11")
+	if err != nil || heavyKnight.Resource.Class.Name.Value != "Heavy Knight" ||
+		heavyKnight.Resource.Class.StartingClassID.Value != 11 ||
+		heavyKnight.Resource.Class.Level.Value != 10 {
+		t.Fatalf("class 11 mapping failed: got %+v, want Heavy Knight (ID 11, level 10)", heavyKnight)
+	}
 }
 
-func TestGetResourcesReturnsTenClasses(t *testing.T) {
+// TestRegulation117ClassNamesCiteTheirTextSource pins where the two names of the
+// Regulation 1.17 classes actually come from. The name is FMG text, not a
+// CharaInitParam column: a provenance naming CharaInitParam and its row 3010 or
+// 3011 would claim the regulation carries the English string, which it does not.
+// The document must cite the GR_MenuText caption row that holds it, so the exact
+// table, row and field are asserted here rather than only the source ID.
+func TestRegulation117ClassNamesCiteTheirTextSource(t *testing.T) {
+	cat := newRealCatalog(t)
+
+	for _, want := range []struct {
+		key   string
+		name  string
+		row   string
+		menu  string
+		level uint32
+	}{
+		{key: "10", name: "Idus Knight", row: "297140", menu: "100210", level: 7},
+		{key: "11", name: "Heavy Knight", row: "297141", menu: "100211", level: 10},
+	} {
+		res, err := catalog.GetResource(cat, string(schema.ResourceKindClass), want.key)
+		if err != nil {
+			t.Fatalf("GetResource(class, %q): %v", want.key, err)
+		}
+		doc := res.Resource.Class
+		if doc == nil {
+			t.Fatalf("key %q: class document is nil", want.key)
+		}
+
+		name := doc.Name
+		if !name.Known || name.Value != want.name {
+			t.Fatalf("key %q: name = %v, want %q", want.key, name, want.name)
+		}
+		if name.Provenance.Source != "game_text_gr_menu_text_dlc02" {
+			t.Errorf("key %q: name provenance source = %q, want game_text_gr_menu_text_dlc02",
+				want.key, name.Provenance.Source)
+		}
+		if name.Provenance.Table != "GR_MenuText" {
+			t.Errorf("key %q: name provenance table = %q, want GR_MenuText",
+				want.key, name.Provenance.Table)
+		}
+		if name.Provenance.Row != want.row {
+			t.Errorf("key %q: name provenance row = %q, want the caption row %q",
+				want.key, name.Provenance.Row, want.row)
+		}
+		if name.Provenance.Field != "Text" {
+			t.Errorf("key %q: name provenance field = %q, want Text",
+				want.key, name.Provenance.Field)
+		}
+		if !strings.Contains(name.Provenance.Method, want.menu) {
+			t.Errorf("key %q: name provenance method = %q, want it to name the "+
+				"CharMakeMenuListItemParam row %q that selects the caption",
+				want.key, name.Provenance.Method, want.menu)
+		}
+
+		// The numeric facts keep citing CharaInitParam, which is where they really
+		// live. Pinning one of them here proves the fix did not move every fact of
+		// the document onto the text source.
+		if !doc.Level.Known || doc.Level.Value != want.level {
+			t.Fatalf("key %q: level = %v, want %d", want.key, doc.Level, want.level)
+		}
+		if doc.Level.Provenance.Source != "regulation_chara_init_param" ||
+			doc.Level.Provenance.Table != "CharaInitParam" ||
+			doc.Level.Provenance.Field != "soulLv" {
+			t.Errorf("key %q: level provenance = %+v, want the CharaInitParam soulLv fact",
+				want.key, doc.Level.Provenance)
+		}
+	}
+}
+
+func TestGetResourcesReturnsTwelveClasses(t *testing.T) {
 	cat := newRealCatalog(t)
 
 	result, err := catalog.GetResources(cat, string(schema.ResourceKindClass), "", "", "", "", 0, 0)
 	if err != nil {
 		t.Fatalf("GetResources(class): %v", err)
 	}
-	if result.Total != 10 {
-		t.Fatalf("class total = %d, want 10", result.Total)
+	if result.Total != 12 {
+		t.Fatalf("class total = %d, want 12", result.Total)
 	}
-	if len(result.Resources) != 10 {
-		t.Fatalf("class resources length = %d, want 10", len(result.Resources))
+	if len(result.Resources) != 12 {
+		t.Fatalf("class resources length = %d, want 12", len(result.Resources))
 	}
 
 	expectedOrder := []struct {
@@ -168,6 +261,8 @@ func TestGetResourcesReturnsTenClasses(t *testing.T) {
 		{"7", "Samurai"},
 		{"8", "Prisoner"},
 		{"9", "Wretch"},
+		{"10", "Idus Knight"},
+		{"11", "Heavy Knight"},
 	}
 
 	for i, expected := range expectedOrder {
@@ -249,9 +344,17 @@ func TestValidateClassResourceRejectsMalformed(t *testing.T) {
 		resource schema.Resource
 	}{
 		{
-			name: "key outside 0-9",
+			name: "key outside 0-11",
 			resource: schema.Resource{
-				Key:   "10",
+				Key:   "12",
+				Kind:  schema.ResourceKindClass,
+				Class: validClassDoc(),
+			},
+		},
+		{
+			name: "key with a leading zero",
+			resource: schema.Resource{
+				Key:   "01",
 				Kind:  schema.ResourceKindClass,
 				Class: validClassDoc(),
 			},

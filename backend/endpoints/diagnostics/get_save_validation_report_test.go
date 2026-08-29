@@ -826,6 +826,23 @@ func TestGetSaveValidationReport_StartingClassMinima(t *testing.T) {
 			attributes:    [8]uint32{11, 12, 11, 11, 14, 14, 6, 9},
 			belowAttr:     [8]uint32{11, 12, 11, 11, 14, 13, 6, 9},
 		},
+		// The two Regulation 1.17 classes must carry minima like any other class:
+		// a save created with one of them is known-good data, not an unknown
+		// class the report may flag.
+		{
+			name:          "Idus Knight class 10",
+			startingClass: 10,
+			level:         7,
+			attributes:    [8]uint32{10, 12, 11, 13, 15, 8, 11, 6},
+			belowAttr:     [8]uint32{10, 12, 11, 13, 14, 8, 11, 6},
+		},
+		{
+			name:          "Heavy Knight class 11",
+			startingClass: 11,
+			level:         10,
+			attributes:    [8]uint32{14, 8, 17, 15, 11, 7, 8, 9},
+			belowAttr:     [8]uint32{14, 8, 16, 15, 11, 7, 8, 9},
+		},
 	}
 
 	for _, tc := range classes {

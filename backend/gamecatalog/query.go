@@ -650,14 +650,31 @@ func (catalog *Catalog) ItemViewByGameID(gameID uint32) (ItemView, bool) {
 }
 
 // sortResourceRefs orders references by kind and only then by key, which is the
-// deterministic order every catalog-derived list uses.
+// deterministic order every catalog-derived list uses. Class keys are the only
+// variable-width decimal keys, so they are ordered by their numeric value; every
+// other kind keeps the plain key order it has always had.
 func sortResourceRefs(refs []schema.ResourceRef) {
 	sort.Slice(refs, func(i, j int) bool {
 		if refs[i].Kind != refs[j].Kind {
 			return refs[i].Kind < refs[j].Kind
 		}
+		if refs[i].Kind == schema.ResourceKindClass {
+			return classKeyLess(refs[i].Key, refs[j].Key)
+		}
 		return refs[i].Key < refs[j].Key
 	})
+}
+
+// classKeyLess orders two class keys by starting-class ID. Since Regulation 1.17
+// added classes 10 and 11 the keys are no longer one digit wide, and plain string
+// order would put "10" before "2". schema.ValidateResource guarantees a class key
+// is a decimal ID without a leading zero, so the shorter key is always the
+// smaller number and equal lengths compare as strings.
+func classKeyLess(left, right string) bool {
+	if len(left) != len(right) {
+		return len(left) < len(right)
+	}
+	return left < right
 }
 
 // EquippedSpellGameIDPrefix is the item-family prefix a raw MagicParam ID carries

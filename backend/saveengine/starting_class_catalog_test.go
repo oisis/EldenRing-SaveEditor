@@ -6,7 +6,7 @@ import (
 
 // TestEveryGeneratedClassDrivesSetCharacterStartingClass proves the regenerated
 // GameCatalog still resolves a complete definition — eight base attributes and a
-// base level — for all ten starting classes, and that SetCharacterStartingClass
+// base level — for all twelve starting classes, and that SetCharacterStartingClass
 // applies each of them verbatim. The definition is loaded from the class
 // documents, so a class lost, renamed or stripped of its level during a catalog
 // regeneration breaks this endpoint rather than a catalog test alone.
@@ -32,7 +32,7 @@ func TestEveryGeneratedClassDrivesSetCharacterStartingClass(t *testing.T) {
 	})
 
 	revision := "0"
-	for classID := uint8(0); classID < 10; classID++ {
+	for classID := uint8(0); classID <= 11; classID++ {
 		definition, err := startingClass(classID)
 		if err != nil {
 			t.Fatalf("startingClass(%d): %v", classID, err)
@@ -71,7 +71,7 @@ func TestEveryGeneratedClassDrivesSetCharacterStartingClass(t *testing.T) {
 		revision = result.SaveRevision
 	}
 
-	if _, err := startingClass(10); err == nil {
-		t.Fatal("startingClass(10): expected an error for an unknown class")
+	if _, err := startingClass(12); err == nil {
+		t.Fatal("startingClass(12): expected an error for an unknown class")
 	}
 }

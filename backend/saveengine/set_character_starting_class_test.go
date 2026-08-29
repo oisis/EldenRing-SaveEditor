@@ -147,8 +147,9 @@ func assertSetStartingClassRejectedUnchanged(t *testing.T, engine *Engine, sessi
 // that silently altered them must fail here instead of being copied into the
 // expectation.
 //
-// The levels are the CharaInitParam soulLv facts, confirmed against a native
-// vanilla save holding all ten freshly created classes.
+// The levels are the CharaInitParam soulLv facts: 0..9 confirmed against a
+// native vanilla save holding all ten freshly created classes, 10 and 11 read
+// from the Regulation 1.17 rows 3010 and 3011.
 var setStartingClassConfirmedBases = []struct {
 	id         uint8
 	name       string
@@ -165,6 +166,8 @@ var setStartingClassConfirmedBases = []struct {
 	{7, "Samurai", 9, CharacterAttributes{Vigor: 12, Mind: 11, Endurance: 13, Strength: 12, Dexterity: 15, Intelligence: 9, Faith: 8, Arcane: 8}},
 	{8, "Prisoner", 9, CharacterAttributes{Vigor: 11, Mind: 12, Endurance: 11, Strength: 11, Dexterity: 14, Intelligence: 14, Faith: 6, Arcane: 9}},
 	{9, "Wretch", 1, CharacterAttributes{Vigor: 10, Mind: 10, Endurance: 10, Strength: 10, Dexterity: 10, Intelligence: 10, Faith: 10, Arcane: 10}},
+	{10, "Idus Knight", 7, CharacterAttributes{Vigor: 10, Mind: 12, Endurance: 11, Strength: 13, Dexterity: 15, Intelligence: 8, Faith: 11, Arcane: 6}},
+	{11, "Heavy Knight", 10, CharacterAttributes{Vigor: 14, Mind: 8, Endurance: 17, Strength: 15, Dexterity: 11, Intelligence: 7, Faith: 8, Arcane: 9}},
 }
 
 // setStartingClassExpectedImage builds the only snapshot the reset is allowed to
@@ -552,8 +555,9 @@ func TestSetCharacterStartingClassRejections(t *testing.T) {
 		})
 		before := bytes.Clone(engine.sessions[sessionID].snapshot.data)
 
-		_, err := engine.SetCharacterStartingClass(sessionID, setStartingClassTestSlot, 10, true, "0")
-		if err == nil || err.Error() != "starting class 10 is unknown; its attribute minima are not confirmed" {
+		// 12 is the first ID above the twelve classes Regulation 1.17 declares.
+		_, err := engine.SetCharacterStartingClass(sessionID, setStartingClassTestSlot, 12, true, "0")
+		if err == nil || err.Error() != "starting class 12 is unknown; its attribute minima are not confirmed" {
 			t.Fatalf("error = %v, want unknown starting class error", err)
 		}
 		assertSetStartingClassRejectedUnchanged(t, engine, sessionID, before)

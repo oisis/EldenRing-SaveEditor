@@ -127,7 +127,7 @@ func loadStartingClassDefinitions() (map[uint8]startingClassDefinition, error) {
 }
 
 // startingClass resolves the shared definition of one starting class. An
-// identifier outside the ten confirmed classes is an error, never a skipped
+// identifier outside the twelve confirmed classes is an error, never a skipped
 // check: an unknown class carries neither confirmed minima nor a confirmed base
 // level, so no rule that needs them may proceed.
 func startingClass(startingClassID uint8) (startingClassDefinition, error) {
@@ -159,7 +159,7 @@ func startingClass(startingClassID uint8) (startingClassDefinition, error) {
 // rejected by the very endpoint meant to execute it.
 //
 // An unknown starting class is an error, not a skipped check: a class outside
-// the ten confirmed ones carries no known minima, so no legal set can be derived
+// the twelve confirmed ones carries no known minima, so no legal set can be derived
 // for it. The class minimum is applied after the range, because every confirmed
 // class minimum already lies inside 1..99 and is therefore the stricter bound.
 //
@@ -468,7 +468,7 @@ func recalculateCharacterLevel(values [characterAttributeCount]uint32) (uint32, 
 
 // validateAgainstStartingClass rejects any attribute below the base value of the
 // character's own starting class, as stored in its PlayerGameData and resolved
-// from the GameCatalog class documents. An identifier outside the ten confirmed
+// from the GameCatalog class documents. An identifier outside the twelve confirmed
 // classes is a hard rejection, not a skipped check: an unknown class carries no
 // known minima, so its save must not be written.
 func validateAgainstStartingClass(values [characterAttributeCount]uint32, startingClassID uint8) error {

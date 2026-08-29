@@ -4722,7 +4722,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace, boss, map region and quest keys use lowercase letters, digits and underscores; tutorial keys are decimal numbers; class keys are decimal digits 0..9. Step keys inside a quest use the historical stable format legacy_NNN. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace, boss, map region and quest keys use lowercase letters, digits and underscores; tutorial keys are decimal numbers; class keys are the decimal starting-class ID 0..11. Step keys inside a quest use the historical stable format legacy_NNN. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -5936,8 +5936,8 @@
             "type": "integer",
             "format": "int32",
             "minimum": 0,
-            "maximum": 9,
-            "description": "Target starting class identifier (0..9)."
+            "maximum": 11,
+            "description": "Target starting class identifier (0..11). Regulation 1.17 added 10 Idus Knight and 11 Heavy Knight to the ten base classes."
           },
           "confirmReset": {
             "type": "boolean",
