@@ -9,6 +9,7 @@ import (
 	"embed"
 	"log"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -25,7 +26,8 @@ var assets embed.FS
 var applicationVersion = "dev"
 
 func main() {
-	bridge := desktop.NewBridge(applicationVersion)
+	saveEngine := saveengine.New()
+	bridge := desktop.NewBridge(applicationVersion, saveEngine)
 
 	err := wails.Run(&options.App{
 		Title:       "Elden Ring SaveForge",
