@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-08-29
+
 ### build: Wails 2.15 and Go 1.27 development compatibility
 
 The Wails runtime and required CLI version are updated from 2.12 to 2.15, whose
