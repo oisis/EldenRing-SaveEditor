@@ -621,7 +621,7 @@
       },
       "weight": {
         "known": true,
-        "value": 11.5,
+        "value": 9,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed weight with zero equip-load normalization for ammunition from row 32140000",
@@ -753,7 +753,7 @@
       },
       "guardBoost": {
         "known": true,
-        "value": 59,
+        "value": 61,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed staminaGuardDef from row 32140000",

@@ -1,0 +1,994 @@
+{
+  "key": "00CE2570",
+  "kind": "item",
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 13510000,
+      "provenance": {
+        "source": "regulation_equip_param_weapon",
+        "method": "parsed Row ID plus item-family prefix from row 13510000",
+        "table": "EquipParamWeapon",
+        "row": "13510000",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "weapon",
+      "provenance": {
+        "source": "regulation_equip_param_weapon",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamWeapon",
+        "row": "13510000",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "melee_armaments",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "SaveForge 2.0 placement of Regulation 1.17 content (EquipParamWeapon:13510000 wepType=24): the established Flails placement of this weapon type"
+      }
+    },
+    "subcategory": {
+      "known": true,
+      "value": "Flails",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "SaveForge 2.0 placement of Regulation 1.17 content (EquipParamWeapon:13510000 wepType=24): the established Flails placement of this weapon type"
+      }
+    },
+    "presentation": {
+      "name": {
+        "known": true,
+        "value": "Golden Order Flail",
+        "provenance": {
+          "source": "game_text_weapon_name_base",
+          "method": "resolved the official English WeaponName.fmg entry 13510000"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "A flail with three golden rings for striking heads, the sacred signature weapon of the esteemed Broken Mask.\n\nThe golden bands are modelled upon the Elden Ring itself, half-corporeal and half formed of light, all in the process of shattering.",
+        "provenance": {
+          "source": "game_text_weapon_caption_base",
+          "method": "resolved the official English WeaponCaption.fmg entry 13510000"
+        }
+      },
+      "description": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/melee_armaments/golden_order_flail.png",
+        "provenance": {
+          "source": "product_item_icons_1_7_1",
+          "method": "copied byte-for-byte from the verified item icon released in the stable SaveForge v1.7.1 product assets"
+        }
+      },
+      "textMetadata": {
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "game_text_weapon_caption_base",
+            "method": "the caption is the official English WeaponCaption.fmg entry 13510000"
+          }
+        },
+        "descriptionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "game_text_weapon_name_base",
+            "method": "the official name resolves in the base WeaponName.fmg overlay, not a DLC overlay"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 armaments and armour are stored as separate instances, like every other equipment record in this catalog"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "one instance per inventory record, the established equipment rule of this catalog"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "one instance per storage record, the established equipment rule of this catalog"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "model": "somber",
+          "maxLevel": 10
+        },
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "derived from the explicit ReinforceParamWeapon band",
+          "table": "ReinforceParamWeapon",
+          "row": "2200",
+          "field": "Row ID"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_reinforce_param_weapon",
+            "method": "derived from the explicit ReinforceParamWeapon band",
+            "table": "ReinforceParamWeapon",
+            "row": "2200",
+            "field": "Row ID"
+          }
+        ]
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "disabled by EquipParamWeapon gemMountType or disableGemAttr",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "gemMountType,disableGemAttr"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "disabled by EquipParamWeapon.gemMountType",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "gemMountType"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "item record mode uses separate instances"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "left_hand",
+            "right_hand"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "copied from explicit EquipParamWeapon equipment-slot flags",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "rightHandEquipable,leftHandEquipable,bothHandEquipable,arrowSlotEquipable,boltSlotEquipable"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_weapon",
+            "method": "copied from explicit EquipParamWeapon equipment-slot flags",
+            "table": "EquipParamWeapon",
+            "row": "13510000",
+            "field": "rightHandEquipable,leftHandEquipable,bothHandEquipable,arrowSlotEquipable,boltSlotEquipable"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed tutorial reference exists for this Regulation 1.17 item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamWeapon",
+        "rowID": 13510000,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "arrowSlotEquipable"
+          },
+          {
+            "name": "attackBaseDark"
+          },
+          {
+            "name": "attackBaseFire"
+          },
+          {
+            "name": "attackBaseMagic"
+          },
+          {
+            "name": "attackBasePhysics"
+          },
+          {
+            "name": "attackBaseStamina"
+          },
+          {
+            "name": "attackBaseThunder"
+          },
+          {
+            "name": "boltSlotEquipable"
+          },
+          {
+            "name": "bothHandEquipable"
+          },
+          {
+            "name": "correctAgility"
+          },
+          {
+            "name": "correctFaith"
+          },
+          {
+            "name": "correctLuck"
+          },
+          {
+            "name": "correctMagic"
+          },
+          {
+            "name": "correctStrength"
+          },
+          {
+            "name": "darkGuardCutRate"
+          },
+          {
+            "name": "disableGemAttr"
+          },
+          {
+            "name": "fireGuardCutRate"
+          },
+          {
+            "name": "gemMountType"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "leftHandEquipable"
+          },
+          {
+            "name": "magGuardCutRate"
+          },
+          {
+            "name": "physGuardCutRate"
+          },
+          {
+            "name": "properAgility"
+          },
+          {
+            "name": "properFaith"
+          },
+          {
+            "name": "properLuck"
+          },
+          {
+            "name": "properMagic"
+          },
+          {
+            "name": "properStrength"
+          },
+          {
+            "name": "reinforceTypeId"
+          },
+          {
+            "name": "rightHandEquipable"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "staminaGuardDef"
+          },
+          {
+            "name": "swordArtsParamId"
+          },
+          {
+            "name": "throwAtkRate"
+          },
+          {
+            "name": "thunGuardCutRate"
+          },
+          {
+            "name": "weight"
+          },
+          {
+            "name": "wepType"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "SwordArtsParam",
+        "rowID": 1201,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_sword_arts_param",
+          "method": "referenced Regulation parameter row",
+          "table": "SwordArtsParam",
+          "row": "1201",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "ReinforceParamWeapon",
+        "rowID": 2200,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "referenced Regulation parameter row",
+          "table": "ReinforceParamWeapon",
+          "row": "2200",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": {
+      "sourceRowID": {
+        "known": true,
+        "value": 13510000,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed Row ID from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 12402,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed iconId from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "iconId"
+        }
+      },
+      "weaponTypeID": {
+        "known": true,
+        "value": 24,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed wepType from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "wepType"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 2303900,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed sortId from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 140,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed sortGroupId from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "sortGroupId"
+        }
+      },
+      "reinforceTypeID": {
+        "known": true,
+        "value": 2200,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed reinforceTypeId from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "reinforceTypeId"
+        }
+      },
+      "gemMountType": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed gemMountType from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "gemMountType"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 5,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed weight with zero equip-load normalization for ammunition from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "weight"
+        }
+      },
+      "attackPhysical": {
+        "known": true,
+        "value": 75,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBasePhysics from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBasePhysics"
+        }
+      },
+      "attackMagic": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseMagic from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBaseMagic"
+        }
+      },
+      "attackFire": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseFire from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBaseFire"
+        }
+      },
+      "attackLightning": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseThunder from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBaseThunder"
+        }
+      },
+      "attackHoly": {
+        "known": true,
+        "value": 92,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseDark from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBaseDark"
+        }
+      },
+      "attackStamina": {
+        "known": true,
+        "value": 56,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseStamina from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "attackBaseStamina"
+        }
+      },
+      "guardPhysical": {
+        "known": true,
+        "value": 39,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed physGuardCutRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "physGuardCutRate"
+        }
+      },
+      "guardMagic": {
+        "known": true,
+        "value": 28,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed magGuardCutRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "magGuardCutRate"
+        }
+      },
+      "guardFire": {
+        "known": true,
+        "value": 28,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed fireGuardCutRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "fireGuardCutRate"
+        }
+      },
+      "guardLightning": {
+        "known": true,
+        "value": 28,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed thunGuardCutRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "thunGuardCutRate"
+        }
+      },
+      "guardHoly": {
+        "known": true,
+        "value": 37,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed darkGuardCutRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "darkGuardCutRate"
+        }
+      },
+      "guardBoost": {
+        "known": true,
+        "value": 22,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed staminaGuardDef from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "staminaGuardDef"
+        }
+      },
+      "requiredStrength": {
+        "known": true,
+        "value": 9,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properStrength from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "properStrength"
+        }
+      },
+      "requiredDexterity": {
+        "known": true,
+        "value": 16,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properAgility from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "properAgility"
+        }
+      },
+      "requiredIntelligence": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properMagic from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "properMagic"
+        }
+      },
+      "requiredFaith": {
+        "known": true,
+        "value": 26,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properFaith from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "properFaith"
+        }
+      },
+      "requiredArcane": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properLuck from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "properLuck"
+        }
+      },
+      "scalingStrengthRaw": {
+        "known": true,
+        "value": 10,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctStrength from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "correctStrength"
+        }
+      },
+      "scalingDexterityRaw": {
+        "known": true,
+        "value": 15,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctAgility from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "correctAgility"
+        }
+      },
+      "scalingIntelligenceRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctMagic from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "correctMagic"
+        }
+      },
+      "scalingFaithRaw": {
+        "known": true,
+        "value": 65,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctFaith from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "correctFaith"
+        }
+      },
+      "scalingArcaneRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctLuck from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "correctLuck"
+        }
+      },
+      "critical": {
+        "known": true,
+        "value": 100,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed base 100 plus throwAtkRate from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "throwAtkRate"
+        }
+      },
+      "passiveEffects": [],
+      "defaultAshOfWarID": {
+        "known": true,
+        "value": 1201,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed swordArtsParamId from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "swordArtsParamId"
+        }
+      },
+      "swordArtsName": {
+        "known": true,
+        "value": "Causality's Wrath",
+        "provenance": {
+          "source": "game_text_arts_name_base",
+          "method": "resolved SwordArtsParam row 1201 textId 1201 from the English game-text FMG extract"
+        }
+      },
+      "isInfusable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "derived from gemMountType == 2 and disableGemAttr == 0",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "gemMountType,disableGemAttr"
+        }
+      },
+      "isSomber": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "derived from an 11-row reinforcement band",
+          "table": "ReinforceParamWeapon",
+          "row": "2200",
+          "field": "Row ID"
+        }
+      },
+      "maxUpgrade": {
+        "known": true,
+        "value": 10,
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "derived from the reinforcement band row count",
+          "table": "ReinforceParamWeapon",
+          "row": "2200",
+          "field": "Row ID"
+        }
+      },
+      "warnings": {
+        "known": true,
+        "value": [
+          "status-deferred"
+        ],
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "the catalog-wide deferred weapon-status marker applies to Regulation 1.17 armaments as well"
+        }
+      },
+      "rightHandEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed rightHandEquipable from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "rightHandEquipable"
+        }
+      },
+      "leftHandEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed leftHandEquipable from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "leftHandEquipable"
+        }
+      },
+      "bothHandEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed bothHandEquipable from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "bothHandEquipable"
+        }
+      },
+      "arrowSlotEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed arrowSlotEquipable from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "arrowSlotEquipable"
+        }
+      },
+      "boltSlotEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed boltSlotEquipable from row 13510000",
+          "table": "EquipParamWeapon",
+          "row": "13510000",
+          "field": "boltSlotEquipable"
+        }
+      }
+    },
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

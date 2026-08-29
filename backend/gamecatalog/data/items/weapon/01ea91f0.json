@@ -734,7 +734,7 @@
       },
       "guardBoost": {
         "known": true,
-        "value": 67,
+        "value": 69,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed staminaGuardDef from row 32150000",

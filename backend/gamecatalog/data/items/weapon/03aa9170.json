@@ -656,7 +656,7 @@
       },
       "attackMagic": {
         "known": true,
-        "value": 105,
+        "value": 112,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed attackBaseMagic from row 61510000",

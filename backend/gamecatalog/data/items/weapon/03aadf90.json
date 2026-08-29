@@ -656,7 +656,7 @@
       },
       "attackLightning": {
         "known": true,
-        "value": 110,
+        "value": 118,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed attackBaseThunder from row 61530000",

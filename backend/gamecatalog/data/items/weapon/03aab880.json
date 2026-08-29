@@ -667,7 +667,7 @@
       },
       "attackFire": {
         "known": true,
-        "value": 105,
+        "value": 112,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed attackBaseFire from row 61520000",

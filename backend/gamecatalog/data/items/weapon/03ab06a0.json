@@ -635,7 +635,7 @@
       },
       "attackPhysical": {
         "known": true,
-        "value": 92,
+        "value": 98,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed attackBasePhysics from row 61540000",

@@ -1043,7 +1043,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230100",
@@ -2145,7 +2145,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230200",
@@ -3247,7 +3247,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230300",
@@ -4349,7 +4349,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230400",
@@ -5451,7 +5451,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230500",
@@ -6553,7 +6553,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230600",
@@ -7655,7 +7655,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230700",
@@ -8757,7 +8757,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230800",
@@ -9859,7 +9859,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32230900",
@@ -11049,7 +11049,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32231000",
@@ -12239,7 +12239,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32231100",
@@ -13429,7 +13429,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 65,
+              "value": 70,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32231200",
@@ -14297,7 +14297,7 @@
       },
       "guardBoost": {
         "known": true,
-        "value": 65,
+        "value": 70,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed staminaGuardDef from row 32230000",

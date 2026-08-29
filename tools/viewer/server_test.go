@@ -35,7 +35,7 @@ func TestServerHeaderShowsHumanReadableCatalogSummaryAndCopyableFingerprint(t *t
 		"<dd>2</dd>",
 		"<dt>Data fingerprint</dt>",
 		"<dt>Game version</dt>",
-		"<dd>1.16</dd>",
+		"<dd>1.17</dd>",
 		`<code id="catalog-fingerprint">` + manifest.DataVersion[:6] + `</code>`,
 		`<button class="copy-button" type="button" data-copy="` + manifest.DataVersion + `">Copy</button>`,
 	} {

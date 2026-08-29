@@ -1,0 +1,705 @@
+{
+  "key": "1051A2D4",
+  "kind": "item",
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 273785556,
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "parsed Row ID plus item-family prefix from row 5350100",
+        "table": "EquipParamProtector",
+        "row": "5350100",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "armor",
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamProtector",
+        "row": "5350100",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "chest",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "SaveForge 2.0 placement of Regulation 1.17 content (EquipParamProtector:5350100 protectorCategory=1): the chest slot the row's own equipment flag also declares"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "armour carries no subcategory in this catalog"
+      }
+    },
+    "presentation": {
+      "name": {
+        "known": true,
+        "value": "Silver Grooved Armor",
+        "provenance": {
+          "source": "game_text_protector_name_base",
+          "method": "resolved the official English ProtectorName.fmg entry 5350100"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "Silver armor whose expert craftsmanship compensates for its weight. The construction is extremely thin, but the beautifully etched grooves reinforce its strength as protective gear.\n\nThe verdant green raiment is given upon receiving the guidance of grace—even if the wearer is but a sapling at present, in time must they grow into ripened gold. ",
+        "provenance": {
+          "source": "game_text_protector_caption_base",
+          "method": "resolved the official English ProtectorCaption.fmg entry 5350100"
+        }
+      },
+      "description": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/chest/silver_grooved_armor.png",
+        "provenance": {
+          "source": "product_item_icons_1_7_1",
+          "method": "copied byte-for-byte from the verified item icon released in the stable SaveForge v1.7.1 product assets"
+        }
+      },
+      "textMetadata": {
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "game_text_protector_caption_base",
+            "method": "the caption is the official English ProtectorCaption.fmg entry 5350100"
+          }
+        },
+        "descriptionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "game_text_protector_name_base",
+            "method": "the official name resolves in the base ProtectorName.fmg overlay, not a DLC overlay"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 armaments and armour are stored as separate instances, like every other equipment record in this catalog"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "one instance per inventory record, the established equipment rule of this catalog"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "one instance per storage record, the established equipment rule of this catalog"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "armour carries no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "armour carries no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "armour carries no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "item record mode uses separate instances"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "chest"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "copied from explicit EquipParamProtector equipment-slot flags",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "headEquip,bodyEquip,armEquip,legEquip"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_protector",
+            "method": "copied from explicit EquipParamProtector equipment-slot flags",
+            "table": "EquipParamProtector",
+            "row": "5350100",
+            "field": "headEquip,bodyEquip,armEquip,legEquip"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 released content: public, non-DLC, obtainable in the retail game and carrying no reviewed safety restriction"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed tutorial reference exists for this Regulation 1.17 item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamProtector",
+        "rowID": 5350100,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "armEquip"
+          },
+          {
+            "name": "blowDamageCutRate"
+          },
+          {
+            "name": "bodyEquip"
+          },
+          {
+            "name": "darkDamageCutRate"
+          },
+          {
+            "name": "fireDamageCutRate"
+          },
+          {
+            "name": "headEquip"
+          },
+          {
+            "name": "iconIdF"
+          },
+          {
+            "name": "iconIdM"
+          },
+          {
+            "name": "legEquip"
+          },
+          {
+            "name": "magicDamageCutRate"
+          },
+          {
+            "name": "neutralDamageCutRate"
+          },
+          {
+            "name": "resistBlood"
+          },
+          {
+            "name": "resistCurse"
+          },
+          {
+            "name": "resistPoison"
+          },
+          {
+            "name": "resistSleep"
+          },
+          {
+            "name": "slashDamageCutRate"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "thrustDamageCutRate"
+          },
+          {
+            "name": "thunderDamageCutRate"
+          },
+          {
+            "name": "toughnessCorrectRate"
+          },
+          {
+            "name": "weight"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "ReinforceParamProtector",
+        "rowID": 0,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_reinforce_param_protector",
+          "method": "referenced Regulation parameter row",
+          "table": "ReinforceParamProtector",
+          "row": "0",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": {
+      "sourceRowID": {
+        "known": true,
+        "value": 5350100,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed Row ID from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "Row ID"
+        }
+      },
+      "iconIDMale": {
+        "known": true,
+        "value": 15705,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed iconIdM from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "iconIdM"
+        }
+      },
+      "iconIDFemale": {
+        "known": true,
+        "value": 15705,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed iconIdF from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "iconIdF"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 607025,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed sortId from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 80,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed sortGroupId from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "sortGroupId"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 7.1,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed weight converted to one-decimal display value from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "weight"
+        }
+      },
+      "physical": {
+        "known": true,
+        "value": 10.2,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed neutralDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "neutralDamageCutRate"
+        }
+      },
+      "strike": {
+        "known": true,
+        "value": 9.4,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed blowDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "blowDamageCutRate"
+        }
+      },
+      "slash": {
+        "known": true,
+        "value": 10,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed slashDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "slashDamageCutRate"
+        }
+      },
+      "pierce": {
+        "known": true,
+        "value": 9.8,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed thrustDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "thrustDamageCutRate"
+        }
+      },
+      "magic": {
+        "known": true,
+        "value": 6.8,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed magicDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "magicDamageCutRate"
+        }
+      },
+      "fire": {
+        "known": true,
+        "value": 7.4,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed fireDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "fireDamageCutRate"
+        }
+      },
+      "lightning": {
+        "known": true,
+        "value": 5.8,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed thunderDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "thunderDamageCutRate"
+        }
+      },
+      "holy": {
+        "known": true,
+        "value": 7.7,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed darkDamageCutRate converted to display negation from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "darkDamageCutRate"
+        }
+      },
+      "immunity": {
+        "known": true,
+        "value": 23,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistPoison from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "resistPoison"
+        }
+      },
+      "robustness": {
+        "known": true,
+        "value": 37,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistBlood from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "resistBlood"
+        }
+      },
+      "focus": {
+        "known": true,
+        "value": 14,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistSleep from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "resistSleep"
+        }
+      },
+      "vitality": {
+        "known": true,
+        "value": 14,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistCurse from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "resistCurse"
+        }
+      },
+      "poise": {
+        "known": true,
+        "value": 16,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed toughnessCorrectRate converted to display poise from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "toughnessCorrectRate"
+        }
+      },
+      "headEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed headEquip from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "headEquip"
+        }
+      },
+      "bodyEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed bodyEquip from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "bodyEquip"
+        }
+      },
+      "armEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed armEquip from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "armEquip"
+        }
+      },
+      "legEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed legEquip from row 5350100",
+          "table": "EquipParamProtector",
+          "row": "5350100",
+          "field": "legEquip"
+        }
+      }
+    },
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

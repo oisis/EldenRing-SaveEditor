@@ -476,7 +476,7 @@
       },
       "sortID": {
         "known": true,
-        "value": 606081,
+        "value": 606085,
         "provenance": {
           "source": "regulation_equip_param_protector",
           "method": "parsed sortId from row 5120100",

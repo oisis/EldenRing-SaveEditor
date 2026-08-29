@@ -911,7 +911,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270100",
@@ -1043,7 +1043,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270100",
@@ -2013,7 +2013,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270200",
@@ -2145,7 +2145,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270200",
@@ -3115,7 +3115,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270300",
@@ -3247,7 +3247,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270300",
@@ -4217,7 +4217,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270400",
@@ -4349,7 +4349,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270400",
@@ -5319,7 +5319,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270500",
@@ -5451,7 +5451,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270500",
@@ -6421,7 +6421,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270600",
@@ -6553,7 +6553,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270600",
@@ -7523,7 +7523,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270700",
@@ -7655,7 +7655,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270700",
@@ -8625,7 +8625,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270800",
@@ -8757,7 +8757,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270800",
@@ -9727,7 +9727,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32270900",
@@ -9859,7 +9859,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32270900",
@@ -10917,7 +10917,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32271000",
@@ -11049,7 +11049,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32271000",
@@ -12107,7 +12107,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32271100",
@@ -12239,7 +12239,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32271100",
@@ -13297,7 +13297,7 @@
             },
             "weight": {
               "known": true,
-              "value": 17.5,
+              "value": 16.5,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32271200",
@@ -13429,7 +13429,7 @@
             },
             "guardBoost": {
               "known": true,
-              "value": 69,
+              "value": 71,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed staminaGuardDef from row 32271200",
@@ -14165,7 +14165,7 @@
       },
       "weight": {
         "known": true,
-        "value": 17.5,
+        "value": 16.5,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed weight with zero equip-load normalization for ammunition from row 32270000",
@@ -14297,7 +14297,7 @@
       },
       "guardBoost": {
         "known": true,
-        "value": 69,
+        "value": 71,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed staminaGuardDef from row 32270000",

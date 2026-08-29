@@ -911,7 +911,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280100",
@@ -2013,7 +2013,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280200",
@@ -3115,7 +3115,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280300",
@@ -4217,7 +4217,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280400",
@@ -5319,7 +5319,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280500",
@@ -6421,7 +6421,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280600",
@@ -7523,7 +7523,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280700",
@@ -8625,7 +8625,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280800",
@@ -9727,7 +9727,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32280900",
@@ -10917,7 +10917,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32281000",
@@ -12107,7 +12107,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32281100",
@@ -13297,7 +13297,7 @@
             },
             "weight": {
               "known": true,
-              "value": 18.5,
+              "value": 17,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed weight with zero equip-load normalization for ammunition from row 32281200",
@@ -14165,7 +14165,7 @@
       },
       "weight": {
         "known": true,
-        "value": 18.5,
+        "value": 17,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed weight with zero equip-load normalization for ammunition from row 32280000",

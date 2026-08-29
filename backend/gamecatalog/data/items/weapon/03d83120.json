@@ -867,7 +867,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750001,
+              "value": 1750501,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500100",
@@ -1969,7 +1969,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750002,
+              "value": 1750502,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500200",
@@ -3071,7 +3071,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750003,
+              "value": 1750503,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500300",
@@ -4173,7 +4173,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750005,
+              "value": 1750505,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500400",
@@ -5275,7 +5275,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750006,
+              "value": 1750506,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500500",
@@ -6377,7 +6377,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750007,
+              "value": 1750507,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500600",
@@ -7479,7 +7479,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750008,
+              "value": 1750508,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500700",
@@ -8581,7 +8581,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750004,
+              "value": 1750504,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500800",
@@ -9683,7 +9683,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750011,
+              "value": 1750511,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64500900",
@@ -10873,7 +10873,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750009,
+              "value": 1750509,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64501000",
@@ -12063,7 +12063,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750010,
+              "value": 1750510,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64501100",
@@ -13253,7 +13253,7 @@
             },
             "sortID": {
               "known": true,
-              "value": 1750012,
+              "value": 1750512,
               "provenance": {
                 "source": "regulation_equip_param_weapon",
                 "method": "parsed sortId from row 64501200",
@@ -14121,7 +14121,7 @@
       },
       "sortID": {
         "known": true,
-        "value": 1750000,
+        "value": 1750500,
         "provenance": {
           "source": "regulation_equip_param_weapon",
           "method": "parsed sortId from row 64500000",
