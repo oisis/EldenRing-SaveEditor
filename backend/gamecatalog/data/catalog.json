@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 16,
-    "dataVersion": "8b8267c948e2cbe78d5ad920ef331092d82fc582be02c4725173ec37ffa010f6",
+    "dataVersion": "e851d285f2b1370ad17c262e0620b34d2f42f002e5598dab9b5165d47ff80ee1",
     "gameVersion": "1.17-class",
     "sources": [
       {
@@ -345,6 +345,30 @@
         "kind": "game_text_fmg_extract",
         "location": "regulation.bin/msg/engus/item.msgbnd/ProtectorCaption.fmg",
         "version": "2bbfa519603e172cd07a1c3752ba7910a054bc732127a5d5a443d6eb509cfc67",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_goods_name_dlc02",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/GoodsName.fmg",
+        "version": "3ecbb84206296cc18d9ca89228cd130c66a49312a4ed654977922ddd861a565a",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_goods_caption_dlc02",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/GoodsCaption.fmg",
+        "version": "c23927fb4bb74860f935b36f2586f6a2e621eff537ec4ea497c59ee9be456683",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_goods_info_dlc02",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/GoodsInfo.fmg",
+        "version": "f238816b841fd2a911cc1f6c18b2eaf6a1e2c25d2ab1f3325957ed7ea59279d2",
         "evidence": "game_data",
         "reviewed": true
       },
@@ -2687,6 +2711,9 @@
     "items/goods/401ea900.json",
     "items/goods/401ea901.json",
     "items/goods/401ea99c.json",
+    "items/goods/401eaa00.json",
+    "items/goods/401eaa0a.json",
+    "items/goods/401eaa14.json",
     "items/goods/401eab90.json",
     "items/goods/401eabf4.json",
     "items/goods/401eaf78.json",

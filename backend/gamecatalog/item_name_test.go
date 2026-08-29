@@ -28,10 +28,14 @@ var removedNameFields = []string{
 // catalog that owns its names. The source ID carries both the FMG file and
 // whether the entry came from the base or the DLC extract.
 var wantNameSourceByFamily = map[schema.ItemFamily][]schema.SourceID{
-	schema.ItemFamilyWeapon:    {"game_text_weapon_name_base", "game_text_weapon_name_dlc"},
-	schema.ItemFamilyArmor:     {"game_text_protector_name_base", "game_text_protector_name_dlc"},
-	schema.ItemFamilyTalisman:  {"game_text_accessory_name_base", "game_text_accessory_name_dlc"},
-	schema.ItemFamilyGoods:     {"game_text_goods_name_base", "game_text_goods_name_dlc"},
+	schema.ItemFamilyWeapon:   {"game_text_weapon_name_base", "game_text_weapon_name_dlc"},
+	schema.ItemFamilyArmor:    {"game_text_protector_name_base", "game_text_protector_name_dlc"},
+	schema.ItemFamilyTalisman: {"game_text_accessory_name_base", "game_text_accessory_name_dlc"},
+	// The Regulation 1.17 Spectral Steed Attire goods are named from the
+	// unsuffixed GoodsName.fmg inside item_dlc02.msgbnd, which is a third
+	// overlay next to the base file and the _dlc01 one.
+	schema.ItemFamilyGoods: {"game_text_goods_name_base", "game_text_goods_name_dlc",
+		"game_text_goods_name_dlc02"},
 	schema.ItemFamilyGesture:   {"game_text_goods_name_base", "game_text_goods_name_dlc"},
 	schema.ItemFamilySpell:     {"game_text_goods_name_base", "game_text_goods_name_dlc"},
 	schema.ItemFamilySpiritAsh: {"game_text_goods_name_base", "game_text_goods_name_dlc"},

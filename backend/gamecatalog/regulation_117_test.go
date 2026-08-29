@@ -2,6 +2,8 @@ package gamecatalog_test
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"image/png"
 	"math"
@@ -118,6 +120,54 @@ var regulation117ArmourPieces = []regulation117Armour{
 	{key: "1051F0F4", gameID: 0x1051F0F4, name: "Steel Armor", category: "chest", weight: 18.5, poise: 35.0, physical: 18.5, sortID: 609000, iconMale: 15715, iconFemale: 15715, iconPath: "assets/icons/items/chest/steel_armor.png"},
 	{key: "1051F158", gameID: 0x1051F158, name: "Steel Gauntlets", category: "arms", weight: 6.1, poise: 10.0, physical: 5.6, sortID: 708000, iconMale: 15716, iconFemale: 15716, iconPath: "assets/icons/items/arms/steel_gauntlets.png"},
 	{key: "1051F1BC", gameID: 0x1051F1BC, name: "Steel Greaves", category: "legs", weight: 11.3, poise: 19.0, physical: 10.8, sortID: 808000, iconMale: 15717, iconFemale: 15717, iconPath: "assets/icons/items/legs/steel_greaves.png"},
+}
+
+type regulation117AttireItem struct {
+	key         string
+	gameID      uint32
+	rowID       uint32
+	name        string
+	caption     string
+	description string
+	iconID      uint32
+	sortID      uint32
+	sortGroupID uint8
+	iconPath    string
+	iconSHA256  string
+}
+
+// regulation117Attire is the Spectral Steed Attire goods 1.17 added: three DLC
+// key items that unlock a Torrent appearance. Every text is the official
+// item_dlc02 FMG entry, never the application-authored name the stable v1.7.1
+// release displayed, and every limit is the one that release settled on.
+var regulation117Attire = []regulation117AttireItem{
+	{
+		key: "401EAA00", gameID: 0x401EAA00, rowID: 2009600,
+		name:        "Spectral Steed Regalia: Tree Sentinel",
+		caption:     "A smaller version of the solemn gold armor that adorns the warhorses of the Tree Sentinels who serve the Erdtree.\n\nOne of several liveries once prepared for spectral steeds, which allows Torrent, through grace, to change his appearance.\n\nThough a spectral steed's form will change when vested in this garb, their heart will remain the same.",
+		description: "Allows grace to alter Torrent's appearance",
+		iconID:      3900, sortID: 206160, sortGroupID: 60,
+		iconPath:   "assets/icons/items/key_items/tree_sentinel_spectral_steed_attire.png",
+		iconSHA256: "8026042d0462e91949bb8045bb875c8469a41d5558e6188293a184a78e367aa5",
+	},
+	{
+		key: "401EAA0A", gameID: 0x401EAA0A, rowID: 2009610,
+		name:        "Spectral Steed Regalia: Carian Silver",
+		caption:     "The richly ornamented white silver armor of the Carian Royal line is a one-of-a-kind item made for a certain spectral steed, once forged in the lands of the Three Sisters.\n\nIt is through grace that the spectral steed Torrent's appearance may be changed.\n\nThough a spectral steed's form will change when vested in this garb, their heart will remain the same.",
+		description: "Allows grace to alter Torrent's appearance",
+		iconID:      3901, sortID: 206170, sortGroupID: 60,
+		iconPath:   "assets/icons/items/key_items/silver_of_caria_spectral_steed_attire.png",
+		iconSHA256: "7e85e8a85008d38430ccc94c5441f96a58bb5878e36ec0134108f1bedbf23431",
+	},
+	{
+		key: "401EAA14", gameID: 0x401EAA14, rowID: 2009620,
+		name:        "Spectral Steed Regalia: Funereal Night",
+		caption:     "A smaller version of the sable attire used to adorn and conceal the warhorses of the Night's Cavalry.\n\nOne of several liveries once prepared for spectral steeds, which allows Torrent, through grace, to change his appearance.\n\nThough a spectral steed's form will change when vested in this garb, their heart will remain the same.",
+		description: "Allows grace to alter Torrent's appearance",
+		iconID:      3902, sortID: 206180, sortGroupID: 60,
+		iconPath:   "assets/icons/items/key_items/funereal_night_spectral_steed_attire.png",
+		iconSHA256: "3bc04cfa3aa861a4c24f66e7697d3fb339bbbf2d226798dabbcad87d9edce4da",
+	},
 }
 
 // TestRegulation117ArmamentFamiliesAreComplete is the public-layer contract of
@@ -357,18 +407,24 @@ func assertRegulation117Presentation(
 	}
 }
 
-// TestRegulation117IconsAreTheReleasedProductAssets proves all 24 icons ship,
+// TestRegulation117IconsAreTheReleasedProductAssets proves all 27 icons ship,
 // decode as 256x256 images and that none of them fell back to the placeholder.
+// The three Spectral Steed Attire icons additionally have to match the byte
+// content of the v1.7.1 release, so a re-encode or a rescale is a failure and
+// not a cosmetic difference.
 func TestRegulation117IconsAreTheReleasedProductAssets(t *testing.T) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
 		t.Fatalf("LoadFS: %v", err)
 	}
-	paths := make([]string, 0, 24)
+	paths := make([]string, 0, 27)
 	for _, want := range regulation117Armaments {
 		paths = append(paths, want.iconPath)
 	}
 	for _, want := range regulation117ArmourPieces {
+		paths = append(paths, want.iconPath)
+	}
+	for _, want := range regulation117Attire {
 		paths = append(paths, want.iconPath)
 	}
 	seen := make(map[string]struct{}, len(paths))
@@ -391,8 +447,19 @@ func TestRegulation117IconsAreTheReleasedProductAssets(t *testing.T) {
 			t.Errorf("icon asset %q is %dx%d, want 256x256", path, config.Width, config.Height)
 		}
 	}
-	if len(seen) != 24 {
-		t.Errorf("%d distinct 1.17 icons, want 24", len(seen))
+	if len(seen) != 27 {
+		t.Errorf("%d distinct 1.17 icons, want 27", len(seen))
+	}
+	for _, want := range regulation117Attire {
+		content, exists := data.ReadAsset(want.iconPath)
+		if !exists {
+			continue
+		}
+		digest := sha256.Sum256(content)
+		if got := hex.EncodeToString(digest[:]); got != want.iconSHA256 {
+			t.Errorf("icon asset %q sha256 = %s, want the v1.7.1 asset %s",
+				want.iconPath, got, want.iconSHA256)
+		}
 	}
 	source, found := manifestSource(data.Manifest, regulation117IconSource)
 	if !found {
@@ -404,10 +471,150 @@ func TestRegulation117IconsAreTheReleasedProductAssets(t *testing.T) {
 	}
 }
 
+// TestRegulation117SpectralSteedAttireGoodsAreComplete is the public-layer
+// contract of the three Spectral Steed Attire key items. The stable v1.7.1
+// release settled what they are: DLC key items that live in the inventory only,
+// never reach storage and stay out of the general item database until the World
+// feature consumes them. Everything below is stated inline, so an ingest that
+// silently renames them to the v1.7.1 application names, opens storage, drops
+// the noDatabase flag or invents a location fails here.
+func TestRegulation117SpectralSteedAttireGoodsAreComplete(t *testing.T) {
+	catalog := newRealCatalog(t)
+	for _, want := range regulation117Attire {
+		resource, err := catalog.ResourceByKindAndKey(schema.ResourceKindItem, want.key)
+		if err != nil {
+			t.Errorf("%s: resolve key %q: %v", want.name, want.key, err)
+			continue
+		}
+		if resource.Key != want.key {
+			t.Errorf("%s: key = %q, want %q", want.name, resource.Key, want.key)
+		}
+		item := resource.Item
+		if item == nil {
+			t.Errorf("%s: resource carries no item document", want.name)
+			continue
+		}
+
+		assertEqual(t, want.name, "gameID", item.GameID.Value, want.gameID)
+		assertEqual(t, want.name, "family", item.Family.Value, schema.ItemFamilyGoods)
+		assertEqual(t, want.name, "category", item.Category.Value, "key_items")
+		if item.Subcategory.Known {
+			t.Errorf("%s: subcategory = %q, want an unknown fact: no reviewed subcategory exists",
+				want.name, item.Subcategory.Value)
+		}
+		if _, found := catalog.ItemByGameID(want.gameID); !found {
+			t.Errorf("%s: 0x%08X does not resolve by game ID", want.name, want.gameID)
+		}
+
+		presentation := item.Presentation
+		assertEqual(t, want.name, "name", presentation.Name.Value, want.name)
+		assertEqual(t, want.name, "name source", presentation.Name.Provenance.Source,
+			schema.SourceID("game_text_goods_name_dlc02"))
+		assertEqual(t, want.name, "caption", presentation.Caption.Value, want.caption)
+		assertEqual(t, want.name, "caption source", presentation.Caption.Provenance.Source,
+			schema.SourceID("game_text_goods_caption_dlc02"))
+		assertEqual(t, want.name, "description", presentation.Description.Value, want.description)
+		assertEqual(t, want.name, "description source", presentation.Description.Provenance.Source,
+			schema.SourceID("game_text_goods_info_dlc02"))
+		if presentation.Location.Known || presentation.Location.Value != "" {
+			t.Errorf("%s: location = %#v, want an unknown fact: no location was ever confirmed",
+				want.name, presentation.Location)
+		}
+
+		metadata := presentation.TextMetadata
+		assertEqual(t, want.name, "captionSource", metadata.CaptionSource.Value, "fmg")
+		assertEqual(t, want.name, "descriptionSource", metadata.DescriptionSource.Value, "fmg")
+		if metadata.LocationSource.Known {
+			t.Errorf("%s: locationSource = %q, want an unknown fact",
+				want.name, metadata.LocationSource.Value)
+		}
+		assertEqual(t, want.name, "dlcSource", metadata.DLCSource.Value, "dlc02")
+
+		assertEqual(t, want.name, "iconPath", presentation.IconPath.Value, want.iconPath)
+		assertEqual(t, want.name, "icon source", presentation.IconPath.Provenance.Source,
+			regulation117IconSource)
+
+		goods := item.Goods
+		if goods == nil {
+			t.Errorf("%s: goods section is missing", want.name)
+			continue
+		}
+		assertEqual(t, want.name, "sourceRowID", goods.SourceRowID.Value, want.rowID)
+		assertEqual(t, want.name, "iconID", goods.IconID.Value, want.iconID)
+		assertEqual(t, want.name, "sortID", goods.SortID.Value, want.sortID)
+		assertEqual(t, want.name, "sortGroupID", goods.SortGroupID.Value, want.sortGroupID)
+		assertEqual(t, want.name, "goodsType", goods.GoodsType.Value, uint16(1))
+		assertClose(t, want.name, "weight", goods.Weight.Value, 0)
+		assertEqual(t, want.name, "maxQuantity", goods.MaxQuantity.Value, uint32(1))
+		// The raw parameter fact stays 1 even though the item can never be
+		// deposited; the effective storage limit below is what the writer reads.
+		assertEqual(t, want.name, "maxRepository", goods.MaxRepository.Value, uint32(1))
+		assertEqual(t, want.name, "isDepositable", goods.IsDepositable.Value, false)
+		assertEqual(t, want.name, "isConsumable", goods.IsConsumable.Value, false)
+		assertEqual(t, want.name, "isDiscardable", goods.IsDiscardable.Value, false)
+		assertEqual(t, want.name, "isDroppable", goods.IsDroppable.Value, false)
+		assertEqual(t, want.name, "isEquipable", goods.IsEquipable.Value, false)
+
+		storage := item.Storage
+		assertEqual(t, want.name, "recordMode", storage.RecordMode.Value,
+			schema.RecordModeQuantityStack)
+		assertEqual(t, want.name, "maxInventory", storage.MaxInventory.Value, uint32(1))
+		// isDeposit=0 means storage is closed, and a non-zero effective limit is
+		// exactly what would open the Move to Storage path for these items.
+		assertEqual(t, want.name, "maxStorage", storage.MaxStorage.Value, uint32(0))
+
+		capabilities := item.Capabilities
+		assertCapabilityDisabled(t, want.name, "stack", capabilities.Stack)
+		assertCapabilityDisabled(t, want.name, "equipment", capabilities.Equipment)
+		assertCapabilityDisabled(t, want.name, "upgrade", capabilities.Upgrade)
+		assertCapabilityDisabled(t, want.name, "infusion", capabilities.Infusion)
+		assertCapabilityDisabled(t, want.name, "ashOfWarMount", capabilities.AshOfWarMount)
+
+		safety := item.Safety
+		for _, flag := range []struct {
+			label string
+			got   bool
+			want  bool
+		}{
+			{"cutContent", safety.CutContent.Value, false},
+			{"banRisk", safety.BanRisk.Value, false},
+			{"dlc", safety.DLC.Value, true},
+			{"noDatabase", safety.NoDatabase.Value, true},
+			{"scalesWithNG", safety.ScalesWithNG.Value, false},
+			{"preOrder", safety.PreOrder.Value, false},
+		} {
+			assertEqual(t, want.name, "safety."+flag.label, flag.got, flag.want)
+		}
+
+		if len(item.Variants) != 0 || len(item.Aliases) != 0 || len(item.Unlocks) != 0 {
+			t.Errorf("%s: variants/aliases/unlocks = %d/%d/%d, want none: the attire has no "+
+				"variant, no confirmed alias contract and no unlock record",
+				want.name, len(item.Variants), len(item.Aliases), len(item.Unlocks))
+		}
+		// The 6700..6703 attire event flags belong to a later World contract. A
+		// document that already claims one of them would make this ingest decide
+		// a contract it has no evidence for.
+		for _, link := range item.Links.RelatedEventFlags {
+			if link.EventFlagID.Value >= 6700 && link.EventFlagID.Value <= 6703 {
+				t.Errorf("%s: relates to attire event flag %d, which no ingested contract owns yet",
+					want.name, link.EventFlagID.Value)
+			}
+		}
+		for _, unlock := range item.Unlocks {
+			if unlock.EventFlagID.Value >= 6700 && unlock.EventFlagID.Value <= 6703 {
+				t.Errorf("%s: unlocks attire event flag %d, which no ingested contract owns yet",
+					want.name, unlock.EventFlagID.Value)
+			}
+		}
+	}
+}
+
 // TestRegulation117UnsupportedContentNeverReachesTheCatalog fails closed on the
-// scope decision: the two altered protector variants, the two unnamed technical
-// armament rows and the Spectral Steed Attire goods are evidence, not catalog
-// items, and none of their icons may ship.
+// scope decision: the two altered protector variants and the two unnamed
+// technical armament rows are evidence, not catalog items, and none of their
+// icons may ship. The three Spectral Steed Attire goods left this list when they
+// were ingested; TestRegulation117SpectralSteedAttireGoodsAreComplete is what
+// protects them now.
 func TestRegulation117UnsupportedContentNeverReachesTheCatalog(t *testing.T) {
 	catalog := newRealCatalog(t)
 	for _, excluded := range []struct {
@@ -418,9 +625,6 @@ func TestRegulation117UnsupportedContentNeverReachesTheCatalog(t *testing.T) {
 		{0x10000000 | 5361000, "Leontiel's Hat (Altered) is an unsupported altered variant"},
 		{3910000, "unnamed technical armament row"},
 		{13900000, "unnamed technical armament row"},
-		{0x40000000 | 2009600, "Spectral Steed Attire is out of scope for this ingest"},
-		{0x40000000 | 2009610, "Spectral Steed Attire is out of scope for this ingest"},
-		{0x40000000 | 2009620, "Spectral Steed Attire is out of scope for this ingest"},
 	} {
 		if resource, found := catalog.ItemByGameID(excluded.gameID); found {
 			t.Errorf("0x%08X resolved to %q but %s",
@@ -675,6 +879,17 @@ func manifestSource(manifest schema.Manifest, id schema.SourceID) (schema.DataSo
 		}
 	}
 	return schema.DataSource{}, false
+}
+
+// assertCapabilityDisabled is the "this item cannot do that" contract: the fact
+// has to be known, so it is a decision rather than a gap, disabled, and carry no
+// rules that a later reader could act on anyway.
+func assertCapabilityDisabled[T any](t *testing.T, label, name string, capability schema.Capability[T]) {
+	t.Helper()
+	if !capability.Known || capability.Enabled || capability.Rules != nil {
+		t.Errorf("%s: %s capability = %#v, want a known, disabled capability with no rules",
+			label, name, capability)
+	}
 }
 
 func assertEqual[T comparable](t *testing.T, label, field string, got, want T) {

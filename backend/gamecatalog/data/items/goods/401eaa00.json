@@ -1,0 +1,556 @@
+{
+  "key": "401EAA00",
+  "kind": "item",
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1075751424,
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "parsed Row ID plus item-family prefix from row 2009600",
+        "table": "EquipParamGoods",
+        "row": "2009600",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "goods",
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamGoods",
+        "row": "2009600",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "key_items",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "SaveForge 2.0 placement of Regulation 1.17 content (EquipParamGoods:2009600 goodsType=1, isConsume=0, isDiscard=0): a key item, matching the stable SaveForge v1.7.1 placement"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "curated_regulation_117",
+        "method": "no reviewed subcategory exists for this Regulation 1.17 item"
+      }
+    },
+    "presentation": {
+      "name": {
+        "known": true,
+        "value": "Spectral Steed Regalia: Tree Sentinel",
+        "provenance": {
+          "source": "game_text_goods_name_dlc02",
+          "method": "resolved the official English item_dlc02 GoodsName.fmg entry 2009600"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "A smaller version of the solemn gold armor that adorns the warhorses of the Tree Sentinels who serve the Erdtree.\n\nOne of several liveries once prepared for spectral steeds, which allows Torrent, through grace, to change his appearance.\n\nThough a spectral steed's form will change when vested in this garb, their heart will remain the same.",
+        "provenance": {
+          "source": "game_text_goods_caption_dlc02",
+          "method": "resolved the official English item_dlc02 GoodsCaption.fmg entry 2009600"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Allows grace to alter Torrent's appearance",
+        "provenance": {
+          "source": "game_text_goods_info_dlc02",
+          "method": "resolved the official English item_dlc02 GoodsInfo.fmg entry 2009600"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/key_items/tree_sentinel_spectral_steed_attire.png",
+        "provenance": {
+          "source": "product_item_icons_1_7_1",
+          "method": "copied byte-for-byte from the verified item icon released in the stable SaveForge v1.7.1 product assets"
+        }
+      },
+      "textMetadata": {
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "game_text_goods_caption_dlc02",
+            "method": "the caption is the official English item_dlc02 GoodsCaption.fmg entry 2009600"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "game_text_goods_info_dlc02",
+            "method": "the description is the official English item_dlc02 GoodsInfo.fmg entry 2009600"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "dlc02",
+          "provenance": {
+            "source": "game_text_goods_name_dlc02",
+            "method": "the official name resolves in the item_dlc02 GoodsName.fmg overlay"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_regulation_117",
+            "method": "Regulation 1.17 content carries no curated SaveForge text; no reviewed source in this catalog provides one"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "quantity_stack",
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "goods are stored as a quantity stack, like every other goods record in this catalog"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "maxNum"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "EquipParamGoods:2009600 isDeposit=0, so the item cannot be moved to storage and the effective storage limit is zero; the raw maxRepositoryNum stays in item.goods.maxRepository"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "goods carry no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "goods carry no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "goods carry no upgrade, infusion or Ash of War capability in this catalog"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "derived from EquipParamGoods.maxNum: a maximum of one allows no stack",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "maxNum"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "EquipParamGoods does not allow a supported equipment slot",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "goodsType,isEquip"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "Regulation 1.17 Spectral Steed Attire: DLC key item held only in the inventory and reserved for the World Spectral Steed Attire feature, so it must not appear in the general item database"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed acquisition record exists for this Regulation 1.17 item"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_regulation_117",
+          "method": "no reviewed tutorial reference exists for this Regulation 1.17 item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamGoods",
+        "rowID": 2009600,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "goodsType"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "isConsume"
+          },
+          {
+            "name": "isDeposit"
+          },
+          {
+            "name": "isDiscard"
+          },
+          {
+            "name": "isDrop"
+          },
+          {
+            "name": "isEquip"
+          },
+          {
+            "name": "itemGetTutorialFlagId"
+          },
+          {
+            "name": "maxNum"
+          },
+          {
+            "name": "maxRepositoryNum"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "weight"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": {
+      "sourceRowID": {
+        "known": true,
+        "value": 2009600,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed Row ID from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 3900,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed iconId from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 206160,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortId from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 60,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortGroupId from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "sortGroupId"
+        }
+      },
+      "goodsType": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed goodsType from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "goodsType"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 0.0,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed weight from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "weight"
+        }
+      },
+      "maxQuantity": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "maxNum"
+        }
+      },
+      "maxRepository": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "maxRepositoryNum"
+        }
+      },
+      "tutorialFlagID": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed itemGetTutorialFlagId from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "itemGetTutorialFlagId"
+        }
+      },
+      "isEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isEquip from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "isEquip"
+        }
+      },
+      "isConsumable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isConsume from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "isConsume"
+        }
+      },
+      "isDiscardable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDiscard from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "isDiscard"
+        }
+      },
+      "isDepositable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDeposit from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "isDeposit"
+        }
+      },
+      "isDroppable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDrop from row 2009600",
+          "table": "EquipParamGoods",
+          "row": "2009600",
+          "field": "isDrop"
+        }
+      }
+    },
+    "gesture": null
+  }
+}
