@@ -369,9 +369,9 @@ func TestPlayerStatsValid(t *testing.T) {
 					t.Errorf("Slot %d (%s): Level %d out of range [1, 713]", i, name, p.Level)
 				}
 
-				// Class range: 0-9
-				if p.Class > 9 {
-					t.Errorf("Slot %d (%s): Class %d > 9", i, name, p.Class)
+				// Class range: 0-11 (Regulation 1.17 added Idus Knight=10, Heavy Knight=11)
+				if p.Class > 11 {
+					t.Errorf("Slot %d (%s): Class %d > 11", i, name, p.Class)
 				}
 
 				// Gender: 0 or 1

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### fix(diagnostics): accept Regulation 1.17 starting classes
+
+Save diagnostics no longer flags characters created as Idus Knight (10) or
+Heavy Knight (11) as having an out-of-range Class. The accepted range is now
+0-11, matching the class database.
+
 ## [1.7.0] - 2026-08-29
 
 ### build: Wails 2.15 and Go 1.27 development compatibility

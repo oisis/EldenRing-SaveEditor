@@ -217,8 +217,8 @@ func (d *SlotDiagnostics) checkStats(slot *SaveSlot) {
 		}
 	}
 
-	if slot.Player.Class > 9 {
-		d.addWarning("stats", "Class=%d out of range [0, 9]", slot.Player.Class)
+	if slot.Player.Class > 11 {
+		d.addWarning("stats", "Class=%d out of range [0, 11]", slot.Player.Class)
 	}
 	if slot.Player.Gender > 1 {
 		d.addWarning("stats", "Gender=%d out of range [0, 1]", slot.Player.Gender)
