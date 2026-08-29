@@ -269,25 +269,30 @@ func TestSetSpectralSteedAttireErrorLeavesNoPartialMutation(t *testing.T) {
 	}
 }
 
-func TestSetSpectralSteedAttireFailsClosedOnPS4(t *testing.T) {
+// PS4/PS5 saves decode into the same slot model, so 6700-6703 behave exactly
+// like on PC. PS5 is identified as the PS4 container format.
+func TestSetSpectralSteedAttireOnPS4(t *testing.T) {
 	app := spectralSteedApp(t)
 	app.save.Platform = "PS4"
 	setSpectralSteedFlag(t, app, 6700, true)
 	giveAttireItem(app, treeSentinelAttireItem)
 
-	err := app.SetSpectralSteedAttire(0, 6701)
-	if err == nil {
-		t.Fatal("expected PS4 to be rejected — the contract is confirmed on PC only")
+	if err := app.SetSpectralSteedAttire(0, 6701); err != nil {
+		t.Fatalf("PS4 set must succeed: %v", err)
 	}
-	if !strings.Contains(err.Error(), "PS4") {
-		t.Fatalf("error = %v", err)
+	states := spectralSteedFlagStates(t, app)
+	if !states[6701] || states[6700] || states[6702] || states[6703] {
+		t.Fatalf("flags = %v, want only 6701 set", states)
 	}
-	if states := spectralSteedFlagStates(t, app); !states[6700] || states[6701] {
-		t.Fatalf("PS4 call mutated flags: %v", states)
+	if !spectralSteedItemOwned(&app.save.Slots[0], treeSentinelAttireItem) {
+		t.Fatal("set removed the attire item")
 	}
-	// The read path stays available on PS4.
-	if _, err := app.GetSpectralSteedAttire(0); err != nil {
-		t.Fatalf("getter must still work on PS4: %v", err)
+	state, err := app.GetSpectralSteedAttire(0)
+	if err != nil {
+		t.Fatalf("getter on PS4: %v", err)
+	}
+	if state.Status != db.SpectralSteedAttireResolved || state.ActiveID != 6701 {
+		t.Fatalf("state = %+v, want resolved 6701", state)
 	}
 }
 
@@ -334,20 +339,30 @@ func TestLockAllSpectralSteedAttiresRejectsTruncatedFlagsWithoutMutation(t *test
 	}
 }
 
-func TestLockAllSpectralSteedAttiresFailsClosedOnPS4(t *testing.T) {
+func TestLockAllSpectralSteedAttiresOnPS4(t *testing.T) {
 	app := spectralSteedApp(t)
 	app.save.Platform = "PS4"
-	giveAttireItem(app, treeSentinelAttireItem)
-	setSpectralSteedFlag(t, app, 6701, true)
+	addAttireItems(t, app, treeSentinelAttireItem, silverOfCariaItem, funerealNightItem)
+	setSpectralSteedFlag(t, app, 6703, true)
 
-	if err := app.LockAllSpectralSteedAttires(0); err == nil {
-		t.Fatal("expected PS4 to be rejected")
+	if err := app.LockAllSpectralSteedAttires(0); err != nil {
+		t.Fatalf("PS4 lock all must succeed: %v", err)
 	}
-	if states := spectralSteedFlagStates(t, app); !states[6701] || states[6700] {
-		t.Fatalf("PS4 call mutated flags: %v", states)
+	for _, itemID := range []uint32{treeSentinelAttireItem, silverOfCariaItem, funerealNightItem} {
+		if spectralSteedItemOwned(&app.save.Slots[0], itemID) {
+			t.Fatalf("item 0x%08X still owned after lock all", itemID)
+		}
 	}
-	if !spectralSteedItemOwned(&app.save.Slots[0], treeSentinelAttireItem) {
-		t.Fatal("PS4 call removed the attire item")
+	states := spectralSteedFlagStates(t, app)
+	if !states[data.SpectralSteedAttireDefaultFlag] || states[6701] || states[6702] || states[6703] {
+		t.Fatalf("flags = %v, want only default appearance set", states)
+	}
+	state, err := app.GetSpectralSteedAttire(0)
+	if err != nil {
+		t.Fatalf("getter on PS4: %v", err)
+	}
+	if state.Status != db.SpectralSteedAttireResolved || state.ActiveID != data.SpectralSteedAttireDefaultFlag {
+		t.Fatalf("state = %+v, want resolved default appearance", state)
 	}
 }
 

@@ -8,11 +8,6 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
-// spectralSteedAttirePlatform is the only platform whose 6700-6703 contract is
-// confirmed from native saves. PS4 mutation stays fail-closed until the same
-// evidence exists there.
-const spectralSteedAttirePlatform = "PC"
-
 // spectralSteedItemOwned reports whether the attire key item is physically in
 // the character's inventory. Both the editor-computed handle and the raw item ID
 // route through db.HandleToItemID, so a game-placed record matches too.
@@ -105,9 +100,6 @@ func (a *App) SetSpectralSteedAttire(slotIndex int, flagID uint32) error {
 	if slotIndex < 0 || slotIndex >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
-	if a.save.Platform != spectralSteedAttirePlatform {
-		return fmt.Errorf("spectral steed attire is not yet verified for %s saves", a.save.Platform)
-	}
 	attire, ok := data.FindSpectralSteedAttire(flagID)
 	if !ok {
 		return fmt.Errorf("unknown spectral steed attire")
@@ -143,9 +135,6 @@ func (a *App) LockAllSpectralSteedAttires(slotIndex int) error {
 	}
 	if slotIndex < 0 || slotIndex >= 10 {
 		return fmt.Errorf("invalid slot index")
-	}
-	if a.save.Platform != spectralSteedAttirePlatform {
-		return fmt.Errorf("spectral steed attire is not yet verified for %s saves", a.save.Platform)
 	}
 
 	a.slotMu[slotIndex].Lock()

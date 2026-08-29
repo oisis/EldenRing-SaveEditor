@@ -10,6 +10,12 @@ Save diagnostics no longer flags characters created as Idus Knight (10) or
 Heavy Knight (11) as having an out-of-range Class. The accepted range is now
 0-11, matching the class database.
 
+### fix(world): Spectral Steed Attire on PS4/PS5 saves
+
+Spectral Steed Attire can now be added and set from the World tab on PS4/PS5
+saves as well as PC. The three attire key items are no longer listed in the Item
+Database; the World tab remains their only entry point.
+
 ## [1.7.0] - 2026-08-29
 
 ### build: Wails 2.15 and Go 1.27 development compatibility

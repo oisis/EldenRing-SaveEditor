@@ -237,22 +237,30 @@ describe('WorldTab — Spectral Steed Attire', () => {
         expect(screen.queryByRole('button', { name: 'Set' })).toBeNull();
     });
 
-    it('disables every mutation on an unknown platform', async () => {
-        await openAttireSection('');
-        for (const id of [6701, 6702, 6703]) {
-            expect((addButton(id) as HTMLButtonElement).disabled).toBe(true);
-            expect((setButton(id) as HTMLButtonElement).disabled).toBe(true);
-        }
+    it('keeps every action available on a PS4/PS5 save', async () => {
+        await openAttireSection('PS4');
+        // Ownership and active state are the only gates: 6702 is owned, 6700 active.
+        expect((addButton(6701) as HTMLButtonElement).disabled).toBe(false);
+        expect((addButton(6702) as HTMLButtonElement).disabled).toBe(true);
+        expect((setButton(6702) as HTMLButtonElement).disabled).toBe(false);
         expect((setButton(6700) as HTMLButtonElement).disabled).toBe(true);
+        expect((attireHeader().getByRole('button', { name: 'Unlock All' }) as HTMLButtonElement).disabled).toBe(false);
+        expect((attireHeader().getByRole('button', { name: 'Lock All' }) as HTMLButtonElement).disabled).toBe(false);
+
+        fireEvent.click(setButton(6702));
+        await waitFor(() => expect(SetSpectralSteedAttire).toHaveBeenCalledWith(0, 6702));
+        fireEvent.click(addButton(6701));
+        await waitFor(() => expect(AddItemsToCharacter).toHaveBeenCalledWith(0, [TREE_SENTINEL_ITEM], 0, 0, 0, 0, 1, 0));
+        fireEvent.click(attireHeader().getByRole('button', { name: 'Lock All' }));
+        await waitFor(() => expect(LockAllSpectralSteedAttires).toHaveBeenCalledWith(0));
     });
 
-    it('disables every mutation on PS4', async () => {
-        await openAttireSection('PS4');
-        for (const id of [6701, 6702, 6703]) {
-            expect((addButton(id) as HTMLButtonElement).disabled).toBe(true);
-            expect((setButton(id) as HTMLButtonElement).disabled).toBe(true);
-        }
+    it('adds no platform gate when the platform is unknown', async () => {
+        await openAttireSection('');
+        expect((addButton(6701) as HTMLButtonElement).disabled).toBe(false);
+        expect((addButton(6702) as HTMLButtonElement).disabled).toBe(true);
+        expect((setButton(6702) as HTMLButtonElement).disabled).toBe(false);
         expect((setButton(6700) as HTMLButtonElement).disabled).toBe(true);
-        expect(setButton(6700).getAttribute('title')).toBe('Not yet verified for PS4');
+        expect(setButton(6702).getAttribute('title')).toBeNull();
     });
 });

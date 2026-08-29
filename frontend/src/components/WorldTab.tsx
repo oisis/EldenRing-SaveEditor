@@ -12,6 +12,7 @@ import {RISK_INFO, RiskKey} from '../data/riskInfo';
 
 interface WorldTabProps {
     charIdx: number;
+    /** Kept for call-site compatibility; no World action depends on the platform. */
     platform?: string | null;
     showFlaggedItems?: boolean;
     saveLoadKey?: number;
@@ -62,7 +63,7 @@ const worldActionFailureReason = (error: unknown): string => {
     return 'world_operation_failed';
 };
 
-export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, saveDataRevision = 0, onMutate, addSettings}: WorldTabProps) {
+export function WorldTab({charIdx, showFlaggedItems, saveLoadKey, saveDataRevision = 0, onMutate, addSettings}: WorldTabProps) {
     const [graces, setGraces] = useState<db.GraceEntry[]>([]);
     const [bosses, setBosses] = useState<db.BossEntry[]>([]);
     const [pools, setPools] = useState<db.SummoningPoolEntry[]>([]);
@@ -218,11 +219,8 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
     const unlockedWBs = whetblades.filter(w => w.unlocked).length;
 
     // --- Spectral Steed Attire logic (Regulation 1.17) ---
-    // The backend contract for event flags 6700-6703 is confirmed on PC saves
-    // only, so mutations fail closed on every other (or unknown) platform.
-    // Reading the state is safe there.
-    const attireMutationBlocked = platform !== 'PC';
-    const attireBlockedTitle = attireMutationBlocked ? `Not yet verified for ${platform || 'this platform'}` : undefined;
+    // PC and PS4/PS5 saves decode into the same slot model, so 6700-6703 behave
+    // identically; only ownership and the active appearance gate the buttons.
     const attireActiveId = attire?.status === 'resolved' ? attire.activeId : 0;
     const attireOwnedCount = attire?.entries.filter(e => e.owned).length ?? 0;
     const attireTotalCount = attire?.entries.length ?? 0;
@@ -928,10 +926,10 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                         actions={<>
                             <RiskActionButton riskKey={attireAddWarningAcknowledged ? null : 'tarnished_edition_dlc'}
                                 onConfirm={() => acknowledgeAttireAddWarning(handleAttireUnlockAll)}
-                                disabled={!missingAttires.length || attireMutationBlocked} title={attireBlockedTitle}
+                                disabled={!missingAttires.length}
                                 className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button type="button" onClick={handleAttireLockAll}
-                                disabled={!ownedDlcAttires.length || attireMutationBlocked} title={attireBlockedTitle}
+                                disabled={!ownedDlcAttires.length}
                                 className={`${btnSm} disabled:opacity-40 hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         </>}>
                         <div className="space-y-2">
@@ -967,11 +965,11 @@ export function WorldTab({charIdx, platform, showFlaggedItems, saveLoadKey, save
                                             {!isDefault && (
                                                 <RiskActionButton riskKey={attireAddWarningAcknowledged ? null : 'tarnished_edition_dlc'}
                                                     onConfirm={() => acknowledgeAttireAddWarning(() => handleAttireAdd(e))}
-                                                    disabled={e.owned || attireMutationBlocked} title={attireBlockedTitle}
+                                                    disabled={e.owned}
                                                     className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Add</RiskActionButton>
                                             )}
                                             <button type="button" onClick={() => handleAttireSet(e)}
-                                                disabled={isActive || !e.owned || attireMutationBlocked} title={attireBlockedTitle}
+                                                disabled={isActive || !e.owned}
                                                 className={`${btnSm} disabled:opacity-40 hover:text-primary hover:border-primary/50`}>Set</button>
                                         </div>
                                     );
