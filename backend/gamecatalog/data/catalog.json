@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 16,
-    "dataVersion": "e851d285f2b1370ad17c262e0620b34d2f42f002e5598dab9b5165d47ff80ee1",
+    "dataVersion": "88d495cbd9ac16ed8543967558755f62fde32baaf84dbbf5439065df6035870a",
     "gameVersion": "1.17-class",
     "sources": [
       {
@@ -386,6 +386,14 @@
         "location": "saveforge-2.0/gamecatalog/curation/regulation_117",
         "version": "2324467d25e03d2f44acdf820fe083c780cb06c8ab390680e7c692af7930094e",
         "evidence": "curated",
+        "reviewed": true
+      },
+      {
+        "id": "curated_technical_records",
+        "kind": "curated_technical_records",
+        "location": "saveforge-2.0/gamecatalog/curation/technical_records",
+        "version": "7e0492c315cdcfaba486dea254e9ff85b4b8a2d704c64c80fa5cd920fcc2d8be",
+        "evidence": "verified_research",
         "reviewed": true
       }
     ]
@@ -935,6 +943,10 @@
     "graces/weeping_peninsula_tombsward.json",
     "graces/weeping_peninsula_tombsward_catacombs.json",
     "graces/weeping_peninsula_tombsward_cave.json",
+    "items/armor/10002710.json",
+    "items/armor/10002774.json",
+    "items/armor/100027d8.json",
+    "items/armor/1000283c.json",
     "items/armor/10009c40.json",
     "items/armor/10009ca4.json",
     "items/armor/10009d08.json",

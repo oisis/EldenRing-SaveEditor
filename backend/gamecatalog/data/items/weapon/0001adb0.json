@@ -33,11 +33,11 @@
       }
     },
     "subcategory": {
-      "known": true,
-      "value": "Straight Swords",
+      "known": false,
+      "value": "",
       "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.SubCategory"
+        "source": "curated_technical_records",
+        "method": "Unarmed is a native empty-hand record, not a user-facing weapon subcategory"
       }
     },
     "presentation": {
@@ -250,10 +250,10 @@
       },
       "noDatabase": {
         "known": true,
-        "value": false,
+        "value": true,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "derived from legacy ItemData flags"
+          "source": "curated_technical_records",
+          "method": "reserved for native equipment handling and hidden from the general item database"
         }
       },
       "scalesWithNG": {

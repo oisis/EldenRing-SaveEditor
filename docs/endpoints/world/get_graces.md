@@ -161,11 +161,12 @@ missing document, a foreign document in the union, an unknown name, an empty
 region label, a zero flag, a flag in the unused block `75`, a flag outside every
 grace block, an unknown boss-arena fact, an unknown and an unsupported dungeon
 type, an unknown door flag and a door flag without a dungeon type, plus the
-generic `GetResource`/`GetResources` surface. The migrator test proves the 419
-migrated rows, their block bounds, flag and key uniqueness, key determinism, the
-name and region-label split including the one curated name that carries its own
-separator, and the resolved Castle Sol boss-arena difference. The transport test
-compares the HTTP response with the typed getter result.
+generic `GetResource`/`GetResources` surface. The authored catalog and endpoint
+tests prove the 419 stored rows, their block bounds, flag and key uniqueness,
+deterministic ordering, the name and region-label split including the one curated
+name that carries its own separator, and the resolved Castle Sol boss-arena
+difference. The transport test compares the HTTP response with the typed getter
+result.
 
 `SetGraceVisited` remains contract-only and is deliberately not exposed in
 OpenAPI or Scalar.

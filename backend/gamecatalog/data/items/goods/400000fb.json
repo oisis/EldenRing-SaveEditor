@@ -346,7 +346,39 @@
       "mapFragment": null
     },
     "variants": [],
-    "aliases": [],
+    "aliases": [
+      {
+        "gameID": {
+          "known": true,
+          "value": 1073742074,
+          "provenance": {
+            "source": "regulation_equip_param_goods",
+            "method": "Row ID plus goods item prefix for the filled save-side Flask state",
+            "table": "EquipParamGoods",
+            "row": "250",
+            "field": "Row ID"
+          }
+        },
+        "sourceRecords": [
+          {
+            "table": "EquipParamGoods",
+            "rowID": 250,
+            "fields": [
+              {
+                "name": "Row ID"
+              }
+            ],
+            "provenance": {
+              "source": "regulation_equip_param_goods",
+              "method": "referenced filled save-side Flask state row",
+              "table": "EquipParamGoods",
+              "row": "250",
+              "field": "Row ID"
+            }
+          }
+        ]
+      }
+    ],
     "unlocks": [],
     "relatedTechnicalRecords": null,
     "sourceRecords": [

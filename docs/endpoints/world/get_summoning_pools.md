@@ -131,9 +131,10 @@ PC and PS4 including the boundaries `670000` and `670999` with their neighbours.
 Catalog tests cover fail-closed rejection of a missing document, a foreign
 document in the union, an unknown name, an empty region label, a zero flag and a
 flag outside block `670`, plus the generic `GetResource`/`GetResources` surface.
-The migrator test proves the 213 migrated rows, their block bounds, key
-uniqueness, key determinism and the exclusion of the colosseum rows. The
-transport test compares the HTTP response with the typed getter result.
+The authored catalog and endpoint tests prove the 213 stored rows, their block
+bounds, key uniqueness, deterministic ordering and the exclusion of the
+colosseum rows. The transport test compares the HTTP response with the typed
+getter result.
 
 `SetSummoningPoolActivated` remains contract-only and is deliberately not
 exposed in OpenAPI or Scalar.

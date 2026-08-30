@@ -7,10 +7,18 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-// The three Regulation 1.17 Spectral Steed Attire goods are the current
-// noDatabase items: the World Spectral Steed Attire endpoints own them, so the
+// These records have an endpoint- or equipment-owned technical role, so the
 // general item list must not offer them while an exact lookup must still work.
-var noDatabaseItemKeys = []string{"401EAA00", "401EAA0A", "401EAA14"}
+var noDatabaseItemKeys = []string{
+	"0001ADB0", // Unarmed equipment state.
+	"10002710", // Bare Head equipment state.
+	"10002774", // Bare Body equipment state.
+	"100027D8", // Bare Arms equipment state.
+	"1000283C", // Bare Legs equipment state.
+	"401EAA00", // Spectral Steed Regalia body goods.
+	"401EAA0A", // Spectral Steed Regalia mane goods.
+	"401EAA14", // Spectral Steed Regalia tail goods.
+}
 
 func TestGetResourcesHidesNoDatabaseItems(t *testing.T) {
 	t.Parallel()

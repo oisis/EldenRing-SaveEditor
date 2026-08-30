@@ -108,8 +108,8 @@ func TestGetBossesReturnsTheCuratedCatalogState(t *testing.T) {
 	if len(found) != len(want) {
 		t.Fatalf("found boss keys = %v, want all %v", found, want)
 	}
-	// The exact counts are a curated-data fact the migrator owns; here they only
-	// have to prove the fields are carried through instead of staying uniform.
+	// The exact counts are authored-catalog facts; here this endpoint test only
+	// has to prove the fields are carried through instead of staying uniform.
 	if !remembrance {
 		t.Error("no entry carries remembrance")
 	}

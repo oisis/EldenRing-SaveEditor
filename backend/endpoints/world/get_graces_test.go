@@ -109,8 +109,8 @@ func TestGetGracesReturnsTheCuratedCatalogState(t *testing.T) {
 	if len(found) != len(want) {
 		t.Fatalf("found grace keys = %v, want all %v", found, want)
 	}
-	// The exact count is a curated-data fact the migrator owns; here it only has
-	// to prove the field is carried through instead of staying uniformly false.
+	// The exact count is an authored-catalog fact; here this endpoint test only
+	// has to prove the field is carried through instead of staying uniformly false.
 	if !bossArena {
 		t.Error("no entry carries bossArena")
 	}

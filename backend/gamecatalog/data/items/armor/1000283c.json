@@ -1,0 +1,440 @@
+{
+  "key": "1000283C",
+  "kind": "item",
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 268445756,
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "parsed Row ID plus item-family prefix from technical row 10300",
+        "table": "EquipParamProtector",
+        "row": "10300",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "armor",
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "classified from the technical EquipParamProtector row",
+        "table": "EquipParamProtector",
+        "row": "10300",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "legs",
+      "provenance": {
+        "source": "curated_technical_records",
+        "method": "curated from the confirmed native empty legs-slot contract"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "curated_technical_records",
+        "method": "technical empty-slot records have no user-facing armor subcategory"
+      }
+    },
+    "presentation": {
+      "name": {
+        "known": true,
+        "value": "Bare Legs",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from the SaveForge 1.7.1 technical placeholder label because no usable official FMG name entry exists"
+        }
+      },
+      "caption": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "no standalone caption is confirmed for the technical empty-slot record"
+        }
+      },
+      "description": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "no standalone description is confirmed for the technical empty-slot record"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "technical empty-slot records are not obtainable world items"
+        }
+      },
+      "iconPath": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "no shipped standalone icon is confirmed for the technical empty-slot record"
+        }
+      },
+      "textMetadata": {
+        "captionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_technical_records",
+            "method": "no standalone caption is confirmed"
+          }
+        },
+        "descriptionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_technical_records",
+            "method": "no standalone description is confirmed"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "curated_technical_records",
+            "method": "technical empty-slot records have no acquisition location"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "curated_technical_records",
+            "method": "the native empty-slot contract belongs to the base game"
+          }
+        },
+        "notes": {
+          "known": true,
+          "value": "Native empty legs-slot record; hidden from the general item database.",
+          "provenance": {
+            "source": "curated_technical_records",
+            "method": "records the confirmed technical role"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "the record is native equipment state, not a user-addable storage item"
+        }
+      },
+      "maxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "no user-facing inventory limit applies to the technical record"
+        }
+      },
+      "maxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "no user-facing storage limit applies to the technical record"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "technical empty-slot records are not upgradeable"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "infusion does not apply to armor"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "Ash of War mounting does not apply to armor"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "native empty-slot records are not stackable"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "legs"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "copied from explicit technical EquipParamProtector equipment-slot flags",
+          "table": "EquipParamProtector",
+          "row": "10300",
+          "field": "headEquip,bodyEquip,armEquip,legEquip"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_protector",
+            "method": "copied from explicit technical EquipParamProtector equipment-slot flags",
+            "table": "EquipParamProtector",
+            "row": "10300",
+            "field": "headEquip,bodyEquip,armEquip,legEquip"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "native technical equipment state is not cut content"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "native technical equipment state is not a ban-risk item"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "the native empty-slot contract belongs to the base game"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "reserved for native equipment handling and hidden from the general item database"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "native empty-slot identity does not scale with New Game cycle"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "curated_technical_records",
+          "method": "native empty-slot identity is not preorder content"
+        }
+      }
+    },
+    "acquisition": {},
+    "modifiers": {},
+    "links": {
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamProtector",
+        "rowID": 10300,
+        "fields": [
+          { "name": "Row ID" },
+          { "name": "armEquip" },
+          { "name": "blowDamageCutRate" },
+          { "name": "bodyEquip" },
+          { "name": "darkDamageCutRate" },
+          { "name": "fireDamageCutRate" },
+          { "name": "headEquip" },
+          { "name": "iconIdF" },
+          { "name": "iconIdM" },
+          { "name": "legEquip" },
+          { "name": "magicDamageCutRate" },
+          { "name": "neutralDamageCutRate" },
+          { "name": "resistBlood" },
+          { "name": "resistCurse" },
+          { "name": "resistPoison" },
+          { "name": "resistSleep" },
+          { "name": "slashDamageCutRate" },
+          { "name": "sortGroupId" },
+          { "name": "sortId" },
+          { "name": "thrustDamageCutRate" },
+          { "name": "thunderDamageCutRate" },
+          { "name": "toughnessCorrectRate" },
+          { "name": "weight" }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "referenced technical Regulation parameter row",
+          "table": "EquipParamProtector",
+          "row": "10300",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": {
+      "sourceRowID": {
+        "known": true,
+        "value": 10300,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed Row ID from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "Row ID" }
+      },
+      "iconIDMale": {
+        "known": true,
+        "value": 1100,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed iconIdM from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "iconIdM" }
+      },
+      "iconIDFemale": {
+        "known": true,
+        "value": 1104,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed iconIdF from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "iconIdF" }
+      },
+      "sortID": {
+        "known": true,
+        "value": 99999,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed sortId from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "sortId" }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 255,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed sortGroupId from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "sortGroupId" }
+      },
+      "weight": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed weight from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "weight" }
+      },
+      "physical": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted neutralDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "neutralDamageCutRate" }
+      },
+      "strike": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted blowDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "blowDamageCutRate" }
+      },
+      "slash": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted slashDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "slashDamageCutRate" }
+      },
+      "pierce": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted thrustDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "thrustDamageCutRate" }
+      },
+      "magic": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted magicDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "magicDamageCutRate" }
+      },
+      "fire": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted fireDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "fireDamageCutRate" }
+      },
+      "lightning": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted thunderDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "thunderDamageCutRate" }
+      },
+      "holy": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted darkDamageCutRate to display negation from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "darkDamageCutRate" }
+      },
+      "immunity": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed resistPoison from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "resistPoison" }
+      },
+      "robustness": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed resistBlood from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "resistBlood" }
+      },
+      "focus": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed resistSleep from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "resistSleep" }
+      },
+      "vitality": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed resistCurse from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "resistCurse" }
+      },
+      "poise": {
+        "known": true,
+        "value": 0,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "converted toughnessCorrectRate to display poise from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "toughnessCorrectRate" }
+      },
+      "headEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed headEquip from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "headEquip" }
+      },
+      "bodyEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed bodyEquip from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "bodyEquip" }
+      },
+      "armEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed armEquip from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "armEquip" }
+      },
+      "legEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": { "source": "regulation_equip_param_protector", "method": "parsed legEquip from technical row 10300", "table": "EquipParamProtector", "row": "10300", "field": "legEquip" }
+      }
+    },
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

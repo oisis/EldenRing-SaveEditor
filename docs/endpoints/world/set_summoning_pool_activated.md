@@ -172,14 +172,13 @@ non-JSON media type are rejected before the endpoint is called.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.10 carry byte-identical implementations of this
+SaveForge 1.5.8, 1.6.10 and 1.7.1 carry byte-identical implementations of this
 mutation. `applySummoningPoolActivated` writes exactly one event flag — the pool
 identifier itself — through `db.SetEventFlag` and has no further effect: no
-derivative flag, no global flag, no item and no map state. The local read-only
-copy in `tmp/er-sf-1.6.10/internal/application/app_world.go` is identical to the
-`v1.6.10` tag. SaveForge 2.0 therefore reproduces the same single-flag semantics,
-with the flag coming from `SummoningPoolDocument` instead of a raw caller
-argument.
+derivative flag, no global flag, no item and no map state. Historical comparisons
+use the canonical Git tags directly. SaveForge 2.0 therefore reproduces the same
+single-flag semantics, with the flag coming from `SummoningPoolDocument` instead
+of a raw caller argument.
 
 The 1.x versions differ only in surrounding infrastructure that 2.0 replaces on
 purpose: their per-slot undo stack of depth five versus the single revision-based

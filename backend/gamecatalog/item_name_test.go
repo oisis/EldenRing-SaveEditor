@@ -48,6 +48,16 @@ var wantLegacyNameFallbacks = map[uint32]string{
 	0x40002354: "?GoodsName?",
 }
 
+// The native empty armor records have no official FMG names. Unlike the
+// historical fallbacks above, they are technical equipment state rather than
+// unsafe catalog items, so they have their own closed exception list.
+var wantTechnicalNameFallbacks = map[uint32]string{
+	0x10002710: "Bare Head",
+	0x10002774: "Bare Body",
+	0x100027D8: "Bare Arms",
+	0x1000283C: "Bare Legs",
+}
+
 // TestEmbeddedNamesComeFromTheOfficialFMGPerFamily proves every family resolves
 // its names from its own official FMG catalog, with provenance that names the
 // exact FMG file and entry ID, and that every family is actually represented.
@@ -62,6 +72,8 @@ func TestEmbeddedNamesComeFromTheOfficialFMGPerFamily(t *testing.T) {
 			t.Fatalf("resource %q has unsupported family %q", resource.Key, family)
 		}
 		if want, legacyFallback := wantLegacyNameFallbacks[item.GameID.Value]; legacyFallback {
+			assertLegacyNameFallback(t, resource.Key, item.Presentation.Name, want)
+		} else if want, technicalFallback := wantTechnicalNameFallbacks[item.GameID.Value]; technicalFallback {
 			assertLegacyNameFallback(t, resource.Key, item.Presentation.Name, want)
 		} else {
 			assertNameProvenance(t, resource.Key, family, wantSources, item.Presentation.Name)

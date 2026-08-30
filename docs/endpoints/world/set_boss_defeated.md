@@ -178,13 +178,12 @@ non-JSON media type are rejected before the endpoint is called.
 
 ## Legacy comparison
 
-SaveForge 1.5.8 and 1.6.10 carry byte-identical implementations of this mutation;
-the only difference between the two files is the package name (`main` in 1.5.8,
-`application` in 1.6.10). `applyBossDefeated` writes exactly one event flag — the
-boss identifier itself — through `db.SetEventFlag` and has no further effect: no
-arena state flag, no reward, no Remembrance drop and no world state flag. The
-local read-only copy in `tmp/er-sf-1.6.10/internal/application/app_world.go` is
-identical to the `v1.6.10` tag.
+SaveForge 1.5.8, 1.6.10 and 1.7.1 carry byte-identical implementations of this
+mutation; the only difference between the 1.5.8 and later files is the package
+name (`main` in 1.5.8, `application` later). `applyBossDefeated` writes exactly
+one event flag — the boss identifier itself — through `db.SetEventFlag` and has
+no further effect: no arena state flag, no reward, no Remembrance drop and no
+world state flag. Historical comparisons use the canonical Git tags directly.
 
 Both versions ship the identical design document `spec/38-boss-multiflag.md`,
 which describes a multi-flag kill rework with status `Planned`. It was never
