@@ -13,6 +13,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Active characters"
+msgstr "Aktywne postacie"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
 msgstr "Aplikacja"
@@ -30,6 +34,10 @@ msgstr "Backend aplikacji"
 msgid "Capabilities"
 msgstr "Możliwości"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Characters"
+msgstr "Postacie"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
 msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
@@ -46,6 +54,14 @@ msgstr "Elden Ring"
 msgid "English"
 msgstr "angielski"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Inactive slot"
+msgstr "Nieaktywny slot"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Inactive slots"
+msgstr "Nieaktywne sloty"
+
 #: src/App.tsx
 msgid "Language"
 msgstr "Język"
@@ -58,6 +74,18 @@ msgstr "Jasny"
 msgid "Loading application information…"
 msgstr "Wczytywanie informacji o aplikacji…"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Loading characters…"
+msgstr "Ładowanie postaci…"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "No active character is available."
+msgstr "Brak dostępnej aktywnej postaci."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "No save loaded."
+msgstr "Nie wczytano pliku save."
+
 #: src/App.tsx
 msgid "Polish"
 msgstr "polski"
@@ -66,9 +94,17 @@ msgstr "polski"
 msgid "Retry"
 msgstr "Ponów"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "RL {level}"
+msgstr "RL {level}"
+
 #: src/App.tsx
 msgid "SaveForge 2.0"
 msgstr "SaveForge 2.0"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Slot {slotNumber}"
+msgstr "Slot {slotNumber}"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
@@ -81,6 +117,10 @@ msgstr "Motyw"
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr ""
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Unable to load characters."
+msgstr "Nie udało się wczytać postaci."
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Version"

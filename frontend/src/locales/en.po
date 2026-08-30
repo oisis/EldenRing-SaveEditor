@@ -13,6 +13,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Active characters"
+msgstr "Active characters"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
 msgstr "Application"
@@ -30,6 +34,10 @@ msgstr "Backend"
 msgid "Capabilities"
 msgstr "Capabilities"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Characters"
+msgstr "Characters"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
 msgstr "Could not read application information from the backend."
@@ -46,6 +54,14 @@ msgstr "Elden Ring"
 msgid "English"
 msgstr "English"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Inactive slot"
+msgstr "Inactive slot"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Inactive slots"
+msgstr "Inactive slots"
+
 #: src/App.tsx
 msgid "Language"
 msgstr "Language"
@@ -58,6 +74,18 @@ msgstr "Light"
 msgid "Loading application information…"
 msgstr "Loading application information…"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Loading characters…"
+msgstr "Loading characters…"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "No active character is available."
+msgstr "No active character is available."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "No save loaded."
+msgstr "No save loaded."
+
 #: src/App.tsx
 msgid "Polish"
 msgstr "Polish"
@@ -66,9 +94,17 @@ msgstr "Polish"
 msgid "Retry"
 msgstr "Retry"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "RL {level}"
+msgstr "RL {level}"
+
 #: src/App.tsx
 msgid "SaveForge 2.0"
 msgstr "SaveForge 2.0"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Slot {slotNumber}"
+msgstr "Slot {slotNumber}"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
@@ -81,6 +117,10 @@ msgstr "Theme"
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr "This message is intentionally left untranslated in Polish."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Unable to load characters."
+msgstr "Unable to load characters."
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Version"
