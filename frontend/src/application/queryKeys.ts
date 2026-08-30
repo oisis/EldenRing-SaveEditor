@@ -1,4 +1,7 @@
-import type { CatalogResourcesRequest } from "./catalog/catalogPort";
+import type {
+  CatalogResourcePresentationIdentity,
+  CatalogResourcesRequest,
+} from "./catalog/catalogPort";
 
 /**
  * The placeholder a per-character query is keyed under while no character is
@@ -43,6 +46,19 @@ export const queryKeys = {
       search,
       page,
       pageSize,
+    ] as const,
+  /**
+   * Presentation batches preserve order and duplicates, so every ordered pair
+   * participates in the key. `null` is the unselected state; an empty array is
+   * a real backend request and therefore a distinct key.
+   */
+  catalogResourcePresentationSummaries: (
+    identities: readonly CatalogResourcePresentationIdentity[] | null,
+  ) =>
+    [
+      "catalog",
+      "resource-presentation-summaries",
+      identities?.map(({ kind, key }) => [kind, key] as const) ?? null,
     ] as const,
   /**
    * One resource detail is keyed by its exact identity, so two kinds and two

@@ -257,6 +257,46 @@
         }
       }
     },
+    "/api/v1/catalog/resource-presentation-summaries": {
+      "post": {
+        "operationId": "getResourcePresentationSummaries",
+        "tags": ["Catalog"],
+        "summary": "GetResourcePresentationSummaries",
+        "description": "Returns scalar presentation metadata for an ordered batch of exact resource identities. Input order and duplicates are preserved. Every kind and key is matched exactly and case-sensitively; no value is trimmed, normalised or resolved through an alias. An invalid identity rejects the whole request without a partial result. Exact noDatabase identities remain reachable by the feature that owns them. Unknown names and icon paths stay empty, and full resource documents are never returned.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetResourcePresentationSummariesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Presentation summaries in input order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetResourcePresentationSummariesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The JSON body is invalid or at least one exact identity is unknown. The getter failure includes the zero-based input index.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/catalog/item-variants": {
       "get": {
         "operationId": "getItemVariants",
@@ -10384,6 +10424,72 @@
           }
         },
         "required": ["resources", "total", "page", "pageSize"]
+      },
+      "ResourcePresentationIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One exact GameCatalog identity. Neither field is trimmed, normalised, recased or matched through an alias.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "example": "item"
+          },
+          "key": {
+            "type": "string",
+            "example": "000F4240"
+          }
+        },
+        "required": ["kind", "key"]
+      },
+      "ResourcePresentationSummary": {
+        "type": "object",
+        "description": "Scalar-only presentation metadata for one exact resource. Unknown name and iconPath facts are encoded as empty strings; no fallback or placeholder is invented.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "example": "item"
+          },
+          "key": {
+            "type": "string",
+            "example": "000F4240"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dagger"
+          },
+          "iconPath": {
+            "type": "string",
+            "description": "Validated embedded GameCatalog path, or empty when the resource has no known icon.",
+            "example": "assets/icons/items/melee_armaments/dagger.png"
+          }
+        },
+        "required": ["kind", "key", "name", "iconPath"]
+      },
+      "GetResourcePresentationSummariesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "identities": {
+            "type": "array",
+            "description": "Ordered identities to resolve. Duplicates are preserved. An empty or omitted array is valid.",
+            "items": {
+              "$ref": "#/components/schemas/ResourcePresentationIdentity"
+            }
+          }
+        }
+      },
+      "GetResourcePresentationSummariesResult": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "description": "Presentation summaries in the exact input order, including duplicates. Empty, never null, for an empty request.",
+            "items": {
+              "$ref": "#/components/schemas/ResourcePresentationSummary"
+            }
+          }
+        },
+        "required": ["resources"]
       },
       "GetItemVariantsResult": {
         "type": "object",

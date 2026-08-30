@@ -256,6 +256,22 @@ func newHandlerWithTemplatesStore(
 		writeJSON(writer, http.StatusOK, result)
 	})
 
+	mux.HandleFunc("POST /api/v1/catalog/resource-presentation-summaries", func(writer http.ResponseWriter, request *http.Request) {
+		var body getResourcePresentationSummariesRequest
+		decoder := json.NewDecoder(request.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		result, err := catalog.GetResourcePresentationSummaries(gameCatalog, body.Identities)
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
 	mux.HandleFunc("GET /api/v1/catalog/item-variants", func(writer http.ResponseWriter, request *http.Request) {
 		query := request.URL.Query()
 		result, err := catalog.GetItemVariants(gameCatalog, query.Get("kind"), query.Get("key"))
@@ -362,6 +378,10 @@ func requireJSONBody(request *http.Request) error {
 // loadSaveRequest is the JSON body of POST /api/v1/save-sessions. Both fields
 // reach LoadSave exactly as sent: they are never trimmed, normalised or given a
 // default here.
+type getResourcePresentationSummariesRequest struct {
+	Identities []catalog.ResourcePresentationIdentity `json:"identities"`
+}
+
 type loadSaveRequest struct {
 	Source           string `json:"source"`
 	ExpectedPlatform string `json:"expectedPlatform"`

@@ -34,6 +34,10 @@ export function GetResource(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetResource'](arg1, arg2);
 }
 
+export function GetResourcePresentationSummaries(arg1) {
+  return window['go']['desktop']['Bridge']['GetResourcePresentationSummaries'](arg1);
+}
+
 export function GetResources(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   return window['go']['desktop']['Bridge']['GetResources'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }

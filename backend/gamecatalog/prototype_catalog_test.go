@@ -77,6 +77,43 @@ func TestPrototypeCatalogIndexesWeaponVariants(t *testing.T) {
 	}
 }
 
+func TestResourceSummaryByKindAndKeyUsesTheListProjectionWithoutCloningTheDocument(t *testing.T) {
+	catalog, err := gamecatalog.NewPrototype()
+	if err != nil {
+		t.Fatalf("NewPrototype: %v", err)
+	}
+
+	summary, err := catalog.ResourceSummaryByKindAndKey(schema.ResourceKindItem, "000F4240")
+	if err != nil {
+		t.Fatalf("ResourceSummaryByKindAndKey: %v", err)
+	}
+	if summary.Kind != schema.ResourceKindItem || summary.Key != "000F4240" {
+		t.Fatalf("identity = (%q, %q)", summary.Kind, summary.Key)
+	}
+	if !summary.NameKnown || summary.Name != "Dagger" {
+		t.Fatalf("name = %t/%q, want known Dagger", summary.NameKnown, summary.Name)
+	}
+	if !summary.IconPathKnown || summary.IconPath != "assets/icons/items/melee_armaments/dagger.png" {
+		t.Fatalf("icon path = %t/%q", summary.IconPathKnown, summary.IconPath)
+	}
+
+	var listed *gamecatalog.ResourceSummary
+	for _, candidate := range catalog.ResourceSummaries() {
+		if candidate.Kind == summary.Kind && candidate.Key == summary.Key {
+			copy := candidate
+			listed = &copy
+			break
+		}
+	}
+	if listed == nil || *listed != summary {
+		t.Fatalf("exact summary = %+v, list summary = %+v", summary, listed)
+	}
+
+	if _, err := catalog.ResourceSummaryByKindAndKey(schema.ResourceKindItem, "000f4240"); err == nil {
+		t.Fatal("lowercase key was normalised instead of rejected")
+	}
+}
+
 func TestPrototypeCatalogDerivesCompatibilityRelation(t *testing.T) {
 	catalog, err := gamecatalog.NewPrototype()
 	if err != nil {

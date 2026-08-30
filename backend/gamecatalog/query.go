@@ -113,12 +113,14 @@ type CapabilitySummary struct {
 // picker reads, and nothing else. It holds no pointer, map or slice, so it copies
 // no mutable catalog state and cannot be used to reach a stored document.
 type ResourceSummary struct {
-	Kind        schema.ResourceKind
-	Key         string
-	FamilyKnown bool
-	Family      schema.ItemFamily
-	NameKnown   bool
-	Name        string
+	Kind          schema.ResourceKind
+	Key           string
+	FamilyKnown   bool
+	Family        schema.ItemFamily
+	NameKnown     bool
+	Name          string
+	IconPathKnown bool
+	IconPath      string
 	// NoDatabaseKnown and NoDatabase carry item.safety.noDatabase, the flag that
 	// marks an item as reserved for the feature that owns it instead of being
 	// offered through the general item catalog. The two are reported separately,
@@ -143,75 +145,95 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 	stored := catalog.sortedResources()
 	summaries := make([]ResourceSummary, 0, len(stored))
 	for _, resource := range stored {
-		summary := ResourceSummary{Kind: resource.Kind, Key: resource.Key}
-		switch {
-		case resource.Item != nil:
-			summary.FamilyKnown = resource.Item.Family.Known
-			summary.Family = resource.Item.Family.Value
-			summary.NameKnown = resource.Item.Presentation.Name.Known
-			summary.Name = resource.Item.Presentation.Name.Value
-			summary.NoDatabaseKnown = resource.Item.Safety.NoDatabase.Known
-			summary.NoDatabase = resource.Item.Safety.NoDatabase.Value
-
-			capabilities := resource.Item.Capabilities
-			summary.Upgrade = summariseCapability(capabilities.Upgrade)
-			summary.Infusion = summariseCapability(capabilities.Infusion)
-			summary.AshOfWarMount = summariseCapability(capabilities.AshOfWarMount)
-			summary.Stack = summariseCapability(capabilities.Stack)
-			summary.Equipment = summariseCapability(capabilities.Equipment)
-		case resource.Colosseum != nil:
-			// A colosseum has a name but no family and no capability, so those
-			// stay zero and no filter built on them can ever match it.
-			summary.NameKnown = resource.Colosseum.Name.Known
-			summary.Name = resource.Colosseum.Name.Value
-		case resource.Region != nil:
-			// A region likewise carries a name only; its area is part of the full
-			// document and is never projected into a summary.
-			summary.NameKnown = resource.Region.Name.Known
-			summary.Name = resource.Region.Name.Value
-		case resource.SummoningPool != nil:
-			// A summoning pool likewise carries a name only; its region label is
-			// part of the full document and is never projected into a summary.
-			summary.NameKnown = resource.SummoningPool.Name.Known
-			summary.Name = resource.SummoningPool.Name.Value
-		case resource.Grace != nil:
-			// A grace likewise carries a name only; its region label, boss-arena
-			// fact, dungeon type and flags are part of the full document and are
-			// never projected into a summary.
-			summary.NameKnown = resource.Grace.Name.Known
-			summary.Name = resource.Grace.Name.Value
-		case resource.Boss != nil:
-			// A boss likewise carries a name only; its region label, encounter
-			// type, remembrance fact and defeat flag are part of the full
-			// document and are never projected into a summary.
-			summary.NameKnown = resource.Boss.Name.Known
-			summary.Name = resource.Boss.Name.Value
-		case resource.MapRegion != nil:
-			// A map region likewise carries a name only; its area label and
-			// visibility flag are part of the full document and are never
-			// projected into a summary.
-			summary.NameKnown = resource.MapRegion.Name.Known
-			summary.Name = resource.MapRegion.Name.Value
-		case resource.Tutorial != nil:
-			// A tutorial exposes its official title in summaries; the physical
-			// TutorialParam row ID remains part of the full document.
-			summary.NameKnown = resource.Tutorial.Title.Known
-			summary.Name = resource.Tutorial.Title.Value
-		case resource.Quest != nil:
-			// A quest likewise carries a name only; its steps and event flag
-			// plans are part of the full document and are never projected into
-			// a summary.
-			summary.NameKnown = resource.Quest.Name.Known
-			summary.Name = resource.Quest.Name.Value
-		case resource.Class != nil:
-			// A class likewise carries a name only; its starting class ID is part
-			// of the full document and is never projected into a summary.
-			summary.NameKnown = resource.Class.Name.Known
-			summary.Name = resource.Class.Name.Value
-		}
-		summaries = append(summaries, summary)
+		summaries = append(summaries, summariseResource(resource))
 	}
 	return summaries
+}
+
+// ResourceSummaryByKindAndKey resolves one scalar-only summary by the same
+// exact identity contract as ResourceByKindAndKey. It avoids cloning the full
+// document when a caller needs presentation metadata only.
+func (catalog *Catalog) ResourceSummaryByKindAndKey(
+	kind schema.ResourceKind,
+	key string,
+) (ResourceSummary, error) {
+	resource, err := catalog.requireResource(kind, key)
+	if err != nil {
+		return ResourceSummary{}, err
+	}
+	return summariseResource(resource), nil
+}
+
+func summariseResource(resource schema.Resource) ResourceSummary {
+	summary := ResourceSummary{Kind: resource.Kind, Key: resource.Key}
+	switch {
+	case resource.Item != nil:
+		summary.FamilyKnown = resource.Item.Family.Known
+		summary.Family = resource.Item.Family.Value
+		summary.NameKnown = resource.Item.Presentation.Name.Known
+		summary.Name = resource.Item.Presentation.Name.Value
+		summary.IconPathKnown = resource.Item.Presentation.IconPath.Known
+		summary.IconPath = resource.Item.Presentation.IconPath.Value
+		summary.NoDatabaseKnown = resource.Item.Safety.NoDatabase.Known
+		summary.NoDatabase = resource.Item.Safety.NoDatabase.Value
+
+		capabilities := resource.Item.Capabilities
+		summary.Upgrade = summariseCapability(capabilities.Upgrade)
+		summary.Infusion = summariseCapability(capabilities.Infusion)
+		summary.AshOfWarMount = summariseCapability(capabilities.AshOfWarMount)
+		summary.Stack = summariseCapability(capabilities.Stack)
+		summary.Equipment = summariseCapability(capabilities.Equipment)
+	case resource.Colosseum != nil:
+		// A colosseum has a name but no family and no capability, so those
+		// stay zero and no filter built on them can ever match it.
+		summary.NameKnown = resource.Colosseum.Name.Known
+		summary.Name = resource.Colosseum.Name.Value
+	case resource.Region != nil:
+		// A region likewise carries a name only; its area is part of the full
+		// document and is never projected into a summary.
+		summary.NameKnown = resource.Region.Name.Known
+		summary.Name = resource.Region.Name.Value
+	case resource.SummoningPool != nil:
+		// A summoning pool likewise carries a name only; its region label is
+		// part of the full document and is never projected into a summary.
+		summary.NameKnown = resource.SummoningPool.Name.Known
+		summary.Name = resource.SummoningPool.Name.Value
+	case resource.Grace != nil:
+		// A grace likewise carries a name only; its region label, boss-arena
+		// fact, dungeon type and flags are part of the full document and are
+		// never projected into a summary.
+		summary.NameKnown = resource.Grace.Name.Known
+		summary.Name = resource.Grace.Name.Value
+	case resource.Boss != nil:
+		// A boss likewise carries a name only; its region label, encounter
+		// type, remembrance fact and defeat flag are part of the full
+		// document and are never projected into a summary.
+		summary.NameKnown = resource.Boss.Name.Known
+		summary.Name = resource.Boss.Name.Value
+	case resource.MapRegion != nil:
+		// A map region likewise carries a name only; its area label and
+		// visibility flag are part of the full document and are never
+		// projected into a summary.
+		summary.NameKnown = resource.MapRegion.Name.Known
+		summary.Name = resource.MapRegion.Name.Value
+	case resource.Tutorial != nil:
+		// A tutorial exposes its official title in summaries; the physical
+		// TutorialParam row ID remains part of the full document.
+		summary.NameKnown = resource.Tutorial.Title.Known
+		summary.Name = resource.Tutorial.Title.Value
+	case resource.Quest != nil:
+		// A quest likewise carries a name only; its steps and event flag
+		// plans are part of the full document and are never projected into
+		// a summary.
+		summary.NameKnown = resource.Quest.Name.Known
+		summary.Name = resource.Quest.Name.Value
+	case resource.Class != nil:
+		// A class likewise carries a name only; its starting class ID is part
+		// of the full document and is never projected into a summary.
+		summary.NameKnown = resource.Class.Name.Known
+		summary.Name = resource.Class.Name.Value
+	}
+	return summary
 }
 
 // summariseCapability drops the rules pointer and the provenance and keeps the

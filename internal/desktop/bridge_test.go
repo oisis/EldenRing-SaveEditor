@@ -528,6 +528,45 @@ func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	}
 }
 
+func TestGetResourcePresentationSummariesForwardsTheOrderedBatchUnchanged(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	identities := []catalog.ResourcePresentationIdentity{
+		{Kind: "item", Key: "000F4240"},
+		{Kind: "class", Key: "0"},
+		{Kind: "item", Key: "000F4240"},
+	}
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetResourcePresentationSummaries(identities)
+		},
+		func() (any, error) {
+			return catalog.GetResourcePresentationSummaries(gameCatalog, identities)
+		})
+
+	empty, err := bridge.GetResourcePresentationSummaries(nil)
+	if err != nil {
+		t.Fatalf("GetResourcePresentationSummaries(nil): %v", err)
+	}
+	if empty.Resources == nil || len(empty.Resources) != 0 {
+		t.Fatalf("empty Resources = %#v, want non-nil empty slice", empty.Resources)
+	}
+}
+
+func TestGetResourcePresentationSummariesPropagatesEndpointFailureWithoutFallback(t *testing.T) {
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+	identities := []catalog.ResourcePresentationIdentity{{Kind: "item", Key: "000F4240"}}
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetResourcePresentationSummaries(identities)
+		},
+		func() (any, error) {
+			return catalog.GetResourcePresentationSummaries(nil, identities)
+		})
+}
+
 // GetResource reads GameCatalog only, so it is proven against the endpoint on
 // its own, over the identity shapes the endpoint gives meaning to: a real pair,
 // an empty, unknown, untrimmed and recased kind or key, the pre-migration

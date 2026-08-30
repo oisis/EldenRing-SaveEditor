@@ -11,6 +11,7 @@ import {
   GetItemVariants,
   GetLoadedSave,
   GetResource,
+  GetResourcePresentationSummaries,
   GetResources,
   GetSaveCharacters,
   GetStorage,
@@ -32,6 +33,7 @@ import type {
   CatalogPort,
   CatalogProvenance,
   CatalogResourceDetail,
+  CatalogResourcePresentationSummaries,
   CatalogResourcesPage,
   CatalogStackRules,
   CatalogUpgradeRules,
@@ -122,6 +124,20 @@ function toCatalogResourcesPage(
     // the request: zero paging resolves to the backend default there.
     page: result.page,
     pageSize: result.pageSize,
+  };
+}
+
+/** Projects the generated lightweight batch onto transport-free port values. */
+function toCatalogResourcePresentationSummaries(
+  result: Awaited<ReturnType<typeof GetResourcePresentationSummaries>>,
+): CatalogResourcePresentationSummaries {
+  return {
+    resources: result.resources.map(({ kind, key, name, iconPath }) => ({
+      kind,
+      key,
+      name,
+      iconPath,
+    })),
   };
 }
 
@@ -411,6 +427,13 @@ export const wailsDesktopBridge: ApplicationInfoPort &
     toCatalogResourcesPage(
       await callBridge(() =>
         GetResources(resourceType, family, capability, endpointID, search, page, pageSize),
+      ),
+    ),
+
+  getResourcePresentationSummaries: async (identities) =>
+    toCatalogResourcePresentationSummaries(
+      await callBridge(() =>
+        GetResourcePresentationSummaries(identities.map(({ kind, key }) => ({ kind, key }))),
       ),
     ),
 

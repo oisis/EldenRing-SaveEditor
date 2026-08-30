@@ -260,6 +260,10 @@ export const stubCatalogItemVariants: CatalogItemVariantsResult = {
 export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPort {
   return {
     getResources: () => Promise.resolve(stubCatalogPage),
+    getResourcePresentationSummaries: (identities) =>
+      Promise.resolve({
+        resources: identities.map(({ kind, key }) => ({ kind, key, name: "", iconPath: "" })),
+      }),
     getResource: () => Promise.resolve(stubCatalogResourceDetail),
     getItemVariants: () => Promise.resolve(stubCatalogItemVariants),
     ...overrides,

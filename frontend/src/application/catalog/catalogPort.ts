@@ -28,6 +28,24 @@ export type CatalogResourceSummary = {
   name: string;
 };
 
+/** One exact identity requested from the lightweight presentation batch. */
+export type CatalogResourcePresentationIdentity = {
+  kind: string;
+  key: string;
+};
+
+/** Scalar-only presentation metadata returned for one exact identity. */
+export type CatalogResourcePresentationSummary = CatalogResourcePresentationIdentity & {
+  /** Empty when the catalog does not know the resource name. */
+  name: string;
+  /** Embedded catalog path only; turn it into a URL through catalogAssetURL. */
+  iconPath: string;
+};
+
+export type CatalogResourcePresentationSummaries = {
+  resources: readonly CatalogResourcePresentationSummary[];
+};
+
 /** One resolved page of catalog resources. */
 export type CatalogResourcesPage = {
   resources: readonly CatalogResourceSummary[];
@@ -251,6 +269,10 @@ export type CatalogItemVariantsRequest = {
 export type CatalogPort = {
   /** Reads one page of the catalog under the backend's own filter contract. */
   getResources: (request: CatalogResourcesRequest) => Promise<CatalogResourcesPage>;
+  /** Reads scalar presentation metadata for an ordered batch of exact identities. */
+  getResourcePresentationSummaries: (
+    identities: readonly CatalogResourcePresentationIdentity[],
+  ) => Promise<CatalogResourcePresentationSummaries>;
   /** Reads the common detail of one resource under the backend's own identity contract. */
   getResource: (request: CatalogResourceRequest) => Promise<CatalogResourceDetail>;
   /** Reads the variants of one item under the backend's own identity contract. */

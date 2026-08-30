@@ -449,6 +449,69 @@ func TestResourcesRouteRejectsInvalidPaging(t *testing.T) {
 	)
 }
 
+func TestResourcePresentationSummariesRouteMatchesGetter(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	identities := []catalog.ResourcePresentationIdentity{
+		{Kind: resourceKindItem, Key: daggerResourceKey},
+		{Kind: resourceKindItem, Key: "8000EA60"},
+		{Kind: resourceKindItem, Key: daggerResourceKey},
+	}
+	want, err := catalog.GetResourcePresentationSummaries(gameCatalog, identities)
+	if err != nil {
+		t.Fatalf("catalog.GetResourcePresentationSummaries: %v", err)
+	}
+	body, err := json.Marshal(map[string]any{"identities": identities})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder,
+		httptest.NewRequest(http.MethodPost,
+			"/api/v1/catalog/resource-presentation-summaries", bytes.NewReader(body)))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+	if got := decode(t, recorder.Body.Bytes()); !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatalf("body = %#v, want %#v", got, marshalled(t, want))
+	}
+}
+
+func TestResourcePresentationSummariesRouteAcceptsAnEmptyBatch(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder,
+		httptest.NewRequest(http.MethodPost,
+			"/api/v1/catalog/resource-presentation-summaries", strings.NewReader(`{"identities":[]}`)))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	if got := decode(t, recorder.Body.Bytes()); !reflect.DeepEqual(got, map[string]any{"resources": []any{}}) {
+		t.Fatalf("body = %#v, want resources: []", got)
+	}
+}
+
+func TestResourcePresentationSummariesRouteRejectsInvalidInput(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	for name, body := range map[string]string{
+		"malformed JSON":   `{`,
+		"unknown field":    `{"identities":[],"extra":true}`,
+		"unknown identity": `{"identities":[{"kind":"item","key":"UNKNOWN"}]}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder,
+				httptest.NewRequest(http.MethodPost,
+					"/api/v1/catalog/resource-presentation-summaries", strings.NewReader(body)))
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+			assertJSONContentType(t, recorder)
+		})
+	}
+}
+
 func TestNetworkPresetsRouteMatchesGetter(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 	want, err := network.GetNetworkPresets(gameCatalog, "")
@@ -1033,6 +1096,11 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 			t.Fatalf("openapi.json describes %s without a GET operation", path)
 		}
 	}
+	if operation, exists := document.Paths["/api/v1/catalog/resource-presentation-summaries"]; !exists {
+		t.Fatal("openapi.json does not describe /api/v1/catalog/resource-presentation-summaries")
+	} else if _, hasPost := operation["post"]; !hasPost {
+		t.Fatal("openapi.json describes resource presentation summaries without a POST operation")
+	}
 	// The save-session routes exist only in the local loopback mode, so the
 	// document has to describe them with their own methods.
 	for path, method := range map[string]string{
@@ -1249,6 +1317,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
 		"GetResourcesResult",
+		"ResourcePresentationIdentity",
+		"ResourcePresentationSummary",
+		"GetResourcePresentationSummariesRequest",
+		"GetResourcePresentationSummariesResult",
 		"Relation",
 		"ResourceRef",
 		"NetworkParamValues",

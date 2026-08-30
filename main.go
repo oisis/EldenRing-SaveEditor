@@ -13,6 +13,7 @@ import (
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+	"github.com/oisis/EldenRing-SaveForge/internal/catalogassets"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -45,13 +46,16 @@ func main() {
 	bridge := desktop.NewBridge(applicationVersion, saveEngine, gameCatalog)
 
 	err = wails.Run(&options.App{
-		Title:       "Elden Ring SaveForge",
-		Width:       1280,
-		Height:      820,
-		MinWidth:    960,
-		MinHeight:   640,
-		AssetServer: &assetserver.Options{Assets: assets},
-		Bind:        []any{bridge},
+		Title:     "Elden Ring SaveForge",
+		Width:     1280,
+		Height:    820,
+		MinWidth:  960,
+		MinHeight: 640,
+		AssetServer: &assetserver.Options{
+			Assets:  assets,
+			Handler: catalogassets.New(catalogData),
+		},
+		Bind: []any{bridge},
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -144,6 +144,15 @@ func (b *Bridge) GetResources(
 		b.gameCatalog, resourceType, family, capability, endpointID, search, page, pageSize)
 }
 
+// GetResourcePresentationSummaries delegates to the matching batch endpoint.
+// Order, duplicates, exact identity validation and atomic failure all remain
+// endpoint concerns; the bridge forwards the slice unchanged.
+func (b *Bridge) GetResourcePresentationSummaries(
+	identities []catalog.ResourcePresentationIdentity,
+) (catalog.GetResourcePresentationSummariesResult, error) {
+	return catalog.GetResourcePresentationSummaries(b.gameCatalog, identities)
+}
+
 // GetResource delegates to the GetResource endpoint and returns its result and
 // error unchanged. The kind and the key are forwarded exactly as received: what
 // a valid kind is, that neither value is trimmed, normalised or retried under

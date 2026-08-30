@@ -61,6 +61,11 @@
                 "filepath": "../../../docs/endpoints/catalog/get_resources.md",
                 "title": "GetResources"
               },
+              "/get-resource-presentation-summaries": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_resource_presentation_summaries.md",
+                "title": "GetResourcePresentationSummaries"
+              },
               "/get-resource-relations": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/catalog/get_resource_relations.md",

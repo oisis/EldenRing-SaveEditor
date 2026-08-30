@@ -8,6 +8,7 @@ import {
   GetItemVariants,
   GetLoadedSave,
   GetResource,
+  GetResourcePresentationSummaries,
   GetResources,
   GetSaveCharacters,
   GetStorage,
@@ -25,6 +26,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetItemVariants: vi.fn(),
   GetLoadedSave: vi.fn(),
   GetResource: vi.fn(),
+  GetResourcePresentationSummaries: vi.fn(),
   GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
   GetStorage: vi.fn(),
@@ -41,6 +43,7 @@ const getCharacterStats = vi.mocked(GetCharacterStats);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
 const getResources = vi.mocked(GetResources);
+const getResourcePresentationSummaries = vi.mocked(GetResourcePresentationSummaries);
 const getResource = vi.mocked(GetResource);
 const getItemVariants = vi.mocked(GetItemVariants);
 
@@ -55,6 +58,7 @@ beforeEach(() => {
   getInventory.mockReset();
   getStorage.mockReset();
   getResources.mockReset();
+  getResourcePresentationSummaries.mockReset();
   getResource.mockReset();
   getItemVariants.mockReset();
 });
@@ -687,6 +691,74 @@ describe("wails catalog adapter", () => {
     // not told apart here: that needs a structured backend error contract.
     expect(failure?.message).toBe(bridgeFailureCode);
     expect(failure?.message).not.toContain("goroutine");
+    expect(failure?.message).not.toContain("/Users/private");
+  });
+
+  it("forwards an ordered presentation batch with duplicates and maps only scalar fields", async () => {
+    getResourcePresentationSummaries.mockResolvedValue(
+      catalog.GetResourcePresentationSummariesResult.createFrom({
+        resources: [
+          {
+            kind: "item",
+            key: "000F4240",
+            name: "Dagger",
+            iconPath: "assets/icons/items/melee_armaments/dagger.png",
+          },
+          { kind: "class", key: "0", name: "Vagabond", iconPath: "" },
+          {
+            kind: "item",
+            key: "000F4240",
+            name: "Dagger",
+            iconPath: "assets/icons/items/melee_armaments/dagger.png",
+          },
+        ],
+      }),
+    );
+    const identities = [
+      { kind: "item", key: "000F4240" },
+      { kind: "class", key: "0" },
+      { kind: "item", key: "000F4240" },
+    ];
+
+    await expect(wailsDesktopBridge.getResourcePresentationSummaries(identities)).resolves.toEqual({
+      resources: [
+        {
+          kind: "item",
+          key: "000F4240",
+          name: "Dagger",
+          iconPath: "assets/icons/items/melee_armaments/dagger.png",
+        },
+        { kind: "class", key: "0", name: "Vagabond", iconPath: "" },
+        {
+          kind: "item",
+          key: "000F4240",
+          name: "Dagger",
+          iconPath: "assets/icons/items/melee_armaments/dagger.png",
+        },
+      ],
+    });
+    expect(getResourcePresentationSummaries).toHaveBeenCalledExactlyOnceWith(identities);
+  });
+
+  it("forwards an empty presentation batch and sanitises bridge failures", async () => {
+    getResourcePresentationSummaries.mockResolvedValue(
+      catalog.GetResourcePresentationSummariesResult.createFrom({ resources: [] }),
+    );
+    await expect(wailsDesktopBridge.getResourcePresentationSummaries([])).resolves.toEqual({
+      resources: [],
+    });
+    expect(getResourcePresentationSummaries).toHaveBeenCalledExactlyOnceWith([]);
+
+    getResourcePresentationSummaries.mockRejectedValue(
+      new Error("identity 0: /Users/private/catalog.json"),
+    );
+    const failure = await wailsDesktopBridge
+      .getResourcePresentationSummaries([{ kind: "item", key: "UNKNOWN" }])
+      .then(
+        () => undefined,
+        (error: unknown) => error as Error,
+      );
+    expect(failure?.message).toBe(bridgeFailureCode);
     expect(failure?.message).not.toContain("/Users/private");
   });
 });

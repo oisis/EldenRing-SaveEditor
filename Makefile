@@ -5,6 +5,7 @@ GO_PACKAGES := \
 	./backend/saveengine/... \
 	./backend/buildtemplates/... \
 	./backend/endpoints/... \
+	./internal/catalogassets \
 	./internal/desktop \
 	./tools/...
 
