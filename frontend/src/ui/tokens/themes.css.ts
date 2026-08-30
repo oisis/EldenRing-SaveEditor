@@ -54,6 +54,7 @@ export const lightTheme = createTheme(tokens, {
     focus: "#1a5fa6",
     danger: "#a52a21",
     dangerSurface: "#f7e2df",
+    overlay: "rgba(20, 27, 35, 0.52)",
   },
   ...shared,
 });
@@ -75,6 +76,7 @@ export const darkTheme = createTheme(tokens, {
     focus: "#6fb3ff",
     danger: "#f07d74",
     dangerSurface: "#331c1b",
+    overlay: "rgba(0, 0, 0, 0.72)",
   },
   ...shared,
 });
@@ -96,6 +98,7 @@ export const eldenRingTheme = createTheme(tokens, {
     focus: "#f0d182",
     danger: "#e28376",
     dangerSurface: "#2e1613",
+    overlay: "rgba(0, 0, 0, 0.78)",
   },
   ...shared,
 });

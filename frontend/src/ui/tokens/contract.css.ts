@@ -25,6 +25,7 @@ export const tokens = createThemeContract({
     focus: null,
     danger: null,
     dangerSurface: null,
+    overlay: null,
   },
   font: {
     body: null,

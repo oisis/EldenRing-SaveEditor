@@ -82,6 +82,24 @@ describe("architecture boundaries", () => {
     ).toEqual([]);
   });
 
+  it("keeps Radix primitives behind the internal UI library", () => {
+    const offenders = files
+      .filter((file) => /@radix-ui\//.test(file.text))
+      .map((file) => file.path)
+      .filter((path) => !path.startsWith("ui/components/"));
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps raw form and table elements behind the internal UI library", () => {
+    const offenders = files
+      .filter((file) => file.path.startsWith("features/"))
+      .filter((file) => /<(?:input|select|table)\b/.test(file.text))
+      .map((file) => file.path);
+
+    expect(offenders).toEqual([]);
+  });
+
   it("keeps the application layer independent of the infrastructure layer", () => {
     const applicationLayer = files.filter((file) => file.path.startsWith("application/"));
 

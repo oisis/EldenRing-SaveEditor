@@ -17,6 +17,10 @@ msgstr ""
 msgid "Active characters"
 msgstr "Aktywne postacie"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "All families"
+msgstr "Wszystkie rodziny"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
 msgstr "Aplikacja"
@@ -24,6 +28,14 @@ msgstr "Aplikacja"
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application information"
 msgstr "Informacje o aplikacji"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Armor"
+msgstr "Pancerze"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Ashes of War"
+msgstr "Prochy Wojny"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 #: src/i18n/i18n.test.tsx
@@ -34,9 +46,17 @@ msgstr "Backend aplikacji"
 msgid "Capabilities"
 msgstr "Możliwości"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Category"
+msgstr "Kategoria"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Characters"
 msgstr "Postacie"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Close"
+msgstr "Zamknij"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
@@ -46,6 +66,10 @@ msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
 msgid "Dark"
 msgstr "Ciemny"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Details"
+msgstr "Szczegóły"
+
 #: src/App.tsx
 msgid "Elden Ring"
 msgstr "Elden Ring"
@@ -54,6 +78,22 @@ msgstr "Elden Ring"
 msgid "English"
 msgstr "angielski"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Family"
+msgstr "Rodzina"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Gestures"
+msgstr "Gesty"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Goods"
+msgstr "Przedmioty"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Grid"
+msgstr "Siatka"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
 msgstr "Nieaktywny slot"
@@ -61,6 +101,26 @@ msgstr "Nieaktywny slot"
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slots"
 msgstr "Nieaktywne sloty"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item Database"
+msgstr "Baza przedmiotów"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item Database pages"
+msgstr "Strony bazy przedmiotów"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item details"
+msgstr "Szczegóły przedmiotu"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item family"
+msgstr "Rodzina przedmiotu"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item results"
+msgstr "Wyniki wyszukiwania przedmiotów"
 
 #: src/App.tsx
 msgid "Language"
@@ -78,17 +138,69 @@ msgstr "Wczytywanie informacji o aplikacji…"
 msgid "Loading characters…"
 msgstr "Ładowanie postaci…"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Loading item details…"
+msgstr "Wczytywanie szczegółów przedmiotu…"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Loading items…"
+msgstr "Wczytywanie przedmiotów…"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Loading variants…"
+msgstr "Wczytywanie wariantów…"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Location"
+msgstr "Lokalizacja"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Name"
+msgstr "Nazwa"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Name unavailable"
+msgstr "Nazwa niedostępna"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Next"
+msgstr "Następna"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "No active character is available."
 msgstr "Brak dostępnej aktywnej postaci."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "No items match the current search."
+msgstr "Brak przedmiotów pasujących do wyszukiwania."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No save loaded."
 msgstr "Nie wczytano pliku save."
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "No variants are available."
+msgstr "Brak dostępnych wariantów."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Page {servedPage}"
+msgstr "Strona {servedPage}"
+
 #: src/App.tsx
 msgid "Polish"
 msgstr "polski"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Read-only information from GameCatalog."
+msgstr "Informacje tylko do odczytu z GameCatalog."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Results: {total}"
+msgstr "Wyniki: {total}"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Retry"
@@ -102,13 +214,41 @@ msgstr "RL {level}"
 msgid "SaveForge 2.0"
 msgstr "SaveForge 2.0"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Search items"
+msgstr "Szukaj przedmiotów"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
 msgstr "Slot {slotNumber}"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Spells"
+msgstr "Zaklęcia"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Spirit Ashes"
+msgstr "Prochy duchów"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Subcategory"
+msgstr "Podkategoria"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
 msgstr "Wspierane schematy"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Table"
+msgstr "Tabela"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Talismans"
+msgstr "Talizmany"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "The selected resource has no item details."
+msgstr "Wybrany zasób nie zawiera szczegółów przedmiotu."
 
 #: src/App.tsx
 msgid "Theme"
@@ -122,6 +262,38 @@ msgstr ""
 msgid "Unable to load characters."
 msgstr "Nie udało się wczytać postaci."
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Unable to load item details."
+msgstr "Nie udało się wczytać szczegółów przedmiotu."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Unable to load item variants."
+msgstr "Nie udało się wczytać wariantów przedmiotu."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Unable to load the Item Database."
+msgstr "Nie udało się wczytać bazy przedmiotów."
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Unavailable"
+msgstr "Niedostępne"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Variant details unavailable"
+msgstr "Szczegóły wariantu niedostępne"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Variants"
+msgstr "Warianty"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Version"
 msgstr "Wersja"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "View"
+msgstr "Widok"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Weapons"
+msgstr "Bronie"

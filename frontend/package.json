@@ -24,7 +24,9 @@
   "dependencies": {
     "@lingui/core": "6.6.0",
     "@lingui/react": "6.6.0",
+    "@radix-ui/react-dialog": "1.1.23",
     "@tanstack/react-query": "5.102.8",
+    "@tanstack/react-table": "9.2.4",
     "@vanilla-extract/css": "1.21.2",
     "@vanilla-extract/recipes": "0.5.7",
     "react": "19.2.8",
