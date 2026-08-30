@@ -295,6 +295,35 @@ describe("useInventoryAndStorage", () => {
     expect(result.current.selected).toBeNull();
   });
 
+  it("starts a fresh selection entry after changing the container section", async () => {
+    // Both sections answer with the same owned-item identity and the same
+    // revision: matching values must not resurrect a foreign section's intent.
+    const shared = page(stubInventoryPage, { saveRevision: "revision-1" });
+    const { wrapper } = setup(
+      makeItemsPort({
+        getInventory: () => Promise.resolve(shared),
+        getStorage: () => Promise.resolve(shared),
+      }),
+    );
+    const { result, rerender } = renderHook(
+      ({ current }: { current: InventoryAndStorageQuery }) => useInventoryAndStorage(current),
+      { wrapper, initialProps: { current: query } },
+    );
+    await waitFor(() => expect(result.current.inventory.data).toBeDefined());
+    result.current.selectItem("inventory", "owned-1");
+    await waitFor(() => expect(result.current.selected).not.toBeNull());
+
+    rerender({ current: { ...query, containerSection: "key" } });
+    expect(result.current.selected).toBeNull();
+    await waitFor(() => expect(result.current.inventory.data).toBe(shared));
+    expect(result.current.selected).toBeNull();
+
+    rerender({ current: query });
+    expect(result.current.selected).toBeNull();
+    await waitFor(() => expect(result.current.inventory.data).toBe(shared));
+    expect(result.current.selected).toBeNull();
+  });
+
   it("keeps an Inventory error independent from a successful Storage page", async () => {
     const getInventory = vi.fn(() => Promise.reject(new Error("bridge_call_failed private")));
     const { wrapper } = setup(makeItemsPort({ getInventory }));

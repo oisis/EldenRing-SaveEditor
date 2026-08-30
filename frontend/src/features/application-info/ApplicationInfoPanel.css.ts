@@ -19,12 +19,3 @@ export const description = style({
   flexWrap: "wrap",
   gap: tokens.space.xs,
 });
-
-export const alert = style({
-  margin: 0,
-  padding: tokens.space.md,
-  borderRadius: tokens.radius.sm,
-  border: `1px solid ${tokens.color.danger}`,
-  backgroundColor: tokens.color.dangerSurface,
-  color: tokens.color.text,
-});

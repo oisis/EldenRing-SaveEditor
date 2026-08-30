@@ -3,7 +3,8 @@ import { useApplicationInfo } from "../../application/application-info/useApplic
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
-import { alert, definitionList, description, term } from "./ApplicationInfoPanel.css";
+import { alertPanel } from "../../ui/patterns/panel.css";
+import { definitionList, description, term } from "./ApplicationInfoPanel.css";
 
 /**
  * The foundation screen of SaveForge 2.0. It renders exactly what the
@@ -32,7 +33,7 @@ export function ApplicationInfoPanel() {
         // Retry belongs to this state only: there is nothing to retry while the
         // call is in flight or after it succeeded.
         <>
-          <p role="alert" className={alert}>
+          <p role="alert" className={alertPanel}>
             <Trans>Could not read application information from the backend.</Trans>
           </p>
           <div>

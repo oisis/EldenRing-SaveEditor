@@ -46,6 +46,11 @@ msgstr "Backend"
 msgid "Capabilities"
 msgstr "Capabilities"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Card {servedPage} of {cardCount}"
+msgstr "Card {servedPage} of {cardCount}"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Category"
 msgstr "Category"
@@ -54,9 +59,14 @@ msgstr "Category"
 msgid "Characters"
 msgstr "Characters"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Close"
 msgstr "Close"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Container"
+msgstr "Container"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
@@ -66,6 +76,7 @@ msgstr "Could not read application information from the backend."
 msgid "Dark"
 msgstr "Dark"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Details"
 msgstr "Details"
@@ -90,6 +101,7 @@ msgstr "Gestures"
 msgid "Goods"
 msgstr "Goods"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Grid"
 msgstr "Grid"
@@ -102,6 +114,26 @@ msgstr "Inactive slot"
 msgid "Inactive slots"
 msgstr "Inactive slots"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory"
+msgstr "Inventory"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory and Storage"
+msgstr "Inventory and Storage"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory and Storage records"
+msgstr "Inventory and Storage records"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory cards"
+msgstr "Inventory cards"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory items"
+msgstr "Inventory items"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item Database"
 msgstr "Item Database"
@@ -110,6 +142,7 @@ msgstr "Item Database"
 msgid "Item Database pages"
 msgstr "Item Database pages"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item details"
 msgstr "Item details"
@@ -118,9 +151,17 @@ msgstr "Item details"
 msgid "Item family"
 msgstr "Item family"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Item names and icons are unavailable."
+msgstr "Item names and icons are unavailable."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item results"
 msgstr "Item results"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Items: {total}"
+msgstr "Items: {total}"
 
 #: src/App.tsx
 msgid "Language"
@@ -130,6 +171,10 @@ msgstr "Language"
 msgid "Light"
 msgstr "Light"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Load a save and select a character to read the Inventory and the Storage Box."
+msgstr "Load a save and select a character to read the Inventory and the Storage Box."
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Loading application information…"
 msgstr "Loading application information…"
@@ -138,6 +183,7 @@ msgstr "Loading application information…"
 msgid "Loading characters…"
 msgstr "Loading characters…"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading item details…"
 msgstr "Loading item details…"
@@ -145,6 +191,14 @@ msgstr "Loading item details…"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading items…"
 msgstr "Loading items…"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Loading the Inventory…"
+msgstr "Loading the Inventory…"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Loading the Storage Box…"
+msgstr "Loading the Storage Box…"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading variants…"
@@ -154,17 +208,36 @@ msgstr "Loading variants…"
 msgid "Location"
 msgstr "Location"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Maximum in Inventory"
+msgstr "Maximum in Inventory"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Maximum in Storage"
+msgstr "Maximum in Storage"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name"
 msgstr "Name"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name unavailable"
 msgstr "Name unavailable"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Next"
 msgstr "Next"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Next inventory card"
+msgstr "Next inventory card"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Next storage card"
+msgstr "Next storage card"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No active character is available."
@@ -190,13 +263,34 @@ msgstr "Page {servedPage}"
 msgid "Polish"
 msgstr "Polish"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Position"
+msgstr "Position"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Previous"
 msgstr "Previous"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Previous inventory card"
+msgstr "Previous inventory card"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Previous storage card"
+msgstr "Previous storage card"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Quantity"
+msgstr "Quantity"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Read-only information from GameCatalog."
 msgstr "Read-only information from GameCatalog."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Read-only information from the save and GameCatalog."
+msgstr "Read-only information from the save and GameCatalog."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Results: {total}"
@@ -230,6 +324,19 @@ msgstr "Spells"
 msgid "Spirit Ashes"
 msgstr "Spirit Ashes"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage"
+msgstr "Storage"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage cards"
+msgstr "Storage cards"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage items"
+msgstr "Storage items"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Subcategory"
 msgstr "Subcategory"
@@ -238,6 +345,7 @@ msgstr "Subcategory"
 msgid "Supported schemas"
 msgstr "Supported schemas"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Table"
 msgstr "Table"
@@ -246,6 +354,11 @@ msgstr "Table"
 msgid "Talismans"
 msgstr "Talismans"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
+msgstr "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The selected resource has no item details."
 msgstr "The selected resource has no item details."
@@ -254,14 +367,23 @@ msgstr "The selected resource has no item details."
 msgid "Theme"
 msgstr "Theme"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "This Inventory card is empty."
+msgstr "This Inventory card is empty."
+
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr "This message is intentionally left untranslated in Polish."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "This Storage card is empty."
+msgstr "This Storage card is empty."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
 msgstr "Unable to load characters."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load item details."
 msgstr "Unable to load item details."
@@ -270,9 +392,17 @@ msgstr "Unable to load item details."
 msgid "Unable to load item variants."
 msgstr "Unable to load item variants."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Unable to load the Inventory."
+msgstr "Unable to load the Inventory."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load the Item Database."
 msgstr "Unable to load the Item Database."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Unable to load the Storage Box."
+msgstr "Unable to load the Storage Box."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unavailable"
@@ -290,6 +420,7 @@ msgstr "Variants"
 msgid "Version"
 msgstr "Version"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "View"
 msgstr "View"

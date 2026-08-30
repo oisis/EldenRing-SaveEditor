@@ -18,22 +18,24 @@ import {
   factLabel,
   facts,
   factValue,
-  family as familyControl,
-  grid,
   message,
-  pagination,
   panel,
-  search as searchControl,
   spacer,
   tableFrame,
+  toolbar,
+  viewSwitch,
+  visuallyHidden,
+} from "../../../ui/patterns/panel.css";
+import {
+  family as familyControl,
+  grid,
+  pagination,
+  search as searchControl,
   tile,
   tileMeta,
   tileName,
-  toolbar,
   variant,
   variantList,
-  viewSwitch,
-  visuallyHidden,
 } from "./ItemDatabasePanel.css";
 import { useItemDatabase } from "./useItemDatabase";
 

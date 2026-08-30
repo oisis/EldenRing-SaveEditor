@@ -41,6 +41,7 @@ type Selection = {
 type SessionEntry = {
   saveSessionID: string | undefined;
   characterID: number | undefined;
+  containerSection: string;
   selection: Selection | null;
 };
 
@@ -53,8 +54,8 @@ type SessionEntry = {
  *
  * Selection stores only an opaque owned-item identity and the exact revision
  * that minted it. The selected record is derived from the current query page,
- * so changing session, slot, page contents or revision can never leave a stale
- * record available to a future action.
+ * so changing session, slot, container section, page contents or revision can
+ * never leave a stale record available to a future action.
  */
 export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
   const inventory = useInventory({
@@ -111,21 +112,32 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
   const [entry, setEntry] = useState<SessionEntry>({
     saveSessionID: query.saveSessionID,
     characterID: query.characterID,
+    containerSection: query.containerSection,
     selection: null,
   });
 
-  // A session or character change creates a fresh workspace entry. Resetting
-  // during render prevents one frame from exposing the previous slot's intent.
-  if (entry.saveSessionID !== query.saveSessionID || entry.characterID !== query.characterID) {
+  // A session, character or container-section change creates a fresh workspace
+  // entry. The section is compared as the opaque value the caller supplied, and
+  // resetting during render prevents one frame from exposing the previous
+  // workspace's intent. An owned-item identity only ever means something inside
+  // the exact workspace that offered it.
+  if (
+    entry.saveSessionID !== query.saveSessionID ||
+    entry.characterID !== query.characterID ||
+    entry.containerSection !== query.containerSection
+  ) {
     setEntry({
       saveSessionID: query.saveSessionID,
       characterID: query.characterID,
+      containerSection: query.containerSection,
       selection: null,
     });
   }
 
   const isCurrentEntry =
-    entry.saveSessionID === query.saveSessionID && entry.characterID === query.characterID;
+    entry.saveSessionID === query.saveSessionID &&
+    entry.characterID === query.characterID &&
+    entry.containerSection === query.containerSection;
   const selection = isCurrentEntry ? entry.selection : null;
   const revisionState = compareRevisions(inventory.data, storage.data);
 
@@ -147,6 +159,7 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
     setEntry({
       saveSessionID: query.saveSessionID,
       characterID: query.characterID,
+      containerSection: query.containerSection,
       selection:
         page && exists ? { container, ownedItemID, saveRevision: page.saveRevision } : null,
     });
@@ -165,6 +178,7 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
       setEntry({
         saveSessionID: query.saveSessionID,
         characterID: query.characterID,
+        containerSection: query.containerSection,
         selection: null,
       }),
   };

@@ -46,6 +46,11 @@ msgstr "Backend aplikacji"
 msgid "Capabilities"
 msgstr "Możliwości"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Card {servedPage} of {cardCount}"
+msgstr "Karta {servedPage} z {cardCount}"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Category"
 msgstr "Kategoria"
@@ -54,9 +59,14 @@ msgstr "Kategoria"
 msgid "Characters"
 msgstr "Postacie"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Close"
 msgstr "Zamknij"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Container"
+msgstr "Kontener"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
@@ -66,6 +76,7 @@ msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
 msgid "Dark"
 msgstr "Ciemny"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Details"
 msgstr "Szczegóły"
@@ -90,6 +101,7 @@ msgstr "Gesty"
 msgid "Goods"
 msgstr "Przedmioty"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Grid"
 msgstr "Siatka"
@@ -102,6 +114,26 @@ msgstr "Nieaktywny slot"
 msgid "Inactive slots"
 msgstr "Nieaktywne sloty"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory"
+msgstr "Ekwipunek"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory and Storage"
+msgstr "Ekwipunek i skrzynia"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory and Storage records"
+msgstr "Rekordy ekwipunku i skrzyni"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory cards"
+msgstr "Karty ekwipunku"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Inventory items"
+msgstr "Przedmioty w ekwipunku"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item Database"
 msgstr "Baza przedmiotów"
@@ -110,6 +142,7 @@ msgstr "Baza przedmiotów"
 msgid "Item Database pages"
 msgstr "Strony bazy przedmiotów"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item details"
 msgstr "Szczegóły przedmiotu"
@@ -118,9 +151,17 @@ msgstr "Szczegóły przedmiotu"
 msgid "Item family"
 msgstr "Rodzina przedmiotu"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Item names and icons are unavailable."
+msgstr "Nazwy i ikony przedmiotów są niedostępne."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item results"
 msgstr "Wyniki wyszukiwania przedmiotów"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Items: {total}"
+msgstr "Przedmioty: {total}"
 
 #: src/App.tsx
 msgid "Language"
@@ -130,6 +171,10 @@ msgstr "Język"
 msgid "Light"
 msgstr "Jasny"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Load a save and select a character to read the Inventory and the Storage Box."
+msgstr "Wczytaj save i wybierz postać, aby odczytać ekwipunek i skrzynię."
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Loading application information…"
 msgstr "Wczytywanie informacji o aplikacji…"
@@ -138,6 +183,7 @@ msgstr "Wczytywanie informacji o aplikacji…"
 msgid "Loading characters…"
 msgstr "Ładowanie postaci…"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading item details…"
 msgstr "Wczytywanie szczegółów przedmiotu…"
@@ -145,6 +191,14 @@ msgstr "Wczytywanie szczegółów przedmiotu…"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading items…"
 msgstr "Wczytywanie przedmiotów…"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Loading the Inventory…"
+msgstr "Wczytywanie ekwipunku…"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Loading the Storage Box…"
+msgstr "Wczytywanie skrzyni…"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading variants…"
@@ -154,17 +208,36 @@ msgstr "Wczytywanie wariantów…"
 msgid "Location"
 msgstr "Lokalizacja"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Maximum in Inventory"
+msgstr "Maksimum w ekwipunku"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Maximum in Storage"
+msgstr "Maksimum w skrzyni"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name"
 msgstr "Nazwa"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name unavailable"
 msgstr "Nazwa niedostępna"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Next"
 msgstr "Następna"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Next inventory card"
+msgstr "Następna karta ekwipunku"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Next storage card"
+msgstr "Następna karta skrzyni"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No active character is available."
@@ -190,13 +263,34 @@ msgstr "Strona {servedPage}"
 msgid "Polish"
 msgstr "polski"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Position"
+msgstr "Pozycja"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Previous"
 msgstr "Poprzednia"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Previous inventory card"
+msgstr "Poprzednia karta ekwipunku"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Previous storage card"
+msgstr "Poprzednia karta skrzyni"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Quantity"
+msgstr "Ilość"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Read-only information from GameCatalog."
 msgstr "Informacje tylko do odczytu z GameCatalog."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Read-only information from the save and GameCatalog."
+msgstr "Informacje tylko do odczytu z save i GameCatalog."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Results: {total}"
@@ -230,6 +324,19 @@ msgstr "Zaklęcia"
 msgid "Spirit Ashes"
 msgstr "Prochy duchów"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage"
+msgstr "Skrzynia"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage cards"
+msgstr "Karty skrzyni"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Storage items"
+msgstr "Przedmioty w skrzyni"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Subcategory"
 msgstr "Podkategoria"
@@ -238,6 +345,7 @@ msgstr "Podkategoria"
 msgid "Supported schemas"
 msgstr "Wspierane schematy"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Table"
 msgstr "Tabela"
@@ -246,6 +354,11 @@ msgstr "Tabela"
 msgid "Talismans"
 msgstr "Talizmany"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
+msgstr "Ekwipunek i skrzynia zostały odczytane w różnych rewizjach save. Wczytaj postać ponownie, zanim zaufasz temu widokowi."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The selected resource has no item details."
 msgstr "Wybrany zasób nie zawiera szczegółów przedmiotu."
@@ -254,14 +367,23 @@ msgstr "Wybrany zasób nie zawiera szczegółów przedmiotu."
 msgid "Theme"
 msgstr "Motyw"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "This Inventory card is empty."
+msgstr "Ta karta ekwipunku jest pusta."
+
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr ""
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "This Storage card is empty."
+msgstr "Ta karta skrzyni jest pusta."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
 msgstr "Nie udało się wczytać postaci."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load item details."
 msgstr "Nie udało się wczytać szczegółów przedmiotu."
@@ -270,9 +392,17 @@ msgstr "Nie udało się wczytać szczegółów przedmiotu."
 msgid "Unable to load item variants."
 msgstr "Nie udało się wczytać wariantów przedmiotu."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Unable to load the Inventory."
+msgstr "Nie udało się wczytać ekwipunku."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load the Item Database."
 msgstr "Nie udało się wczytać bazy przedmiotów."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Unable to load the Storage Box."
+msgstr "Nie udało się wczytać skrzyni."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unavailable"
@@ -290,6 +420,7 @@ msgstr "Warianty"
 msgid "Version"
 msgstr "Wersja"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "View"
 msgstr "Widok"

@@ -99,17 +99,3 @@ export const inactiveRow = style({
   color: tokens.color.textMuted,
   minWidth: 0,
 });
-
-export const message = style({
-  margin: 0,
-  color: tokens.color.textMuted,
-});
-
-export const alert = style({
-  margin: 0,
-  padding: tokens.space.md,
-  borderRadius: tokens.radius.sm,
-  border: `1px solid ${tokens.color.danger}`,
-  backgroundColor: tokens.color.dangerSurface,
-  color: tokens.color.text,
-});

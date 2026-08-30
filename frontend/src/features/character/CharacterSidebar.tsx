@@ -1,14 +1,13 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { CharacterSummary } from "../../application/character/characterPort";
 import { Button } from "../../ui/components/Button/Button";
+import { alertPanel, message } from "../../ui/patterns/panel.css";
 import {
-  alert,
   group,
   groupTitle,
   inactiveRow,
   level as levelText,
   list,
-  message,
   meta,
   name as nameText,
   row,
@@ -47,7 +46,7 @@ export function CharacterSidebar({ model }: { model: CharacterSelection }) {
       {hasSession && characters.isError && (
         // The transport error never reaches the interface: the adapter reduces
         // every failure to one code, so the user sees one safe message.
-        <p role="alert" className={alert}>
+        <p role="alert" className={alertPanel}>
           <Trans>Unable to load characters.</Trans>
         </p>
       )}
