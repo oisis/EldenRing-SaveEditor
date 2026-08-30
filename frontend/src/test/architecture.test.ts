@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const srcRoot = resolve(import.meta.dirname, "..");
 
 /** The only module allowed to reach the generated Wails bindings. */
-const bridgeAdapter = "infrastructure/bridge/applicationInfoBridge.ts";
+const bridgeAdapter = "infrastructure/bridge/desktopBridge.ts";
 
 /** The only directory allowed to hold raw colour values. */
 const tokenDirectory = "ui/tokens/";

@@ -4,11 +4,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
+import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
-import { wailsApplicationInfoBridge } from "./infrastructure/bridge/applicationInfoBridge";
+import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
 import "./ui/tokens/global.css";
 
 // Composition root: the only place that picks a concrete port implementation.
+// One adapter fulfils every port, injected through React context so nothing
+// below reaches it as a global.
 const queryClient = new QueryClient();
 
 const container = document.getElementById("root");
@@ -22,8 +25,10 @@ createRoot(container).render(
   <StrictMode>
     <I18nProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
-        <ApplicationInfoPortProvider port={wailsApplicationInfoBridge}>
-          <App />
+        <ApplicationInfoPortProvider port={wailsDesktopBridge}>
+          <SaveSessionPortProvider port={wailsDesktopBridge}>
+            <App />
+          </SaveSessionPortProvider>
         </ApplicationInfoPortProvider>
       </QueryClientProvider>
     </I18nProvider>
