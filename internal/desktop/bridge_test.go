@@ -628,3 +628,113 @@ func TestGetResourcePropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
 }
+
+// GetItemVariants reads GameCatalog only, so it is proven against the endpoint
+// on its own, over the identity shapes the endpoint gives meaning to: a real
+// item, an item without variants, an empty, unknown, untrimmed and recased kind
+// or key, a non-item kind and the pre-migration prefixed key. The bridge has to
+// produce the endpoint outcome in each of them.
+func TestGetItemVariantsForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	arguments := []struct {
+		name string
+		kind string
+		key  string
+	}{
+		{"item with variants", "item", "000F4240"},
+		{"item without variants", "item", "10009C40"},
+		{"non-item kind", "class", "0"},
+		{"empty kind and key", "", ""},
+		{"empty kind with a known key", "", "000F4240"},
+		{"empty key in the item kind", "item", ""},
+		{"untrimmed kind", " item ", "000F4240"},
+		{"untrimmed key", "item", " 000F4240"},
+		{"recased kind", "Item", "000F4240"},
+		{"recased key", "item", "000f4240"},
+		{"unknown kind", "future_kind", "000F4240"},
+		{"unknown key in the item kind", "item", "FFFFFFFF"},
+		{"pre-migration prefixed key", "item", "item:000F4240"},
+		{"game ID passed as a key", "item", "1000000"},
+	}
+
+	for _, argument := range arguments {
+		t.Run(argument.name, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetItemVariants(argument.kind, argument.key)
+				},
+				func() (any, error) {
+					return catalog.GetItemVariants(gameCatalog, argument.kind, argument.key)
+				})
+		})
+	}
+}
+
+// The variants reach the caller in catalog order, and an item that carries none
+// is a valid empty result rather than a rejection or a nil slice.
+func TestGetItemVariantsKeepsCatalogOrderAndTheEmptyResult(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	result, err := bridge.GetItemVariants("item", "000F4240")
+	if err != nil {
+		t.Fatalf("GetItemVariants: %v", err)
+	}
+	direct, err := catalog.GetItemVariants(gameCatalog, "item", "000F4240")
+	if err != nil {
+		t.Fatalf("catalog.GetItemVariants: %v", err)
+	}
+	if len(result.Variants) == 0 {
+		t.Fatal("variants = 0, want the variants of the item document")
+	}
+	// Order is the catalog's, so the sequence of GameIDs has to match exactly.
+	bridged := make([]uint32, 0, len(result.Variants))
+	endpoint := make([]uint32, 0, len(direct.Variants))
+	for _, variant := range result.Variants {
+		bridged = append(bridged, variant.GameID.Value)
+	}
+	for _, variant := range direct.Variants {
+		endpoint = append(endpoint, variant.GameID.Value)
+	}
+	if !reflect.DeepEqual(bridged, endpoint) {
+		t.Fatalf("variant order = %v, want %v", bridged, endpoint)
+	}
+
+	empty, err := bridge.GetItemVariants("item", "10009C40")
+	if err != nil {
+		t.Fatalf("GetItemVariants without variants: %v", err)
+	}
+	if empty.Variants == nil {
+		t.Fatal("variants = nil, want an empty slice")
+	}
+	if len(empty.Variants) != 0 {
+		t.Fatalf("variants = %d, want 0", len(empty.Variants))
+	}
+}
+
+// A nil catalog is a wiring error owned by the endpoint. The bridge must
+// propagate its rejection instead of loading a catalog of its own.
+func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetItemVariants("item", "000F4240")
+		},
+		func() (any, error) {
+			return catalog.GetItemVariants(nil, "item", "000F4240")
+		})
+
+	result, err := bridge.GetItemVariants("item", "000F4240")
+	if err == nil {
+		t.Fatal("GetItemVariants with a nil catalog = nil error, want the endpoint rejection")
+	}
+	if err.Error() != "game catalog is not loaded" {
+		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
+	}
+	if !reflect.DeepEqual(result, catalog.GetItemVariantsResult{}) {
+		t.Fatalf("result = %#v, want the empty result", result)
+	}
+}

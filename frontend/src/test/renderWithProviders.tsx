@@ -10,6 +10,7 @@ import type {
 import { CatalogPortProvider } from "../application/catalog/catalogClient";
 import type {
   CatalogFact,
+  CatalogItemVariantsResult,
   CatalogPort,
   CatalogResourceDetail,
   CatalogResourcesPage,
@@ -231,10 +232,36 @@ export const stubCatalogResourceDetail: CatalogResourceDetail = {
   },
 };
 
+/**
+ * The variant stub keeps the catalog order it is written in and mixes the
+ * shapes the mapping has to survive: a resolved fact, an unknown one keeping
+ * its raw zero and empty string, and an affinity that is empty for a pure
+ * upgrade variant.
+ */
+export const stubCatalogItemVariants: CatalogItemVariantsResult = {
+  variants: [
+    {
+      gameID: knownFact(1000100),
+      kind: knownFact("affinity"),
+      affinity: knownFact("heavy"),
+      upgradeLevel: knownFact(0),
+      sourceRowID: knownFact(1000100),
+    },
+    {
+      gameID: knownFact(1000001),
+      kind: knownFact("upgrade"),
+      affinity: unknownFact(""),
+      upgradeLevel: knownFact(1),
+      sourceRowID: unknownFact(0),
+    },
+  ],
+};
+
 export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPort {
   return {
     getResources: () => Promise.resolve(stubCatalogPage),
     getResource: () => Promise.resolve(stubCatalogResourceDetail),
+    getItemVariants: () => Promise.resolve(stubCatalogItemVariants),
     ...overrides,
   };
 }

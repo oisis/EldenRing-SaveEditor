@@ -152,3 +152,13 @@ func (b *Bridge) GetResources(
 func (b *Bridge) GetResource(kind string, key string) (catalog.GetResourceResult, error) {
 	return catalog.GetResource(b.gameCatalog, kind, key)
 }
+
+// GetItemVariants delegates to the GetItemVariants endpoint and returns its
+// result and error unchanged. The kind and the key are forwarded exactly as
+// received: that only the item kind carries variants, that neither value is
+// trimmed, normalised or aliased, that an item without variants is a valid
+// empty result and which identity failure applies are the endpoint's contract,
+// and the bridge must not restate any of it.
+func (b *Bridge) GetItemVariants(kind string, key string) (catalog.GetItemVariantsResult, error) {
+	return catalog.GetItemVariants(b.gameCatalog, kind, key)
+}

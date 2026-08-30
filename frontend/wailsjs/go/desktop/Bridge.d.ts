@@ -15,6 +15,8 @@ export function GetCharacterStats(arg1:string,arg2:number):Promise<saveengine.Ch
 
 export function GetInventory(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetInventoryResult>;
 
+export function GetItemVariants(arg1:string,arg2:string):Promise<catalog.GetItemVariantsResult>;
+
 export function GetLoadedSave(arg1:string):Promise<saveengine.SessionInfo>;
 
 export function GetResource(arg1:string,arg2:string):Promise<catalog.GetResourceResult>;

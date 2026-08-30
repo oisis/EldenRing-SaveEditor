@@ -8,6 +8,7 @@ import {
   GetCharacterProfile,
   GetCharacterStats,
   GetInventory,
+  GetItemVariants,
   GetLoadedSave,
   GetResource,
   GetResources,
@@ -27,6 +28,7 @@ import type {
   CatalogFact,
   CatalogInfusionRules,
   CatalogItemDetail,
+  CatalogItemVariantsResult,
   CatalogPort,
   CatalogProvenance,
   CatalogResourceDetail,
@@ -274,6 +276,28 @@ function toCatalogResourceDetail(
 }
 
 /**
+ * Projects the generated variant list onto the application port shape. Only the
+ * five facts the port declares are read: `data` and `sourceRecords` stay in the
+ * transport result and reach no layer above this one, and no variant is
+ * materialised into an item document. The catalog order is the backend's, so
+ * the list is mapped in place and never sorted, filtered or deduplicated; an
+ * item without variants stays an empty list.
+ */
+function toCatalogItemVariants(
+  result: Awaited<ReturnType<typeof GetItemVariants>>,
+): CatalogItemVariantsResult {
+  return {
+    variants: result.variants.map((variant) => ({
+      gameID: toFact(variant.gameID),
+      kind: toFact(variant.kind),
+      affinity: toFact(variant.affinity),
+      upgradeLevel: toFact(variant.upgradeLevel),
+      sourceRowID: toFact(variant.sourceRowID),
+    })),
+  };
+}
+
+/**
  * The single adapter behind every application port. A second, parallel
  * adaptation layer would give the generated bindings a second way into the
  * application, so all ports are fulfilled here.
@@ -395,4 +419,10 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // backend's, and every rejection of it is its own.
   getResource: async ({ kind, key }) =>
     toCatalogResourceDetail(await callBridge(() => GetResource(kind, key))),
+
+  // The same pair, forwarded in the same order and just as unchanged. That only
+  // the item kind carries variants, and that an unknown or non-item identity is
+  // a rejection, is the backend's contract and is never anticipated here.
+  getItemVariants: async ({ kind, key }) =>
+    toCatalogItemVariants(await callBridge(() => GetItemVariants(kind, key))),
 };

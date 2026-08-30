@@ -22,6 +22,10 @@ export function GetInventory(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['GetInventory'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function GetItemVariants(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetItemVariants'](arg1, arg2);
+}
+
 export function GetLoadedSave(arg1) {
   return window['go']['desktop']['Bridge']['GetLoadedSave'](arg1);
 }

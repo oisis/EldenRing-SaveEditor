@@ -5,6 +5,7 @@ import {
   GetCharacterProfile,
   GetCharacterStats,
   GetInventory,
+  GetItemVariants,
   GetLoadedSave,
   GetResource,
   GetResources,
@@ -21,6 +22,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetCharacterProfile: vi.fn(),
   GetCharacterStats: vi.fn(),
   GetInventory: vi.fn(),
+  GetItemVariants: vi.fn(),
   GetLoadedSave: vi.fn(),
   GetResource: vi.fn(),
   GetResources: vi.fn(),
@@ -40,6 +42,7 @@ const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
 const getResources = vi.mocked(GetResources);
 const getResource = vi.mocked(GetResource);
+const getItemVariants = vi.mocked(GetItemVariants);
 
 beforeEach(() => {
   getApplicationInfo.mockReset();
@@ -53,6 +56,7 @@ beforeEach(() => {
   getStorage.mockReset();
   getResources.mockReset();
   getResource.mockReset();
+  getItemVariants.mockReset();
 });
 
 describe("wails application info adapter", () => {
@@ -997,6 +1001,158 @@ describe("wails catalog resource adapter", () => {
     // here: that needs a structured backend error contract.
     expect(failure?.message).toBe(bridgeFailureCode);
     expect(failure?.message).not.toContain("unknown resource key");
+    expect(failure?.message).not.toContain("/Users/private");
+  });
+});
+
+/**
+ * One generated variant list covering what the projection has to survive: two
+ * variants in a fixed catalog order, resolved facts, an unresolved one keeping
+ * its raw zero and empty string, and the `data` and `sourceRecords` blocks that
+ * are deliberately outside the application contract of this step.
+ */
+const itemVariants = catalog.GetItemVariantsResult.createFrom({
+  variants: [
+    {
+      gameID: knownFact(1000100),
+      kind: knownFact("affinity"),
+      affinity: knownFact("heavy"),
+      upgradeLevel: knownFact(0),
+      sourceRowID: knownFact(1000100),
+      data: { family: knownFact("weapon"), weapon: { physicalAttack: knownFact(80) } },
+      sourceRecords: [{ table: "EquipParamWeapon", rowID: 1000100 }],
+    },
+    {
+      gameID: knownFact(1000001),
+      kind: unknownFact(""),
+      affinity: unknownFact(""),
+      upgradeLevel: knownFact(1),
+      sourceRowID: unknownFact(0),
+      data: { family: knownFact("weapon") },
+      sourceRecords: [],
+    },
+  ],
+});
+
+describe("wails catalog item variants adapter", () => {
+  it("passes the kind and the key to the binding exactly as given", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    await wailsDesktopBridge.getItemVariants({ kind: "  Item  ", key: " 000f4240 " });
+
+    // No trimming, no recasing, no alias and no kind default: every one of them
+    // is the backend's contract.
+    expect(getItemVariants).toHaveBeenCalledExactlyOnceWith("  Item  ", " 000f4240 ");
+  });
+
+  it("passes an empty kind and an empty key through instead of skipping the call", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    await wailsDesktopBridge.getItemVariants({ kind: "", key: "" });
+
+    expect(getItemVariants).toHaveBeenCalledExactlyOnceWith("", "");
+  });
+
+  it("maps the five variant facts with their provenance, and nothing else", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    await expect(
+      wailsDesktopBridge.getItemVariants({ kind: "item", key: "000F4240" }),
+    ).resolves.toEqual({
+      variants: [
+        {
+          gameID: { known: true, value: 1000100, provenance: fullProvenance },
+          kind: { known: true, value: "affinity", provenance: fullProvenance },
+          affinity: { known: true, value: "heavy", provenance: fullProvenance },
+          upgradeLevel: { known: true, value: 0, provenance: fullProvenance },
+          sourceRowID: { known: true, value: 1000100, provenance: fullProvenance },
+        },
+        {
+          gameID: { known: true, value: 1000001, provenance: fullProvenance },
+          kind: { known: false, value: "", provenance: emptyPartsProvenance },
+          affinity: { known: false, value: "", provenance: emptyPartsProvenance },
+          upgradeLevel: { known: true, value: 1, provenance: fullProvenance },
+          sourceRowID: { known: false, value: 0, provenance: emptyPartsProvenance },
+        },
+      ],
+    });
+  });
+
+  it("keeps the variant document data and the source records out of the port result", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    const result = await wailsDesktopBridge.getItemVariants({ kind: "item", key: "000F4240" });
+
+    for (const variant of result.variants) {
+      expect(Object.keys(variant)).toEqual([
+        "gameID",
+        "kind",
+        "affinity",
+        "upgradeLevel",
+        "sourceRowID",
+      ]);
+    }
+    // Neither the weapon statistics nor the parameter records reach the port.
+    // `EquipParamWeapon` is not searched for: it is a legitimate part of the
+    // provenance the five facts keep.
+    expect(JSON.stringify(result)).not.toContain("physicalAttack");
+    expect(JSON.stringify(result)).not.toContain("rowID");
+  });
+
+  it("keeps an unknown fact, an empty string and a zero exactly as reported", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    const result = await wailsDesktopBridge.getItemVariants({ kind: "item", key: "000F4240" });
+
+    // No placeholder affinity, no upgrade level derived from the kind and no
+    // zero row identifier turned into an absent one.
+    expect(result.variants[1].affinity).toEqual({
+      known: false,
+      value: "",
+      provenance: emptyPartsProvenance,
+    });
+    expect(result.variants[1].sourceRowID.value).toBe(0);
+    // A known fact whose value happens to be zero stays known.
+    expect(result.variants[0].upgradeLevel).toEqual({
+      known: true,
+      value: 0,
+      provenance: fullProvenance,
+    });
+  });
+
+  it("keeps the catalog order the backend reported", async () => {
+    getItemVariants.mockResolvedValue(itemVariants);
+
+    const result = await wailsDesktopBridge.getItemVariants({ kind: "item", key: "000F4240" });
+
+    // No sorting by game identifier, affinity or upgrade level happens here.
+    expect(result.variants.map((variant) => variant.gameID.value)).toEqual([1000100, 1000001]);
+  });
+
+  it("maps an item without variants to an empty list rather than a failure", async () => {
+    getItemVariants.mockResolvedValue(catalog.GetItemVariantsResult.createFrom({ variants: [] }));
+
+    // An item that carries no variant is a valid answer, and the base item is
+    // never synthesised into one.
+    await expect(
+      wailsDesktopBridge.getItemVariants({ kind: "item", key: "10009C40" }),
+    ).resolves.toEqual({ variants: [] });
+  });
+
+  it("replaces a failed variants call with the same stable code as every other port", async () => {
+    getItemVariants.mockRejectedValue(
+      new Error(
+        'resource kind "class" has no item variants /Users/private/get_item_variants.go:96',
+      ),
+    );
+
+    const failure = await wailsDesktopBridge.getItemVariants({ kind: "class", key: "0" }).then(
+      () => undefined,
+      (error: unknown) => error as Error,
+    );
+
+    expect(failure?.message).toBe(bridgeFailureCode);
+    expect(failure?.message).not.toContain("has no item variants");
     expect(failure?.message).not.toContain("/Users/private");
   });
 });

@@ -53,6 +53,14 @@ export const queryKeys = {
   catalogResource: (kind: string | null, key: string | null) =>
     ["catalog", "resource", kind, key] as const,
   /**
+   * The variants of one item are a separate branch of the same global catalog
+   * prefix, so they never share an entry with the resource detail of the same
+   * identity. `null` stands for "nothing selected" and cannot collide with any
+   * backend value: the empty string is a real request the backend rejects.
+   */
+  catalogItemVariants: (kind: string | null, key: string | null) =>
+    ["catalog", "item-variants", kind, key] as const,
+  /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to
    * be keyed below it to be cleaned up with the session.

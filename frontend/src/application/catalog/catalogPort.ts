@@ -213,9 +213,46 @@ export type CatalogResourceRequest = {
   key: string;
 };
 
+/**
+ * One item variant exactly as the backend reports it. Only the five identity
+ * and provenance facts of the variant are carried: `data` and `sourceRecords`
+ * stay in the transport result, and no variant is materialised into an item
+ * document here. `kind` and `affinity` stay plain strings so a value the
+ * backend adds later cannot be rejected by a frontend enum.
+ */
+export type CatalogItemVariantSummary = {
+  gameID: CatalogFact<number>;
+  kind: CatalogFact<string>;
+  affinity: CatalogFact<string>;
+  upgradeLevel: CatalogFact<number>;
+  sourceRowID: CatalogFact<number>;
+};
+
+/**
+ * Every variant of one item, in catalog order. An item that carries none is a
+ * valid answer and arrives as an empty list, never as a rejection and never as
+ * a synthesised base variant.
+ */
+export type CatalogItemVariantsResult = {
+  variants: readonly CatalogItemVariantSummary[];
+};
+
+/**
+ * The identity whose variants are read. Neither value is trimmed, recased,
+ * parsed or matched through an alias, and only the exact item kind carries
+ * variants: that is the backend's contract, and every rejection of it is its
+ * own.
+ */
+export type CatalogItemVariantsRequest = {
+  kind: string;
+  key: string;
+};
+
 export type CatalogPort = {
   /** Reads one page of the catalog under the backend's own filter contract. */
   getResources: (request: CatalogResourcesRequest) => Promise<CatalogResourcesPage>;
   /** Reads the common detail of one resource under the backend's own identity contract. */
   getResource: (request: CatalogResourceRequest) => Promise<CatalogResourceDetail>;
+  /** Reads the variants of one item under the backend's own identity contract. */
+  getItemVariants: (request: CatalogItemVariantsRequest) => Promise<CatalogItemVariantsResult>;
 };
