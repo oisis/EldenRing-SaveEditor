@@ -9,16 +9,31 @@ import {
   GetCharacterStats,
   GetInventory,
   GetLoadedSave,
+  GetResource,
   GetResources,
   GetSaveCharacters,
   GetStorage,
   LoadSave,
 } from "../../../wailsjs/go/desktop/Bridge";
+import type { schema } from "../../../wailsjs/go/models";
 import type {
   ApplicationInfo,
   ApplicationInfoPort,
 } from "../../application/application-info/applicationInfoPort";
-import type { CatalogPort, CatalogResourcesPage } from "../../application/catalog/catalogPort";
+import type {
+  CatalogAshOfWarMountRules,
+  CatalogCapability,
+  CatalogEquipmentRules,
+  CatalogFact,
+  CatalogInfusionRules,
+  CatalogItemDetail,
+  CatalogPort,
+  CatalogProvenance,
+  CatalogResourceDetail,
+  CatalogResourcesPage,
+  CatalogStackRules,
+  CatalogUpgradeRules,
+} from "../../application/catalog/catalogPort";
 import type {
   CharacterPort,
   CharacterProfile,
@@ -105,6 +120,156 @@ function toCatalogResourcesPage(
     // the request: zero paging resolves to the backend default there.
     page: result.page,
     pageSize: result.pageSize,
+  };
+}
+
+/**
+ * The generated `Fact[T]` and `Capability[T]` classes are one per instantiated
+ * type parameter, so they share a shape but no common base. These two structural
+ * types are what lets one projection cover all of them instead of one copy per
+ * instantiation.
+ */
+type GeneratedFact<T> = { known: boolean; value: T; provenance: schema.Provenance };
+type GeneratedCapability<R> = {
+  known: boolean;
+  enabled: boolean;
+  rules?: R;
+  provenance: schema.Provenance;
+};
+
+/**
+ * The three optional provenance parts are omitted by the backend exactly when
+ * they are empty, so restoring the empty string is the encoding, not a
+ * fallback: no origin is invented for a fact that has none.
+ */
+function toProvenance(provenance: schema.Provenance): CatalogProvenance {
+  return {
+    source: provenance.source,
+    method: provenance.method,
+    table: provenance.table ?? "",
+    row: provenance.row ?? "",
+    field: provenance.field ?? "",
+  };
+}
+
+/** Carries one fact over unchanged, including the raw value of an unknown one. */
+function toFact<T>(fact: GeneratedFact<T>): CatalogFact<T> {
+  return { known: fact.known, value: fact.value, provenance: toProvenance(fact.provenance) };
+}
+
+/** An absent optional fact stays absent: null, never a zero-valued fact. */
+function toOptionalFact<T>(fact: GeneratedFact<T> | undefined | null): CatalogFact<T> | null {
+  return fact ? toFact(fact) : null;
+}
+
+/**
+ * Carries one capability over unchanged. Absent rules stay null and are never
+ * derived from `enabled`, nor `enabled` from them. `rulesEvidence` is dropped:
+ * it is not part of the application contract of this step.
+ */
+function toCapability<R, M>(
+  capability: GeneratedCapability<R>,
+  toRules: (rules: R) => M,
+): CatalogCapability<M> {
+  return {
+    known: capability.known,
+    enabled: capability.enabled,
+    rules: capability.rules ? toRules(capability.rules) : null,
+    provenance: toProvenance(capability.provenance),
+  };
+}
+
+function toUpgradeRules(rules: schema.UpgradeRules): CatalogUpgradeRules {
+  return {
+    model: rules.model,
+    maxLevel: rules.maxLevel,
+    maxLevelSFV: toOptionalFact(rules["maxLevel-sfv"]),
+  };
+}
+
+function toInfusionRules(rules: schema.InfusionRules): CatalogInfusionRules {
+  return { allowedAffinities: [...rules.allowedAffinities] };
+}
+
+function toAshOfWarMountRules(rules: schema.AshOfWarMountRules): CatalogAshOfWarMountRules {
+  return {
+    mode: rules.mode,
+    weaponType: rules.weaponType,
+    compatibilityBit: rules.compatibilityBit,
+  };
+}
+
+function toStackRules(rules: schema.StackRules): CatalogStackRules {
+  return { maxPerStack: rules.maxPerStack };
+}
+
+function toEquipmentRules(rules: schema.EquipmentRules): CatalogEquipmentRules {
+  return { allowedSlots: [...rules.allowedSlots] };
+}
+
+/**
+ * Projects the common part of a generated item document onto the application
+ * port shape. Only the fields the port declares are read: acquisition,
+ * modifiers, links, variants, aliases, unlocks, technical and source records
+ * and the family-specific blocks stay in the transport result and reach no
+ * layer above this one.
+ */
+function toCatalogItemDetail(item: schema.ItemDocument): CatalogItemDetail {
+  return {
+    gameID: toFact(item.gameID),
+    family: toFact(item.family),
+    category: toFact(item.category),
+    subcategory: toFact(item.subcategory),
+    presentation: {
+      name: toFact(item.presentation.name),
+      caption: toFact(item.presentation.caption),
+      description: toFact(item.presentation.description),
+      location: toFact(item.presentation.location),
+      // Metadata only: the adapter never turns this path into an icon.
+      iconPath: toFact(item.presentation.iconPath),
+    },
+    storage: {
+      recordMode: toFact(item.storage.recordMode),
+      // No effective limit is computed here: the raw limits are carried as they
+      // are reported, and which one applies is a later contract.
+      maxInventory: toFact(item.storage.maxInventory),
+      safeModeMaxInventory: toOptionalFact(item.storage.safeModeMaxInventory),
+      maxInventorySFV: toOptionalFact(item.storage["maxInventory-sfv"]),
+      maxStorage: toFact(item.storage.maxStorage),
+      safeModeMaxStorage: toOptionalFact(item.storage.safeModeMaxStorage),
+      maxStorageSFV: toOptionalFact(item.storage["maxStorage-sfv"]),
+    },
+    safety: {
+      // Six independent facts, never folded into a risk level here.
+      cutContent: toFact(item.safety.cutContent),
+      banRisk: toFact(item.safety.banRisk),
+      dlc: toFact(item.safety.dlc),
+      noDatabase: toFact(item.safety.noDatabase),
+      scalesWithNG: toFact(item.safety.scalesWithNG),
+      preOrder: toFact(item.safety.preOrder),
+    },
+    capabilities: {
+      upgrade: toCapability(item.capabilities.upgrade, toUpgradeRules),
+      infusion: toCapability(item.capabilities.infusion, toInfusionRules),
+      ashOfWarMount: toCapability(item.capabilities.ashOfWarMount, toAshOfWarMountRules),
+      stack: toCapability(item.capabilities.stack, toStackRules),
+      equipment: toCapability(item.capabilities.equipment, toEquipmentRules),
+    },
+  };
+}
+
+/**
+ * Projects the generated resource union onto the application port shape. The
+ * identity is carried verbatim, and a resource of any other kind keeps `item`
+ * null rather than having its own document mapped onto the item shape.
+ */
+function toCatalogResourceDetail(
+  result: Awaited<ReturnType<typeof GetResource>>,
+): CatalogResourceDetail {
+  return {
+    kind: result.resource.kind,
+    key: result.resource.key,
+    item: result.resource.item ? toCatalogItemDetail(result.resource.item) : null,
   };
 }
 
@@ -224,4 +389,10 @@ export const wailsDesktopBridge: ApplicationInfoPort &
         GetResources(resourceType, family, capability, endpointID, search, page, pageSize),
       ),
     ),
+
+  // The pair reaches the bridge exactly as received. Nothing is trimmed,
+  // recased or retried under another kind: the identity contract is the
+  // backend's, and every rejection of it is its own.
+  getResource: async ({ kind, key }) =>
+    toCatalogResourceDetail(await callBridge(() => GetResource(kind, key))),
 };

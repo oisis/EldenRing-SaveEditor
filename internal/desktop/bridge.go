@@ -143,3 +143,12 @@ func (b *Bridge) GetResources(
 	return catalog.GetResources(
 		b.gameCatalog, resourceType, family, capability, endpointID, search, page, pageSize)
 }
+
+// GetResource delegates to the GetResource endpoint and returns its result and
+// error unchanged. The kind and the key are forwarded exactly as received: what
+// a valid kind is, that neither value is trimmed, normalised or retried under
+// another kind, and which of the four identity failures applies are the
+// endpoint's contract, and the bridge must not restate any of it.
+func (b *Bridge) GetResource(kind string, key string) (catalog.GetResourceResult, error) {
+	return catalog.GetResource(b.gameCatalog, kind, key)
+}

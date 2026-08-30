@@ -14,6 +14,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
 )
@@ -523,6 +524,107 @@ func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
 	}
 	if !reflect.DeepEqual(result, catalog.GetResourcesResult{}) {
+		t.Fatalf("result = %#v, want the empty result", result)
+	}
+}
+
+// GetResource reads GameCatalog only, so it is proven against the endpoint on
+// its own, over the identity shapes the endpoint gives meaning to: a real pair,
+// an empty, unknown, untrimmed and recased kind or key, the pre-migration
+// prefixed key and a GameID passed as a key. The bridge has to produce the
+// endpoint outcome in each of them, including the four distinguishable
+// rejections.
+func TestGetResourceForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	arguments := []struct {
+		name string
+		kind string
+		key  string
+	}{
+		{"known item", "item", "000F4240"},
+		{"known non-item kind", "class", "0"},
+		{"empty kind and key", "", ""},
+		{"empty kind with a known key", "", "000F4240"},
+		{"empty key in a known kind", "item", ""},
+		{"untrimmed kind", " item ", "000F4240"},
+		{"untrimmed key", "item", " 000F4240"},
+		{"recased kind", "Item", "000F4240"},
+		{"recased key", "item", "000f4240"},
+		{"unknown kind", "future_kind", "000F4240"},
+		{"unknown key in a known kind", "item", "FFFFFFFF"},
+		{"pre-migration prefixed key", "item", "item:000F4240"},
+		{"game ID passed as a key", "item", "1000000"},
+	}
+
+	for _, argument := range arguments {
+		t.Run(argument.name, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetResource(argument.kind, argument.key)
+				},
+				func() (any, error) {
+					return catalog.GetResource(gameCatalog, argument.kind, argument.key)
+				})
+		})
+	}
+}
+
+// The bridge must not retry an unresolved identity under another kind and must
+// not fall back to a different resource: a key that exists under kind item is
+// unknown under every other kind, and the item document of the resolved
+// resource is the only document the result carries.
+func TestGetResourceResolvesOneKindOnlyWithoutFallback(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	result, err := bridge.GetResource("item", "000F4240")
+	if err != nil {
+		t.Fatalf("GetResource: %v", err)
+	}
+	if result.Resource.Kind != schema.ResourceKindItem || result.Resource.Key != "000F4240" {
+		t.Fatalf("resource identity = (%q, %q), want (item, 000F4240)",
+			result.Resource.Kind, result.Resource.Key)
+	}
+	if result.Resource.Item == nil {
+		t.Fatal("item document = nil, want the resolved item document")
+	}
+	if result.Resource.Class != nil {
+		t.Fatal("class document is set on an item resource, want nil")
+	}
+
+	// The same key under a different kind is unknown; no second lookup rescues it.
+	other, err := bridge.GetResource("class", "000F4240")
+	if err == nil {
+		t.Fatal("GetResource with a foreign kind = nil error, want the endpoint rejection")
+	}
+	if !reflect.DeepEqual(other, catalog.GetResourceResult{}) {
+		t.Fatalf("result = %#v, want the empty result", other)
+	}
+}
+
+// A nil catalog is a wiring error owned by the endpoint. The bridge must
+// propagate its rejection instead of loading a catalog of its own.
+func TestGetResourcePropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetResource("item", "000F4240")
+		},
+		func() (any, error) {
+			return catalog.GetResource(nil, "item", "000F4240")
+		})
+
+	result, err := bridge.GetResource("item", "000F4240")
+	if err == nil {
+		t.Fatal("GetResource with a nil catalog = nil error, want the endpoint rejection")
+	}
+	if err.Error() != "game catalog is not loaded" {
+		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
+	}
+	if !reflect.DeepEqual(result, catalog.GetResourceResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
 }

@@ -8,7 +8,12 @@ import type {
   ApplicationInfoPort,
 } from "../application/application-info/applicationInfoPort";
 import { CatalogPortProvider } from "../application/catalog/catalogClient";
-import type { CatalogPort, CatalogResourcesPage } from "../application/catalog/catalogPort";
+import type {
+  CatalogFact,
+  CatalogPort,
+  CatalogResourceDetail,
+  CatalogResourcesPage,
+} from "../application/catalog/catalogPort";
 import { CharacterPortProvider } from "../application/character/characterClient";
 import type {
   CharacterPort,
@@ -126,9 +131,110 @@ export const stubCatalogPage: CatalogResourcesPage = {
   pageSize: 50,
 };
 
+/** A fact the backend resolved, with a complete provenance record. */
+function knownFact<T>(value: T): CatalogFact<T> {
+  return {
+    known: true,
+    value,
+    provenance: {
+      source: "legacy_db_data",
+      method: "regulation_row",
+      table: "EquipParamWeapon",
+      row: "1000000",
+      field: "maxLevel",
+    },
+  };
+}
+
+/**
+ * A fact the backend could not resolve. Its raw value is carried as reported,
+ * and the provenance the backend still supplies stays complete: an unknown fact
+ * is not a missing one.
+ */
+function unknownFact<T>(value: T): CatalogFact<T> {
+  return {
+    known: false,
+    value,
+    provenance: { source: "legacy_db_data", method: "unresolved", table: "", row: "", field: "" },
+  };
+}
+
+/**
+ * The detail stub deliberately mixes the shapes the mapping has to survive: a
+ * resolved fact, an unknown one keeping its raw value, empty strings, zeros,
+ * absent optional facts and a capability the backend reports without rules.
+ */
+export const stubCatalogResourceDetail: CatalogResourceDetail = {
+  kind: "item",
+  key: "000F4240",
+  item: {
+    gameID: knownFact(1000000),
+    family: knownFact("weapon"),
+    category: knownFact("dagger"),
+    subcategory: unknownFact(""),
+    presentation: {
+      name: knownFact("Dagger"),
+      caption: knownFact("A small dagger."),
+      description: unknownFact(""),
+      location: unknownFact(""),
+      iconPath: knownFact("MENU_Knowledge_00100.png"),
+    },
+    storage: {
+      recordMode: knownFact("separate_instances"),
+      maxInventory: knownFact(600),
+      safeModeMaxInventory: knownFact(99),
+      maxInventorySFV: null,
+      maxStorage: knownFact(600),
+      safeModeMaxStorage: null,
+      maxStorageSFV: null,
+    },
+    safety: {
+      cutContent: knownFact(false),
+      banRisk: knownFact(false),
+      dlc: knownFact(false),
+      noDatabase: unknownFact(false),
+      scalesWithNG: knownFact(false),
+      preOrder: knownFact(false),
+    },
+    capabilities: {
+      upgrade: {
+        known: true,
+        enabled: true,
+        rules: { model: "standard", maxLevel: 25, maxLevelSFV: null },
+        provenance: knownFact(0).provenance,
+      },
+      infusion: {
+        known: true,
+        enabled: true,
+        rules: { allowedAffinities: ["standard", "heavy"] },
+        provenance: knownFact(0).provenance,
+      },
+      ashOfWarMount: {
+        known: true,
+        enabled: true,
+        rules: { mode: "custom", weaponType: "dagger", compatibilityBit: 1 },
+        provenance: knownFact(0).provenance,
+      },
+      stack: {
+        known: true,
+        enabled: false,
+        rules: null,
+        provenance: unknownFact(0).provenance,
+      },
+      equipment: {
+        known: true,
+        enabled: true,
+        rules: { allowedSlots: ["left_hand", "right_hand"] },
+        provenance: knownFact(0).provenance,
+      },
+    },
+  },
+};
+
 export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPort {
   return {
     getResources: () => Promise.resolve(stubCatalogPage),
+    getResource: () => Promise.resolve(stubCatalogResourceDetail),
     ...overrides,
   };
 }

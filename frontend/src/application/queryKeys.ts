@@ -45,6 +45,14 @@ export const queryKeys = {
       pageSize,
     ] as const,
   /**
+   * One resource detail is keyed by its exact identity, so two kinds and two
+   * keys never share an entry. `null` stands for "nothing selected" and cannot
+   * collide with any backend value, because every kind and key is a string —
+   * the empty string included, which is a real request the backend rejects.
+   */
+  catalogResource: (kind: string | null, key: string | null) =>
+    ["catalog", "resource", kind, key] as const,
+  /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to
    * be keyed below it to be cleaned up with the session.

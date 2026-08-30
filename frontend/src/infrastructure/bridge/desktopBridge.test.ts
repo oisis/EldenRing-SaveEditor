@@ -6,6 +6,7 @@ import {
   GetCharacterStats,
   GetInventory,
   GetLoadedSave,
+  GetResource,
   GetResources,
   GetSaveCharacters,
   GetStorage,
@@ -21,6 +22,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetCharacterStats: vi.fn(),
   GetInventory: vi.fn(),
   GetLoadedSave: vi.fn(),
+  GetResource: vi.fn(),
   GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
   GetStorage: vi.fn(),
@@ -37,6 +39,7 @@ const getCharacterStats = vi.mocked(GetCharacterStats);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
 const getResources = vi.mocked(GetResources);
+const getResource = vi.mocked(GetResource);
 
 beforeEach(() => {
   getApplicationInfo.mockReset();
@@ -49,6 +52,7 @@ beforeEach(() => {
   getInventory.mockReset();
   getStorage.mockReset();
   getResources.mockReset();
+  getResource.mockReset();
 });
 
 describe("wails application info adapter", () => {
@@ -679,6 +683,320 @@ describe("wails catalog adapter", () => {
     // not told apart here: that needs a structured backend error contract.
     expect(failure?.message).toBe(bridgeFailureCode);
     expect(failure?.message).not.toContain("goroutine");
+    expect(failure?.message).not.toContain("/Users/private");
+  });
+});
+
+const fullProvenance = {
+  source: "legacy_db_data",
+  method: "regulation_row",
+  table: "EquipParamWeapon",
+  row: "1000000",
+  field: "maxLevel",
+};
+
+/**
+ * The backend omits an empty `table`, `row` or `field`, so this is what an
+ * unresolved fact actually arrives as: a complete record with three absent
+ * parts, never a missing provenance.
+ */
+const sparseProvenance = { source: "legacy_db_data", method: "unresolved" };
+
+/** The same record as it must arrive above the port: absent parts become empty. */
+const emptyPartsProvenance = {
+  source: "legacy_db_data",
+  method: "unresolved",
+  table: "",
+  row: "",
+  field: "",
+};
+
+const knownFact = (value: unknown) => ({ known: true, value, provenance: fullProvenance });
+const unknownFact = (value: unknown) => ({ known: false, value, provenance: sparseProvenance });
+
+/**
+ * One generated item resource covering every shape the projection has to
+ * survive: resolved facts, unresolved ones keeping their raw value, empty
+ * strings, zeros, absent optional facts, present optional ones, all five
+ * capabilities and a capability the backend reports with `rules` null.
+ */
+const itemResource = catalog.GetResourceResult.createFrom({
+  resource: {
+    kind: "item",
+    key: "000F4240",
+    item: {
+      gameID: knownFact(1000000),
+      family: knownFact("weapon"),
+      category: unknownFact(""),
+      subcategory: knownFact(""),
+      presentation: {
+        name: knownFact("Dagger"),
+        caption: unknownFact(""),
+        description: knownFact("A small dagger."),
+        location: unknownFact(""),
+        iconPath: knownFact("MENU_Knowledge_00100.png"),
+        textMetadata: {
+          captionSource: knownFact("caption"),
+          descriptionSource: knownFact("description"),
+          locationSource: knownFact("location"),
+          dlcSource: knownFact("base"),
+          notes: knownFact("ignored"),
+        },
+      },
+      storage: {
+        recordMode: knownFact("separate_instances"),
+        maxInventory: knownFact(600),
+        safeModeMaxInventory: knownFact(99),
+        maxStorage: unknownFact(0),
+        "maxStorage-sfv": knownFact(0),
+      },
+      safety: {
+        cutContent: knownFact(false),
+        banRisk: knownFact(true),
+        dlc: knownFact(false),
+        noDatabase: unknownFact(false),
+        scalesWithNG: knownFact(false),
+        preOrder: knownFact(false),
+      },
+      capabilities: {
+        upgrade: {
+          known: true,
+          enabled: true,
+          rules: { model: "standard", maxLevel: 25, "maxLevel-sfv": knownFact(10) },
+          provenance: fullProvenance,
+          rulesEvidence: [fullProvenance],
+        },
+        infusion: {
+          known: true,
+          enabled: true,
+          rules: { allowedAffinities: ["standard", "heavy"] },
+          provenance: fullProvenance,
+        },
+        ashOfWarMount: {
+          known: true,
+          enabled: true,
+          rules: { mode: "custom", weaponType: "dagger", compatibilityBit: 0 },
+          provenance: sparseProvenance,
+        },
+        stack: { known: false, enabled: false, rules: null, provenance: sparseProvenance },
+        equipment: {
+          known: true,
+          enabled: true,
+          rules: { allowedSlots: [] },
+          provenance: fullProvenance,
+        },
+      },
+      // Everything below is deliberately outside the application contract of
+      // this step and must not reach the port result.
+      acquisition: {},
+      modifiers: {},
+      links: {},
+      variants: [{ gameID: knownFact(1000100) }],
+      aliases: [],
+      unlocks: [],
+      relatedTechnicalRecords: [],
+      sourceRecords: [{ table: "EquipParamWeapon", rowID: 1000000 }],
+      weapon: { physicalAttack: knownFact(73) },
+    },
+  },
+});
+
+describe("wails catalog resource adapter", () => {
+  it("passes the kind and the key to the binding exactly as given", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    await wailsDesktopBridge.getResource({ kind: "  Item  ", key: " 000f4240 " });
+
+    // No trimming, no recasing, no alias and no kind default: every one of them
+    // is the backend's contract.
+    expect(getResource).toHaveBeenCalledExactlyOnceWith("  Item  ", " 000f4240 ");
+  });
+
+  it("passes an empty kind and an empty key through instead of skipping the call", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    await wailsDesktopBridge.getResource({ kind: "", key: "" });
+
+    // The empty pair is a real request the backend rejects; the adapter must
+    // not decide that on its own.
+    expect(getResource).toHaveBeenCalledExactlyOnceWith("", "");
+  });
+
+  it("maps the identity and the common item fields, and nothing else", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    await expect(
+      wailsDesktopBridge.getResource({ kind: "item", key: "000F4240" }),
+    ).resolves.toEqual({
+      kind: "item",
+      key: "000F4240",
+      item: {
+        gameID: { known: true, value: 1000000, provenance: fullProvenance },
+        family: { known: true, value: "weapon", provenance: fullProvenance },
+        category: { known: false, value: "", provenance: emptyPartsProvenance },
+        subcategory: { known: true, value: "", provenance: fullProvenance },
+        presentation: {
+          name: { known: true, value: "Dagger", provenance: fullProvenance },
+          caption: { known: false, value: "", provenance: emptyPartsProvenance },
+          description: { known: true, value: "A small dagger.", provenance: fullProvenance },
+          location: { known: false, value: "", provenance: emptyPartsProvenance },
+          iconPath: {
+            known: true,
+            value: "MENU_Knowledge_00100.png",
+            provenance: fullProvenance,
+          },
+        },
+        storage: {
+          recordMode: { known: true, value: "separate_instances", provenance: fullProvenance },
+          maxInventory: { known: true, value: 600, provenance: fullProvenance },
+          safeModeMaxInventory: { known: true, value: 99, provenance: fullProvenance },
+          maxInventorySFV: null,
+          maxStorage: { known: false, value: 0, provenance: emptyPartsProvenance },
+          safeModeMaxStorage: null,
+          maxStorageSFV: { known: true, value: 0, provenance: fullProvenance },
+        },
+        safety: {
+          cutContent: { known: true, value: false, provenance: fullProvenance },
+          banRisk: { known: true, value: true, provenance: fullProvenance },
+          dlc: { known: true, value: false, provenance: fullProvenance },
+          noDatabase: { known: false, value: false, provenance: emptyPartsProvenance },
+          scalesWithNG: { known: true, value: false, provenance: fullProvenance },
+          preOrder: { known: true, value: false, provenance: fullProvenance },
+        },
+        capabilities: {
+          upgrade: {
+            known: true,
+            enabled: true,
+            rules: {
+              model: "standard",
+              maxLevel: 25,
+              maxLevelSFV: { known: true, value: 10, provenance: fullProvenance },
+            },
+            provenance: fullProvenance,
+          },
+          infusion: {
+            known: true,
+            enabled: true,
+            rules: { allowedAffinities: ["standard", "heavy"] },
+            provenance: fullProvenance,
+          },
+          ashOfWarMount: {
+            known: true,
+            enabled: true,
+            rules: { mode: "custom", weaponType: "dagger", compatibilityBit: 0 },
+            provenance: emptyPartsProvenance,
+          },
+          stack: {
+            known: false,
+            enabled: false,
+            rules: null,
+            provenance: emptyPartsProvenance,
+          },
+          equipment: {
+            known: true,
+            enabled: true,
+            rules: { allowedSlots: [] },
+            provenance: fullProvenance,
+          },
+        },
+      },
+    });
+  });
+
+  it("keeps an unknown fact, an empty string and a zero exactly as reported", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    const detail = await wailsDesktopBridge.getResource({ kind: "item", key: "000F4240" });
+
+    // An unresolved fact keeps its raw value: no placeholder, no key promoted to
+    // a name, no zero turned into an absent limit.
+    expect(detail.item?.category).toEqual({
+      known: false,
+      value: "",
+      provenance: emptyPartsProvenance,
+    });
+    // A known fact whose value happens to be empty or zero stays known.
+    expect(detail.item?.subcategory.known).toBe(true);
+    expect(detail.item?.subcategory.value).toBe("");
+    expect(detail.item?.storage.maxStorage.value).toBe(0);
+    expect(detail.item?.capabilities.ashOfWarMount.rules?.compatibilityBit).toBe(0);
+    expect(detail.item?.capabilities.equipment.rules?.allowedSlots).toEqual([]);
+  });
+
+  it("maps an absent optional fact to null instead of a zero-valued fact", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    const detail = await wailsDesktopBridge.getResource({ kind: "item", key: "000F4240" });
+
+    // Absent and zero are different answers and must stay distinguishable.
+    expect(detail.item?.storage.maxInventorySFV).toBeNull();
+    expect(detail.item?.storage.safeModeMaxStorage).toBeNull();
+    expect(detail.item?.storage.maxStorageSFV).not.toBeNull();
+  });
+
+  it("maps a capability reported without rules to null rules", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    const detail = await wailsDesktopBridge.getResource({ kind: "item", key: "000F4240" });
+
+    // No rule set is invented, and `enabled` is not derived from the rules.
+    expect(detail.item?.capabilities.stack.rules).toBeNull();
+    expect(detail.item?.capabilities.stack.enabled).toBe(false);
+    expect(detail.item?.capabilities.stack.known).toBe(false);
+  });
+
+  it("reports safety as six independent facts without a derived level", async () => {
+    getResource.mockResolvedValue(itemResource);
+
+    const detail = await wailsDesktopBridge.getResource({ kind: "item", key: "000F4240" });
+
+    expect(Object.keys(detail.item?.safety ?? {})).toEqual([
+      "cutContent",
+      "banRisk",
+      "dlc",
+      "noDatabase",
+      "scalesWithNG",
+      "preOrder",
+    ]);
+    // A ban-risk item gets no severity, no ordering and no verdict here.
+    expect(JSON.stringify(detail)).not.toMatch(/warning|critical|riskLevel|safetyLevel/i);
+  });
+
+  it("keeps item null for a resource of another kind", async () => {
+    getResource.mockResolvedValue(
+      catalog.GetResourceResult.createFrom({
+        resource: {
+          kind: "class",
+          key: "0",
+          class: { startingClassID: knownFact(0), name: knownFact("Vagabond") },
+        },
+      }),
+    );
+
+    // The identity is exact and no other document is mapped onto the item shape.
+    await expect(wailsDesktopBridge.getResource({ kind: "class", key: "0" })).resolves.toEqual({
+      kind: "class",
+      key: "0",
+      item: null,
+    });
+  });
+
+  it("replaces a failed detail call with the same stable code as every other port", async () => {
+    getResource.mockRejectedValue(
+      new Error(
+        'unknown resource key " 000F4240" in kind "item" /Users/private/get_resource.go:96',
+      ),
+    );
+
+    const failure = await wailsDesktopBridge.getResource({ kind: "item", key: " 000F4240" }).then(
+      () => undefined,
+      (error: unknown) => error as Error,
+    );
+
+    // An unknown kind, an unknown key and a transport failure are not told apart
+    // here: that needs a structured backend error contract.
+    expect(failure?.message).toBe(bridgeFailureCode);
+    expect(failure?.message).not.toContain("unknown resource key");
     expect(failure?.message).not.toContain("/Users/private");
   });
 });
