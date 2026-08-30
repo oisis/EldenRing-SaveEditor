@@ -26,6 +26,10 @@ export function GetLoadedSave(arg1) {
   return window['go']['desktop']['Bridge']['GetLoadedSave'](arg1);
 }
 
+export function GetResources(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['desktop']['Bridge']['GetResources'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
 export function GetSaveCharacters(arg1) {
   return window['go']['desktop']['Bridge']['GetSaveCharacters'](arg1);
 }

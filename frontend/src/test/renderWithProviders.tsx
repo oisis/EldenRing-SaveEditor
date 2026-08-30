@@ -7,6 +7,8 @@ import type {
   ApplicationInfo,
   ApplicationInfoPort,
 } from "../application/application-info/applicationInfoPort";
+import { CatalogPortProvider } from "../application/catalog/catalogClient";
+import type { CatalogPort, CatalogResourcesPage } from "../application/catalog/catalogPort";
 import { CharacterPortProvider } from "../application/character/characterClient";
 import type {
   CharacterPort,
@@ -109,6 +111,28 @@ export const stubStoragePage: ItemPage = {
   records: [{ ...stubInventoryPage.records[0], ownedItemID: "owned-2", physicalIndex: 7 }],
 };
 
+/**
+ * The catalog stub carries a named row and a nameless one: an unknown name is
+ * the empty string in the backend contract, and nothing above the port may turn
+ * it into a key or a placeholder.
+ */
+export const stubCatalogPage: CatalogResourcesPage = {
+  resources: [
+    { kind: "item", key: "weapon/uchigatana", family: "weapon", name: "Uchigatana" },
+    { kind: "item", key: "goods/unnamed", family: "", name: "" },
+  ],
+  total: 2,
+  page: 1,
+  pageSize: 50,
+};
+
+export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPort {
+  return {
+    getResources: () => Promise.resolve(stubCatalogPage),
+    ...overrides,
+  };
+}
+
 export function makeItemsPort(overrides: Partial<ItemsPort> = {}): ItemsPort {
   return {
     getInventory: () => Promise.resolve(stubInventoryPage),
@@ -161,6 +185,7 @@ export function TestProviders({
   saveSessionPort,
   characterPort,
   itemsPort,
+  catalogPort,
 }: {
   children: ReactNode;
   queryClient: QueryClient;
@@ -168,15 +193,18 @@ export function TestProviders({
   saveSessionPort?: SaveSessionPort;
   characterPort?: CharacterPort;
   itemsPort?: ItemsPort;
+  catalogPort?: CatalogPort;
 }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ApplicationInfoPortProvider port={port ?? makePort()}>
-        <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
-          <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-            <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>{children}</ItemsPortProvider>
-          </CharacterPortProvider>
-        </SaveSessionPortProvider>
+        <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
+          <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
+            <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
+              <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>{children}</ItemsPortProvider>
+            </CharacterPortProvider>
+          </SaveSessionPortProvider>
+        </CatalogPortProvider>
       </ApplicationInfoPortProvider>
     </QueryClientProvider>
   );
@@ -189,6 +217,7 @@ export async function renderApp(
     saveSessionPort?: SaveSessionPort;
     characterPort?: CharacterPort;
     itemsPort?: ItemsPort;
+    catalogPort?: CatalogPort;
     locale?: Locale;
     queryClient?: QueryClient;
   } = {},
@@ -203,6 +232,7 @@ export async function renderApp(
         saveSessionPort={options.saveSessionPort}
         characterPort={options.characterPort}
         itemsPort={options.itemsPort}
+        catalogPort={options.catalogPort}
       >
         {ui}
       </TestProviders>

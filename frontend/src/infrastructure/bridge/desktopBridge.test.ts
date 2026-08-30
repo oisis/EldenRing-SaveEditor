@@ -6,11 +6,12 @@ import {
   GetCharacterStats,
   GetInventory,
   GetLoadedSave,
+  GetResources,
   GetSaveCharacters,
   GetStorage,
   LoadSave,
 } from "../../../wailsjs/go/desktop/Bridge";
-import { application, inventory, saveengine } from "../../../wailsjs/go/models";
+import { application, catalog, inventory, saveengine } from "../../../wailsjs/go/models";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
@@ -20,6 +21,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetCharacterStats: vi.fn(),
   GetInventory: vi.fn(),
   GetLoadedSave: vi.fn(),
+  GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
   GetStorage: vi.fn(),
   LoadSave: vi.fn(),
@@ -34,6 +36,7 @@ const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
+const getResources = vi.mocked(GetResources);
 
 beforeEach(() => {
   getApplicationInfo.mockReset();
@@ -45,6 +48,7 @@ beforeEach(() => {
   getCharacterStats.mockReset();
   getInventory.mockReset();
   getStorage.mockReset();
+  getResources.mockReset();
 });
 
 describe("wails application info adapter", () => {
@@ -547,5 +551,134 @@ describe("wails items adapter", () => {
       expect(failure?.message).not.toContain("goroutine");
       expect(failure?.message).not.toContain("/Users/private");
     }
+  });
+});
+
+const catalogPage = catalog.GetResourcesResult.createFrom({
+  resources: [
+    { kind: "item", key: "weapon/uchigatana", family: "weapon", name: "Uchigatana" },
+    { kind: "item", key: "goods/unnamed", family: "", name: "" },
+    { kind: "future_kind", key: "future/key", family: "", name: "Future Resource" },
+  ],
+  total: 3,
+  page: 1,
+  pageSize: 50,
+});
+
+const catalogRequest = {
+  resourceType: "item",
+  family: "weapon",
+  capability: "upgrade",
+  endpointID: "",
+  search: "uchi",
+  page: 2,
+  pageSize: 25,
+};
+
+describe("wails catalog adapter", () => {
+  it("passes all seven arguments to the binding in contract order", async () => {
+    getResources.mockResolvedValue(catalogPage);
+
+    await wailsDesktopBridge.getResources({
+      resourceType: "  Item  ",
+      family: "  Weapon  ",
+      capability: "  Upgrade  ",
+      endpointID: "  get_resources  ",
+      search: "  Uchi  ",
+      page: 0,
+      pageSize: 0,
+    });
+
+    // No trimming, no recasing, no filter default and no paging normalisation:
+    // every one of them is the backend's contract.
+    expect(getResources).toHaveBeenCalledExactlyOnceWith(
+      "  Item  ",
+      "  Weapon  ",
+      "  Upgrade  ",
+      "  get_resources  ",
+      "  Uchi  ",
+      0,
+      0,
+    );
+  });
+
+  it("maps every reported catalog field and every row, and nothing else", async () => {
+    getResources.mockResolvedValue(catalogPage);
+
+    // Exactly the four fields the backend reports per row: no icon, no
+    // description, no capability, no provenance, no limit, no favourite state
+    // and no safety level is invented here.
+    await expect(wailsDesktopBridge.getResources(catalogRequest)).resolves.toEqual({
+      resources: [
+        { kind: "item", key: "weapon/uchigatana", family: "weapon", name: "Uchigatana" },
+        { kind: "item", key: "goods/unnamed", family: "", name: "" },
+        { kind: "future_kind", key: "future/key", family: "", name: "Future Resource" },
+      ],
+      total: 3,
+      page: 1,
+      pageSize: 50,
+    });
+  });
+
+  it("keeps an empty name and an empty family instead of building a fallback", async () => {
+    getResources.mockResolvedValue(catalogPage);
+
+    const page = await wailsDesktopBridge.getResources(catalogRequest);
+
+    // The key is never promoted to a name, and an unknown family stays empty.
+    expect(page.resources[1].name).toBe("");
+    expect(page.resources[1].family).toBe("");
+    expect(page.resources[1].key).toBe("goods/unnamed");
+  });
+
+  it("reports the page and page size the backend served, not the requested ones", async () => {
+    getResources.mockResolvedValue(catalogPage);
+
+    const page = await wailsDesktopBridge.getResources({
+      ...catalogRequest,
+      page: 0,
+      pageSize: 0,
+    });
+
+    // Zero paging resolves to the backend defaults; the adapter echoes neither
+    // the request nor a default of its own.
+    expect(page.page).toBe(1);
+    expect(page.pageSize).toBe(50);
+    expect(page.total).toBe(3);
+  });
+
+  it("carries an empty page through as an ordinary result", async () => {
+    getResources.mockResolvedValue(
+      catalog.GetResourcesResult.createFrom({
+        resources: [],
+        total: 0,
+        page: 99,
+        pageSize: 25,
+      }),
+    );
+
+    await expect(wailsDesktopBridge.getResources(catalogRequest)).resolves.toEqual({
+      resources: [],
+      total: 0,
+      page: 99,
+      pageSize: 25,
+    });
+  });
+
+  it("replaces a failed catalog call with the same stable code as every other port", async () => {
+    getResources.mockRejectedValue(
+      new Error("goroutine 13 [running]: catalog.GetResources /Users/private/get_resources.go:96"),
+    );
+
+    const failure = await wailsDesktopBridge.getResources(catalogRequest).then(
+      () => undefined,
+      (error: unknown) => error as Error,
+    );
+
+    // A rejected filter, an unknown resource type and a transport failure are
+    // not told apart here: that needs a structured backend error contract.
+    expect(failure?.message).toBe(bridgeFailureCode);
+    expect(failure?.message).not.toContain("goroutine");
+    expect(failure?.message).not.toContain("/Users/private");
   });
 });

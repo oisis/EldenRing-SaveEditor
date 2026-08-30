@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -415,5 +416,113 @@ func TestItemMethodsForwardSectionAndPagingUnchanged(t *testing.T) {
 						argument.characterID, argument.containerSection, argument.page, argument.pageSize)
 				})
 		})
+	}
+}
+
+// GetResources reads GameCatalog only, so it is proven against the endpoint on
+// its own, over the argument shapes the endpoint gives meaning to: an empty
+// filter, an untrimmed one, an unknown value, the rejected endpoint filter and
+// every paging boundary. The bridge has to produce the endpoint outcome in each
+// of them, including the rejections.
+func TestGetResourcesForwardsEveryArgumentToTheEndpointUnchanged(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	arguments := []struct {
+		name         string
+		resourceType string
+		family       string
+		capability   string
+		endpointID   string
+		search       string
+		page         int
+		pageSize     int
+	}{
+		{"empty filters", "", "", "", "", "", 0, 0},
+		{"every filter set", "item", "weapon", "upgrade", "", "sword", 1, 5},
+		{"untrimmed and recased filters", " Item ", " Weapon ", " Upgrade ", "", "  Sword  ", 1, 5},
+		{"mixed case search", "item", "", "", "", "UCHIGATANA", 1, 5},
+		{"unknown resource type", "future_kind", "", "", "", "", 1, 5},
+		{"unknown family", "item", "future_family", "", "", "", 1, 5},
+		{"unknown capability", "item", "", "future_capability", "", "", 1, 5},
+		{"rejected endpoint filter", "item", "", "", "get_resources", "", 1, 5},
+		{"zero paging", "item", "", "", "", "", 0, 0},
+		{"negative page", "item", "", "", "", "", -1, 5},
+		{"negative page size", "item", "", "", "", "", 1, -1},
+		{"page past the last one", "item", "", "", "", "", 999999, 5},
+		{"non-item kind", "class", "", "", "", "", 1, 5},
+	}
+
+	for _, argument := range arguments {
+		t.Run(argument.name, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetResources(argument.resourceType, argument.family,
+						argument.capability, argument.endpointID, argument.search,
+						argument.page, argument.pageSize)
+				},
+				func() (any, error) {
+					return catalog.GetResources(gameCatalog, argument.resourceType, argument.family,
+						argument.capability, argument.endpointID, argument.search,
+						argument.page, argument.pageSize)
+				})
+		})
+	}
+}
+
+// The bridge owns no default of its own: an empty resource type must stay the
+// unfiltered catalog rather than becoming an implicit item filter, and zero
+// paging must produce the endpoint page size rather than a bridge constant.
+func TestGetResourcesAppliesNoFiltersOrDefaultsOfItsOwn(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+
+	result, err := bridge.GetResources("", "", "", "", "", 0, 0)
+	if err != nil {
+		t.Fatalf("GetResources: %v", err)
+	}
+
+	if result.Page != 1 {
+		t.Fatalf("page = %d, want the endpoint default 1", result.Page)
+	}
+	if result.PageSize != catalog.GetResourcesDefaultPageSize {
+		t.Fatalf("pageSize = %d, want the endpoint default %d",
+			result.PageSize, catalog.GetResourcesDefaultPageSize)
+	}
+
+	items, err := bridge.GetResources("item", "", "", "", "", 0, 0)
+	if err != nil {
+		t.Fatalf("GetResources for items: %v", err)
+	}
+	// The catalog holds more than items, so an unfiltered total has to exceed the
+	// item total. This fails if the bridge ever substitutes an item filter for an
+	// empty resource type.
+	if result.Total <= items.Total {
+		t.Fatalf("unfiltered total = %d, want more than the item total %d", result.Total, items.Total)
+	}
+}
+
+// A nil catalog is a wiring error owned by the endpoint. The bridge must
+// propagate its rejection instead of loading a catalog of its own.
+func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetResources("item", "", "", "", "", 1, 5)
+		},
+		func() (any, error) {
+			return catalog.GetResources(nil, "item", "", "", "", "", 1, 5)
+		})
+
+	result, err := bridge.GetResources("item", "", "", "", "", 1, 5)
+	if err == nil {
+		t.Fatal("GetResources with a nil catalog = nil error, want the endpoint rejection")
+	}
+	if err.Error() != "game catalog is not loaded" {
+		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
+	}
+	if !reflect.DeepEqual(result, catalog.GetResourcesResult{}) {
+		t.Fatalf("result = %#v, want the empty result", result)
 	}
 }

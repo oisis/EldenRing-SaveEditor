@@ -3,6 +3,7 @@
 import {application} from '../models';
 import {saveengine} from '../models';
 import {inventory} from '../models';
+import {catalog} from '../models';
 
 export function CloseSave(arg1:string):Promise<void>;
 
@@ -15,6 +16,8 @@ export function GetCharacterStats(arg1:string,arg2:number):Promise<saveengine.Ch
 export function GetInventory(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetInventoryResult>;
 
 export function GetLoadedSave(arg1:string):Promise<saveengine.SessionInfo>;
+
+export function GetResources(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:number,arg7:number):Promise<catalog.GetResourcesResult>;
 
 export function GetSaveCharacters(arg1:string):Promise<saveengine.SaveCharacters>;
 

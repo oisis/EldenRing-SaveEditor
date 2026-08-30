@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
+import { CatalogPortProvider } from "./application/catalog/catalogClient";
 import { CharacterPortProvider } from "./application/character/characterClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
@@ -27,14 +28,19 @@ createRoot(container).render(
   <StrictMode>
     <I18nProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
+        {/* The catalog provider sits beside the application-info one and above,
+            not inside, the save session: Item Database reads the catalog with no
+            save loaded. */}
         <ApplicationInfoPortProvider port={wailsDesktopBridge}>
-          <SaveSessionPortProvider port={wailsDesktopBridge}>
-            <CharacterPortProvider port={wailsDesktopBridge}>
-              <ItemsPortProvider port={wailsDesktopBridge}>
-                <App />
-              </ItemsPortProvider>
-            </CharacterPortProvider>
-          </SaveSessionPortProvider>
+          <CatalogPortProvider port={wailsDesktopBridge}>
+            <SaveSessionPortProvider port={wailsDesktopBridge}>
+              <CharacterPortProvider port={wailsDesktopBridge}>
+                <ItemsPortProvider port={wailsDesktopBridge}>
+                  <App />
+                </ItemsPortProvider>
+              </CharacterPortProvider>
+            </SaveSessionPortProvider>
+          </CatalogPortProvider>
         </ApplicationInfoPortProvider>
       </QueryClientProvider>
     </I18nProvider>

@@ -1,3 +1,5 @@
+import type { CatalogResourcesRequest } from "./catalog/catalogPort";
+
 /**
  * The placeholder a per-character query is keyed under while no character is
  * selected. Such a query never runs, so it must not share a key with any real
@@ -16,6 +18,32 @@ type CharacterKey = number | typeof noCharacter;
  */
 export const queryKeys = {
   applicationInfo: () => ["application", "info"] as const,
+  /**
+   * The catalog is global: it belongs to no save session, so its keys live
+   * outside the `save-session` prefix and closing a save leaves them cached.
+   * All seven backend arguments take part in the key, because every one of them
+   * selects a different page of the catalog.
+   */
+  catalogResources: ({
+    resourceType,
+    family,
+    capability,
+    endpointID,
+    search,
+    page,
+    pageSize,
+  }: CatalogResourcesRequest) =>
+    [
+      "catalog",
+      "resources",
+      resourceType,
+      family,
+      capability,
+      endpointID,
+      search,
+      page,
+      pageSize,
+    ] as const,
   /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to

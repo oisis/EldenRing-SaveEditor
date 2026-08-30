@@ -8,6 +8,7 @@ package desktop
 
 import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -123,4 +124,22 @@ func (b *Bridge) GetStorage(
 ) (inventory.GetStorageResult, error) {
 	return inventory.GetStorage(
 		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize)
+}
+
+// GetResources delegates to the GetResources endpoint and returns its result
+// and error unchanged. Every filter, the search text and the paging are
+// forwarded exactly as received: which values are accepted, which are rejected,
+// what an empty filter means and which defaults apply are the endpoint's
+// contract, and the bridge must not restate any of it.
+func (b *Bridge) GetResources(
+	resourceType string,
+	family string,
+	capability string,
+	endpointID string,
+	search string,
+	page int,
+	pageSize int,
+) (catalog.GetResourcesResult, error) {
+	return catalog.GetResources(
+		b.gameCatalog, resourceType, family, capability, endpointID, search, page, pageSize)
 }
