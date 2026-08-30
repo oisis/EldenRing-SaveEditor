@@ -3,19 +3,48 @@ package desktop_test
 import (
 	"path/filepath"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
 )
 
+var (
+	bridgeCatalogOnce sync.Once
+	bridgeCatalogData loader.Data
+	bridgeCatalogErr  error
+)
+
+// testCatalog builds the catalog the way the composition root does, from the
+// embedded catalog data. The bridge tests need a real catalog because a nil one
+// is what the endpoints reject, so it must not be the default in every case.
+func testCatalog(t *testing.T) *gamecatalog.Catalog {
+	t.Helper()
+	bridgeCatalogOnce.Do(func() {
+		bridgeCatalogData, bridgeCatalogErr = loader.LoadFS(catalogdata.Files())
+	})
+	if bridgeCatalogErr != nil {
+		t.Fatalf("loader.LoadFS: %v", bridgeCatalogErr)
+	}
+	catalog, err := gamecatalog.New(bridgeCatalogData.Manifest, bridgeCatalogData.Resources())
+	if err != nil {
+		t.Fatalf("gamecatalog.New: %v", err)
+	}
+	return catalog
+}
+
 type endpointCall func() (any, error)
 
 func newTestBridge(version string) *desktop.Bridge {
-	return desktop.NewBridge(version, saveengine.New())
+	return desktop.NewBridge(version, saveengine.New(), nil)
 }
 
 func assertCallsMatch(t *testing.T, bridged endpointCall, direct endpointCall) {
@@ -112,7 +141,8 @@ func TestGetApplicationInfoPropagatesTheEmptyVersionWiringError(t *testing.T) {
 
 func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T) {
 	engine := saveengine.New()
-	bridge := desktop.NewBridge("dev", engine)
+	catalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", engine, catalog)
 	missingSource := filepath.Join(t.TempDir(), "missing.sl2")
 	const unknownSessionID = "unknown-session"
 
@@ -175,6 +205,24 @@ func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T
 				return character.GetCharacterStats(engine, unknownSessionID, 0)
 			},
 		},
+		{
+			name: "GetInventory",
+			bridged: func() (any, error) {
+				return bridge.GetInventory(unknownSessionID, 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetInventory(engine, catalog, unknownSessionID, 0, "common", 1, 30)
+			},
+		},
+		{
+			name: "GetStorage",
+			bridged: func() (any, error) {
+				return bridge.GetStorage(unknownSessionID, 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetStorage(engine, catalog, unknownSessionID, 0, "common", 1, 30)
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -185,7 +233,8 @@ func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T
 }
 
 func TestReadOnlySaveMethodsPropagateNilEngineErrorsWithoutFallback(t *testing.T) {
-	bridge := desktop.NewBridge("dev", nil)
+	catalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", nil, catalog)
 
 	tests := []struct {
 		name    string
@@ -246,11 +295,125 @@ func TestReadOnlySaveMethodsPropagateNilEngineErrorsWithoutFallback(t *testing.T
 				return character.GetCharacterStats(nil, "session", 0)
 			},
 		},
+		{
+			name: "GetInventory",
+			bridged: func() (any, error) {
+				return bridge.GetInventory("session", 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetInventory(nil, catalog, "session", 0, "common", 1, 30)
+			},
+		},
+		{
+			name: "GetStorage",
+			bridged: func() (any, error) {
+				return bridge.GetStorage("session", 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetStorage(nil, catalog, "session", 0, "common", 1, 30)
+			},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			assertCallsMatch(t, test.bridged, test.direct)
+		})
+	}
+}
+
+// A nil catalog is a wiring error owned by the endpoints. The bridge must
+// propagate their rejection instead of building a catalog of its own.
+func TestItemMethodsPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
+	engine := saveengine.New()
+	bridge := desktop.NewBridge("dev", engine, nil)
+
+	tests := []struct {
+		name    string
+		bridged endpointCall
+		direct  endpointCall
+	}{
+		{
+			name: "GetInventory",
+			bridged: func() (any, error) {
+				return bridge.GetInventory("session", 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetInventory(engine, nil, "session", 0, "common", 1, 30)
+			},
+		},
+		{
+			name: "GetStorage",
+			bridged: func() (any, error) {
+				return bridge.GetStorage("session", 0, "common", 1, 30)
+			},
+			direct: func() (any, error) {
+				return inventory.GetStorage(engine, nil, "session", 0, "common", 1, 30)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertCallsMatch(t, test.bridged, test.direct)
+			result, err := test.bridged()
+			if err == nil {
+				t.Fatal("call with a nil catalog = nil error, want the endpoint rejection")
+			}
+			if err.Error() != "game catalog is not available" {
+				t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
+			}
+			if !reflect.ValueOf(result).IsZero() {
+				t.Fatalf("result = %#v, want the empty result", result)
+			}
+		})
+	}
+}
+
+// The section, page and page size are backend contract. The bridge must not
+// normalise, default or reorder them, so an unusual value has to reach the
+// endpoint exactly as given and produce the endpoint's own outcome.
+func TestItemMethodsForwardSectionAndPagingUnchanged(t *testing.T) {
+	engine := saveengine.New()
+	catalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", engine, catalog)
+
+	arguments := []struct {
+		name             string
+		saveSessionID    string
+		characterID      int
+		containerSection string
+		page             int
+		pageSize         int
+	}{
+		{"untrimmed section", "  Session ID  ", 0, "  Common  ", 1, 30},
+		{"empty section", "session", 9, "", 1, 30},
+		{"unknown section", "session", 0, "future_section", 1, 30},
+		{"zero paging", "session", 0, "common", 0, 0},
+		{"negative paging", "session", -1, "common", -1, -1},
+		{"large paging", "session", 42, "common", 999999, 999999},
+	}
+
+	for _, argument := range arguments {
+		t.Run(argument.name, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetInventory(argument.saveSessionID, argument.characterID,
+						argument.containerSection, argument.page, argument.pageSize)
+				},
+				func() (any, error) {
+					return inventory.GetInventory(engine, catalog, argument.saveSessionID,
+						argument.characterID, argument.containerSection, argument.page, argument.pageSize)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetStorage(argument.saveSessionID, argument.characterID,
+						argument.containerSection, argument.page, argument.pageSize)
+				},
+				func() (any, error) {
+					return inventory.GetStorage(engine, catalog, argument.saveSessionID,
+						argument.characterID, argument.containerSection, argument.page, argument.pageSize)
+				})
 		})
 	}
 }

@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
 import { CharacterPortProvider } from "./application/character/characterClient";
+import { ItemsPortProvider } from "./application/items/itemsClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
 import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
@@ -29,7 +30,9 @@ createRoot(container).render(
         <ApplicationInfoPortProvider port={wailsDesktopBridge}>
           <SaveSessionPortProvider port={wailsDesktopBridge}>
             <CharacterPortProvider port={wailsDesktopBridge}>
-              <App />
+              <ItemsPortProvider port={wailsDesktopBridge}>
+                <App />
+              </ItemsPortProvider>
             </CharacterPortProvider>
           </SaveSessionPortProvider>
         </ApplicationInfoPortProvider>

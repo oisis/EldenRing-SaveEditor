@@ -193,6 +193,38 @@ describe("useCloseSave", () => {
     });
   });
 
+  it("drops the container pages of the closed session and keeps another session's", async () => {
+    const { queryClient, wrapper } = setup(makeSaveSessionPort());
+    for (const saveSessionID of ["session-1", "session-2"]) {
+      queryClient.setQueryData(queryKeys.inventory(saveSessionID, 0, "common", 1, 30), {
+        saveSessionID,
+      });
+      queryClient.setQueryData(queryKeys.storage(saveSessionID, 0, "common", 2, 30), {
+        saveSessionID,
+      });
+    }
+
+    const { result } = renderHook(() => useCloseSave(), { wrapper });
+
+    result.current.mutate("session-1");
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    // Both containers are keyed under the session prefix, so the existing close
+    // rule removes them without a new cleanup rule of its own.
+    expect(queryClient.getQueryData(queryKeys.inventory("session-1", 0, "common", 1, 30))).toBe(
+      undefined,
+    );
+    expect(queryClient.getQueryData(queryKeys.storage("session-1", 0, "common", 2, 30))).toBe(
+      undefined,
+    );
+    expect(queryClient.getQueryData(queryKeys.inventory("session-2", 0, "common", 1, 30))).toEqual({
+      saveSessionID: "session-2",
+    });
+    expect(queryClient.getQueryData(queryKeys.storage("session-2", 0, "common", 2, 30))).toEqual({
+      saveSessionID: "session-2",
+    });
+  });
+
   it("keeps the cache and reports the failure when the close is rejected", async () => {
     const closeSave = vi.fn(() => Promise.reject(new Error("bridge_call_failed")));
     const { queryClient, wrapper } = setup(makeSaveSessionPort({ closeSave }));

@@ -9,7 +9,9 @@ package desktop
 import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -24,14 +26,26 @@ type Bridge struct {
 	// root. The bridge only passes it to public endpoints and owns no session or
 	// save-data behavior of its own.
 	saveEngine *saveengine.Engine
+	// gameCatalog is the single process-wide catalog supplied by the composition
+	// root. The bridge only passes it to public endpoints and resolves nothing
+	// through it itself.
+	gameCatalog *gamecatalog.Catalog
 }
 
-// NewBridge builds the bridge with the application version and SaveEngine
-// supplied by its caller. Neither dependency is validated or replaced here:
-// the public endpoints own their validation and the bridge must not duplicate
-// it or create fallback dependencies.
-func NewBridge(applicationVersion string, saveEngine *saveengine.Engine) *Bridge {
-	return &Bridge{applicationVersion: applicationVersion, saveEngine: saveEngine}
+// NewBridge builds the bridge with the application version, SaveEngine and
+// GameCatalog supplied by its caller. No dependency is validated or replaced
+// here: the public endpoints own their validation and the bridge must not
+// duplicate it or create fallback dependencies.
+func NewBridge(
+	applicationVersion string,
+	saveEngine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+) *Bridge {
+	return &Bridge{
+		applicationVersion: applicationVersion,
+		saveEngine:         saveEngine,
+		gameCatalog:        gameCatalog,
+	}
 }
 
 // GetApplicationInfo delegates to the GetApplicationInfo endpoint and returns
@@ -81,4 +95,32 @@ func (b *Bridge) GetCharacterStats(
 	characterID int,
 ) (character.GetCharacterStatsResult, error) {
 	return character.GetCharacterStats(b.saveEngine, saveSessionID, characterID)
+}
+
+// GetInventory delegates to the GetInventory endpoint and returns its result
+// and error unchanged. Section, page and page size are forwarded exactly as
+// received: paging and section resolution are the endpoint's contract.
+func (b *Bridge) GetInventory(
+	saveSessionID string,
+	characterID int,
+	containerSection string,
+	page int,
+	pageSize int,
+) (inventory.GetInventoryResult, error) {
+	return inventory.GetInventory(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize)
+}
+
+// GetStorage delegates to the GetStorage endpoint and returns its result and
+// error unchanged. It neither merges Storage with Inventory nor shares any
+// state with GetInventory.
+func (b *Bridge) GetStorage(
+	saveSessionID string,
+	characterID int,
+	containerSection string,
+	page int,
+	pageSize int,
+) (inventory.GetStorageResult, error) {
+	return inventory.GetStorage(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize)
 }

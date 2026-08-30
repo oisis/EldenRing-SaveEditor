@@ -9,6 +9,9 @@ import (
 	"embed"
 	"log"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
 	"github.com/wailsapp/wails/v2"
@@ -27,9 +30,21 @@ var applicationVersion = "dev"
 
 func main() {
 	saveEngine := saveengine.New()
-	bridge := desktop.NewBridge(applicationVersion, saveEngine)
+	// The single process-wide GameCatalog, built from the embedded catalog data
+	// the backend already ships. A failure here is a build or data defect, not a
+	// user condition: the application stops instead of starting with a partial
+	// or empty catalog that would silently change endpoint results.
+	catalogData, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		log.Fatalf("load game catalog data: %v", err)
+	}
+	gameCatalog, err := gamecatalog.New(catalogData.Manifest, catalogData.Resources())
+	if err != nil {
+		log.Fatalf("build game catalog: %v", err)
+	}
+	bridge := desktop.NewBridge(applicationVersion, saveEngine, gameCatalog)
 
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:       "Elden Ring SaveForge",
 		Width:       1280,
 		Height:      820,

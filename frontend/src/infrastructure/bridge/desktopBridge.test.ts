@@ -4,11 +4,13 @@ import {
   GetApplicationInfo,
   GetCharacterProfile,
   GetCharacterStats,
+  GetInventory,
   GetLoadedSave,
   GetSaveCharacters,
+  GetStorage,
   LoadSave,
 } from "../../../wailsjs/go/desktop/Bridge";
-import { application, saveengine } from "../../../wailsjs/go/models";
+import { application, inventory, saveengine } from "../../../wailsjs/go/models";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
@@ -16,8 +18,10 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetApplicationInfo: vi.fn(),
   GetCharacterProfile: vi.fn(),
   GetCharacterStats: vi.fn(),
+  GetInventory: vi.fn(),
   GetLoadedSave: vi.fn(),
   GetSaveCharacters: vi.fn(),
+  GetStorage: vi.fn(),
   LoadSave: vi.fn(),
 }));
 
@@ -28,6 +32,8 @@ const closeSave = vi.mocked(CloseSave);
 const getSaveCharacters = vi.mocked(GetSaveCharacters);
 const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
+const getInventory = vi.mocked(GetInventory);
+const getStorage = vi.mocked(GetStorage);
 
 beforeEach(() => {
   getApplicationInfo.mockReset();
@@ -37,6 +43,8 @@ beforeEach(() => {
   getSaveCharacters.mockReset();
   getCharacterProfile.mockReset();
   getCharacterStats.mockReset();
+  getInventory.mockReset();
+  getStorage.mockReset();
 });
 
 describe("wails application info adapter", () => {
@@ -356,6 +364,186 @@ describe("wails character adapter", () => {
       expect(failure?.message).toBe(bridgeFailureCode);
       // An unknown session, an inactive slot and a transport failure are not
       // told apart here: that needs a structured backend error contract.
+      expect(failure?.message).not.toContain("goroutine");
+      expect(failure?.message).not.toContain("/Users/private");
+    }
+  });
+});
+
+const containerRecord = {
+  ownedItemID: "owned-1",
+  kind: "item",
+  key: "weapon/uchigatana",
+  gameID: 0x00bb8000,
+  containerSection: "common",
+  physicalIndex: 3,
+  gaItemHandle: 0x8000000a,
+  quantity: 1,
+  acquisitionIndex: 42,
+};
+
+const inventoryPage = inventory.GetInventoryResult.createFrom({
+  saveSessionID: "session-1",
+  saveRevision: "  Revision 7  ",
+  characterID: 0,
+  active: true,
+  records: [containerRecord],
+  total: 1,
+  page: 2,
+  pageSize: 30,
+});
+
+const storagePage = inventory.GetStorageResult.createFrom({
+  saveSessionID: "session-1",
+  saveRevision: "  Revision 7  ",
+  characterID: 0,
+  active: true,
+  records: [{ ...containerRecord, ownedItemID: "owned-2", physicalIndex: 7 }],
+  total: 1,
+  page: 2,
+  pageSize: 30,
+});
+
+const expectedPage = {
+  saveSessionID: "session-1",
+  saveRevision: "  Revision 7  ",
+  characterID: 0,
+  active: true,
+  records: [containerRecord],
+  total: 1,
+  page: 2,
+  pageSize: 30,
+};
+
+describe("wails items adapter", () => {
+  it("passes all five arguments to the Inventory binding in contract order", async () => {
+    getInventory.mockResolvedValue(inventoryPage);
+
+    await wailsDesktopBridge.getInventory({
+      saveSessionID: "  Session ID  ",
+      characterID: 9,
+      containerSection: "  Common  ",
+      page: 2,
+      pageSize: 30,
+    });
+
+    // No trimming, no section default, no paging normalisation and no slot
+    // range check: the backend owns all of them.
+    expect(getInventory).toHaveBeenCalledExactlyOnceWith("  Session ID  ", 9, "  Common  ", 2, 30);
+    expect(getStorage).not.toHaveBeenCalled();
+  });
+
+  it("passes all five arguments to the Storage binding in contract order", async () => {
+    getStorage.mockResolvedValue(storagePage);
+
+    await wailsDesktopBridge.getStorage({
+      saveSessionID: "session-1",
+      characterID: -1,
+      containerSection: "",
+      page: 0,
+      pageSize: 0,
+    });
+
+    expect(getStorage).toHaveBeenCalledExactlyOnceWith("session-1", -1, "", 0, 0);
+    expect(getInventory).not.toHaveBeenCalled();
+  });
+
+  it("maps every reported Inventory field and nothing else", async () => {
+    getInventory.mockResolvedValue(inventoryPage);
+
+    // Exactly the fields the backend reports: no name, no icon, no capacity, no
+    // favourite state and no capability is invented here.
+    await expect(
+      wailsDesktopBridge.getInventory({
+        saveSessionID: "session-1",
+        characterID: 0,
+        containerSection: "common",
+        page: 2,
+        pageSize: 30,
+      }),
+    ).resolves.toEqual(expectedPage);
+  });
+
+  it("maps every reported Storage field and nothing else", async () => {
+    getStorage.mockResolvedValue(storagePage);
+
+    await expect(
+      wailsDesktopBridge.getStorage({
+        saveSessionID: "session-1",
+        characterID: 0,
+        containerSection: "common",
+        page: 2,
+        pageSize: 30,
+      }),
+    ).resolves.toEqual({
+      ...expectedPage,
+      records: [{ ...containerRecord, ownedItemID: "owned-2", physicalIndex: 7 }],
+    });
+  });
+
+  it("carries an inactive slot, an empty page and an opaque revision through", async () => {
+    getInventory.mockResolvedValue(
+      inventory.GetInventoryResult.createFrom({
+        saveSessionID: "session-1",
+        saveRevision: "",
+        characterID: 4,
+        active: false,
+        records: [],
+        total: 0,
+        page: 99,
+        pageSize: 30,
+      }),
+    );
+
+    const page = await wailsDesktopBridge.getInventory({
+      saveSessionID: "session-1",
+      characterID: 4,
+      containerSection: "common",
+      page: 99,
+      pageSize: 30,
+    });
+
+    // An inactive slot is an ordinary result, not an error, and the revision is
+    // never generated or replaced by the adapter.
+    expect(page).toEqual({
+      saveSessionID: "session-1",
+      saveRevision: "",
+      characterID: 4,
+      active: false,
+      records: [],
+      total: 0,
+      page: 99,
+      pageSize: 30,
+    });
+  });
+
+  it("replaces a failed container call with the stable code, on both methods", async () => {
+    const transportError = new Error(
+      "goroutine 11 [running]: saveengine.(*Engine).GetInventory /Users/private/inventory.go:64",
+    );
+    getInventory.mockRejectedValue(transportError);
+    getStorage.mockRejectedValue(transportError);
+
+    const request = {
+      saveSessionID: "session-1",
+      characterID: 0,
+      containerSection: "common",
+      page: 1,
+      pageSize: 30,
+    };
+
+    for (const call of [
+      () => wailsDesktopBridge.getInventory(request),
+      () => wailsDesktopBridge.getStorage(request),
+    ]) {
+      const failure = await call().then(
+        () => undefined,
+        (error: unknown) => error as Error,
+      );
+
+      // An unknown section, an unknown item ID and a transport failure are not
+      // told apart here: that needs a structured backend error contract.
+      expect(failure?.message).toBe(bridgeFailureCode);
       expect(failure?.message).not.toContain("goroutine");
       expect(failure?.message).not.toContain("/Users/private");
     }

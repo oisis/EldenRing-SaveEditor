@@ -14,6 +14,8 @@ import type {
   CharacterStats,
   SaveCharacters,
 } from "../application/character/characterPort";
+import { ItemsPortProvider } from "../application/items/itemsClient";
+import type { ItemPage, ItemsPort } from "../application/items/itemsPort";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
 import type { SaveSession, SaveSessionPort } from "../application/save-session/saveSessionPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
@@ -79,6 +81,42 @@ export const stubCharacterStats: CharacterStats = {
   baseMaxSP: 130,
 };
 
+export const stubInventoryPage: ItemPage = {
+  saveSessionID: "session-1",
+  saveRevision: "revision-1",
+  characterID: 0,
+  active: true,
+  records: [
+    {
+      ownedItemID: "owned-1",
+      kind: "item",
+      key: "weapon/uchigatana",
+      gameID: 0x00bb8000,
+      containerSection: "common",
+      physicalIndex: 3,
+      gaItemHandle: 0x8000000a,
+      quantity: 1,
+      acquisitionIndex: 42,
+    },
+  ],
+  total: 1,
+  page: 1,
+  pageSize: 30,
+};
+
+export const stubStoragePage: ItemPage = {
+  ...stubInventoryPage,
+  records: [{ ...stubInventoryPage.records[0], ownedItemID: "owned-2", physicalIndex: 7 }],
+};
+
+export function makeItemsPort(overrides: Partial<ItemsPort> = {}): ItemsPort {
+  return {
+    getInventory: () => Promise.resolve(stubInventoryPage),
+    getStorage: () => Promise.resolve(stubStoragePage),
+    ...overrides,
+  };
+}
+
 export function makePort(overrides: Partial<ApplicationInfoPort> = {}): ApplicationInfoPort {
   return {
     getApplicationInfo: () => Promise.resolve(stubApplicationInfo),
@@ -122,19 +160,21 @@ export function TestProviders({
   port,
   saveSessionPort,
   characterPort,
+  itemsPort,
 }: {
   children: ReactNode;
   queryClient: QueryClient;
   port?: ApplicationInfoPort;
   saveSessionPort?: SaveSessionPort;
   characterPort?: CharacterPort;
+  itemsPort?: ItemsPort;
 }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ApplicationInfoPortProvider port={port ?? makePort()}>
         <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
           <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-            {children}
+            <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>{children}</ItemsPortProvider>
           </CharacterPortProvider>
         </SaveSessionPortProvider>
       </ApplicationInfoPortProvider>
@@ -148,6 +188,7 @@ export async function renderApp(
     port?: ApplicationInfoPort;
     saveSessionPort?: SaveSessionPort;
     characterPort?: CharacterPort;
+    itemsPort?: ItemsPort;
     locale?: Locale;
     queryClient?: QueryClient;
   } = {},
@@ -161,6 +202,7 @@ export async function renderApp(
         port={options.port}
         saveSessionPort={options.saveSessionPort}
         characterPort={options.characterPort}
+        itemsPort={options.itemsPort}
       >
         {ui}
       </TestProviders>

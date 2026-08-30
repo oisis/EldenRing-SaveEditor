@@ -18,12 +18,20 @@ export function GetCharacterStats(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetCharacterStats'](arg1, arg2);
 }
 
+export function GetInventory(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['desktop']['Bridge']['GetInventory'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function GetLoadedSave(arg1) {
   return window['go']['desktop']['Bridge']['GetLoadedSave'](arg1);
 }
 
 export function GetSaveCharacters(arg1) {
   return window['go']['desktop']['Bridge']['GetSaveCharacters'](arg1);
+}
+
+export function GetStorage(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['desktop']['Bridge']['GetStorage'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function LoadSave(arg1, arg2) {

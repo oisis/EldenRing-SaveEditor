@@ -53,6 +53,156 @@ export namespace application {
 
 }
 
+export namespace inventory {
+	
+	export class InventoryRecord {
+	    ownedItemID: string;
+	    kind: string;
+	    key: string;
+	    gameID: number;
+	    containerSection: string;
+	    physicalIndex: number;
+	    gaItemHandle: number;
+	    quantity: number;
+	    acquisitionIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new InventoryRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.gameID = source["gameID"];
+	        this.containerSection = source["containerSection"];
+	        this.physicalIndex = source["physicalIndex"];
+	        this.gaItemHandle = source["gaItemHandle"];
+	        this.quantity = source["quantity"];
+	        this.acquisitionIndex = source["acquisitionIndex"];
+	    }
+	}
+	export class GetInventoryResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    records: InventoryRecord[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetInventoryResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.records = this.convertValues(source["records"], InventoryRecord);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class StorageRecord {
+	    ownedItemID: string;
+	    kind: string;
+	    key: string;
+	    gameID: number;
+	    containerSection: string;
+	    physicalIndex: number;
+	    gaItemHandle: number;
+	    quantity: number;
+	    acquisitionIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new StorageRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.gameID = source["gameID"];
+	        this.containerSection = source["containerSection"];
+	        this.physicalIndex = source["physicalIndex"];
+	        this.gaItemHandle = source["gaItemHandle"];
+	        this.quantity = source["quantity"];
+	        this.acquisitionIndex = source["acquisitionIndex"];
+	    }
+	}
+	export class GetStorageResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    records: StorageRecord[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetStorageResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.records = this.convertValues(source["records"], StorageRecord);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+
+}
+
 export namespace saveengine {
 	
 	export class CharacterProfile {

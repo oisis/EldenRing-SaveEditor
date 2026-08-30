@@ -32,4 +32,45 @@ export const queryKeys = {
     ["save-session", saveSessionID, "character", characterID, "profile"] as const,
   characterStats: (saveSessionID: string, characterID: CharacterKey) =>
     ["save-session", saveSessionID, "character", characterID, "stats"] as const,
+  /**
+   * A container page is identified by its session, slot, container, section and
+   * page window: two sections, two pages or two page sizes are different views
+   * of the same slot and must not share a cache entry. Inventory and Storage
+   * are separate containers of the same slot, so the container name is part of
+   * the key rather than an argument of one shared key.
+   */
+  inventory: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    containerSection: string,
+    page: number,
+    pageSize: number,
+  ) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "inventory",
+      containerSection,
+      page,
+      pageSize,
+    ] as const,
+  storage: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    containerSection: string,
+    page: number,
+    pageSize: number,
+  ) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "storage",
+      containerSection,
+      page,
+      pageSize,
+    ] as const,
 } as const;
