@@ -7,9 +7,14 @@ import {
   GetApplicationInfo,
   GetCharacterProfile,
   GetCharacterStats,
+  GetEquipment,
+  GetEquippedSpells,
   GetInventory,
   GetItemVariants,
   GetLoadedSave,
+  GetPhysickMixture,
+  GetPouchItems,
+  GetQuickItems,
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
@@ -44,6 +49,14 @@ import type {
   CharacterStats,
   SaveCharacters,
 } from "../../application/character/characterPort";
+import type {
+  CharacterEquipment,
+  CharacterEquippedSpells,
+  CharacterPhysickMixture,
+  CharacterPouchItems,
+  CharacterQuickItems,
+  EquipmentPort,
+} from "../../application/equipment/equipmentPort";
 import type { ItemPage, ItemsPort } from "../../application/items/itemsPort";
 import type { SaveSession, SaveSessionPort } from "../../application/save-session/saveSessionPort";
 
@@ -105,6 +118,88 @@ function toItemPage(
     total: result.total,
     page: result.page,
     pageSize: result.pageSize,
+  };
+}
+
+/**
+ * Projects the generated raw equipment result onto the application port shape.
+ * The 22 values are copied into an array this layer owns, in the order the
+ * backend reported them: the generated array itself never becomes application
+ * state. No value is named, resolved, filtered or recognised as a sentinel.
+ */
+function toCharacterEquipment(
+  result: Awaited<ReturnType<typeof GetEquipment>>,
+): CharacterEquipment {
+  return {
+    saveSessionID: result.saveSessionID,
+    characterID: result.characterID,
+    active: result.active,
+    slots: [...result.slots],
+  };
+}
+
+/**
+ * Projects the generated quick-item result. `activeQuick` is signed in the
+ * backend contract and is carried as reported: a negative value is not clamped,
+ * zeroed or turned into an index.
+ */
+function toCharacterQuickItems(
+  result: Awaited<ReturnType<typeof GetQuickItems>>,
+): CharacterQuickItems {
+  return {
+    saveSessionID: result.saveSessionID,
+    characterID: result.characterID,
+    active: result.active,
+    items: result.items.map((item) => ({ itemID: item.itemID, equipIndex: item.equipIndex })),
+    activeQuick: result.activeQuick,
+  };
+}
+
+/** Projects the generated pouch result under the same rules. */
+function toCharacterPouchItems(
+  result: Awaited<ReturnType<typeof GetPouchItems>>,
+): CharacterPouchItems {
+  return {
+    saveSessionID: result.saveSessionID,
+    characterID: result.characterID,
+    active: result.active,
+    items: result.items.map((item) => ({ itemID: item.itemID, equipIndex: item.equipIndex })),
+  };
+}
+
+/** Projects both raw Crystal Tear identifiers into an array this layer owns. */
+function toCharacterPhysickMixture(
+  result: Awaited<ReturnType<typeof GetPhysickMixture>>,
+): CharacterPhysickMixture {
+  return {
+    saveSessionID: result.saveSessionID,
+    characterID: result.characterID,
+    active: result.active,
+    tears: [...result.tears],
+  };
+}
+
+/**
+ * Projects the generated equipped-spells result. The three resolved fields are
+ * the backend's own answer and are carried verbatim, empty values included: an
+ * empty record keeps its raw identifier and its empty key, name and cost, and
+ * neither count is recomputed from the records.
+ */
+function toCharacterEquippedSpells(
+  result: Awaited<ReturnType<typeof GetEquippedSpells>>,
+): CharacterEquippedSpells {
+  return {
+    saveSessionID: result.saveSessionID,
+    characterID: result.characterID,
+    active: result.active,
+    spells: result.spells.map((spell) => ({
+      rawMagicParamID: spell.rawMagicParamID,
+      resourceKey: spell.resourceKey,
+      name: spell.name,
+      memorySlots: spell.memorySlots,
+    })),
+    usedMemorySlots: result.usedMemorySlots,
+    availableMemorySlots: result.availableMemorySlots,
   };
 }
 
@@ -322,6 +417,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   SaveSessionPort &
   CharacterPort &
   ItemsPort &
+  EquipmentPort &
   CatalogPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
     const result = await callBridge(GetApplicationInfo);
@@ -418,6 +514,28 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       await callBridge(() =>
         GetStorage(saveSessionID, characterID, containerSection, page, pageSize),
       ),
+    ),
+
+  // The pair reaches the bridge in the order the backend contract defines; the
+  // grouped request only protects the caller from transposing them. Neither
+  // value is trimmed, defaulted or clamped on the way.
+  getEquipment: async ({ saveSessionID, characterID }) =>
+    toCharacterEquipment(await callBridge(() => GetEquipment(saveSessionID, characterID))),
+
+  getQuickItems: async ({ saveSessionID, characterID }) =>
+    toCharacterQuickItems(await callBridge(() => GetQuickItems(saveSessionID, characterID))),
+
+  getPouchItems: async ({ saveSessionID, characterID }) =>
+    toCharacterPouchItems(await callBridge(() => GetPouchItems(saveSessionID, characterID))),
+
+  getPhysickMixture: async ({ saveSessionID, characterID }) =>
+    toCharacterPhysickMixture(
+      await callBridge(() => GetPhysickMixture(saveSessionID, characterID)),
+    ),
+
+  getEquippedSpells: async ({ saveSessionID, characterID }) =>
+    toCharacterEquippedSpells(
+      await callBridge(() => GetEquippedSpells(saveSessionID, characterID)),
     ),
 
   // The seven arguments reach the bridge in the order the backend contract

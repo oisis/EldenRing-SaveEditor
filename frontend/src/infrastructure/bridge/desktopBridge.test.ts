@@ -4,9 +4,14 @@ import {
   GetApplicationInfo,
   GetCharacterProfile,
   GetCharacterStats,
+  GetEquipment,
+  GetEquippedSpells,
   GetInventory,
   GetItemVariants,
   GetLoadedSave,
+  GetPhysickMixture,
+  GetPouchItems,
+  GetQuickItems,
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
@@ -14,7 +19,7 @@ import {
   GetStorage,
   LoadSave,
 } from "../../../wailsjs/go/desktop/Bridge";
-import { application, catalog, inventory, saveengine } from "../../../wailsjs/go/models";
+import { application, catalog, equipment, inventory, saveengine } from "../../../wailsjs/go/models";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
@@ -22,9 +27,14 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetApplicationInfo: vi.fn(),
   GetCharacterProfile: vi.fn(),
   GetCharacterStats: vi.fn(),
+  GetEquipment: vi.fn(),
+  GetEquippedSpells: vi.fn(),
   GetInventory: vi.fn(),
   GetItemVariants: vi.fn(),
   GetLoadedSave: vi.fn(),
+  GetPhysickMixture: vi.fn(),
+  GetPouchItems: vi.fn(),
+  GetQuickItems: vi.fn(),
   GetResource: vi.fn(),
   GetResourcePresentationSummaries: vi.fn(),
   GetResources: vi.fn(),
@@ -40,6 +50,11 @@ const closeSave = vi.mocked(CloseSave);
 const getSaveCharacters = vi.mocked(GetSaveCharacters);
 const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
+const getEquipment = vi.mocked(GetEquipment);
+const getQuickItems = vi.mocked(GetQuickItems);
+const getPouchItems = vi.mocked(GetPouchItems);
+const getPhysickMixture = vi.mocked(GetPhysickMixture);
+const getEquippedSpells = vi.mocked(GetEquippedSpells);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
 const getResources = vi.mocked(GetResources);
@@ -55,6 +70,11 @@ beforeEach(() => {
   getSaveCharacters.mockReset();
   getCharacterProfile.mockReset();
   getCharacterStats.mockReset();
+  getEquipment.mockReset();
+  getQuickItems.mockReset();
+  getPouchItems.mockReset();
+  getPhysickMixture.mockReset();
+  getEquippedSpells.mockReset();
   getInventory.mockReset();
   getStorage.mockReset();
   getResources.mockReset();
@@ -1226,5 +1246,277 @@ describe("wails catalog item variants adapter", () => {
     expect(failure?.message).toBe(bridgeFailureCode);
     expect(failure?.message).not.toContain("has no item variants");
     expect(failure?.message).not.toContain("/Users/private");
+  });
+});
+
+/**
+ * The generated equipment results, built through `createFrom` exactly like the
+ * bridge delivers them. Every array is at its full backend length and carries
+ * the boundary values a wrong mapping would destroy: a zero, the maximum
+ * uint32, unequal equip indexes and, for the spells, empty and occupied records
+ * side by side.
+ */
+const generatedEquipment = saveengine.CharacterEquipment.createFrom({
+  saveSessionID: "  Session ID  ",
+  characterID: 9,
+  active: true,
+  slots: [
+    0, 0xffffffff, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260,
+    270, 280, 290, 0xfffffffe,
+  ],
+});
+
+const generatedQuickItems = saveengine.CharacterQuickItems.createFrom({
+  saveSessionID: "  Session ID  ",
+  characterID: 9,
+  active: true,
+  items: [
+    { itemID: 0, equipIndex: 0 },
+    { itemID: 0xffffffff, equipIndex: 1 },
+    { itemID: 1010, equipIndex: 7 },
+    { itemID: 1020, equipIndex: 2 },
+    { itemID: 1030, equipIndex: 0xffffffff },
+    { itemID: 1040, equipIndex: 4 },
+    { itemID: 1050, equipIndex: 9 },
+    { itemID: 1060, equipIndex: 3 },
+    { itemID: 1070, equipIndex: 8 },
+    { itemID: 1080, equipIndex: 5 },
+  ],
+  activeQuick: -3,
+});
+
+const generatedPouchItems = saveengine.CharacterPouchItems.createFrom({
+  saveSessionID: "  Session ID  ",
+  characterID: 9,
+  active: true,
+  items: [
+    { itemID: 0, equipIndex: 5 },
+    { itemID: 0xffffffff, equipIndex: 0 },
+    { itemID: 2010, equipIndex: 3 },
+    { itemID: 2020, equipIndex: 1 },
+    { itemID: 2030, equipIndex: 4 },
+    { itemID: 2040, equipIndex: 2 },
+  ],
+});
+
+const generatedPhysickMixture = saveengine.CharacterPhysickMixture.createFrom({
+  saveSessionID: "  Session ID  ",
+  characterID: 9,
+  active: true,
+  tears: [0xffffffff, 0],
+});
+
+const generatedEquippedSpells = equipment.GetEquippedSpellsResult.createFrom({
+  saveSessionID: "  Session ID  ",
+  characterID: 9,
+  active: true,
+  spells: [
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    {
+      rawMagicParamID: 3000,
+      resourceKey: "item/glintstone-pebble",
+      name: "Glintstone Pebble",
+      memorySlots: 1,
+    },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    {
+      rawMagicParamID: 4010,
+      resourceKey: "item/rotten-breath",
+      name: "Rotten Breath",
+      memorySlots: 2,
+    },
+    { rawMagicParamID: 5020, resourceKey: "item/comet-azur", name: "Comet Azur", memorySlots: 3 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 6030, resourceKey: "item/flame-sling", name: "Flame Sling", memorySlots: 1 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+  ],
+  usedMemorySlots: 7,
+  availableMemorySlots: 10,
+});
+
+const equipmentRequest = { saveSessionID: "  Session ID  ", characterID: 9 };
+
+describe("wails equipment adapter", () => {
+  it("passes the session and the slot to each generated method exactly as given", async () => {
+    getEquipment.mockResolvedValue(generatedEquipment);
+    getQuickItems.mockResolvedValue(generatedQuickItems);
+    getPouchItems.mockResolvedValue(generatedPouchItems);
+    getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
+    getEquippedSpells.mockResolvedValue(generatedEquippedSpells);
+
+    await wailsDesktopBridge.getEquipment(equipmentRequest);
+    await wailsDesktopBridge.getQuickItems(equipmentRequest);
+    await wailsDesktopBridge.getPouchItems(equipmentRequest);
+    await wailsDesktopBridge.getPhysickMixture(equipmentRequest);
+    await wailsDesktopBridge.getEquippedSpells(equipmentRequest);
+
+    // Nothing is trimmed, defaulted or clamped on the way to the bridge.
+    for (const call of [
+      getEquipment,
+      getQuickItems,
+      getPouchItems,
+      getPhysickMixture,
+      getEquippedSpells,
+    ]) {
+      expect(call).toHaveBeenCalledExactlyOnceWith("  Session ID  ", 9);
+    }
+  });
+
+  it("projects the raw equipment result without naming or reordering a field", async () => {
+    getEquipment.mockResolvedValue(generatedEquipment);
+
+    const result = await wailsDesktopBridge.getEquipment(equipmentRequest);
+
+    expect(result).toEqual({
+      saveSessionID: "  Session ID  ",
+      characterID: 9,
+      active: true,
+      slots: [
+        0, 0xffffffff, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250,
+        260, 270, 280, 290, 0xfffffffe,
+      ],
+    });
+    // The unknown fields keep their positions and their raw values, the
+    // sentinel included: none of them becomes a null, a name or an icon.
+    expect(result.slots).toHaveLength(22);
+    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "saveSessionID", "slots"]);
+  });
+
+  it("projects the quick items and keeps the negative active slot", async () => {
+    getQuickItems.mockResolvedValue(generatedQuickItems);
+
+    const result = await wailsDesktopBridge.getQuickItems(equipmentRequest);
+
+    expect(result.items).toEqual(generatedQuickItems.items);
+    expect(result.items).toHaveLength(10);
+    // Signed backend state: not clamped to zero and not turned into an index.
+    expect(result.activeQuick).toBe(-3);
+    expect(result.items[1].itemID).toBe(0xffffffff);
+    expect(result.items[4].equipIndex).toBe(0xffffffff);
+    expect(Object.keys(result).sort()).toEqual([
+      "active",
+      "activeQuick",
+      "characterID",
+      "items",
+      "saveSessionID",
+    ]);
+  });
+
+  it("projects the pouch records in their stored order", async () => {
+    getPouchItems.mockResolvedValue(generatedPouchItems);
+
+    const result = await wailsDesktopBridge.getPouchItems(equipmentRequest);
+
+    expect(result.items).toEqual(generatedPouchItems.items);
+    expect(result.items).toHaveLength(6);
+    expect(result.items.map((item) => item.equipIndex)).toEqual([5, 0, 3, 1, 4, 2]);
+    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "items", "saveSessionID"]);
+  });
+
+  it("projects both Physick tears unchanged", async () => {
+    getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
+
+    const result = await wailsDesktopBridge.getPhysickMixture(equipmentRequest);
+
+    expect(result.tears).toEqual([0xffffffff, 0]);
+    expect(result.tears).toHaveLength(2);
+    // A zero stays a zero: it is neither an empty slot nor a null here.
+    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "saveSessionID", "tears"]);
+  });
+
+  it("carries the resolved spells and the empty records exactly as reported", async () => {
+    getEquippedSpells.mockResolvedValue(generatedEquippedSpells);
+
+    const result = await wailsDesktopBridge.getEquippedSpells(equipmentRequest);
+
+    expect(result.spells).toEqual(generatedEquippedSpells.spells);
+    expect(result.spells).toHaveLength(12);
+    // An empty record keeps the backend's own empty key, name and cost: no
+    // placeholder name and no icon is invented for it.
+    expect(result.spells[0]).toEqual({
+      rawMagicParamID: 0xffffffff,
+      resourceKey: "",
+      name: "",
+      memorySlots: 0,
+    });
+    expect(result.spells[1].name).toBe("Glintstone Pebble");
+    expect(result.spells.map((spell) => spell.memorySlots)).toEqual([
+      0, 1, 0, 2, 3, 0, 0, 1, 0, 0, 0, 0,
+    ]);
+    // The two counts are the backend's answer and are not recomputed here.
+    expect(result.usedMemorySlots).toBe(7);
+    expect(result.availableMemorySlots).toBe(10);
+    expect(Object.keys(result).sort()).toEqual([
+      "active",
+      "availableMemorySlots",
+      "characterID",
+      "saveSessionID",
+      "spells",
+      "usedMemorySlots",
+    ]);
+    expect(Object.keys(result.spells[1]).sort()).toEqual([
+      "memorySlots",
+      "name",
+      "rawMagicParamID",
+      "resourceKey",
+    ]);
+  });
+
+  it("declares no save revision, capability, name or icon of its own", async () => {
+    getEquipment.mockResolvedValue(generatedEquipment);
+    getQuickItems.mockResolvedValue(generatedQuickItems);
+    getPouchItems.mockResolvedValue(generatedPouchItems);
+    getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
+
+    const results = [
+      await wailsDesktopBridge.getEquipment(equipmentRequest),
+      await wailsDesktopBridge.getQuickItems(equipmentRequest),
+      await wailsDesktopBridge.getPouchItems(equipmentRequest),
+      await wailsDesktopBridge.getPhysickMixture(equipmentRequest),
+    ];
+
+    // The backend contract of this stage carries none of these, so the adapter
+    // must not add them either.
+    for (const result of results) {
+      const keys = Object.keys(result);
+      for (const forbidden of ["saveRevision", "name", "iconPath", "capabilities", "locked"]) {
+        expect(keys).not.toContain(forbidden);
+      }
+    }
+  });
+
+  it("hands out copies rather than the generated arrays", async () => {
+    getEquipment.mockResolvedValue(generatedEquipment);
+    getQuickItems.mockResolvedValue(generatedQuickItems);
+    getPouchItems.mockResolvedValue(generatedPouchItems);
+    getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
+    getEquippedSpells.mockResolvedValue(generatedEquippedSpells);
+
+    const equipmentResult = await wailsDesktopBridge.getEquipment(equipmentRequest);
+    const quickResult = await wailsDesktopBridge.getQuickItems(equipmentRequest);
+    const pouchResult = await wailsDesktopBridge.getPouchItems(equipmentRequest);
+    const physickResult = await wailsDesktopBridge.getPhysickMixture(equipmentRequest);
+    const spellsResult = await wailsDesktopBridge.getEquippedSpells(equipmentRequest);
+
+    // The transport objects never become application state, so a later mutation
+    // of a generated array cannot reach a value the application already holds.
+    expect(equipmentResult.slots).not.toBe(generatedEquipment.slots);
+    expect(quickResult.items).not.toBe(generatedQuickItems.items);
+    expect(pouchResult.items).not.toBe(generatedPouchItems.items);
+    expect(physickResult.tears).not.toBe(generatedPhysickMixture.tears);
+    expect(spellsResult.spells).not.toBe(generatedEquippedSpells.spells);
+    expect(spellsResult.spells[1]).not.toBe(generatedEquippedSpells.spells[1]);
+  });
+
+  it("replaces a transport failure with the stable code", async () => {
+    getEquipment.mockRejectedValue(new Error("goroutine 1 [running]: /Users/private/app.go:42"));
+
+    await expect(wailsDesktopBridge.getEquipment(equipmentRequest)).rejects.toThrow(
+      new Error(bridgeFailureCode),
+    );
   });
 });

@@ -234,6 +234,69 @@ export namespace catalog {
 
 }
 
+export namespace equipment {
+	
+	export class EquippedSpellSlot {
+	    rawMagicParamID: number;
+	    resourceKey: string;
+	    name: string;
+	    memorySlots: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EquippedSpellSlot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rawMagicParamID = source["rawMagicParamID"];
+	        this.resourceKey = source["resourceKey"];
+	        this.name = source["name"];
+	        this.memorySlots = source["memorySlots"];
+	    }
+	}
+	export class GetEquippedSpellsResult {
+	    saveSessionID: string;
+	    characterID: number;
+	    active: boolean;
+	    spells: EquippedSpellSlot[];
+	    usedMemorySlots: number;
+	    availableMemorySlots: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetEquippedSpellsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.spells = this.convertValues(source["spells"], EquippedSpellSlot);
+	        this.usedMemorySlots = source["usedMemorySlots"];
+	        this.availableMemorySlots = source["availableMemorySlots"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace inventory {
 	
 	export class InventoryRecord {
@@ -386,6 +449,92 @@ export namespace inventory {
 
 export namespace saveengine {
 	
+	export class CharacterEquipment {
+	    saveSessionID: string;
+	    characterID: number;
+	    active: boolean;
+	    slots: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterEquipment(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.slots = source["slots"];
+	    }
+	}
+	export class CharacterPhysickMixture {
+	    saveSessionID: string;
+	    characterID: number;
+	    active: boolean;
+	    tears: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterPhysickMixture(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.tears = source["tears"];
+	    }
+	}
+	export class PouchItemSlot {
+	    itemID: number;
+	    equipIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PouchItemSlot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemID = source["itemID"];
+	        this.equipIndex = source["equipIndex"];
+	    }
+	}
+	export class CharacterPouchItems {
+	    saveSessionID: string;
+	    characterID: number;
+	    active: boolean;
+	    items: PouchItemSlot[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterPouchItems(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.items = this.convertValues(source["items"], PouchItemSlot);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class CharacterProfile {
 	    saveSessionID: string;
 	    characterID: number;
@@ -411,6 +560,58 @@ export namespace saveengine {
 	        this.gender = source["gender"];
 	        this.secondsPlayed = source["secondsPlayed"];
 	    }
+	}
+	export class QuickItemSlot {
+	    itemID: number;
+	    equipIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new QuickItemSlot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemID = source["itemID"];
+	        this.equipIndex = source["equipIndex"];
+	    }
+	}
+	export class CharacterQuickItems {
+	    saveSessionID: string;
+	    characterID: number;
+	    active: boolean;
+	    items: QuickItemSlot[];
+	    activeQuick: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterQuickItems(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.items = this.convertValues(source["items"], QuickItemSlot);
+	        this.activeQuick = source["activeQuick"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class CharacterStats {
 	    saveSessionID: string;
@@ -482,6 +683,8 @@ export namespace saveengine {
 	        this.level = source["level"];
 	    }
 	}
+	
+	
 	export class SaveCharacters {
 	    saveSessionID: string;
 	    characters: CharacterSummary[];

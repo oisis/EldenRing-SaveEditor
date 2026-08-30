@@ -10,6 +10,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -170,4 +171,59 @@ func (b *Bridge) GetResource(kind string, key string) (catalog.GetResourceResult
 // and the bridge must not restate any of it.
 func (b *Bridge) GetItemVariants(kind string, key string) (catalog.GetItemVariantsResult, error) {
 	return catalog.GetItemVariants(b.gameCatalog, kind, key)
+}
+
+// GetEquipment delegates to the GetEquipment endpoint and returns its result
+// and error unchanged. The session identifier and the slot index are forwarded
+// exactly as received: matching a session, the slot range and what an inactive
+// or residual slot exposes are the endpoint's contract, and the bridge must not
+// restate any of it. The 22 raw fields are carried over without being named,
+// reordered or resolved.
+func (b *Bridge) GetEquipment(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetEquipmentResult, error) {
+	return equipment.GetEquipment(b.saveEngine, saveSessionID, characterID)
+}
+
+// GetQuickItems delegates to the GetQuickItems endpoint and returns its result
+// and error unchanged. The ten raw records and the signed active-slot value are
+// carried over exactly as the endpoint reports them.
+func (b *Bridge) GetQuickItems(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetQuickItemsResult, error) {
+	return equipment.GetQuickItems(b.saveEngine, saveSessionID, characterID)
+}
+
+// GetPouchItems delegates to the GetPouchItems endpoint and returns its result
+// and error unchanged. The six raw records are carried over exactly as the
+// endpoint reports them.
+func (b *Bridge) GetPouchItems(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetPouchItemsResult, error) {
+	return equipment.GetPouchItems(b.saveEngine, saveSessionID, characterID)
+}
+
+// GetPhysickMixture delegates to the GetPhysickMixture endpoint and returns its
+// result and error unchanged. Both raw Crystal Tear identifiers are carried
+// over exactly as the endpoint reports them.
+func (b *Bridge) GetPhysickMixture(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetPhysickMixtureResult, error) {
+	return equipment.GetPhysickMixture(b.saveEngine, saveSessionID, characterID)
+}
+
+// GetEquippedSpells delegates to the GetEquippedSpells endpoint and returns its
+// result and error unchanged. It is the only equipment getter that also needs
+// the catalog, so the wired one is passed on as it is: the bridge builds,
+// loads or substitutes no catalog of its own, and a missing one stays the
+// endpoint's rejection.
+func (b *Bridge) GetEquippedSpells(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetEquippedSpellsResult, error) {
+	return equipment.GetEquippedSpells(b.saveEngine, b.gameCatalog, saveSessionID, characterID)
 }

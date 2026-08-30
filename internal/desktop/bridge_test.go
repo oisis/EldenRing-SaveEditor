@@ -9,6 +9,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -775,5 +776,224 @@ func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T
 	}
 	if !reflect.DeepEqual(result, catalog.GetItemVariantsResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
+	}
+}
+
+// The five equipment getters are read-only and share one argument pair, so they
+// are proven together over the argument shapes the endpoints give meaning to:
+// an untrimmed identifier, an empty one, a negative slot and a slot far past the
+// last one. The bridge has to produce the endpoint outcome in each of them,
+// which is what proves it neither trims the identifier nor clamps the slot.
+func TestEquipmentGettersForwardEveryArgumentToTheEndpointUnchanged(t *testing.T) {
+	engine := saveengine.New()
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", engine, gameCatalog)
+
+	arguments := []struct {
+		name          string
+		saveSessionID string
+		characterID   int
+	}{
+		{"untrimmed session identifier", "  Session ID  ", 0},
+		{"empty session identifier", "", 0},
+		{"unknown session identifier", "unknown-session", 0},
+		{"negative slot", "session", -1},
+		{"last slot", "session", 9},
+		{"slot past the last one", "session", 42},
+	}
+
+	for _, argument := range arguments {
+		t.Run(argument.name, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetEquipment(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetEquipment(engine, argument.saveSessionID, argument.characterID)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetQuickItems(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetQuickItems(engine, argument.saveSessionID, argument.characterID)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetPouchItems(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetPouchItems(engine, argument.saveSessionID, argument.characterID)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetPhysickMixture(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetPhysickMixture(engine, argument.saveSessionID, argument.characterID)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetEquippedSpells(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetEquippedSpells(
+						engine, gameCatalog, argument.saveSessionID, argument.characterID)
+				})
+		})
+	}
+}
+
+// A nil engine is a wiring error owned by the endpoints. The bridge must
+// propagate their rejection unchanged instead of building an engine of its own,
+// so the result stays empty and the message stays the endpoint message.
+func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T) {
+	gameCatalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", nil, gameCatalog)
+
+	tests := []struct {
+		name    string
+		bridged endpointCall
+		direct  endpointCall
+	}{
+		{
+			name: "GetEquipment",
+			bridged: func() (any, error) {
+				return bridge.GetEquipment("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetEquipment(nil, "session", 0)
+			},
+		},
+		{
+			name: "GetQuickItems",
+			bridged: func() (any, error) {
+				return bridge.GetQuickItems("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetQuickItems(nil, "session", 0)
+			},
+		},
+		{
+			name: "GetPouchItems",
+			bridged: func() (any, error) {
+				return bridge.GetPouchItems("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetPouchItems(nil, "session", 0)
+			},
+		},
+		{
+			name: "GetPhysickMixture",
+			bridged: func() (any, error) {
+				return bridge.GetPhysickMixture("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetPhysickMixture(nil, "session", 0)
+			},
+		},
+		{
+			name: "GetEquippedSpells",
+			bridged: func() (any, error) {
+				return bridge.GetEquippedSpells("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetEquippedSpells(nil, gameCatalog, "session", 0)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertCallsMatch(t, test.bridged, test.direct)
+			result, err := test.bridged()
+			if err == nil {
+				t.Fatal("call with a nil engine = nil error, want the endpoint rejection")
+			}
+			if err.Error() != "save engine is not available" {
+				t.Fatalf("error = %q, want %q", err.Error(), "save engine is not available")
+			}
+			if !reflect.ValueOf(result).IsZero() {
+				t.Fatalf("result = %#v, want the empty result", result)
+			}
+		})
+	}
+}
+
+// GetEquippedSpells is the only equipment getter that reads GameCatalog. A nil
+// catalog has to reach the endpoint and produce its own rejection: the bridge
+// must neither build nor load a catalog to cover for the composition root.
+func TestGetEquippedSpellsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
+	engine := saveengine.New()
+	bridge := desktop.NewBridge("dev", engine, nil)
+
+	assertCallsMatch(t,
+		func() (any, error) {
+			return bridge.GetEquippedSpells("session", 0)
+		},
+		func() (any, error) {
+			return equipment.GetEquippedSpells(engine, nil, "session", 0)
+		})
+
+	result, err := bridge.GetEquippedSpells("session", 0)
+	if err == nil {
+		t.Fatal("GetEquippedSpells with a nil catalog = nil error, want the endpoint rejection")
+	}
+	if err.Error() != "game catalog is not available" {
+		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
+	}
+	if !reflect.DeepEqual(result, equipment.GetEquippedSpellsResult{}) {
+		t.Fatalf("result = %#v, want the empty result", result)
+	}
+}
+
+// The other four equipment getters read no catalog at all. Wiring a nil one
+// must therefore change nothing about them, which is what proves the bridge
+// passes the catalog only where the endpoint contract asks for it.
+func TestEquipmentGettersWithoutACatalogAreUnaffectedByANilCatalog(t *testing.T) {
+	engine := saveengine.New()
+	withCatalog := desktop.NewBridge("dev", engine, testCatalog(t))
+	withoutCatalog := desktop.NewBridge("dev", engine, nil)
+
+	tests := []struct {
+		name   string
+		call   func(*desktop.Bridge) (any, error)
+		direct endpointCall
+	}{
+		{
+			name: "GetEquipment",
+			call: func(b *desktop.Bridge) (any, error) { return b.GetEquipment("session", 0) },
+			direct: func() (any, error) {
+				return equipment.GetEquipment(engine, "session", 0)
+			},
+		},
+		{
+			name: "GetQuickItems",
+			call: func(b *desktop.Bridge) (any, error) { return b.GetQuickItems("session", 0) },
+			direct: func() (any, error) {
+				return equipment.GetQuickItems(engine, "session", 0)
+			},
+		},
+		{
+			name: "GetPouchItems",
+			call: func(b *desktop.Bridge) (any, error) { return b.GetPouchItems("session", 0) },
+			direct: func() (any, error) {
+				return equipment.GetPouchItems(engine, "session", 0)
+			},
+		},
+		{
+			name: "GetPhysickMixture",
+			call: func(b *desktop.Bridge) (any, error) { return b.GetPhysickMixture("session", 0) },
+			direct: func() (any, error) {
+				return equipment.GetPhysickMixture(engine, "session", 0)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertCallsMatch(t, func() (any, error) { return test.call(withoutCatalog) }, test.direct)
+			assertCallsMatch(t, func() (any, error) { return test.call(withCatalog) }, test.direct)
+		})
 	}
 }

@@ -22,6 +22,15 @@ import type {
   CharacterStats,
   SaveCharacters,
 } from "../application/character/characterPort";
+import { EquipmentPortProvider } from "../application/equipment/equipmentClient";
+import type {
+  CharacterEquipment,
+  CharacterEquippedSpells,
+  CharacterPhysickMixture,
+  CharacterPouchItems,
+  CharacterQuickItems,
+  EquipmentPort,
+} from "../application/equipment/equipmentPort";
 import { ItemsPortProvider } from "../application/items/itemsClient";
 import type { ItemPage, ItemsPort } from "../application/items/itemsPort";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
@@ -278,6 +287,114 @@ export function makeItemsPort(overrides: Partial<ItemsPort> = {}): ItemsPort {
   };
 }
 
+/**
+ * The equipment stubs are deliberately full length and full of boundary values,
+ * so a mapping that dropped, reordered, clamped or reinterpreted anything fails
+ * instead of looking plausible: every array has its exact backend length, and
+ * each one carries a zero, the maximum uint32 and ordinary values around them.
+ */
+export const stubCharacterEquipment: CharacterEquipment = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  // Twenty-two raw fields in the backend's stored order. The unknown ones are
+  // carried exactly like the known ones, because this stage names neither.
+  slots: [
+    0, 0xffffffff, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260,
+    270, 280, 290, 0xfffffffe,
+  ],
+};
+
+export const stubCharacterQuickItems: CharacterQuickItems = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  items: [
+    { itemID: 0, equipIndex: 0 },
+    { itemID: 0xffffffff, equipIndex: 1 },
+    { itemID: 1010, equipIndex: 7 },
+    { itemID: 1020, equipIndex: 2 },
+    { itemID: 1030, equipIndex: 0xffffffff },
+    { itemID: 1040, equipIndex: 4 },
+    { itemID: 1050, equipIndex: 9 },
+    { itemID: 1060, equipIndex: 3 },
+    { itemID: 1070, equipIndex: 8 },
+    { itemID: 1080, equipIndex: 5 },
+  ],
+  // Signed in the backend contract: a negative value is real reported state.
+  activeQuick: -3,
+};
+
+export const stubCharacterPouchItems: CharacterPouchItems = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  items: [
+    { itemID: 0, equipIndex: 5 },
+    { itemID: 0xffffffff, equipIndex: 0 },
+    { itemID: 2010, equipIndex: 3 },
+    { itemID: 2020, equipIndex: 1 },
+    { itemID: 2030, equipIndex: 4 },
+    { itemID: 2040, equipIndex: 2 },
+  ],
+};
+
+export const stubCharacterPhysickMixture: CharacterPhysickMixture = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  tears: [0xffffffff, 0],
+};
+
+/**
+ * Twelve memory slots mixing the shapes the mapping has to survive: empty
+ * records the backend resolved nothing for, occupied ones with different costs,
+ * and two capacity counts that deliberately do not agree with each other or
+ * with the records.
+ */
+export const stubCharacterEquippedSpells: CharacterEquippedSpells = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  spells: [
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    {
+      rawMagicParamID: 3000,
+      resourceKey: "item/glintstone-pebble",
+      name: "Glintstone Pebble",
+      memorySlots: 1,
+    },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    {
+      rawMagicParamID: 4010,
+      resourceKey: "item/rotten-breath",
+      name: "Rotten Breath",
+      memorySlots: 2,
+    },
+    { rawMagicParamID: 5020, resourceKey: "item/comet-azur", name: "Comet Azur", memorySlots: 3 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 6030, resourceKey: "item/flame-sling", name: "Flame Sling", memorySlots: 1 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+    { rawMagicParamID: 0xffffffff, resourceKey: "", name: "", memorySlots: 0 },
+  ],
+  usedMemorySlots: 7,
+  availableMemorySlots: 10,
+};
+
+export function makeEquipmentPort(overrides: Partial<EquipmentPort> = {}): EquipmentPort {
+  return {
+    getEquipment: () => Promise.resolve(stubCharacterEquipment),
+    getQuickItems: () => Promise.resolve(stubCharacterQuickItems),
+    getPouchItems: () => Promise.resolve(stubCharacterPouchItems),
+    getPhysickMixture: () => Promise.resolve(stubCharacterPhysickMixture),
+    getEquippedSpells: () => Promise.resolve(stubCharacterEquippedSpells),
+    ...overrides,
+  };
+}
+
 export function makePort(overrides: Partial<ApplicationInfoPort> = {}): ApplicationInfoPort {
   return {
     getApplicationInfo: () => Promise.resolve(stubApplicationInfo),
@@ -322,6 +439,7 @@ export function TestProviders({
   saveSessionPort,
   characterPort,
   itemsPort,
+  equipmentPort,
   catalogPort,
 }: {
   children: ReactNode;
@@ -330,6 +448,7 @@ export function TestProviders({
   saveSessionPort?: SaveSessionPort;
   characterPort?: CharacterPort;
   itemsPort?: ItemsPort;
+  equipmentPort?: EquipmentPort;
   catalogPort?: CatalogPort;
 }) {
   return (
@@ -338,7 +457,11 @@ export function TestProviders({
         <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
           <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
             <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-              <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>{children}</ItemsPortProvider>
+              <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
+                <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
+                  {children}
+                </EquipmentPortProvider>
+              </ItemsPortProvider>
             </CharacterPortProvider>
           </SaveSessionPortProvider>
         </CatalogPortProvider>
@@ -354,6 +477,7 @@ export async function renderApp(
     saveSessionPort?: SaveSessionPort;
     characterPort?: CharacterPort;
     itemsPort?: ItemsPort;
+    equipmentPort?: EquipmentPort;
     catalogPort?: CatalogPort;
     locale?: Locale;
     queryClient?: QueryClient;
@@ -369,6 +493,7 @@ export async function renderApp(
         saveSessionPort={options.saveSessionPort}
         characterPort={options.characterPort}
         itemsPort={options.itemsPort}
+        equipmentPort={options.equipmentPort}
         catalogPort={options.catalogPort}
       >
         {ui}

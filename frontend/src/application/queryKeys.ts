@@ -93,6 +93,22 @@ export const queryKeys = {
   characterStats: (saveSessionID: string, characterID: CharacterKey) =>
     ["save-session", saveSessionID, "character", characterID, "stats"] as const,
   /**
+   * The five equipped views of one slot are five independent backend getters,
+   * so each one keeps its own key below the same session and slot scope. They
+   * are never merged into one key: a failure or a refetch of one must not
+   * invalidate, replace or hide the other four.
+   */
+  equipment: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "equipment"] as const,
+  quickItems: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "quick-items"] as const,
+  pouchItems: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "pouch-items"] as const,
+  physickMixture: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "physick-mixture"] as const,
+  equippedSpells: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "equipped-spells"] as const,
+  /**
    * A container page is identified by its session, slot, container, section and
    * page window: two sections, two pages or two page sizes are different views
    * of the same slot and must not share a cache entry. Inventory and Storage

@@ -18,6 +18,14 @@ export function GetCharacterStats(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetCharacterStats'](arg1, arg2);
 }
 
+export function GetEquipment(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetEquipment'](arg1, arg2);
+}
+
+export function GetEquippedSpells(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetEquippedSpells'](arg1, arg2);
+}
+
 export function GetInventory(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['GetInventory'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -28,6 +36,18 @@ export function GetItemVariants(arg1, arg2) {
 
 export function GetLoadedSave(arg1) {
   return window['go']['desktop']['Bridge']['GetLoadedSave'](arg1);
+}
+
+export function GetPhysickMixture(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetPhysickMixture'](arg1, arg2);
+}
+
+export function GetPouchItems(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetPouchItems'](arg1, arg2);
+}
+
+export function GetQuickItems(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetQuickItems'](arg1, arg2);
 }
 
 export function GetResource(arg1, arg2) {
