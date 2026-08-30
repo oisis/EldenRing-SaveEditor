@@ -1,4 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import type {
+  CatalogResourcePresentationIdentity,
+  CatalogResourcePresentationSummary,
+} from "../../../application/catalog/catalogPort";
+import { useCatalogResourcePresentationSummaries } from "../../../application/catalog/useCatalogResourcePresentationSummaries";
 import type { ItemPage, ItemRecord } from "../../../application/items/itemsPort";
 import { useInventory, useStorage } from "../../../application/items/useItems";
 
@@ -25,6 +30,8 @@ export type SelectedOwnedItem = {
   record: ItemRecord;
 };
 
+type PresentableIdentity = Pick<ItemRecord, "kind" | "key">;
+
 type Selection = {
   container: ItemContainer;
   ownedItemID: string;
@@ -41,7 +48,8 @@ type SessionEntry = {
  * Coordinates the two read-only container pages of one character without
  * copying either page out of TanStack Query. Presentation owns the section and
  * page windows; the backend remains the source of records, totals and served
- * paging values.
+ * paging values. Once both container calls have settled, one lightweight
+ * catalog batch resolves the distinct exact identities from both current pages.
  *
  * Selection stores only an opaque owned-item identity and the exact revision
  * that minted it. The selected record is derived from the current query page,
@@ -63,6 +71,43 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
     page: query.storage.page,
     pageSize: query.storage.pageSize,
   });
+  const presentationIdentities = useMemo(
+    () =>
+      presentationIdentitiesForSettledPages(
+        query.saveSessionID,
+        query.characterID,
+        inventory.isPending,
+        inventory.data,
+        storage.isPending,
+        storage.data,
+      ),
+    [
+      inventory.data,
+      inventory.isPending,
+      query.characterID,
+      query.saveSessionID,
+      storage.data,
+      storage.isPending,
+    ],
+  );
+  const presentations = useCatalogResourcePresentationSummaries(presentationIdentities);
+  const presentationsByKind = useMemo(() => {
+    const byKind = new Map<string, Map<string, CatalogResourcePresentationSummary>>();
+    for (const presentation of presentations.data?.resources ?? []) {
+      let byKey = byKind.get(presentation.kind);
+      if (!byKey) {
+        byKey = new Map();
+        byKind.set(presentation.kind, byKey);
+      }
+      byKey.set(presentation.key, presentation);
+    }
+    return byKind;
+  }, [presentations.data]);
+  const presentationFor = useCallback(
+    (identity: PresentableIdentity) =>
+      presentationsByKind.get(identity.kind)?.get(identity.key) ?? null,
+    [presentationsByKind],
+  );
   const [entry, setEntry] = useState<SessionEntry>({
     saveSessionID: query.saveSessionID,
     characterID: query.characterID,
@@ -110,8 +155,11 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
   return {
     inventory,
     storage,
+    presentations,
+    presentationFor,
     revisionState,
     selected,
+    selectedPresentation: selected ? presentationFor(selected.record) : null,
     selectItem,
     clearSelection: () =>
       setEntry({
@@ -120,6 +168,41 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
         selection: null,
       }),
   };
+}
+
+function presentationIdentitiesForSettledPages(
+  saveSessionID: string | undefined,
+  characterID: number | undefined,
+  inventoryPending: boolean,
+  inventory: ItemPage | undefined,
+  storagePending: boolean,
+  storage: ItemPage | undefined,
+): readonly CatalogResourcePresentationIdentity[] | undefined {
+  if (
+    !saveSessionID ||
+    characterID === undefined ||
+    inventoryPending ||
+    storagePending ||
+    (!inventory && !storage)
+  ) {
+    return undefined;
+  }
+
+  const identities: CatalogResourcePresentationIdentity[] = [];
+  const seenByKind = new Map<string, Set<string>>();
+  for (const page of [inventory, storage]) {
+    for (const record of page?.records ?? []) {
+      let seenKeys = seenByKind.get(record.kind);
+      if (!seenKeys) {
+        seenKeys = new Set();
+        seenByKind.set(record.kind, seenKeys);
+      }
+      if (seenKeys.has(record.key)) continue;
+      seenKeys.add(record.key);
+      identities.push({ kind: record.kind, key: record.key });
+    }
+  }
+  return identities;
 }
 
 function compareRevisions(

@@ -2,8 +2,13 @@ import { QueryClient } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
+import type {
+  CatalogPort,
+  CatalogResourcePresentationIdentity,
+} from "../../../application/catalog/catalogPort";
 import type { ItemPage, ItemsPort } from "../../../application/items/itemsPort";
 import {
+  makeCatalogPort,
   makeItemsPort,
   stubInventoryPage,
   stubStoragePage,
@@ -19,10 +24,10 @@ const query: InventoryAndStorageQuery = {
   storage: { page: 3, pageSize: 50 },
 };
 
-function setup(port: ItemsPort) {
+function setup(port: ItemsPort, catalogPort: CatalogPort = makeCatalogPort()) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <TestProviders queryClient={queryClient} itemsPort={port}>
+    <TestProviders queryClient={queryClient} itemsPort={port} catalogPort={catalogPort}>
       {children}
     </TestProviders>
   );
@@ -59,10 +64,93 @@ describe("useInventoryAndStorage", () => {
     });
   });
 
+  it("resolves one deduplicated presentation batch for both settled pages", async () => {
+    const storage = page(stubStoragePage, {
+      records: [
+        stubStoragePage.records[0],
+        {
+          ...stubStoragePage.records[0],
+          ownedItemID: "owned-3",
+          kind: "item",
+          key: "goods/lantern",
+        },
+        {
+          ...stubStoragePage.records[0],
+          ownedItemID: "owned-4",
+          kind: "class",
+          key: "weapon/uchigatana",
+        },
+      ],
+    });
+    const getResourcePresentationSummaries = vi.fn(
+      (identities: readonly CatalogResourcePresentationIdentity[]) =>
+        Promise.resolve({
+          resources: identities.map(({ kind, key }) => ({
+            kind,
+            key,
+            name: `${kind}:${key}`,
+            iconPath:
+              kind === "item" ? `assets/icons/items/test/${key.replaceAll("/", "_")}.png` : "",
+          })),
+        }),
+    );
+    const { wrapper } = setup(
+      makeItemsPort({ getStorage: () => Promise.resolve(storage) }),
+      makeCatalogPort({ getResourcePresentationSummaries }),
+    );
+
+    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+    await waitFor(() => expect(result.current.presentations.data).toBeDefined());
+
+    expect(getResourcePresentationSummaries).toHaveBeenCalledExactlyOnceWith([
+      { kind: "item", key: "weapon/uchigatana" },
+      { kind: "item", key: "goods/lantern" },
+      { kind: "class", key: "weapon/uchigatana" },
+    ]);
+    expect(result.current.presentationFor(stubInventoryPage.records[0])).toEqual({
+      kind: "item",
+      key: "weapon/uchigatana",
+      name: "item:weapon/uchigatana",
+      iconPath: "assets/icons/items/test/weapon_uchigatana.png",
+    });
+    expect(
+      result.current.presentationFor({ ...stubInventoryPage.records[0], kind: "future_kind" }),
+    ).toBeNull();
+  });
+
+  it("waits for both container calls to settle before requesting presentations", async () => {
+    let resolveStorage: ((value: ItemPage) => void) | undefined;
+    const getStorage = () =>
+      new Promise<ItemPage>((resolve) => {
+        resolveStorage = resolve;
+      });
+    const getResourcePresentationSummaries = vi.fn(
+      makeCatalogPort().getResourcePresentationSummaries,
+    );
+    const { wrapper } = setup(
+      makeItemsPort({ getStorage }),
+      makeCatalogPort({ getResourcePresentationSummaries }),
+    );
+
+    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+    await waitFor(() => expect(result.current.inventory.data).toBeDefined());
+    expect(getResourcePresentationSummaries).not.toHaveBeenCalled();
+
+    resolveStorage?.(stubStoragePage);
+    await waitFor(() => expect(result.current.presentations.data).toBeDefined());
+    expect(getResourcePresentationSummaries).toHaveBeenCalledTimes(1);
+  });
+
   it("does not reach either getter without a session or character", async () => {
     const getInventory = vi.fn(makeItemsPort().getInventory);
     const getStorage = vi.fn(makeItemsPort().getStorage);
-    const { wrapper } = setup(makeItemsPort({ getInventory, getStorage }));
+    const getResourcePresentationSummaries = vi.fn(
+      makeCatalogPort().getResourcePresentationSummaries,
+    );
+    const { wrapper } = setup(
+      makeItemsPort({ getInventory, getStorage }),
+      makeCatalogPort({ getResourcePresentationSummaries }),
+    );
 
     const withoutSession = renderHook(
       () => useInventoryAndStorage({ ...query, saveSessionID: undefined }),
@@ -83,6 +171,25 @@ describe("useInventoryAndStorage", () => {
 
     expect(getInventory).not.toHaveBeenCalled();
     expect(getStorage).not.toHaveBeenCalled();
+    expect(getResourcePresentationSummaries).not.toHaveBeenCalled();
+  });
+
+  it("keeps presentation failure independent from both container pages", async () => {
+    const getResourcePresentationSummaries = vi.fn(() =>
+      Promise.reject(new Error("bridge_call_failed private")),
+    );
+    const { wrapper } = setup(
+      makeItemsPort(),
+      makeCatalogPort({ getResourcePresentationSummaries }),
+    );
+    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+
+    await waitFor(() => expect(result.current.presentations.isError).toBe(true));
+    expect(result.current.inventory.data).toBe(stubInventoryPage);
+    expect(result.current.storage.data).toBe(stubStoragePage);
+    expect(result.current.presentationFor(stubInventoryPage.records[0])).toBeNull();
+    expect(result.current.selectedPresentation).toBeNull();
+    expect(getResourcePresentationSummaries).toHaveBeenCalledTimes(1);
   });
 
   it("compares opaque revisions exactly without parsing or ordering them", async () => {
@@ -131,12 +238,19 @@ describe("useInventoryAndStorage", () => {
     result.current.selectItem("inventory", "owned-1");
 
     await waitFor(() => expect(result.current.selected).not.toBeNull());
+    await waitFor(() => expect(result.current.selectedPresentation).not.toBeNull());
     expect(result.current.selected).toEqual({
       container: "inventory",
       saveRevision: "revision-7",
       record: inventory.records[0],
     });
     expect(result.current.selected?.record).toBe(inventory.records[0]);
+    expect(result.current.selectedPresentation).toEqual({
+      kind: "item",
+      key: "weapon/uchigatana",
+      name: "",
+      iconPath: "",
+    });
   });
 
   it("never creates a selection for an identity outside the current page", async () => {
@@ -200,9 +314,12 @@ describe("useInventoryAndStorage", () => {
     expect(Object.keys(result.current).sort()).toEqual([
       "clearSelection",
       "inventory",
+      "presentationFor",
+      "presentations",
       "revisionState",
       "selectItem",
       "selected",
+      "selectedPresentation",
       "storage",
     ]);
     expect(result.current).not.toHaveProperty("addItem");
