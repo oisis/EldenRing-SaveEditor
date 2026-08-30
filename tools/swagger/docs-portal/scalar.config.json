@@ -308,6 +308,11 @@
                 "filepath": "../../../docs/endpoints/equipment/get_equipment.md",
                 "title": "GetEquipment"
               },
+              "/get-character-loadout": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_character_loadout.md",
+                "title": "GetCharacterLoadout"
+              },
               "/set-equipped-armaments": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/set_equipped_armaments.md",

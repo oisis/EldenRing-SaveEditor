@@ -186,6 +186,18 @@ func (b *Bridge) GetEquipment(
 	return equipment.GetEquipment(b.saveEngine, saveSessionID, characterID)
 }
 
+// GetCharacterLoadout delegates to the coherent, catalog-resolved loadout
+// endpoint and returns its result and error unchanged. Native layout,
+// cross-structure validation, catalog resolution and revision capture remain
+// backend concerns; the bridge only forwards the exact session and slot.
+func (b *Bridge) GetCharacterLoadout(
+	saveSessionID string,
+	characterID int,
+) (equipment.GetCharacterLoadoutResult, error) {
+	return equipment.GetCharacterLoadout(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID)
+}
+
 // GetQuickItems delegates to the GetQuickItems endpoint and returns its result
 // and error unchanged. The ten raw records and the signed active-slot value are
 // carried over exactly as the endpoint reports them.
@@ -217,10 +229,9 @@ func (b *Bridge) GetPhysickMixture(
 }
 
 // GetEquippedSpells delegates to the GetEquippedSpells endpoint and returns its
-// result and error unchanged. It is the only equipment getter that also needs
-// the catalog, so the wired one is passed on as it is: the bridge builds,
-// loads or substitutes no catalog of its own, and a missing one stays the
-// endpoint's rejection.
+// result and error unchanged. The wired catalog is passed on as it is: the
+// bridge builds, loads or substitutes no catalog of its own, and a missing one
+// stays the endpoint's rejection.
 func (b *Bridge) GetEquippedSpells(
 	saveSessionID string,
 	characterID int,

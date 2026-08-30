@@ -779,7 +779,7 @@ func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T
 	}
 }
 
-// The five equipment getters are read-only and share one argument pair, so they
+// The six equipment getters are read-only and share one argument pair, so they
 // are proven together over the argument shapes the endpoints give meaning to:
 // an untrimmed identifier, an empty one, a negative slot and a slot far past the
 // last one. The bridge has to produce the endpoint outcome in each of them,
@@ -810,6 +810,14 @@ func TestEquipmentGettersForwardEveryArgumentToTheEndpointUnchanged(t *testing.T
 				},
 				func() (any, error) {
 					return equipment.GetEquipment(engine, argument.saveSessionID, argument.characterID)
+				})
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetCharacterLoadout(argument.saveSessionID, argument.characterID)
+				},
+				func() (any, error) {
+					return equipment.GetCharacterLoadout(
+						engine, gameCatalog, argument.saveSessionID, argument.characterID)
 				})
 			assertCallsMatch(t,
 				func() (any, error) {
@@ -863,6 +871,15 @@ func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T)
 			},
 			direct: func() (any, error) {
 				return equipment.GetEquipment(nil, "session", 0)
+			},
+		},
+		{
+			name: "GetCharacterLoadout",
+			bridged: func() (any, error) {
+				return bridge.GetCharacterLoadout("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetCharacterLoadout(nil, gameCatalog, "session", 0)
 			},
 		},
 		{
@@ -920,30 +937,52 @@ func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T)
 	}
 }
 
-// GetEquippedSpells is the only equipment getter that reads GameCatalog. A nil
-// catalog has to reach the endpoint and produce its own rejection: the bridge
-// must neither build nor load a catalog to cover for the composition root.
-func TestGetEquippedSpellsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
+// The resolved loadout and spell getters read GameCatalog. A nil catalog has to
+// reach each endpoint and produce its own rejection: the bridge must neither
+// build nor load a catalog to cover for the composition root.
+func TestResolvedEquipmentGettersPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	engine := saveengine.New()
 	bridge := desktop.NewBridge("dev", engine, nil)
 
-	assertCallsMatch(t,
-		func() (any, error) {
-			return bridge.GetEquippedSpells("session", 0)
+	tests := []struct {
+		name   string
+		call   endpointCall
+		direct endpointCall
+	}{
+		{
+			name: "GetCharacterLoadout",
+			call: func() (any, error) {
+				return bridge.GetCharacterLoadout("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetCharacterLoadout(engine, nil, "session", 0)
+			},
 		},
-		func() (any, error) {
-			return equipment.GetEquippedSpells(engine, nil, "session", 0)
-		})
+		{
+			name: "GetEquippedSpells",
+			call: func() (any, error) {
+				return bridge.GetEquippedSpells("session", 0)
+			},
+			direct: func() (any, error) {
+				return equipment.GetEquippedSpells(engine, nil, "session", 0)
+			},
+		},
+	}
 
-	result, err := bridge.GetEquippedSpells("session", 0)
-	if err == nil {
-		t.Fatal("GetEquippedSpells with a nil catalog = nil error, want the endpoint rejection")
-	}
-	if err.Error() != "game catalog is not available" {
-		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
-	}
-	if !reflect.DeepEqual(result, equipment.GetEquippedSpellsResult{}) {
-		t.Fatalf("result = %#v, want the empty result", result)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertCallsMatch(t, test.call, test.direct)
+			result, err := test.call()
+			if err == nil {
+				t.Fatal("call with a nil catalog = nil error, want the endpoint rejection")
+			}
+			if err.Error() != "game catalog is not available" {
+				t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
+			}
+			if !reflect.ValueOf(result).IsZero() {
+				t.Fatalf("result = %#v, want the empty result", result)
+			}
+		})
 	}
 }
 

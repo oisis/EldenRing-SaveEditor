@@ -14,11 +14,11 @@ import (
 const (
 	// equippedSpellSlotCount is the number of physical EquippedSpells records.
 	// The section stores exactly these fourteen pairs of raw MagicParam ID and
-	// follower field; the active-index uint32 behind them is never touched by
-	// this getter.
+	// follower field, followed by the active-index uint32.
 	equippedSpellSlotCount  = 14
 	equippedSpellRecordSize = 8
 	equippedSpellsReadSize  = equippedSpellSlotCount * equippedSpellRecordSize
+	equippedSpellsActiveAt  = equippedSpellsReadSize
 
 	// equippedSpellsSectionOffset is the distance from the anchor to the start of
 	// EquippedSpells. It is the sum of the confirmed fixed structures between the
@@ -207,31 +207,75 @@ func (engine *Engine) GetEquippedSpells(saveSessionID string, characterID int) (
 		return spells, nil
 	}
 
-	base := slotDataBase(loaded.session.platform, characterID)
-	slotEnd := base + characterSlotDataSize
-
-	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, equippedSpellsAnchor)
-	if err != nil {
-		return CharacterEquippedSpells{}, fmt.Errorf(
-			"cannot search the equipped spells of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return CharacterEquippedSpells{}, fmt.Errorf("character %d carries no equipped-spells anchor", characterID)
-	}
-
-	records, err := readEquippedSpellRecords(loaded.snapshot, anchor, slotEnd, characterID)
-	if err != nil {
-		return CharacterEquippedSpells{}, err
-	}
-	available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+	state, err := readEquippedSpellsState(loaded, characterID)
 	if err != nil {
 		return CharacterEquippedSpells{}, err
 	}
 
 	spells.Active = true
-	spells.Spells = records
-	spells.AvailableMemorySlots = available
+	spells.Spells = state.records
+	spells.AvailableMemorySlots = state.availableMemorySlots
 	return spells, nil
+}
+
+type equippedSpellsState struct {
+	records               [equippedSpellSlotCount]uint32
+	activeSpellIndex      int
+	availableMemorySlots  int
+	unlockedTalismanSlots int
+}
+
+// readEquippedSpellsState is the single read-only decoder of the physical spell
+// records, their active index and both capacity inputs needed by a character
+// loadout. GetEquippedSpells deliberately projects only its established fields.
+// The caller must hold Engine.mutex and establish that the slot is active.
+func readEquippedSpellsState(loaded *loadedSave, characterID int) (equippedSpellsState, error) {
+	base := slotDataBase(loaded.session.platform, characterID)
+	slotEnd := base + characterSlotDataSize
+
+	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, equippedSpellsAnchor)
+	if err != nil {
+		return equippedSpellsState{}, fmt.Errorf(
+			"cannot search the equipped spells of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return equippedSpellsState{}, fmt.Errorf("character %d carries no equipped-spells anchor", characterID)
+	}
+
+	records, err := readEquippedSpellRecords(loaded.snapshot, anchor, slotEnd, characterID)
+	if err != nil {
+		return equippedSpellsState{}, err
+	}
+	available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+	if err != nil {
+		return equippedSpellsState{}, err
+	}
+	unlocked, err := readUnlockedTalismanFields(loaded.snapshot, anchor, base, characterID)
+	if err != nil {
+		return equippedSpellsState{}, err
+	}
+
+	activeAt := anchor + equippedSpellsSectionOffset + equippedSpellsActiveAt
+	if activeAt+4 > slotEnd {
+		return equippedSpellsState{}, fmt.Errorf(
+			"active spell index of character %d lies outside its slot", characterID)
+	}
+	activeRaw, err := loaded.snapshot.uint32At(activeAt)
+	if err != nil {
+		return equippedSpellsState{}, fmt.Errorf(
+			"cannot read active spell index of character %d: %w", characterID, err)
+	}
+	active := -1
+	if activeRaw != equippedSpellEmptyID {
+		active = int(activeRaw)
+	}
+
+	return equippedSpellsState{
+		records:               records,
+		activeSpellIndex:      active,
+		availableMemorySlots:  available,
+		unlockedTalismanSlots: unlocked,
+	}, nil
 }
 
 // SetEquippedSpells atomically replaces the first 12 spell memory positions of
@@ -556,8 +600,9 @@ func wearsMoonOfNokstella(source *codec, anchor, base, slotEnd int64, characterI
 
 	for field := 0; field < unlocked && field < equippedSpellsTalismanFieldCount; field++ {
 		raw := binary.LittleEndian.Uint32(block[(equippedSpellsFirstTalismanField+field)*4:])
-		// A talisman field stores the bare lower bits of the item; the canonical
-		// talisman prefix is restored before the value is compared.
+		// Native saves normally store the complete game ID. Keep the family-bit
+		// normalization for compatibility with already supported fixtures whose
+		// upper nibble is absent.
 		if (raw&0x0FFFFFFF)|0x20000000 == moonOfNokstellaItemID {
 			return true, nil
 		}

@@ -1359,6 +1359,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/loadout": {
+      "get": {
+        "operationId": "getCharacterLoadout",
+        "tags": ["Equipment"],
+        "summary": "GetCharacterLoadout",
+        "description": "Returns one coherent, catalog-resolved read-only loadout snapshot for a character. The response groups hand armaments, ammunition, armor, talismans, Quick Items, Pouch, Physick and spells, and includes active indexes, quantities, unlocked talisman slots, Memory Slot capacity and the save revision. Technical Unarmed and Bare Armor records are represented as empty positions. Unknown or structurally inconsistent occupied data is rejected instead of being guessed. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The coherent, resolved character loadout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterLoadout"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed characterID, unknown session, unsupported or malformed active-slot layout, inconsistent Quick Items or Pouch reference, unknown occupied item, wrong item family, unknown spell capacity, or over-capacity spell loadout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments": {
       "put": {
         "operationId": "setEquippedArmaments",
@@ -6519,6 +6557,162 @@
           "characterID",
           "active",
           "slots"
+        ]
+      },
+      "LoadoutSlotState": {
+        "type": "string",
+        "enum": ["empty", "occupied", "locked"],
+        "description": "Public state of one loadout position. Locked is currently used only for unavailable talisman positions."
+      },
+      "LoadoutSlot": {
+        "type": "object",
+        "description": "One positional equipment or Physick slot. Resource presentation is present only when the position is occupied.",
+        "properties": {
+          "slotType": {
+            "type": "string",
+            "enum": ["left_hand", "right_hand", "arrow", "bolt", "head", "chest", "arms", "legs", "talisman", "physick"]
+          },
+          "state": {
+            "$ref": "#/components/schemas/LoadoutSlotState"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ResourceRef"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "required": ["slotType", "state", "rawValue"]
+      },
+      "LoadoutOwnedSlot": {
+        "type": "object",
+        "description": "One Quick Items or Pouch position. An occupied position carries the revision-scoped ownedItemID and current quantity of the referenced Inventory row.",
+        "properties": {
+          "slotType": {
+            "type": "string",
+            "enum": ["quick_item", "pouch"]
+          },
+          "state": {
+            "$ref": "#/components/schemas/LoadoutSlotState"
+          },
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ResourceRef"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 4294967295
+          }
+        },
+        "required": ["slotType", "state"]
+      },
+      "LoadoutSpellSlot": {
+        "type": "object",
+        "description": "One public playable spell position. Memory Slots and resource presentation are present only when occupied.",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/LoadoutSlotState"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ResourceRef"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconPath": {
+            "type": "string"
+          },
+          "memorySlots": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        },
+        "required": ["state"]
+      },
+      "CharacterLoadout": {
+        "type": "object",
+        "description": "One revisioned, coherent and catalog-resolved character loadout. An inactive slot returns empty group arrays and no residual slot data.",
+        "properties": {
+          "saveSessionID": { "type": "string" },
+          "saveRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": { "type": "integer", "format": "int32" },
+          "active": { "type": "boolean" },
+          "rightHand": {
+            "type": "array", "maxItems": 3,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "leftHand": {
+            "type": "array", "maxItems": 3,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "arrows": {
+            "type": "array", "maxItems": 2,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "bolts": {
+            "type": "array", "maxItems": 2,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "armor": {
+            "type": "array", "maxItems": 4,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "talismans": {
+            "type": "array", "maxItems": 4,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "quickItems": {
+            "type": "array", "maxItems": 10,
+            "items": { "$ref": "#/components/schemas/LoadoutOwnedSlot" }
+          },
+          "pouch": {
+            "type": "array", "maxItems": 6,
+            "items": { "$ref": "#/components/schemas/LoadoutOwnedSlot" }
+          },
+          "activeQuickItem": { "type": "integer", "format": "int32" },
+          "physick": {
+            "type": "array", "maxItems": 2,
+            "items": { "$ref": "#/components/schemas/LoadoutSlot" }
+          },
+          "spells": {
+            "type": "array", "maxItems": 12,
+            "items": { "$ref": "#/components/schemas/LoadoutSpellSlot" }
+          },
+          "activeSpellIndex": { "type": "integer", "format": "int32", "minimum": -1, "maximum": 11 },
+          "usedMemorySlots": { "type": "integer", "format": "int32", "minimum": 0 },
+          "availableMemorySlots": { "type": "integer", "format": "int32", "minimum": 0 },
+          "unlockedTalismanSlots": { "type": "integer", "format": "int32", "minimum": 0, "maximum": 4 }
+        },
+        "required": [
+          "saveSessionID", "saveRevision", "characterID", "active",
+          "rightHand", "leftHand", "arrows", "bolts", "armor", "talismans",
+          "quickItems", "pouch", "activeQuickItem", "physick", "spells",
+          "activeSpellIndex", "usedMemorySlots", "availableMemorySlots",
+          "unlockedTalismanSlots"
         ]
       },
       "SetEquippedArmamentsRequest": {

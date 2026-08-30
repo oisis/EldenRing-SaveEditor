@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   CloseSave,
   GetApplicationInfo,
+  GetCharacterLoadout,
   GetCharacterProfile,
   GetCharacterStats,
   GetEquipment,
@@ -25,6 +26,7 @@ import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   CloseSave: vi.fn(),
   GetApplicationInfo: vi.fn(),
+  GetCharacterLoadout: vi.fn(),
   GetCharacterProfile: vi.fn(),
   GetCharacterStats: vi.fn(),
   GetEquipment: vi.fn(),
@@ -50,6 +52,7 @@ const closeSave = vi.mocked(CloseSave);
 const getSaveCharacters = vi.mocked(GetSaveCharacters);
 const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
+const getCharacterLoadout = vi.mocked(GetCharacterLoadout);
 const getEquipment = vi.mocked(GetEquipment);
 const getQuickItems = vi.mocked(GetQuickItems);
 const getPouchItems = vi.mocked(GetPouchItems);
@@ -70,6 +73,7 @@ beforeEach(() => {
   getSaveCharacters.mockReset();
   getCharacterProfile.mockReset();
   getCharacterStats.mockReset();
+  getCharacterLoadout.mockReset();
   getEquipment.mockReset();
   getQuickItems.mockReset();
   getPouchItems.mockReset();
@@ -1338,16 +1342,80 @@ const generatedEquippedSpells = equipment.GetEquippedSpellsResult.createFrom({
   availableMemorySlots: 10,
 });
 
+const generatedCharacterLoadout = equipment.GetCharacterLoadoutResult.createFrom({
+  saveSessionID: "  Session ID  ",
+  saveRevision: "17",
+  characterID: 9,
+  active: true,
+  rightHand: [
+    {
+      slotType: "right_hand",
+      state: "occupied",
+      resource: { kind: "item", key: "000F4240" },
+      name: "Dagger",
+      iconPath: "icons/items/000F4240.png",
+      rawValue: 0x000f4240,
+    },
+    { slotType: "right_hand", state: "empty", rawValue: 0x0001adb0 },
+    { slotType: "right_hand", state: "empty", rawValue: 0x0001adb0 },
+  ],
+  leftHand: [],
+  arrows: [],
+  bolts: [],
+  armor: [],
+  talismans: [
+    {
+      slotType: "talisman",
+      state: "occupied",
+      resource: { kind: "item", key: "20000474" },
+      name: "Moon of Nokstella",
+      iconPath: "icons/items/20000474.png",
+      rawValue: 0x20000474,
+    },
+    { slotType: "talisman", state: "locked", rawValue: 0 },
+  ],
+  quickItems: [
+    {
+      slotType: "quick_item",
+      state: "occupied",
+      ownedItemID: "opaque-owned-token",
+      resource: { kind: "item", key: "4000272E" },
+      name: "Memory Stone",
+      iconPath: "icons/items/4000272E.png",
+      quantity: 3,
+    },
+  ],
+  pouch: [{ slotType: "pouch", state: "empty" }],
+  activeQuickItem: 4,
+  physick: [],
+  spells: [
+    {
+      state: "occupied",
+      resource: { kind: "item", key: "40000FA0" },
+      name: "Glintstone Pebble",
+      iconPath: "icons/items/40000FA0.png",
+      memorySlots: 1,
+    },
+    { state: "empty" },
+  ],
+  activeSpellIndex: 0,
+  usedMemorySlots: 1,
+  availableMemorySlots: 7,
+  unlockedTalismanSlots: 1,
+});
+
 const equipmentRequest = { saveSessionID: "  Session ID  ", characterID: 9 };
 
 describe("wails equipment adapter", () => {
   it("passes the session and the slot to each generated method exactly as given", async () => {
+    getCharacterLoadout.mockResolvedValue(generatedCharacterLoadout);
     getEquipment.mockResolvedValue(generatedEquipment);
     getQuickItems.mockResolvedValue(generatedQuickItems);
     getPouchItems.mockResolvedValue(generatedPouchItems);
     getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
     getEquippedSpells.mockResolvedValue(generatedEquippedSpells);
 
+    await wailsDesktopBridge.getCharacterLoadout(equipmentRequest);
     await wailsDesktopBridge.getEquipment(equipmentRequest);
     await wailsDesktopBridge.getQuickItems(equipmentRequest);
     await wailsDesktopBridge.getPouchItems(equipmentRequest);
@@ -1356,6 +1424,7 @@ describe("wails equipment adapter", () => {
 
     // Nothing is trimmed, defaulted or clamped on the way to the bridge.
     for (const call of [
+      getCharacterLoadout,
       getEquipment,
       getQuickItems,
       getPouchItems,
@@ -1364,6 +1433,45 @@ describe("wails equipment adapter", () => {
     ]) {
       expect(call).toHaveBeenCalledExactlyOnceWith("  Session ID  ", 9);
     }
+  });
+
+  it("projects the coherent loadout without resolving or recomputing any field locally", async () => {
+    getCharacterLoadout.mockResolvedValue(generatedCharacterLoadout);
+
+    const result = await wailsDesktopBridge.getCharacterLoadout(equipmentRequest);
+
+    expect(result.saveRevision).toBe("17");
+    expect(result.rightHand[0]).toEqual({
+      slotType: "right_hand",
+      state: "occupied",
+      resource: { kind: "item", key: "000F4240" },
+      name: "Dagger",
+      iconPath: "icons/items/000F4240.png",
+      rawValue: 0x000f4240,
+    });
+    expect(result.rightHand[1].state).toBe("empty");
+    expect(result.talismans[1].state).toBe("locked");
+    expect(result.quickItems[0]).toMatchObject({
+      state: "occupied",
+      ownedItemID: "opaque-owned-token",
+      resource: { kind: "item", key: "4000272E" },
+      quantity: 3,
+    });
+    expect(result.pouch[0].state).toBe("empty");
+    expect(result.spells[0]).toMatchObject({
+      state: "occupied",
+      resource: { kind: "item", key: "40000FA0" },
+      memorySlots: 1,
+    });
+    expect(result.activeQuickItem).toBe(4);
+    expect(result.activeSpellIndex).toBe(0);
+    expect(result.usedMemorySlots).toBe(1);
+    expect(result.availableMemorySlots).toBe(7);
+    expect(result.unlockedTalismanSlots).toBe(1);
+
+    // The adapter treats canonical keys, slot states and aggregate values as
+    // opaque backend answers. No raw game ID is parsed to produce them.
+    expect(getCharacterLoadout).toHaveBeenCalledExactlyOnceWith("  Session ID  ", 9);
   });
 
   it("projects the raw equipment result without naming or reordering a field", async () => {
@@ -1490,12 +1598,14 @@ describe("wails equipment adapter", () => {
   });
 
   it("hands out copies rather than the generated arrays", async () => {
+    getCharacterLoadout.mockResolvedValue(generatedCharacterLoadout);
     getEquipment.mockResolvedValue(generatedEquipment);
     getQuickItems.mockResolvedValue(generatedQuickItems);
     getPouchItems.mockResolvedValue(generatedPouchItems);
     getPhysickMixture.mockResolvedValue(generatedPhysickMixture);
     getEquippedSpells.mockResolvedValue(generatedEquippedSpells);
 
+    const loadoutResult = await wailsDesktopBridge.getCharacterLoadout(equipmentRequest);
     const equipmentResult = await wailsDesktopBridge.getEquipment(equipmentRequest);
     const quickResult = await wailsDesktopBridge.getQuickItems(equipmentRequest);
     const pouchResult = await wailsDesktopBridge.getPouchItems(equipmentRequest);
@@ -1504,6 +1614,11 @@ describe("wails equipment adapter", () => {
 
     // The transport objects never become application state, so a later mutation
     // of a generated array cannot reach a value the application already holds.
+    expect(loadoutResult.rightHand).not.toBe(generatedCharacterLoadout.rightHand);
+    expect(loadoutResult.rightHand[0]).not.toBe(generatedCharacterLoadout.rightHand[0]);
+    expect(loadoutResult.rightHand[0].resource).not.toBe(
+      generatedCharacterLoadout.rightHand[0].resource,
+    );
     expect(equipmentResult.slots).not.toBe(generatedEquipment.slots);
     expect(quickResult.items).not.toBe(generatedQuickItems.items);
     expect(pouchResult.items).not.toBe(generatedPouchItems.items);

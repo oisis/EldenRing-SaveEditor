@@ -4,7 +4,7 @@
  * it through the hooks in this directory and never on the transport that
  * fulfils it.
  *
- * All five getters are read-only: the port declares no `set*` method, so no
+ * All six getters are read-only: the port declares no `set*` method, so no
  * layer above it can reach a mutation through this contract.
  *
  * Four of them report raw save state. A raw identifier is carried exactly as
@@ -13,19 +13,81 @@
  * sentinel interpretation. `0`, `0xFFFFFFFF` and every unknown value stay
  * themselves.
  *
- * `getEquippedSpells` is the only one whose result the backend already resolved
- * through GameCatalog, so `resourceKey`, `name` and `memorySlots` are the only
- * presentation this port carries. They are the backend's answer, not a local
- * lookup.
+ * Among the five narrow getters, `getEquippedSpells` is the only result the
+ * backend already resolved through GameCatalog. Its `resourceKey`, `name` and
+ * `memorySlots` are the backend's answer, not a local lookup.
  *
- * None of the five returns a `saveRevision`: it is absent from the backend
- * contract of this stage and is therefore not invented here.
+ * The coherent `getCharacterLoadout` result is the frontend-facing projection.
+ * It alone carries a `saveRevision`, resolved identities and public slot
+ * states. The five older getters stay available as narrow diagnostic reads;
+ * consumers must not combine them into a second loadout model.
  */
 
 /** The session and slot one equipped view is read for. */
 export type EquipmentRequest = {
   saveSessionID: string;
   characterID: number;
+};
+
+export type LoadoutSlotState = "empty" | "occupied" | "locked";
+
+export type LoadoutResource = {
+  kind: string;
+  key: string;
+};
+
+export type LoadoutSlot = {
+  slotType: string;
+  state: LoadoutSlotState;
+  resource?: LoadoutResource;
+  name?: string;
+  iconPath?: string;
+  rawValue: number;
+};
+
+export type LoadoutOwnedSlot = {
+  slotType: "quick_item" | "pouch";
+  state: LoadoutSlotState;
+  ownedItemID?: string;
+  resource?: LoadoutResource;
+  name?: string;
+  iconPath?: string;
+  quantity?: number;
+};
+
+export type LoadoutSpellSlot = {
+  state: LoadoutSlotState;
+  resource?: LoadoutResource;
+  name?: string;
+  iconPath?: string;
+  memorySlots?: number;
+};
+
+/**
+ * One backend-owned, coherent loadout snapshot. Every group, identity,
+ * presentation field, state and aggregate count is carried as reported; the
+ * frontend neither resolves raw game IDs nor recomputes capacity or locking.
+ */
+export type CharacterLoadout = {
+  saveSessionID: string;
+  saveRevision: string;
+  characterID: number;
+  active: boolean;
+  rightHand: readonly LoadoutSlot[];
+  leftHand: readonly LoadoutSlot[];
+  arrows: readonly LoadoutSlot[];
+  bolts: readonly LoadoutSlot[];
+  armor: readonly LoadoutSlot[];
+  talismans: readonly LoadoutSlot[];
+  quickItems: readonly LoadoutOwnedSlot[];
+  pouch: readonly LoadoutOwnedSlot[];
+  activeQuickItem: number;
+  physick: readonly LoadoutSlot[];
+  spells: readonly LoadoutSpellSlot[];
+  activeSpellIndex: number;
+  usedMemorySlots: number;
+  availableMemorySlots: number;
+  unlockedTalismanSlots: number;
 };
 
 /**
@@ -104,6 +166,8 @@ export type CharacterEquippedSpells = {
 };
 
 export type EquipmentPort = {
+  /** Reads the coherent, catalog-resolved loadout used by frontend screens. */
+  getCharacterLoadout: (request: EquipmentRequest) => Promise<CharacterLoadout>;
   /** Reads the 22 raw equipment fields of one slot. */
   getEquipment: (request: EquipmentRequest) => Promise<CharacterEquipment>;
   /** Reads the ten raw quick-item records and the raw active-slot value. */

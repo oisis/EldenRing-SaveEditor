@@ -150,48 +150,72 @@ func (engine *Engine) GetEquipment(saveSessionID string, characterID int) (Chara
 		return equipment, nil
 	}
 
+	slots, _, _, err := readEquipmentSlots(loaded, characterID)
+	if err != nil {
+		return CharacterEquipment{}, err
+	}
+
+	equipment.Active = true
+	equipment.Slots = slots
+	return equipment, nil
+}
+
+// readEquipmentSlots is the single read-only decoder of the dynamic
+// ChrAsmEquipment block. GetEquipment and the aggregate character-loadout
+// reader share it, so presentation can never drift to a second offset chain.
+// The caller must hold Engine.mutex and establish that the slot is active.
+func readEquipmentSlots(
+	loaded *loadedSave,
+	characterID int,
+) ([equipmentSlotCount]uint32, int64, int64, error) {
+	var slots [equipmentSlotCount]uint32
+	blockAt, slotEnd, err := equipmentBlockAt(loaded, characterID)
+	if err != nil {
+		return slots, 0, 0, err
+	}
+	block, err := loaded.snapshot.readAt(blockAt, equipmentBlockSize)
+	if err != nil {
+		return slots, 0, 0, fmt.Errorf("cannot read equipment of character %d: %w", characterID, err)
+	}
+	for index := range slots {
+		slots[index] = binary.LittleEndian.Uint32(block[index*4:])
+	}
+	return slots, blockAt, slotEnd, nil
+}
+
+// equipmentBlockAt locates the dynamic equipped-armaments block for one active
+// slot. Readers that need the confirmed tails behind the 22 fields reuse the
+// same projectile-count validation and bounds checks.
+func equipmentBlockAt(loaded *loadedSave, characterID int) (int64, int64, error) {
 	base := slotDataBase(loaded.session.platform, characterID)
 	slotEnd := base + characterSlotDataSize
 
 	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, equipmentAnchor)
 	if err != nil {
-		return CharacterEquipment{}, fmt.Errorf("cannot search the equipment of character %d: %w", characterID, err)
+		return 0, 0, fmt.Errorf("cannot search the equipment of character %d: %w", characterID, err)
 	}
 	if anchor < 0 {
-		return CharacterEquipment{}, fmt.Errorf("character %d carries no equipment anchor", characterID)
+		return 0, 0, fmt.Errorf("character %d carries no equipment anchor", characterID)
 	}
 
 	countAt := anchor + equipmentProjectileCountOffset
 	if countAt+4 > slotEnd {
-		return CharacterEquipment{}, fmt.Errorf(
-			"projectile count of character %d lies outside its slot", characterID)
+		return 0, 0, fmt.Errorf("projectile count of character %d lies outside its slot", characterID)
 	}
 	rawCount, err := loaded.snapshot.readAt(countAt, 4)
 	if err != nil {
-		return CharacterEquipment{}, fmt.Errorf("cannot read projectile count of character %d: %w", characterID, err)
+		return 0, 0, fmt.Errorf("cannot read projectile count of character %d: %w", characterID, err)
 	}
-	// The count is widened to int64 before it is multiplied, so a declared
-	// length can never wrap into a small, seemingly valid offset.
 	count := int64(binary.LittleEndian.Uint32(rawCount))
 	if count > equipmentMaxProjectileRecords {
-		return CharacterEquipment{}, fmt.Errorf(
+		return 0, 0, fmt.Errorf(
 			"character %d declares %d projectile records, want at most %d",
 			characterID, count, equipmentMaxProjectileRecords)
 	}
 
 	blockAt := countAt + 4 + count*equipmentProjectileRecordSize
 	if blockAt+equipmentBlockSize > slotEnd {
-		return CharacterEquipment{}, fmt.Errorf(
-			"equipment block of character %d does not fit into its slot", characterID)
+		return 0, 0, fmt.Errorf("equipment block of character %d does not fit into its slot", characterID)
 	}
-	block, err := loaded.snapshot.readAt(blockAt, equipmentBlockSize)
-	if err != nil {
-		return CharacterEquipment{}, fmt.Errorf("cannot read equipment of character %d: %w", characterID, err)
-	}
-
-	equipment.Active = true
-	for index := range equipment.Slots {
-		equipment.Slots[index] = binary.LittleEndian.Uint32(block[index*4:])
-	}
-	return equipment, nil
+	return blockAt, slotEnd, nil
 }

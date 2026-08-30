@@ -93,13 +93,15 @@ export const queryKeys = {
   characterStats: (saveSessionID: string, characterID: CharacterKey) =>
     ["save-session", saveSessionID, "character", characterID, "stats"] as const,
   /**
-   * The five equipped views of one slot are five independent backend getters,
+   * The coherent loadout and five narrow equipped views are independent backend getters,
    * so each one keeps its own key below the same session and slot scope. They
    * are never merged into one key: a failure or a refetch of one must not
-   * invalidate, replace or hide the other four.
+   * invalidate, replace or hide the other five.
    */
   equipment: (saveSessionID: string, characterID: CharacterKey) =>
     ["save-session", saveSessionID, "character", characterID, "equipment"] as const,
+  characterLoadout: (saveSessionID: string, characterID: CharacterKey) =>
+    ["save-session", saveSessionID, "character", characterID, "loadout"] as const,
   quickItems: (saveSessionID: string, characterID: CharacterKey) =>
     ["save-session", saveSessionID, "character", characterID, "quick-items"] as const,
   pouchItems: (saveSessionID: string, characterID: CharacterKey) =>

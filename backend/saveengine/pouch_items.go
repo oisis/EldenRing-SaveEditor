@@ -138,34 +138,46 @@ func (engine *Engine) GetPouchItems(saveSessionID string, characterID int) (Char
 		return pouchItems, nil
 	}
 
+	items, err := readPouchItems(loaded, characterID)
+	if err != nil {
+		return CharacterPouchItems{}, err
+	}
+
+	pouchItems.Active = true
+	pouchItems.Items = items
+	return pouchItems, nil
+}
+
+// readPouchItems is the single decoder of the six EquipItemData pouch pairs.
+// The caller must hold Engine.mutex and establish that the slot is active.
+func readPouchItems(loaded *loadedSave, characterID int) ([pouchItemSlotCount]PouchItemSlot, error) {
+	var items [pouchItemSlotCount]PouchItemSlot
 	base := slotDataBase(loaded.session.platform, characterID)
 	slotEnd := base + characterSlotDataSize
 
 	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, pouchItemsAnchor)
 	if err != nil {
-		return CharacterPouchItems{}, fmt.Errorf("cannot search the pouch items of character %d: %w", characterID, err)
+		return items, fmt.Errorf("cannot search the pouch items of character %d: %w", characterID, err)
 	}
 	if anchor < 0 {
-		return CharacterPouchItems{}, fmt.Errorf("character %d carries no pouch-items anchor", characterID)
+		return items, fmt.Errorf("character %d carries no pouch-items anchor", characterID)
 	}
 
 	sectionAt := anchor + pouchItemsSectionOffset
 	if sectionAt+pouchItemsReadSize > slotEnd {
-		return CharacterPouchItems{}, fmt.Errorf(
-			"pouch items of character %d do not fit into its slot", characterID)
+		return items, fmt.Errorf("pouch items of character %d do not fit into its slot", characterID)
 	}
 	section, err := loaded.snapshot.readAt(sectionAt, pouchItemsReadSize)
 	if err != nil {
-		return CharacterPouchItems{}, fmt.Errorf("cannot read pouch items of character %d: %w", characterID, err)
+		return items, fmt.Errorf("cannot read pouch items of character %d: %w", characterID, err)
 	}
 
-	pouchItems.Active = true
-	for index := range pouchItems.Items {
+	for index := range items {
 		record := section[index*pouchItemRecordSize:]
-		pouchItems.Items[index] = PouchItemSlot{
+		items[index] = PouchItemSlot{
 			ItemID:     binary.LittleEndian.Uint32(record),
 			EquipIndex: binary.LittleEndian.Uint32(record[4:]),
 		}
 	}
-	return pouchItems, nil
+	return items, nil
 }

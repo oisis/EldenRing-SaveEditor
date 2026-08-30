@@ -4,6 +4,7 @@ import { useEquipmentPort } from "./equipmentClient";
 import type {
   CharacterEquipment,
   CharacterEquippedSpells,
+  CharacterLoadout,
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
@@ -63,6 +64,16 @@ export function useEquipment(query: EquipmentQuery) {
     query,
     queryKeys.equipment(...scope(query)),
     (request) => port.getEquipment(request),
+  );
+}
+
+export function useCharacterLoadout(query: EquipmentQuery) {
+  const port = useEquipmentPort();
+
+  return useEquipmentQuery<CharacterLoadout>(
+    query,
+    queryKeys.characterLoadout(...scope(query)),
+    (request) => port.getCharacterLoadout(request),
   );
 }
 

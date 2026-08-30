@@ -6,6 +6,7 @@ import {
   makeEquipmentPort,
   stubCharacterEquipment,
   stubCharacterEquippedSpells,
+  stubCharacterLoadout,
   stubCharacterPhysickMixture,
   stubCharacterPouchItems,
   stubCharacterQuickItems,
@@ -15,6 +16,7 @@ import { type noCharacter, queryKeys } from "../queryKeys";
 import type {
   CharacterEquipment,
   CharacterEquippedSpells,
+  CharacterLoadout,
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
@@ -23,6 +25,7 @@ import type {
 } from "./equipmentPort";
 import {
   type EquipmentQuery,
+  useCharacterLoadout,
   useEquipment,
   useEquippedSpells,
   usePhysickMixture,
@@ -70,6 +73,13 @@ const equipmentCase: GetterCase<CharacterEquipment> = {
   portWith: (call) => makeEquipmentPort({ getEquipment: call }),
   stub: stubCharacterEquipment,
   key: queryKeys.equipment,
+};
+
+const characterLoadoutCase: GetterCase<CharacterLoadout> = {
+  hook: useCharacterLoadout,
+  portWith: (call) => makeEquipmentPort({ getCharacterLoadout: call }),
+  stub: stubCharacterLoadout,
+  key: queryKeys.characterLoadout,
 };
 
 const quickItemsCase: GetterCase<CharacterQuickItems> = {
@@ -212,15 +222,17 @@ function describeGetter<T>(name: string, getter: GetterCase<T>) {
 }
 
 describeGetter("useEquipment", equipmentCase);
+describeGetter("useCharacterLoadout", characterLoadoutCase);
 describeGetter("useQuickItems", quickItemsCase);
 describeGetter("usePouchItems", pouchItemsCase);
 describeGetter("usePhysickMixture", physickMixtureCase);
 describeGetter("useEquippedSpells", equippedSpellsCase);
 
-describe("the five equipment hooks together", () => {
+describe("the six equipment hooks together", () => {
   it("calls only its own port method", async () => {
     const port = makeEquipmentPort();
     const spies = {
+      getCharacterLoadout: vi.fn(port.getCharacterLoadout),
       getEquipment: vi.fn(port.getEquipment),
       getQuickItems: vi.fn(port.getQuickItems),
       getPouchItems: vi.fn(port.getPouchItems),
@@ -233,22 +245,25 @@ describe("the five equipment hooks together", () => {
 
     await waitFor(() => expect(result.current.data).toEqual(stubCharacterEquipment));
     expect(spies.getEquipment).toHaveBeenCalledTimes(1);
+    expect(spies.getCharacterLoadout).not.toHaveBeenCalled();
     expect(spies.getQuickItems).not.toHaveBeenCalled();
     expect(spies.getPouchItems).not.toHaveBeenCalled();
     expect(spies.getPhysickMixture).not.toHaveBeenCalled();
     expect(spies.getEquippedSpells).not.toHaveBeenCalled();
   });
 
-  it("carries every raw value, length and order through untouched", async () => {
+  it("carries every backend value, length and order through untouched", async () => {
     const { wrapper } = setup(makeEquipmentPort());
 
     const equipment = renderHook(() => useEquipment(request), { wrapper });
+    const loadout = renderHook(() => useCharacterLoadout(request), { wrapper });
     const quick = renderHook(() => useQuickItems(request), { wrapper });
     const pouch = renderHook(() => usePouchItems(request), { wrapper });
     const physick = renderHook(() => usePhysickMixture(request), { wrapper });
     const spells = renderHook(() => useEquippedSpells(request), { wrapper });
 
     await waitFor(() => expect(equipment.result.current.data).toBeDefined());
+    await waitFor(() => expect(loadout.result.current.data).toBeDefined());
     await waitFor(() => expect(quick.result.current.data).toBeDefined());
     await waitFor(() => expect(pouch.result.current.data).toBeDefined());
     await waitFor(() => expect(physick.result.current.data).toBeDefined());
@@ -256,6 +271,7 @@ describe("the five equipment hooks together", () => {
 
     // Lengths and order are the backend's, and no hook trims, pads or sorts.
     expect(equipment.result.current.data?.slots).toEqual(stubCharacterEquipment.slots);
+    expect(loadout.result.current.data).toEqual(stubCharacterLoadout);
     expect(equipment.result.current.data?.slots).toHaveLength(22);
     expect(quick.result.current.data?.items).toEqual(stubCharacterQuickItems.items);
     expect(pouch.result.current.data?.items).toEqual(stubCharacterPouchItems.items);
@@ -283,19 +299,20 @@ describe("the five equipment hooks together", () => {
 describe("equipment query keys", () => {
   const keys = (session: string, slot: number | typeof noCharacter) => ({
     equipment: queryKeys.equipment(session, slot),
+    characterLoadout: queryKeys.characterLoadout(session, slot),
     quickItems: queryKeys.quickItems(session, slot),
     pouchItems: queryKeys.pouchItems(session, slot),
     physickMixture: queryKeys.physickMixture(session, slot),
     equippedSpells: queryKeys.equippedSpells(session, slot),
   });
 
-  it("gives each of the five getters its own cache entry", () => {
+  it("gives each of the six getters its own cache entry", () => {
     const built = Object.values(keys("session-1", 0)).map((key) => JSON.stringify(key));
 
-    expect(new Set(built).size).toBe(5);
+    expect(new Set(built).size).toBe(6);
   });
 
-  it("nests all five under the session prefix that CloseSave removes", () => {
+  it("nests all six under the session prefix that CloseSave removes", () => {
     const prefix = queryKeys.saveSession("session-1");
 
     for (const built of Object.values(keys("session-1", 0))) {
@@ -303,18 +320,20 @@ describe("equipment query keys", () => {
     }
   });
 
-  it("caches the five getters of one slot separately", async () => {
+  it("caches the six getters of one slot separately", async () => {
     const { queryClient, wrapper } = setup(makeEquipmentPort());
 
     renderHook(() => useEquipment(request), { wrapper });
+    renderHook(() => useCharacterLoadout(request), { wrapper });
     renderHook(() => useQuickItems(request), { wrapper });
     renderHook(() => usePouchItems(request), { wrapper });
     renderHook(() => usePhysickMixture(request), { wrapper });
     renderHook(() => useEquippedSpells(request), { wrapper });
 
-    await waitFor(() => expect(queryClient.getQueryCache().getAll()).toHaveLength(5));
+    await waitFor(() => expect(queryClient.getQueryCache().getAll()).toHaveLength(6));
     const scope = keys(request.saveSessionID, request.characterID);
     expect(queryClient.getQueryData(scope.equipment)).toEqual(stubCharacterEquipment);
+    expect(queryClient.getQueryData(scope.characterLoadout)).toEqual(stubCharacterLoadout);
     expect(queryClient.getQueryData(scope.quickItems)).toEqual(stubCharacterQuickItems);
     expect(queryClient.getQueryData(scope.pouchItems)).toEqual(stubCharacterPouchItems);
     expect(queryClient.getQueryData(scope.physickMixture)).toEqual(stubCharacterPhysickMixture);

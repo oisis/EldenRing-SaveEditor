@@ -5,6 +5,7 @@
 import {
   CloseSave,
   GetApplicationInfo,
+  GetCharacterLoadout,
   GetCharacterProfile,
   GetCharacterStats,
   GetEquipment,
@@ -52,10 +53,15 @@ import type {
 import type {
   CharacterEquipment,
   CharacterEquippedSpells,
+  CharacterLoadout,
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
   EquipmentPort,
+  LoadoutOwnedSlot,
+  LoadoutSlot,
+  LoadoutSlotState,
+  LoadoutSpellSlot,
 } from "../../application/equipment/equipmentPort";
 import type { ItemPage, ItemsPort } from "../../application/items/itemsPort";
 import type { SaveSession, SaveSessionPort } from "../../application/save-session/saveSessionPort";
@@ -135,6 +141,75 @@ function toCharacterEquipment(
     characterID: result.characterID,
     active: result.active,
     slots: [...result.slots],
+  };
+}
+
+function toLoadoutSlot(
+  slot: Awaited<ReturnType<typeof GetCharacterLoadout>>["rightHand"][number],
+): LoadoutSlot {
+  return {
+    slotType: slot.slotType,
+    state: slot.state as LoadoutSlotState,
+    resource: slot.resource === undefined ? undefined : { ...slot.resource },
+    name: slot.name,
+    iconPath: slot.iconPath,
+    rawValue: slot.rawValue,
+  };
+}
+
+function toLoadoutOwnedSlot(
+  slot: Awaited<ReturnType<typeof GetCharacterLoadout>>["quickItems"][number],
+): LoadoutOwnedSlot {
+  return {
+    slotType: slot.slotType as LoadoutOwnedSlot["slotType"],
+    state: slot.state as LoadoutSlotState,
+    ownedItemID: slot.ownedItemID,
+    resource: slot.resource === undefined ? undefined : { ...slot.resource },
+    name: slot.name,
+    iconPath: slot.iconPath,
+    quantity: slot.quantity,
+  };
+}
+
+function toLoadoutSpellSlot(
+  slot: Awaited<ReturnType<typeof GetCharacterLoadout>>["spells"][number],
+): LoadoutSpellSlot {
+  return {
+    state: slot.state as LoadoutSlotState,
+    resource: slot.resource === undefined ? undefined : { ...slot.resource },
+    name: slot.name,
+    iconPath: slot.iconPath,
+    memorySlots: slot.memorySlots,
+  };
+}
+
+/**
+ * Projects the complete backend loadout without interpreting any game ID,
+ * sentinel, family, active index, capacity or locking rule locally.
+ */
+function toCharacterLoadout(
+  result: Awaited<ReturnType<typeof GetCharacterLoadout>>,
+): CharacterLoadout {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    active: result.active,
+    rightHand: result.rightHand.map(toLoadoutSlot),
+    leftHand: result.leftHand.map(toLoadoutSlot),
+    arrows: result.arrows.map(toLoadoutSlot),
+    bolts: result.bolts.map(toLoadoutSlot),
+    armor: result.armor.map(toLoadoutSlot),
+    talismans: result.talismans.map(toLoadoutSlot),
+    quickItems: result.quickItems.map(toLoadoutOwnedSlot),
+    pouch: result.pouch.map(toLoadoutOwnedSlot),
+    activeQuickItem: result.activeQuickItem,
+    physick: result.physick.map(toLoadoutSlot),
+    spells: result.spells.map(toLoadoutSpellSlot),
+    activeSpellIndex: result.activeSpellIndex,
+    usedMemorySlots: result.usedMemorySlots,
+    availableMemorySlots: result.availableMemorySlots,
+    unlockedTalismanSlots: result.unlockedTalismanSlots,
   };
 }
 
@@ -519,6 +594,9 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // The pair reaches the bridge in the order the backend contract defines; the
   // grouped request only protects the caller from transposing them. Neither
   // value is trimmed, defaulted or clamped on the way.
+  getCharacterLoadout: async ({ saveSessionID, characterID }) =>
+    toCharacterLoadout(await callBridge(() => GetCharacterLoadout(saveSessionID, characterID))),
+
   getEquipment: async ({ saveSessionID, characterID }) =>
     toCharacterEquipment(await callBridge(() => GetEquipment(saveSessionID, characterID))),
 

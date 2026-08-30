@@ -909,6 +909,17 @@ func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
 		t.Fatal("equipment route body differs from the GetEquipment result")
 	}
 
+	wantLoadout, err := equipment.GetCharacterLoadout(
+		saveEngine, newPrototypeCatalog(t), session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("equipment.GetCharacterLoadout: %v", err)
+	}
+	loadoutResponse := doSave(t, saveEngine, http.MethodGet, base+"/loadout", "")
+	assertOK(t, loadoutResponse, base+"/loadout")
+	if !reflect.DeepEqual(decode(t, loadoutResponse.Body.Bytes()), marshalled(t, wantLoadout)) {
+		t.Fatal("loadout route body differs from the GetCharacterLoadout result")
+	}
+
 	wantQuickItems, err := equipment.GetQuickItems(saveEngine, session.SaveSessionID, 0)
 	if err != nil {
 		t.Fatalf("equipment.GetQuickItems: %v", err)
@@ -973,6 +984,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/preset", `{"presetID":"geralt-of-rivia-the-witcher","expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/favorite-preset", `{"favoriteSlotID":0,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/loadout", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armaments", `{"slotAssignments":[null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armor", `{"slotAssignments":[null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
@@ -1126,6 +1138,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repairs/apply":                      "post",
 		"/api/v1/save-sessions/{saveSessionID}/diagnostic-log":                                              "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/loadout":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":                        "get",
@@ -1460,6 +1473,11 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetFogOfWarRemovedResult",
 		"SetTutorialUnlockedRequest",
 		"SetTutorialUnlockedResult",
+		"LoadoutSlotState",
+		"LoadoutSlot",
+		"LoadoutOwnedSlot",
+		"LoadoutSpellSlot",
+		"CharacterLoadout",
 		"FavoritePreset",
 		"GetFavoritePresetsResult",
 		"SetFavoritePresetRequest",
@@ -1706,8 +1724,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 88 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 88", found)
+	if found != 89 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 89", found)
 	}
 }
 

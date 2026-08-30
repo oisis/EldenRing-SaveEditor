@@ -9,8 +9,9 @@ import { makeEquipmentPort } from "../../test/renderWithProviders";
 describe("EquipmentPort surface", () => {
   const methods = Object.keys(makeEquipmentPort()).sort();
 
-  it("declares exactly the five backend getters", () => {
+  it("declares exactly the six backend getters", () => {
     expect(methods).toEqual([
+      "getCharacterLoadout",
       "getEquipment",
       "getEquippedSpells",
       "getPhysickMixture",

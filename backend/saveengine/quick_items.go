@@ -146,35 +146,52 @@ func (engine *Engine) GetQuickItems(saveSessionID string, characterID int) (Char
 		return quickItems, nil
 	}
 
+	items, activeQuick, err := readQuickItems(loaded, characterID)
+	if err != nil {
+		return CharacterQuickItems{}, err
+	}
+
+	quickItems.Active = true
+	quickItems.Items = items
+	quickItems.ActiveQuick = activeQuick
+	return quickItems, nil
+}
+
+// readQuickItems is the single decoder of the ten EquipItemData quick-item
+// pairs and their signed active index. The caller must hold Engine.mutex and
+// establish that the slot is active.
+func readQuickItems(
+	loaded *loadedSave,
+	characterID int,
+) ([quickItemSlotCount]QuickItemSlot, int32, error) {
+	var items [quickItemSlotCount]QuickItemSlot
 	base := slotDataBase(loaded.session.platform, characterID)
 	slotEnd := base + characterSlotDataSize
 
 	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, quickItemsAnchor)
 	if err != nil {
-		return CharacterQuickItems{}, fmt.Errorf("cannot search the quick items of character %d: %w", characterID, err)
+		return items, 0, fmt.Errorf("cannot search the quick items of character %d: %w", characterID, err)
 	}
 	if anchor < 0 {
-		return CharacterQuickItems{}, fmt.Errorf("character %d carries no quick-items anchor", characterID)
+		return items, 0, fmt.Errorf("character %d carries no quick-items anchor", characterID)
 	}
 
 	sectionAt := anchor + quickItemsSectionOffset
 	if sectionAt+quickItemsReadSize > slotEnd {
-		return CharacterQuickItems{}, fmt.Errorf(
-			"quick items of character %d do not fit into its slot", characterID)
+		return items, 0, fmt.Errorf("quick items of character %d do not fit into its slot", characterID)
 	}
 	section, err := loaded.snapshot.readAt(sectionAt, quickItemsReadSize)
 	if err != nil {
-		return CharacterQuickItems{}, fmt.Errorf("cannot read quick items of character %d: %w", characterID, err)
+		return items, 0, fmt.Errorf("cannot read quick items of character %d: %w", characterID, err)
 	}
 
-	quickItems.Active = true
-	for index := range quickItems.Items {
+	for index := range items {
 		record := section[index*quickItemRecordSize:]
-		quickItems.Items[index] = QuickItemSlot{
+		items[index] = QuickItemSlot{
 			ItemID:     binary.LittleEndian.Uint32(record),
 			EquipIndex: binary.LittleEndian.Uint32(record[4:]),
 		}
 	}
-	quickItems.ActiveQuick = int32(binary.LittleEndian.Uint32(section[quickItemsActiveOffset:]))
-	return quickItems, nil
+	activeQuick := int32(binary.LittleEndian.Uint32(section[quickItemsActiveOffset:]))
+	return items, activeQuick, nil
 }

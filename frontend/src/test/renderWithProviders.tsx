@@ -26,6 +26,7 @@ import { EquipmentPortProvider } from "../application/equipment/equipmentClient"
 import type {
   CharacterEquipment,
   CharacterEquippedSpells,
+  CharacterLoadout,
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
@@ -305,6 +306,95 @@ export const stubCharacterEquipment: CharacterEquipment = {
   ],
 };
 
+const emptyLoadoutSlot = (slotType: string, rawValue = 0xffffffff) => ({
+  slotType,
+  state: "empty" as const,
+  rawValue,
+});
+
+export const stubCharacterLoadout: CharacterLoadout = {
+  saveSessionID: "session-1",
+  saveRevision: "7",
+  characterID: 0,
+  active: true,
+  rightHand: [
+    {
+      slotType: "right_hand",
+      state: "occupied",
+      resource: { kind: "item", key: "000F4240" },
+      name: "Dagger",
+      iconPath: "icons/items/000F4240.png",
+      rawValue: 0x000f4240,
+    },
+    emptyLoadoutSlot("right_hand", 0x0001adb0),
+    emptyLoadoutSlot("right_hand", 0x0001adb0),
+  ],
+  leftHand: Array.from({ length: 3 }, () => emptyLoadoutSlot("left_hand", 0x0001adb0)),
+  arrows: Array.from({ length: 2 }, () => emptyLoadoutSlot("arrow")),
+  bolts: Array.from({ length: 2 }, () => emptyLoadoutSlot("bolt")),
+  armor: ["head", "chest", "arms", "legs"].map((slotType) => emptyLoadoutSlot(slotType)),
+  talismans: [
+    {
+      slotType: "talisman",
+      state: "occupied",
+      resource: { kind: "item", key: "20000474" },
+      name: "Moon of Nokstella",
+      iconPath: "icons/items/20000474.png",
+      rawValue: 0x20000474,
+    },
+    ...Array.from({ length: 3 }, () => ({
+      slotType: "talisman",
+      state: "locked" as const,
+      rawValue: 0,
+    })),
+  ],
+  quickItems: [
+    {
+      slotType: "quick_item",
+      state: "occupied",
+      ownedItemID: "owned-quick-1",
+      resource: { kind: "item", key: "4000272E" },
+      name: "Memory Stone",
+      iconPath: "icons/items/4000272E.png",
+      quantity: 3,
+    },
+    ...Array.from({ length: 9 }, () => ({
+      slotType: "quick_item" as const,
+      state: "empty" as const,
+    })),
+  ],
+  pouch: Array.from({ length: 6 }, () => ({
+    slotType: "pouch" as const,
+    state: "empty" as const,
+  })),
+  activeQuickItem: 4,
+  physick: [
+    {
+      slotType: "physick",
+      state: "occupied",
+      resource: { kind: "item", key: "40002AF9" },
+      name: "Crimson Crystal Tear",
+      iconPath: "icons/items/40002AF9.png",
+      rawValue: 0x40002af9,
+    },
+    emptyLoadoutSlot("physick"),
+  ],
+  spells: [
+    {
+      state: "occupied",
+      resource: { kind: "item", key: "40000FA0" },
+      name: "Glintstone Pebble",
+      iconPath: "icons/items/40000FA0.png",
+      memorySlots: 1,
+    },
+    ...Array.from({ length: 11 }, () => ({ state: "empty" as const })),
+  ],
+  activeSpellIndex: 0,
+  usedMemorySlots: 1,
+  availableMemorySlots: 7,
+  unlockedTalismanSlots: 1,
+};
+
 export const stubCharacterQuickItems: CharacterQuickItems = {
   saveSessionID: "session-1",
   characterID: 0,
@@ -386,6 +476,7 @@ export const stubCharacterEquippedSpells: CharacterEquippedSpells = {
 
 export function makeEquipmentPort(overrides: Partial<EquipmentPort> = {}): EquipmentPort {
   return {
+    getCharacterLoadout: () => Promise.resolve(stubCharacterLoadout),
     getEquipment: () => Promise.resolve(stubCharacterEquipment),
     getQuickItems: () => Promise.resolve(stubCharacterQuickItems),
     getPouchItems: () => Promise.resolve(stubCharacterPouchItems),

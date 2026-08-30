@@ -10,6 +10,10 @@ export function GetApplicationInfo() {
   return window['go']['desktop']['Bridge']['GetApplicationInfo']();
 }
 
+export function GetCharacterLoadout(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetCharacterLoadout'](arg1, arg2);
+}
+
 export function GetCharacterProfile(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetCharacterProfile'](arg1, arg2);
 }

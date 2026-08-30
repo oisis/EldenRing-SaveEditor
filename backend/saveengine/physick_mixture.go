@@ -144,21 +144,33 @@ func (engine *Engine) GetPhysickMixture(saveSessionID string, characterID int) (
 		return mixture, nil
 	}
 
-	blockAt, err := physickMixtureAt(loaded, characterID)
+	tears, err := readPhysickMixture(loaded, characterID)
 	if err != nil {
 		return CharacterPhysickMixture{}, err
 	}
-	block, err := loaded.snapshot.readAt(blockAt, physickReadSize)
-	if err != nil {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"cannot read physick mixture of character %d: %w", characterID, err)
-	}
 
 	mixture.Active = true
-	for index := range mixture.Tears {
-		mixture.Tears[index] = binary.LittleEndian.Uint32(block[index*4:])
-	}
+	mixture.Tears = tears
 	return mixture, nil
+}
+
+// readPhysickMixture decodes the two positional Crystal Tear identifiers from
+// the shared dynamic EquipPhysicsData location. The caller must hold
+// Engine.mutex and establish that the slot is active.
+func readPhysickMixture(loaded *loadedSave, characterID int) ([physickTearCount]uint32, error) {
+	var tears [physickTearCount]uint32
+	blockAt, err := physickMixtureAt(loaded, characterID)
+	if err != nil {
+		return tears, err
+	}
+	block, err := loaded.snapshot.readAt(blockAt, physickReadSize)
+	if err != nil {
+		return tears, fmt.Errorf("cannot read physick mixture of character %d: %w", characterID, err)
+	}
+	for index := range tears {
+		tears[index] = binary.LittleEndian.Uint32(block[index*4:])
+	}
+	return tears, nil
 }
 
 // physickMixtureAt locates the first byte of EquipPhysicsData for one active
