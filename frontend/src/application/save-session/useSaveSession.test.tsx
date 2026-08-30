@@ -55,6 +55,41 @@ describe("useLoadedSave", () => {
     expect(getLoadedSave).toHaveBeenCalledExactlyOnceWith("session-1");
   });
 
+  it("reaches no port on a manual refetch without a session identifier", async () => {
+    const getLoadedSave = vi.fn(makeSaveSessionPort().getLoadedSave);
+    const { wrapper } = setup(makeSaveSessionPort({ getLoadedSave }));
+
+    const { result, rerender } = renderHook(({ id }: { id?: string }) => useLoadedSave(id), {
+      wrapper,
+      initialProps: {},
+    });
+
+    expect(getLoadedSave).not.toHaveBeenCalled();
+
+    // A disabled query is not a guarded one: `refetch` runs the query function
+    // regardless, so the missing identifier has to remove the function itself.
+    await result.current.refetch();
+    expect(getLoadedSave).not.toHaveBeenCalled();
+
+    rerender({ id: "" });
+    await result.current.refetch();
+    expect(getLoadedSave).not.toHaveBeenCalled();
+  });
+
+  it("calls the port again on a manual refetch with a session identifier", async () => {
+    const getLoadedSave = vi.fn(makeSaveSessionPort().getLoadedSave);
+    const { wrapper } = setup(makeSaveSessionPort({ getLoadedSave }));
+
+    const { result } = renderHook(() => useLoadedSave("  Session ID  "), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await result.current.refetch();
+
+    expect(getLoadedSave).toHaveBeenCalledTimes(2);
+    // Both calls carry the identifier unchanged.
+    expect(getLoadedSave.mock.calls).toEqual([["  Session ID  "], ["  Session ID  "]]);
+  });
+
   it("reads the central query key and does not retry a failed call", async () => {
     const getLoadedSave = vi.fn(() => Promise.reject(new Error("bridge_call_failed")));
     const { queryClient, wrapper } = setup(makeSaveSessionPort({ getLoadedSave }));
@@ -128,6 +163,34 @@ describe("useCloseSave", () => {
     );
     // Another session is untouched.
     expect(queryClient.getQueryData(queryKeys.loadedSave("session-2"))).toEqual(stubSaveSession);
+  });
+
+  it("drops the character views of the closed session and keeps another session's", async () => {
+    const { queryClient, wrapper } = setup(makeSaveSessionPort());
+    for (const saveSessionID of ["session-1", "session-2"]) {
+      queryClient.setQueryData(queryKeys.saveCharacters(saveSessionID), { saveSessionID });
+      queryClient.setQueryData(queryKeys.characterProfile(saveSessionID, 0), { saveSessionID });
+      queryClient.setQueryData(queryKeys.characterStats(saveSessionID, 9), { saveSessionID });
+    }
+
+    const { result } = renderHook(() => useCloseSave(), { wrapper });
+
+    result.current.mutate("session-1");
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    // The session prefix is the only cleanup rule the character views need.
+    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-1"))).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.characterProfile("session-1", 0))).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.characterStats("session-1", 9))).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-2"))).toEqual({
+      saveSessionID: "session-2",
+    });
+    expect(queryClient.getQueryData(queryKeys.characterProfile("session-2", 0))).toEqual({
+      saveSessionID: "session-2",
+    });
+    expect(queryClient.getQueryData(queryKeys.characterStats("session-2", 9))).toEqual({
+      saveSessionID: "session-2",
+    });
   });
 
   it("keeps the cache and reports the failure when the close is rejected", async () => {

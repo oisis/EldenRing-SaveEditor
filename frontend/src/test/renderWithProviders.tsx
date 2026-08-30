@@ -7,6 +7,13 @@ import type {
   ApplicationInfo,
   ApplicationInfoPort,
 } from "../application/application-info/applicationInfoPort";
+import { CharacterPortProvider } from "../application/character/characterClient";
+import type {
+  CharacterPort,
+  CharacterProfile,
+  CharacterStats,
+  SaveCharacters,
+} from "../application/character/characterPort";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
 import type { SaveSession, SaveSessionPort } from "../application/save-session/saveSessionPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
@@ -29,6 +36,49 @@ export const stubSaveSession: SaveSession = {
   unsavedChanges: false,
 };
 
+export const stubSaveCharacters: SaveCharacters = {
+  saveSessionID: "session-1",
+  characters: [
+    { characterID: 0, active: true, name: "Tarnished", level: 150 },
+    { characterID: 1, active: false, name: "", level: 0 },
+  ],
+};
+
+export const stubCharacterProfile: CharacterProfile = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  name: "Tarnished",
+  level: 150,
+  startingClassID: 3,
+  gender: 1,
+  secondsPlayed: 123456,
+};
+
+export const stubCharacterStats: CharacterStats = {
+  saveSessionID: "session-1",
+  characterID: 0,
+  active: true,
+  vigor: 40,
+  mind: 20,
+  endurance: 25,
+  strength: 50,
+  dexterity: 18,
+  intelligence: 9,
+  faith: 12,
+  arcane: 7,
+  level: 150,
+  hp: 1450,
+  maxHP: 1900,
+  baseMaxHP: 1900,
+  fp: 200,
+  maxFP: 220,
+  baseMaxFP: 220,
+  sp: 130,
+  maxSP: 130,
+  baseMaxSP: 130,
+};
+
 export function makePort(overrides: Partial<ApplicationInfoPort> = {}): ApplicationInfoPort {
   return {
     getApplicationInfo: () => Promise.resolve(stubApplicationInfo),
@@ -41,6 +91,15 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
     loadSave: () => Promise.resolve(stubSaveSession),
     getLoadedSave: () => Promise.resolve(stubSaveSession),
     closeSave: () => Promise.resolve(),
+    ...overrides,
+  };
+}
+
+export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): CharacterPort {
+  return {
+    getSaveCharacters: () => Promise.resolve(stubSaveCharacters),
+    getCharacterProfile: () => Promise.resolve(stubCharacterProfile),
+    getCharacterStats: () => Promise.resolve(stubCharacterStats),
     ...overrides,
   };
 }
@@ -62,17 +121,21 @@ export function TestProviders({
   queryClient,
   port,
   saveSessionPort,
+  characterPort,
 }: {
   children: ReactNode;
   queryClient: QueryClient;
   port?: ApplicationInfoPort;
   saveSessionPort?: SaveSessionPort;
+  characterPort?: CharacterPort;
 }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ApplicationInfoPortProvider port={port ?? makePort()}>
         <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
-          {children}
+          <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
+            {children}
+          </CharacterPortProvider>
         </SaveSessionPortProvider>
       </ApplicationInfoPortProvider>
     </QueryClientProvider>
@@ -84,6 +147,7 @@ export async function renderApp(
   options: {
     port?: ApplicationInfoPort;
     saveSessionPort?: SaveSessionPort;
+    characterPort?: CharacterPort;
     locale?: Locale;
     queryClient?: QueryClient;
   } = {},
@@ -96,6 +160,7 @@ export async function renderApp(
         queryClient={options.queryClient ?? createTestQueryClient()}
         port={options.port}
         saveSessionPort={options.saveSessionPort}
+        characterPort={options.characterPort}
       >
         {ui}
       </TestProviders>

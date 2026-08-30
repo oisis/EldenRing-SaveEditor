@@ -5,13 +5,22 @@
 import {
   CloseSave,
   GetApplicationInfo,
+  GetCharacterProfile,
+  GetCharacterStats,
   GetLoadedSave,
+  GetSaveCharacters,
   LoadSave,
 } from "../../../wailsjs/go/desktop/Bridge";
 import type {
   ApplicationInfo,
   ApplicationInfoPort,
 } from "../../application/application-info/applicationInfoPort";
+import type {
+  CharacterPort,
+  CharacterProfile,
+  CharacterStats,
+  SaveCharacters,
+} from "../../application/character/characterPort";
 import type { SaveSession, SaveSessionPort } from "../../application/save-session/saveSessionPort";
 
 /**
@@ -50,7 +59,7 @@ function toSaveSession(result: Awaited<ReturnType<typeof GetLoadedSave>>): SaveS
  * adaptation layer would give the generated bindings a second way into the
  * application, so all ports are fulfilled here.
  */
-export const wailsDesktopBridge: ApplicationInfoPort & SaveSessionPort = {
+export const wailsDesktopBridge: ApplicationInfoPort & SaveSessionPort & CharacterPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
     const result = await callBridge(GetApplicationInfo);
 
@@ -73,5 +82,62 @@ export const wailsDesktopBridge: ApplicationInfoPort & SaveSessionPort = {
 
   closeSave: async (saveSessionID) => {
     await callBridge(() => CloseSave(saveSessionID));
+  },
+
+  getSaveCharacters: async (saveSessionID): Promise<SaveCharacters> => {
+    const result = await callBridge(() => GetSaveCharacters(saveSessionID));
+
+    return {
+      saveSessionID: result.saveSessionID,
+      characters: result.characters.map((summary) => ({
+        characterID: summary.characterID,
+        active: summary.active,
+        name: summary.name,
+        level: summary.level,
+      })),
+    };
+  },
+
+  getCharacterProfile: async (saveSessionID, characterID): Promise<CharacterProfile> => {
+    const result = await callBridge(() => GetCharacterProfile(saveSessionID, characterID));
+
+    return {
+      saveSessionID: result.saveSessionID,
+      characterID: result.characterID,
+      active: result.active,
+      name: result.name,
+      level: result.level,
+      startingClassID: result.startingClassID,
+      gender: result.gender,
+      secondsPlayed: result.secondsPlayed,
+    };
+  },
+
+  getCharacterStats: async (saveSessionID, characterID): Promise<CharacterStats> => {
+    const result = await callBridge(() => GetCharacterStats(saveSessionID, characterID));
+
+    return {
+      saveSessionID: result.saveSessionID,
+      characterID: result.characterID,
+      active: result.active,
+      vigor: result.vigor,
+      mind: result.mind,
+      endurance: result.endurance,
+      strength: result.strength,
+      dexterity: result.dexterity,
+      intelligence: result.intelligence,
+      faith: result.faith,
+      arcane: result.arcane,
+      level: result.level,
+      hp: result.hp,
+      maxHP: result.maxHP,
+      baseMaxHP: result.baseMaxHP,
+      fp: result.fp,
+      maxFP: result.maxFP,
+      baseMaxFP: result.baseMaxFP,
+      sp: result.sp,
+      maxSP: result.maxSP,
+      baseMaxSP: result.baseMaxSP,
+    };
   },
 };

@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
+import { CharacterPortProvider } from "./application/character/characterClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
 import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
@@ -27,7 +28,9 @@ createRoot(container).render(
       <QueryClientProvider client={queryClient}>
         <ApplicationInfoPortProvider port={wailsDesktopBridge}>
           <SaveSessionPortProvider port={wailsDesktopBridge}>
-            <App />
+            <CharacterPortProvider port={wailsDesktopBridge}>
+              <App />
+            </CharacterPortProvider>
           </SaveSessionPortProvider>
         </ApplicationInfoPortProvider>
       </QueryClientProvider>
