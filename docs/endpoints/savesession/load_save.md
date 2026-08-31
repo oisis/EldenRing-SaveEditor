@@ -18,7 +18,7 @@ equipment, world state, `SteamID`, `UserData11`, or any slot content.
 | Kind | Mutation |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `POST /api/v1/save-sessions` of the local OpenAPI explorer (`tools/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `POST /api/v1/save-sessions` of the local OpenAPI explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. Also exposed through the Wails bridge method `LoadSave(source, expectedPlatform, sourceKind)`, which the frontend reaches through its save-session port. No CLI command. |
 | Implementation source | [../../../backend/endpoints/savesession/load_save.go](../../../backend/endpoints/savesession/load_save.go) |
 | Test source | [../../../backend/endpoints/savesession/load_save_test.go](../../../backend/endpoints/savesession/load_save_test.go) |
 | Save access | read-only — the file is opened for reading, and no byte of it is written |
@@ -34,6 +34,7 @@ func LoadSave(
 	engine *saveengine.Engine,
 	source string,
 	expectedPlatform string,
+	sourceKind string,
 ) (LoadSaveResult, error)
 ```
 
@@ -42,8 +43,9 @@ func LoadSave(
 | `engine` | `*saveengine.Engine` | The SaveEngine instance supplied by the backend caller. It owns the session; the endpoint never creates one. A `nil` engine is rejected. |
 | `source` | `string` | Path of a local save file. It is passed to SaveEngine unchanged: it is never rewritten, resolved against a search path, or guessed from a file name. |
 | `expectedPlatform` | `string` | The platform the caller expects, or an empty value for no expectation. |
+| `sourceKind` | `string` | What `source` is: `local` or `temporary`. Required; there is no empty form and no default. |
 
-The local HTTP request carries both values as a JSON body:
+The local HTTP request carries all three values as a JSON body:
 
 ```http
 POST /api/v1/save-sessions
@@ -57,6 +59,22 @@ are rejected with `400` before the body is decoded and before the endpoint or
 SaveEngine is called, so a refused request opens no file and creates no session.
 The rule exists because a `POST` carrying `text/plain` or no `Content-Type` is a
 CORS simple request, which a browser sends without a preflight.
+
+### `sourceKind`
+
+- The accepted values are exactly `local` and `temporary`. There is no third
+  value and no empty form.
+- `local` is a durable file the user owns. `temporary` is a working copy that is
+  not the user's durable save; it exists for the later deployment flow and
+  carries no behaviour of its own at this stage.
+- Matching is exact and case-sensitive and the value is never trimmed. `Local`,
+  `" local"`, `local `, and `temp` are unknown values.
+- It is validated before the file system is touched, so a rejected value opens
+  no file and creates no session.
+- There is deliberately no default. A session records where its snapshot came
+  from, and it must never claim an origin nobody stated: a caller that omits the
+  field is rejected rather than silently treated as `local`.
+- The native file dialog of the desktop host supplies `local`.
 
 ### `expectedPlatform`
 
@@ -78,6 +96,9 @@ type SessionInfo struct {
 	SaveSessionID  string `json:"saveSessionID"`
 	Platform       string `json:"platform"`
 	Format         string `json:"format"`
+	SourcePath     string `json:"sourcePath"`
+	SourceKind     string `json:"sourceKind"`
+	SaveRevision   string `json:"saveRevision"`
 	UnsavedChanges bool   `json:"unsavedChanges"`
 }
 ```
@@ -87,14 +108,30 @@ type SessionInfo struct {
 | `saveSessionID` | `string` | Identifier of the created session. Always non-empty on success and unique per session. A later `GetLoadedSave` will read a session by this value. |
 | `platform` | `string` | The recognised platform: `pc` or `ps4`. Never guessed and never taken from the file name. |
 | `format` | `string` | The recognised container format: `bnd4` for PC and `ps4-container` for PS4. |
+| `sourcePath` | `string` | The exact `source` the snapshot was created from, carried verbatim. Never trimmed, recased, resolved, or guessed. |
+| `sourceKind` | `string` | The `sourceKind` the caller stated, echoed back unchanged. |
+| `saveRevision` | `string` | The canonical decimal revision of the session, always `"0"` for a newly loaded one. A string and not a number, so no consumer can round, increment, or reorder it. |
 | `unsavedChanges` | `bool` | Always `false` for a newly loaded session. Later mutations may set it, and a successful `WriteSave` clears it. |
 
 On any error the result is the zero value: `saveSessionID` is empty and no
 session exists.
 
-The result deliberately carries no absolute path, no `SteamID`, no offset, no
-handle, no raw save bytes, and no character data. The `Session` model inside
-SaveEngine stores none of them either: it is metadata only.
+### `sourcePath` is metadata, not permission to re-read
+
+`sourcePath` records where the snapshot came from so a desktop session can name
+the file it is editing. It is not a licence to reopen that file:
+
+- SaveEngine reads the file exactly once, during `LoadSave`, and closes it
+  before returning.
+- Every later read — `GetLoadedSave`, every getter, every mutation — goes to the
+  private in-memory snapshot.
+- Removing, replacing, or rewriting the file after a successful load changes
+  nothing about the existing session, `sourcePath` included: the recorded path
+  is not re-resolved and not checked for existence.
+
+The result still carries no `SteamID`, no offset, no handle, no raw save bytes,
+and no character data, and the `Session` model inside SaveEngine stores none of
+them either.
 
 The file content itself lives in a private snapshot that SaveEngine
 keeps next to the session, under the same `saveSessionID`. The snapshot is
@@ -108,7 +145,8 @@ session-owned snapshot.
 
 1. The endpoint rejects a missing engine and delegates everything else. It holds
    no magic, no offset, no size, and no platform rule of its own.
-2. SaveEngine validates `expectedPlatform` before touching the file system.
+2. SaveEngine validates `expectedPlatform` and then `sourceKind` before touching
+   the file system.
 3. SaveEngine opens `source` read-only. A directory or any other non-regular
    file is rejected before anything is read. The regular file is then read once
    into a private in-memory snapshot and closed immediately, so no handle to the
@@ -121,7 +159,8 @@ session-owned snapshot.
    the call here, before structural validation and before a session exists.
 6. The platform-specific validation runs: `backend/saveengine/pc.go` for PC and
    `backend/saveengine/ps4.go` for PS4.
-7. A session is created with a fresh identifier and registered in the engine
+7. A session is created with a fresh identifier, the exact `source` and
+   `sourceKind` it was given, and revision `0`, and is registered in the engine
    together with its private snapshot. Not a single byte of the source file was
    written, and the file is already closed at this point.
 
@@ -167,6 +206,7 @@ Every failure returns an empty result and creates no session.
 |---|---|
 | `engine` is `nil` | `save engine is not available` — a backend wiring error, not client input. |
 | `expectedPlatform` is not `""`, `pc`, or `ps4` | Rejected before the file is opened. |
+| `sourceKind` is not exactly `local` or `temporary` | Rejected before the file is opened, the empty value included. No default is applied. |
 | `source` cannot be opened, or is not a regular file | Rejected with the underlying reason. |
 | The leading magic is neither PC nor PS4, or the file is shorter than a magic | `unsupported save container: the file is neither a native PC nor a native PS4 save`. An encrypted or unknown container is never decrypted to find out what it holds. |
 | The recognised platform differs from a non-empty `expectedPlatform` | Fail-closed error naming both platforms. |
@@ -205,9 +245,11 @@ followed that change.
 
 ## Current limitations
 
-- The only transport is the local developer explorer route `POST /api/v1/save-sessions`,
-  which is registered only without `-allow-external-bind`. There is no Wails
-  binding, no CLI command, and no frontend for the endpoint.
+- The transports are the local developer explorer route
+  `POST /api/v1/save-sessions`, registered only without `-allow-external-bind`,
+  and the Wails bridge method `LoadSave`. There is no CLI command.
+- `temporary` is accepted and recorded but carries no behaviour yet: the
+  deployment flow that produces such a file is not implemented.
 - Only native PC and PS4 containers are recognised. Encrypted containers are
   rejected, and no format conversion exists.
 - Structural recognition only: characters, inventory, storage, equipment, world

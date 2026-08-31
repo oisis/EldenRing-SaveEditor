@@ -46,7 +46,7 @@ func TestSetCharacterActiveChangesOnlyTheFlagOnBothPlatforms(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterNameFixture(
-				t, platform, true, true, "Ranni", "Ranni"), string(platform))
+				t, platform, true, true, "Ranni", "Ranni"), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -99,7 +99,7 @@ func TestSetCharacterActiveChangesOnlyTheFlagOnBothPlatforms(t *testing.T) {
 func TestSetCharacterActiveIdempotentRequestDoesNotCommit(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(writeCharacterNameFixture(
-		t, PlatformPC, true, true, "Ranni", "Ranni"), "")
+		t, PlatformPC, true, true, "Ranni", "Ranni"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestSetCharacterActiveRejectsUnsafeReactivationWithoutMutation(t *testing.T
 	} {
 		t.Run(name, func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(testCase.fixture, "")
+			loaded, err := engine.LoadSave(testCase.fixture, "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -158,7 +158,7 @@ func TestSetCharacterActiveRejectsUnsafeReactivationWithoutMutation(t *testing.T
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("write fixture: %v", err)
 	}
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave unknown flag: %v", err)
 	}
@@ -176,7 +176,7 @@ func TestSetCharacterActivePersistsInactiveStateOnBothPlatforms(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterNameFixture(
-				t, platform, true, true, "Ranni", "Ranni"), string(platform))
+				t, platform, true, true, "Ranni", "Ranni"), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -190,7 +190,7 @@ func TestSetCharacterActivePersistsInactiveStateOnBothPlatforms(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloaded := New()
-			session, err := reloaded.LoadSave(target, string(platform))
+			session, err := reloaded.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}

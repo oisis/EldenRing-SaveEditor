@@ -53,7 +53,7 @@ func writeEndpointSetFavoritesFixture(t *testing.T, charSlot int) string {
 func TestSetFavoritePresetEndpointSuccess(t *testing.T) {
 	path := writeEndpointSetFavoritesFixture(t, 0)
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestSetFavoritePresetEndpointRejectsMissingEngine(t *testing.T) {
 func TestSetFavoritePresetEndpointDelegatesValidation(t *testing.T) {
 	path := writeEndpointSetFavoritesFixture(t, 0)
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

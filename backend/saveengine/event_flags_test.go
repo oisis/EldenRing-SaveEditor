@@ -210,7 +210,7 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 			content.set = append(content.set, 11109710, 670500)
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -244,7 +244,7 @@ func TestGetEventFlagsResolvesSupportedBlocksAtTheirBoundaries(t *testing.T) {
 		60000, 60999, 65000, 65999, 670000, 670999, 11109000, 11109999)
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -282,7 +282,7 @@ func TestGetEventFlagsResolvesTheGraceBlocksOfBothPlatforms(t *testing.T) {
 			content.set = append(content.set, 71000, 71999, 72000, 73000, 74000, 76000)
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -326,7 +326,7 @@ func TestGetEventFlagsResolvesTheBossBlockOfBothPlatforms(t *testing.T) {
 			content.set = append(content.set, 9000, 9100, 9281, 9999)
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -367,7 +367,7 @@ func TestGetEventFlagsResolvesTheMapRegionBlockOfBothPlatforms(t *testing.T) {
 			content.set = append(content.set, 62000, 62010, 62999)
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -400,7 +400,7 @@ func TestGetEventFlagsReportsAResidualSlotAsInactive(t *testing.T) {
 	content.flag = 0
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -431,7 +431,7 @@ func TestGetEventFlagsRejectsWhatItCannotResolve(t *testing.T) {
 
 	load := func(content eventFlagTestFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -499,11 +499,11 @@ func TestGetEventFlagsRejectsWhatItCannotResolve(t *testing.T) {
 func TestGetEventFlagsRejectsInvalidRequests(t *testing.T) {
 	engine := New()
 
-	present, err := engine.LoadSave(writeEventFlagFixture(t, eventFlagTestContent(PlatformPC)), "")
+	present, err := engine.LoadSave(writeEventFlagFixture(t, eventFlagTestContent(PlatformPC)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
-	closed, err := engine.LoadSave(writeEventFlagFixture(t, eventFlagTestContent(PlatformPC)), "")
+	closed, err := engine.LoadSave(writeEventFlagFixture(t, eventFlagTestContent(PlatformPC)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -550,7 +550,7 @@ func TestGetEventFlagsResolvesEveryIdentifierBeforeTheSlotIsTouched(t *testing.T
 	content.flag = 0
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -574,7 +574,7 @@ func TestGetEventFlagsRejectsCorruptVariableBlocks(t *testing.T) {
 
 	load := func(content eventFlagTestFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -650,7 +650,7 @@ func TestGetEventFlagsReturnsOneEntryPerDistinctIdentifier(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -691,7 +691,7 @@ func TestGetEventFlagsLeavesTheSaveAndTheSnapshotUntouched(t *testing.T) {
 	path := writeEventFlagFixture(t, content)
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -59,7 +59,7 @@ func loadSpectralSteedSession(
 
 	path, content := spectralSteedFixture(t, platform, set)
 	engine := New()
-	loaded, err := engine.LoadSave(path, string(platform))
+	loaded, err := engine.LoadSave(path, string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -201,7 +201,7 @@ func TestSetSpectralSteedAttirePersistsOnBothPlatforms(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -403,7 +403,7 @@ func TestLockAllSpectralSteedAttiresRemovesOnlyTheThreeAttireItems(t *testing.T)
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}

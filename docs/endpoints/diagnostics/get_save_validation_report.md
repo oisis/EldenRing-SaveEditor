@@ -25,7 +25,7 @@ application state.
 | Kind | Getter |
 | Domain | `diagnostics` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report` of the local explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report` of the local explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. Also exposed through the Wails bridge method `GetSaveValidationReport(saveSessionID, characterID, scope)`, which the frontend reaches through its diagnostics port and uses to gate opening a session. The bridge is a plain delegate: it neither aggregates nor reinterprets a report. There is no CLI command. |
 | Implementation source | [../../../backend/endpoints/diagnostics/get_save_validation_report.go](../../../backend/endpoints/diagnostics/get_save_validation_report.go) |
 | Test source | [../../../backend/endpoints/diagnostics/get_save_validation_report_test.go](../../../backend/endpoints/diagnostics/get_save_validation_report_test.go) |
 | Save access | read-only — the session's private in-memory snapshot, read under one lock and one save revision; no file is opened |

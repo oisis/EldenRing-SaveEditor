@@ -110,7 +110,7 @@ func TestSetCharacterNameSynchronizesBothCopiesOnBothPlatforms(t *testing.T) {
 			path := writeCharacterNameFixture(
 				t, platform, true, true, "Old slot", "Old menu")
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -169,7 +169,7 @@ func TestSetCharacterNameAcceptsUTF16BoundaryAndPreservesInput(t *testing.T) {
 	name := " e\u0301" + strings.Repeat("A", 10) + "😀 "
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterNameFixture(t, PlatformPC, true, true, "Old", "Old"), "")
+		writeCharacterNameFixture(t, PlatformPC, true, true, "Old", "Old"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -194,7 +194,7 @@ func TestSetCharacterNameAcceptsUTF16BoundaryAndPreservesInput(t *testing.T) {
 func TestSetCharacterNameRejectsInvalidNamesWithoutMutation(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterNameFixture(t, PlatformPC, true, true, "Original", "Original"), "")
+		writeCharacterNameFixture(t, PlatformPC, true, true, "Original", "Original"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -227,7 +227,7 @@ func TestSetCharacterNameRejectsInvalidNamesWithoutMutation(t *testing.T) {
 func TestSetCharacterNameRejectsInvalidSessionSlotAndRevision(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterNameFixture(t, PlatformPC, true, true, "Original", "Original"), "")
+		writeCharacterNameFixture(t, PlatformPC, true, true, "Original", "Original"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -278,8 +278,7 @@ func TestSetCharacterNameRejectsInactiveAndMissingAnchor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterNameFixture(
-				t, testCase.platform, testCase.active, testCase.withAnchor, "Old", "Old"),
-				string(testCase.platform))
+				t, testCase.platform, testCase.active, testCase.withAnchor, "Old", "Old"), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -297,7 +296,7 @@ func TestSetCharacterNameRejectsInactiveAndMissingAnchor(t *testing.T) {
 func TestSetCharacterNameIdempotentAssignmentAdvancesRevision(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterNameFixture(t, PlatformPC, true, true, "Same", "Same"), "")
+		writeCharacterNameFixture(t, PlatformPC, true, true, "Same", "Same"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -343,7 +342,7 @@ func TestSetCharacterNamePersistsAndReloadsOnBothPlatforms(t *testing.T) {
 			sourceBefore := bytes.Clone(data)
 
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -364,7 +363,7 @@ func TestSetCharacterNamePersistsAndReloadsOnBothPlatforms(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload target: %v", err)
 			}

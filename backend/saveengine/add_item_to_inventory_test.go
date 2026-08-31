@@ -377,7 +377,7 @@ func TestAddItemToInventoryCreatesARecordOnBothPlatforms(t *testing.T) {
 				gaItemData: []uint32{addItemTestOtherID},
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -447,7 +447,7 @@ func TestAddItemToInventorySurvivesAReload(t *testing.T) {
 		nextEquipIndex: 433, nextAcquisition: 968,
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -462,7 +462,7 @@ func TestAddItemToInventorySurvivesAReload(t *testing.T) {
 	}
 
 	fresh := New()
-	again, err := fresh.LoadSave(target, string(PlatformPC))
+	again, err := fresh.LoadSave(target, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("reload: %v", err)
 	}
@@ -502,7 +502,7 @@ func TestAddItemToInventoryTopsUpExistingStack(t *testing.T) {
 		gaItemData: []uint32{addItemTestGoodsID, addItemTestOtherID, addItemTestTalismanID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -535,7 +535,7 @@ func TestAddItemToInventoryRejectsATopUpAboveThePerRecordLimit(t *testing.T) {
 		commonCount: 1, gaItemData: []uint32{addItemTestGoodsID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -567,7 +567,7 @@ func TestAddItemToInventoryUsesTheFirstFreeRow(t *testing.T) {
 		commonCount: 2, gaItemData: []uint32{addItemTestOtherID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -610,7 +610,7 @@ func TestAddItemToInventoryFillsTheLastFreeRecord(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, string(PlatformPC))
+	loaded, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -648,7 +648,7 @@ func TestAddItemToInventoryTalismanAlwaysCreatesItsOwnRecord(t *testing.T) {
 		gaItemData: []uint32{addItemTestTalismanID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -687,7 +687,7 @@ func TestAddItemToInventoryAddsNoGaItemDataEntryForAnItemHeldInStorage(t *testin
 		storageCount: 1, gaItemData: []uint32{addItemTestGoodsID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -724,7 +724,7 @@ func TestAddItemToInventoryRejectsAnItemHeldInStorageKey(t *testing.T) {
 				commonCount: 1, storageKeyCount: 1, gaItemData: []uint32{addItemTestGoodsID},
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -833,7 +833,7 @@ func TestAddItemToInventoryRejectsAndChangesNothing(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeAddItemFixture(t, testCase.content), string(testCase.content.platform))
+				writeAddItemFixture(t, testCase.content), string(testCase.content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -896,7 +896,7 @@ func TestAddItemToInventoryAcceptsTheLastSafeAcquisitionMark(t *testing.T) {
 		platform: PlatformPC, slot: 2, nextAcquisition: 0xFFFFFFFC,
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -949,7 +949,7 @@ func TestAddItemToInventoryRejectsExistingDuplicateRecords(t *testing.T) {
 		gaItemData:  []uint32{addItemTestGoodsID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

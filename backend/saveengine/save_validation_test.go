@@ -213,7 +213,7 @@ func loadValidationFixture(t *testing.T, content validationTestFixture) (*Engine
 
 	path := writeValidationFixture(t, content)
 	engine := New()
-	session, err := engine.LoadSave(path, string(content.platform))
+	session, err := engine.LoadSave(path, string(content.platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

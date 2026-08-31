@@ -234,6 +234,98 @@ export namespace catalog {
 
 }
 
+export namespace diagnostics {
+	
+	export class SaveValidationIssue {
+	    id: string;
+	    code: string;
+	    severity: string;
+	    scope: string;
+	    message: string;
+	    ownedItemID: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveValidationIssue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.code = source["code"];
+	        this.severity = source["severity"];
+	        this.scope = source["scope"];
+	        this.message = source["message"];
+	        this.ownedItemID = source["ownedItemID"];
+	    }
+	}
+	export class SaveValidationScopeCoverage {
+	    scope: string;
+	    checked: boolean;
+	    reason: string;
+	    recordsChecked: number;
+	    unresolvedRecords: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveValidationScopeCoverage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.scope = source["scope"];
+	        this.checked = source["checked"];
+	        this.reason = source["reason"];
+	        this.recordsChecked = source["recordsChecked"];
+	        this.unresolvedRecords = source["unresolvedRecords"];
+	    }
+	}
+	export class GetSaveValidationReportResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    coverage: SaveValidationScopeCoverage[];
+	    issues: SaveValidationIssue[];
+	    errorCount: number;
+	    warningCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetSaveValidationReportResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.coverage = this.convertValues(source["coverage"], SaveValidationScopeCoverage);
+	        this.issues = this.convertValues(source["issues"], SaveValidationIssue);
+	        this.errorCount = source["errorCount"];
+	        this.warningCount = source["warningCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+
+}
+
 export namespace equipment {
 	
 	export class EquippedSpellSlot {
@@ -909,6 +1001,9 @@ export namespace saveengine {
 	    saveSessionID: string;
 	    platform: string;
 	    format: string;
+	    sourcePath: string;
+	    sourceKind: string;
+	    saveRevision: string;
 	    unsavedChanges: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -920,6 +1015,9 @@ export namespace saveengine {
 	        this.saveSessionID = source["saveSessionID"];
 	        this.platform = source["platform"];
 	        this.format = source["format"];
+	        this.sourcePath = source["sourcePath"];
+	        this.sourceKind = source["sourceKind"];
+	        this.saveRevision = source["saveRevision"];
 	        this.unsavedChanges = source["unsavedChanges"];
 	    }
 	}

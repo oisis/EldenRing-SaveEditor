@@ -248,7 +248,7 @@ func loadGetInventorySession(t *testing.T, platform string, active bool, anchorA
 	t.Helper()
 
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writeGetInventoryFixture(t, platform, active, anchorAt), platform)
+	session, err := engine.LoadSave(writeGetInventoryFixture(t, platform, active, anchorAt), platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

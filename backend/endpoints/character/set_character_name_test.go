@@ -10,7 +10,7 @@ import (
 func TestSetCharacterNameReturnsTheSaveEngineReceipt(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -53,7 +53,7 @@ func TestSetCharacterNameRejectsMissingEngine(t *testing.T) {
 func TestSetCharacterNameDelegatesValidationWithoutMutation(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

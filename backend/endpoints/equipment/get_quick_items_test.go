@@ -102,7 +102,7 @@ func TestGetQuickItemsReturnsTheActiveQuickItemsOfALoadedSession(t *testing.T) {
 
 	engine := saveengine.New()
 	// 0xFFFFFFF6 is -10: the value keeps its sign through the endpoint.
-	loaded, err := engine.LoadSave(writeGetQuickItemsFixture(t, items, 0xFFFFFFF6), "")
+	loaded, err := engine.LoadSave(writeGetQuickItemsFixture(t, items, 0xFFFFFFF6), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

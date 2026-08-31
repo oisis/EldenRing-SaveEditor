@@ -72,7 +72,7 @@ func TestGetFavoritePresetsReads15SlotsOnPCAndPS4(t *testing.T) {
 			}
 			path := writeFavoritesFixture(t, platform, content)
 			engine := New()
-			session, err := engine.LoadSave(path, string(platform))
+			session, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -110,7 +110,7 @@ func TestGetFavoritePresetsFiltersSingleSlot(t *testing.T) {
 	}
 	path := writeFavoritesFixture(t, PlatformPC, content)
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -143,7 +143,7 @@ func TestGetFavoritePresetsFiltersSingleSlot(t *testing.T) {
 func TestGetFavoritePresetsRejectsOutOfRangeSlotID(t *testing.T) {
 	path := writeFavoritesFixture(t, PlatformPC, favoritesFixture{})
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -170,7 +170,7 @@ func TestGetFavoritePresetsRejectsEmptyAndUnknownSession(t *testing.T) {
 
 func TestGetFavoritePresetsTruncatedContainerFailsClosed(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeFavoritesFixture(t, PlatformPC, favoritesFixture{}), "")
+	session, err := engine.LoadSave(writeFavoritesFixture(t, PlatformPC, favoritesFixture{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -193,7 +193,7 @@ func TestGetFavoritePresetsTruncatedContainerFailsClosed(t *testing.T) {
 func TestGetFavoritePresetsActiveDependsOnlyOnMagic(t *testing.T) {
 	path := writeFavoritesFixture(t, PlatformPC, favoritesFixture{})
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -239,7 +239,7 @@ func TestGetFavoritePresetsIsStrictlyReadOnly(t *testing.T) {
 	}
 	path := writeFavoritesFixture(t, PlatformPC, content)
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

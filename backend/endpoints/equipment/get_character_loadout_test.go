@@ -94,7 +94,7 @@ func writeGetCharacterLoadoutFixture(t *testing.T) string {
 
 func TestGetCharacterLoadoutResolvesEveryConfirmedGroup(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCharacterLoadoutFixture(t), "")
+	loaded, err := engine.LoadSave(writeGetCharacterLoadoutFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -154,7 +154,7 @@ func TestGetCharacterLoadoutResolvesEveryConfirmedGroup(t *testing.T) {
 
 func TestGetCharacterLoadoutReturnsEmptyGroupsForInactiveSlot(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCharacterLoadoutFixture(t), "")
+	loaded, err := engine.LoadSave(writeGetCharacterLoadoutFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -185,7 +185,7 @@ func TestGetCharacterLoadoutFailsClosedForUnknownOccupiedItem(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -215,7 +215,7 @@ func TestGetCharacterLoadoutFailsClosedWhenSpellsExceedAvailableCapacity(t *test
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -254,7 +254,7 @@ func TestGetCharacterLoadoutRejectsWrongFamilyInOwnedSlot(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

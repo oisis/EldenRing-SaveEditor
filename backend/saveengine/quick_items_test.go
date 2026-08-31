@@ -173,7 +173,7 @@ func TestGetQuickItemsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 		t.Run(string(testCase.content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeQuickItemsFixture(t, testCase.content), string(testCase.content.platform))
+				writeQuickItemsFixture(t, testCase.content), string(testCase.content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -204,7 +204,7 @@ func TestGetQuickItemsReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeQuickItemsFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeQuickItemsFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -225,7 +225,7 @@ func TestGetQuickItemsRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content quickItemsFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeQuickItemsFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeQuickItemsFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

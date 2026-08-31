@@ -70,10 +70,18 @@ export function GetSaveCharacters(arg1) {
   return window['go']['desktop']['Bridge']['GetSaveCharacters'](arg1);
 }
 
+export function GetSaveValidationReport(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetSaveValidationReport'](arg1, arg2, arg3);
+}
+
 export function GetStorage(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['GetStorage'](arg1, arg2, arg3, arg4, arg5);
 }
 
-export function LoadSave(arg1, arg2) {
-  return window['go']['desktop']['Bridge']['LoadSave'](arg1, arg2);
+export function LoadSave(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['LoadSave'](arg1, arg2, arg3);
+}
+
+export function SelectSaveFile() {
+  return window['go']['desktop']['Bridge']['SelectSaveFile']();
 }

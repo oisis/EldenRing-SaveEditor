@@ -40,7 +40,7 @@ func setInventoryOrderTarget(
 	t.Helper()
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeAddItemFixture(t, setInventoryOrderFixture(platform)), string(platform))
+		writeAddItemFixture(t, setInventoryOrderFixture(platform)), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestSetInventoryOrderWritesOnlyIndicesAndReloadsOnBothPlatforms(t *testing.
 				t.Fatalf("WriteSave: %v", err)
 			}
 			fresh := New()
-			reloaded, err := fresh.LoadSave(target, string(platform))
+			reloaded, err := fresh.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave after WriteSave: %v", err)
 			}

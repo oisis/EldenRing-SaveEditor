@@ -19,7 +19,7 @@ func moveStorageTestTarget(
 	content.platform = platform
 	content.slot = moveStorageTestSlot
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave after WriteSave: %v", err)
 			}
@@ -268,7 +268,7 @@ func TestMoveOwnedItemToStorageRejectsInventoryKey(t *testing.T) {
 		platform: PlatformPC,
 		slot:     moveStorageTestSlot,
 		key:      content.key,
-	}), string(PlatformPC))
+	}), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

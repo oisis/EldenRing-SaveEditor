@@ -47,7 +47,7 @@ func loadColosseumsSession(t *testing.T, active bool) (*saveengine.Engine, strin
 	t.Helper()
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetColosseumsFixture(t, active), "pc")
+	loaded, err := engine.LoadSave(writeGetColosseumsFixture(t, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

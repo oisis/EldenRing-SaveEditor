@@ -9,6 +9,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -47,7 +48,7 @@ func testCatalog(t *testing.T) *gamecatalog.Catalog {
 type endpointCall func() (any, error)
 
 func newTestBridge(version string) *desktop.Bridge {
-	return desktop.NewBridge(version, saveengine.New(), nil)
+	return desktop.NewBridge(version, saveengine.New(), nil, nil)
 }
 
 func assertCallsMatch(t *testing.T, bridged endpointCall, direct endpointCall) {
@@ -145,7 +146,7 @@ func TestGetApplicationInfoPropagatesTheEmptyVersionWiringError(t *testing.T) {
 func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T) {
 	engine := saveengine.New()
 	catalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", engine, catalog)
+	bridge := desktop.NewBridge("dev", engine, catalog, nil)
 	missingSource := filepath.Join(t.TempDir(), "missing.sl2")
 	const unknownSessionID = "unknown-session"
 
@@ -157,10 +158,10 @@ func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T
 		{
 			name: "LoadSave",
 			bridged: func() (any, error) {
-				return bridge.LoadSave(missingSource, "pc")
+				return bridge.LoadSave(missingSource, "pc", "local")
 			},
 			direct: func() (any, error) {
-				return savesession.LoadSave(engine, missingSource, "pc")
+				return savesession.LoadSave(engine, missingSource, "pc", "local")
 			},
 		},
 		{
@@ -237,7 +238,7 @@ func TestReadOnlySaveMethodsReturnEndpointResultsAndErrorsUnchanged(t *testing.T
 
 func TestReadOnlySaveMethodsPropagateNilEngineErrorsWithoutFallback(t *testing.T) {
 	catalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", nil, catalog)
+	bridge := desktop.NewBridge("dev", nil, catalog, nil)
 
 	tests := []struct {
 		name    string
@@ -247,10 +248,10 @@ func TestReadOnlySaveMethodsPropagateNilEngineErrorsWithoutFallback(t *testing.T
 		{
 			name: "LoadSave",
 			bridged: func() (any, error) {
-				return bridge.LoadSave("source.sl2", "")
+				return bridge.LoadSave("source.sl2", "", "local")
 			},
 			direct: func() (any, error) {
-				return savesession.LoadSave(nil, "source.sl2", "")
+				return savesession.LoadSave(nil, "source.sl2", "", "local")
 			},
 		},
 		{
@@ -329,7 +330,7 @@ func TestReadOnlySaveMethodsPropagateNilEngineErrorsWithoutFallback(t *testing.T
 // propagate their rejection instead of building a catalog of its own.
 func TestItemMethodsPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	engine := saveengine.New()
-	bridge := desktop.NewBridge("dev", engine, nil)
+	bridge := desktop.NewBridge("dev", engine, nil, nil)
 
 	tests := []struct {
 		name    string
@@ -379,7 +380,7 @@ func TestItemMethodsPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
 func TestItemMethodsForwardSectionAndPagingUnchanged(t *testing.T) {
 	engine := saveengine.New()
 	catalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", engine, catalog)
+	bridge := desktop.NewBridge("dev", engine, catalog, nil)
 
 	arguments := []struct {
 		name             string
@@ -428,7 +429,7 @@ func TestItemMethodsForwardSectionAndPagingUnchanged(t *testing.T) {
 // of them, including the rejections.
 func TestGetResourcesForwardsEveryArgumentToTheEndpointUnchanged(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	arguments := []struct {
 		name         string
@@ -477,7 +478,7 @@ func TestGetResourcesForwardsEveryArgumentToTheEndpointUnchanged(t *testing.T) {
 // paging must produce the endpoint page size rather than a bridge constant.
 func TestGetResourcesAppliesNoFiltersOrDefaultsOfItsOwn(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	result, err := bridge.GetResources("", "", "", "", "", 0, 0)
 	if err != nil {
@@ -507,7 +508,7 @@ func TestGetResourcesAppliesNoFiltersOrDefaultsOfItsOwn(t *testing.T) {
 // A nil catalog is a wiring error owned by the endpoint. The bridge must
 // propagate its rejection instead of loading a catalog of its own.
 func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
-	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil, nil)
 
 	assertCallsMatch(t,
 		func() (any, error) {
@@ -531,7 +532,7 @@ func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 
 func TestGetResourcePresentationSummariesForwardsTheOrderedBatchUnchanged(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 	identities := []catalog.ResourcePresentationIdentity{
 		{Kind: "item", Key: "000F4240"},
 		{Kind: "class", Key: "0"},
@@ -556,7 +557,7 @@ func TestGetResourcePresentationSummariesForwardsTheOrderedBatchUnchanged(t *tes
 }
 
 func TestGetResourcePresentationSummariesPropagatesEndpointFailureWithoutFallback(t *testing.T) {
-	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil, nil)
 	identities := []catalog.ResourcePresentationIdentity{{Kind: "item", Key: "000F4240"}}
 
 	assertCallsMatch(t,
@@ -576,7 +577,7 @@ func TestGetResourcePresentationSummariesPropagatesEndpointFailureWithoutFallbac
 // rejections.
 func TestGetResourceForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	arguments := []struct {
 		name string
@@ -617,7 +618,7 @@ func TestGetResourceForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
 // resource is the only document the result carries.
 func TestGetResourceResolvesOneKindOnlyWithoutFallback(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	result, err := bridge.GetResource("item", "000F4240")
 	if err != nil {
@@ -647,7 +648,7 @@ func TestGetResourceResolvesOneKindOnlyWithoutFallback(t *testing.T) {
 // A nil catalog is a wiring error owned by the endpoint. The bridge must
 // propagate its rejection instead of loading a catalog of its own.
 func TestGetResourcePropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
-	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil, nil)
 
 	assertCallsMatch(t,
 		func() (any, error) {
@@ -676,7 +677,7 @@ func TestGetResourcePropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 // produce the endpoint outcome in each of them.
 func TestGetItemVariantsForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	arguments := []struct {
 		name string
@@ -716,7 +717,7 @@ func TestGetItemVariantsForwardsKindAndKeyToTheEndpointUnchanged(t *testing.T) {
 // is a valid empty result rather than a rejection or a nil slice.
 func TestGetItemVariantsKeepsCatalogOrderAndTheEmptyResult(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog)
+	bridge := desktop.NewBridge("dev", saveengine.New(), gameCatalog, nil)
 
 	result, err := bridge.GetItemVariants("item", "000F4240")
 	if err != nil {
@@ -757,7 +758,7 @@ func TestGetItemVariantsKeepsCatalogOrderAndTheEmptyResult(t *testing.T) {
 // A nil catalog is a wiring error owned by the endpoint. The bridge must
 // propagate its rejection instead of loading a catalog of its own.
 func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
-	bridge := desktop.NewBridge("dev", saveengine.New(), nil)
+	bridge := desktop.NewBridge("dev", saveengine.New(), nil, nil)
 
 	assertCallsMatch(t,
 		func() (any, error) {
@@ -787,7 +788,7 @@ func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T
 func TestEquipmentGettersForwardEveryArgumentToTheEndpointUnchanged(t *testing.T) {
 	engine := saveengine.New()
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", engine, gameCatalog)
+	bridge := desktop.NewBridge("dev", engine, gameCatalog, nil)
 
 	arguments := []struct {
 		name          string
@@ -857,7 +858,7 @@ func TestEquipmentGettersForwardEveryArgumentToTheEndpointUnchanged(t *testing.T
 // so the result stays empty and the message stays the endpoint message.
 func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T) {
 	gameCatalog := testCatalog(t)
-	bridge := desktop.NewBridge("dev", nil, gameCatalog)
+	bridge := desktop.NewBridge("dev", nil, gameCatalog, nil)
 
 	tests := []struct {
 		name    string
@@ -942,7 +943,7 @@ func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T)
 // build nor load a catalog to cover for the composition root.
 func TestResolvedEquipmentGettersPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	engine := saveengine.New()
-	bridge := desktop.NewBridge("dev", engine, nil)
+	bridge := desktop.NewBridge("dev", engine, nil, nil)
 
 	tests := []struct {
 		name   string
@@ -991,8 +992,8 @@ func TestResolvedEquipmentGettersPropagateTheNilCatalogErrorWithoutFallback(t *t
 // passes the catalog only where the endpoint contract asks for it.
 func TestEquipmentGettersWithoutACatalogAreUnaffectedByANilCatalog(t *testing.T) {
 	engine := saveengine.New()
-	withCatalog := desktop.NewBridge("dev", engine, testCatalog(t))
-	withoutCatalog := desktop.NewBridge("dev", engine, nil)
+	withCatalog := desktop.NewBridge("dev", engine, testCatalog(t), nil)
+	withoutCatalog := desktop.NewBridge("dev", engine, nil, nil)
 
 	tests := []struct {
 		name   string
@@ -1035,4 +1036,79 @@ func TestEquipmentGettersWithoutACatalogAreUnaffectedByANilCatalog(t *testing.T)
 			assertCallsMatch(t, func() (any, error) { return test.call(withCatalog) }, test.direct)
 		})
 	}
+}
+
+// TestLoadSaveForwardsTheSourceKindUnchanged proves the bridge supplies no
+// default and no alias of its own: every value, including the ones the endpoint
+// rejects, reaches it exactly as the frontend sent it.
+func TestLoadSaveForwardsTheSourceKindUnchanged(t *testing.T) {
+	const missingSource = "does-not-exist.sl2"
+
+	for _, sourceKind := range []string{"local", "temporary", "", "Local", "remote"} {
+		t.Run(sourceKind, func(t *testing.T) {
+			bridge := desktop.NewBridge("dev", saveengine.New(), nil, nil)
+
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.LoadSave(missingSource, "", sourceKind)
+				},
+				func() (any, error) {
+					return savesession.LoadSave(saveengine.New(), missingSource, "", sourceKind)
+				},
+			)
+		})
+	}
+}
+
+// TestGetSaveValidationReportReturnsTheEndpointResultUnchanged proves the newly
+// exposed getter is a plain delegate. The bridge must not judge the save, count
+// issues, aggregate coverage or reduce a report to a status of its own: every
+// scope, an unknown scope and a missing catalog all stay the endpoint's answer.
+func TestGetSaveValidationReportReturnsTheEndpointResultUnchanged(t *testing.T) {
+	// One catalog for the whole test: building it is expensive, and every scope
+	// is compared against the same one anyway.
+	catalog := testCatalog(t)
+	bridge := desktop.NewBridge("dev", saveengine.New(), catalog, nil)
+
+	for _, scope := range []string{"", "inventory", "storage", "stats", "equipment", "spells", "unknown-scope"} {
+		t.Run(scope, func(t *testing.T) {
+			assertCallsMatch(t,
+				func() (any, error) {
+					return bridge.GetSaveValidationReport("unknown-session", 0, scope)
+				},
+				func() (any, error) {
+					return diagnostics.GetSaveValidationReport(
+						saveengine.New(), catalog, "unknown-session", 0, scope)
+				},
+			)
+		})
+	}
+}
+
+// TestGetSaveValidationReportPropagatesWiringErrorsWithoutFallback proves a
+// missing engine or catalog stays the endpoint's rejection: the bridge builds
+// no substitute and reports no empty, "clean" report in their place.
+func TestGetSaveValidationReportPropagatesWiringErrorsWithoutFallback(t *testing.T) {
+	catalog := testCatalog(t)
+
+	t.Run("nil engine", func(t *testing.T) {
+		bridge := desktop.NewBridge("dev", nil, catalog, nil)
+		assertCallsMatch(t,
+			func() (any, error) { return bridge.GetSaveValidationReport("session", 0, "") },
+			func() (any, error) {
+				return diagnostics.GetSaveValidationReport(nil, catalog, "session", 0, "")
+			},
+		)
+	})
+
+	t.Run("nil catalog", func(t *testing.T) {
+		engine := saveengine.New()
+		bridge := desktop.NewBridge("dev", engine, nil, nil)
+		assertCallsMatch(t,
+			func() (any, error) { return bridge.GetSaveValidationReport("session", 0, "") },
+			func() (any, error) {
+				return diagnostics.GetSaveValidationReport(engine, nil, "session", 0, "")
+			},
+		)
+	})
 }

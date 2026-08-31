@@ -11,7 +11,7 @@ import (
 func TestSetCharacterStartingClassReturnsTheSaveEngineReceipt(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestSetCharacterStartingClassReturnsTheSaveEngineReceipt(t *testing.T) {
 func TestSetCharacterStartingClassRequiresConfirmReset(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestSetCharacterStartingClassRejectsMissingEngine(t *testing.T) {
 func TestSetCharacterStartingClassDelegatesValidationWithoutMutation(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

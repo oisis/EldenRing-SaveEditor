@@ -37,7 +37,7 @@ func loadTutorialsSession(t *testing.T, active bool) (*saveengine.Engine, string
 		}
 	}
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

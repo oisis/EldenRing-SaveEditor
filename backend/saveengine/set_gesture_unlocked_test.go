@@ -30,7 +30,7 @@ func loadSetGestureSession(
 	content := gestureTestActiveFixture(platform, setGestureTestSlot, 0xB000, 0)
 	content.records = records
 	engine := New()
-	loaded, err := engine.LoadSave(writeGestureFixture(t, content), string(platform))
+	loaded, err := engine.LoadSave(writeGestureFixture(t, content), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -325,7 +325,7 @@ func TestSetGestureUnlockedRejectsInactiveAndMalformedSlots(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeGestureFixture(t, testCase.content), string(testCase.content.platform))
+				writeGestureFixture(t, testCase.content), string(testCase.content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -377,7 +377,7 @@ func TestSetGestureUnlockedPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, string(platform))
+			loaded, err := engine.LoadSave(source, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -400,7 +400,7 @@ func TestSetGestureUnlockedPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 			}
 
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave target: %v", err)
 			}

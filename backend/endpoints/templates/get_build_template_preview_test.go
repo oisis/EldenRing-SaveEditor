@@ -33,7 +33,7 @@ func hasIssueCode(issues []templates.BuildTemplatePreviewIssue, code string) boo
 func TestGetBuildTemplatePreview_Success(t *testing.T) {
 	engine := saveengine.New()
 	savePath, rawBefore := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -241,7 +241,7 @@ func TestGetBuildTemplatePreview_Success(t *testing.T) {
 func TestGetBuildTemplatePreview_NarrowingAndValidation(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -370,7 +370,7 @@ func TestGetBuildTemplatePreview_NarrowingAndValidation(t *testing.T) {
 func TestGetBuildTemplatePreview_TemplateApplyOptionsUnsupported(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -415,7 +415,7 @@ func TestGetBuildTemplatePreview_TemplateApplyOptionsUnsupported(t *testing.T) {
 func TestGetBuildTemplatePreview_LevelMismatch(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -471,7 +471,7 @@ func TestGetBuildTemplatePreview_LevelMismatch(t *testing.T) {
 func TestGetBuildTemplatePreview_SpellCompactionAndAlignment(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -572,7 +572,7 @@ func TestGetBuildTemplatePreview_PhysicalSlots13And14Occupied(t *testing.T) {
 		t.Fatalf("write corrupted fixture: %v", err)
 	}
 
-	loaded, err := engine.LoadSave(corruptedPath, "")
+	loaded, err := engine.LoadSave(corruptedPath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave corrupted: %v", err)
 	}
@@ -620,7 +620,7 @@ func TestGetBuildTemplatePreview_PhysicalSlots13And14Occupied(t *testing.T) {
 func TestGetBuildTemplatePreview_InvalidSpellLoadoutDuplicate(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

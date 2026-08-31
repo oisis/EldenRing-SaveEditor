@@ -350,7 +350,7 @@ func TestSetCookbookUnlockedLeavesTheSaveFileUntouched(t *testing.T) {
 	path := writeGetCookbooksFixture(t, getCookbooksSetFlags, true)
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

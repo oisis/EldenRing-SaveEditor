@@ -91,7 +91,7 @@ func TestSetBellBearingUnlockedConsumesConfirmedRecordsOnBothPlatforms(t *testin
 		t.Run(string(platform), func(t *testing.T) {
 			path, content, layout := setBellBearingFixture(t, platform, false, false)
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -141,7 +141,7 @@ func TestSetBellBearingUnlockedConsumesConfirmedRecordsOnBothPlatforms(t *testin
 func TestSetBellBearingUnlockedClearsOnlyTheFlag(t *testing.T) {
 	path, content, _ := setBellBearingFixture(t, PlatformPC, true, false)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -182,7 +182,7 @@ func TestSetBellBearingUnlockedRejectsStorageKeyBeforeMutation(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestSetBellBearingUnlockedPersistsAndReloads(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			path, content, _ := setBellBearingFixture(t, platform, false, true)
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -223,7 +223,7 @@ func TestSetBellBearingUnlockedPersistsAndReloads(t *testing.T) {
 			}
 
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}

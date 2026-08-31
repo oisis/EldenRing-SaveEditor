@@ -15,7 +15,7 @@ func TestGetItemCapacityReportsCostsWithoutMutatingSession(t *testing.T) {
 		gaItemData:      []uint32{addItemTestGoodsID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestGetItemCapacityReportsLimitsAndInactiveSlots(t *testing.T) {
 		}},
 		commonCount: 1,
 		gaItemData:  []uint32{addItemTestGoodsID},
-	}), string(PlatformPS4))
+	}), string(PlatformPS4), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestGetItemCapacityReportsLimitsAndInactiveSlots(t *testing.T) {
 	inactiveEngine := New()
 	inactive, err := inactiveEngine.LoadSave(writeAddItemFixture(t, addItemTestFixture{
 		platform: PlatformPC, slot: 4, inactive: true,
-	}), string(PlatformPC))
+	}), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave inactive: %v", err)
 	}

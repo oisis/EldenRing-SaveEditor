@@ -91,6 +91,10 @@ Implemented:
 - one vertical flow: `GetApplicationInfo` endpoint → Wails host bridge →
   generated binding → infrastructure adapter → application port → TanStack
   Query → React component;
+- the first desktop save-session flow: the native file chooser, `LoadSave`,
+  source metadata, the active and inactive character list, full validation of
+  every active slot before accepting a session, warning-report presentation,
+  and confirmed `CloseSave` cleanup;
 - loading, success and a safe error state with Retry;
 - the shared token contract with the `Light`, `Dark` and `Elden Ring` themes,
   the canonical `Button`, `Card` and `Badge`, a visible focus ring and
@@ -99,8 +103,8 @@ Implemented:
   Polish catalog used to prove switching and fallback.
 
 Not implemented yet, and deliberately absent from this slice: the application
-shell and main navigation, the save/character panel, `Open Save`, `Save`,
-`Save As`, save sessions, Character, Inventory & Storage, Item Database,
-Equipment, World, Templates, Tools, Settings, deployment and SSH, and update
-checks. The language list of the first release is not decided here, and no
-visible language selector in `Tools → Settings` exists yet.
+shell and main navigation, `Save`, `Save As`, Character editing, the production
+Inventory & Storage, Item Database and Equipment screens, World, Templates,
+Tools, Settings, deployment and SSH, and update checks. The language list of
+the first release is not decided here, and no visible language selector in
+`Tools → Settings` exists yet.

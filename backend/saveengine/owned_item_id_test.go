@@ -15,7 +15,7 @@ func loadOwnedItemSession(t *testing.T, name string) (*Engine, string, *Session)
 
 	path := writeFixture(t, name, pcHeader(), pcFixtureSize)
 	engine := New()
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("load fixture: %v", err)
 	}

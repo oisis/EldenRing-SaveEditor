@@ -37,7 +37,7 @@ func setSpiritAshEndpointTargetWithMatchmaking(t *testing.T, initialMatchmaking 
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

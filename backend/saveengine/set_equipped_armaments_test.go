@@ -91,7 +91,7 @@ func TestSetEquippedArmamentsWritesAndClearsFourRepresentationsOnBothPlatforms(t
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeSetEquippedArmamentsFixture(t, platform), string(platform))
+				writeSetEquippedArmamentsFixture(t, platform), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -164,7 +164,7 @@ func TestSetEquippedArmamentsWritesAndClearsFourRepresentationsOnBothPlatforms(t
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -184,7 +184,7 @@ func TestSetEquippedArmamentsWritesAndClearsFourRepresentationsOnBothPlatforms(t
 
 func TestSetEquippedArmamentsRejectsInvalidPlanWithoutMutation(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -222,7 +222,7 @@ func TestSetEquippedArmamentsRejectsInvalidPlanWithoutMutation(t *testing.T) {
 
 func TestSetEquippedArmamentsRejectsClearWithoutNativeUnarmedRecord(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

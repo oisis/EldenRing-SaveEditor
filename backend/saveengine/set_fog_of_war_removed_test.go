@@ -39,7 +39,7 @@ func TestSetFogOfWarRemovedFillsExactlyTheFieldOnBothPlatforms(t *testing.T) {
 			path := writeRegionsFixture(t, content, regions, uint32(len(regions)))
 			fieldAt := fogTestFieldAt(content, len(regions))
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(content.platform))
+			loaded, err := engine.LoadSave(path, string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -108,7 +108,7 @@ func TestSetFogOfWarRemovedRecordsItsOwnUndoPoint(t *testing.T) {
 	content := gestureTestFixture{platform: PlatformPC, slot: 3, flag: 1, anchorAt: 0x640}
 	path := writeRegionsFixture(t, content, []uint32{6100000}, 1)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestSetFogOfWarRemovedRejectsWithoutMutating(t *testing.T) {
 	load := func(t *testing.T, path string) (*Engine, string) {
 		t.Helper()
 		engine := New()
-		loaded, err := engine.LoadSave(path, "pc")
+		loaded, err := engine.LoadSave(path, "pc", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

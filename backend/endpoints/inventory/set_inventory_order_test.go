@@ -14,7 +14,7 @@ func setInventoryOrderEndpointTarget(
 	t.Helper()
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetInventoryFixture(t, "pc", true, getInventoryAnchorAt), "pc")
+		writeGetInventoryFixture(t, "pc", true, getInventoryAnchorAt), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

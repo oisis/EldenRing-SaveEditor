@@ -92,7 +92,7 @@ func TestGetEquipmentReturnsTheActiveEquipmentOfALoadedSession(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetEquipmentFixture(t, slots), "")
+	loaded, err := engine.LoadSave(writeGetEquipmentFixture(t, slots), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

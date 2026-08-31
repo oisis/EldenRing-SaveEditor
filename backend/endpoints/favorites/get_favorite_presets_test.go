@@ -90,7 +90,7 @@ func TestGetFavoritePresetsEndpointReturnsAllSlots(t *testing.T) {
 			}
 			path := writeEndpointFavoritesFixture(t, platform, active)
 			engine := saveengine.New()
-			session, err := engine.LoadSave(path, platform)
+			session, err := engine.LoadSave(path, platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -122,7 +122,7 @@ func TestGetFavoritePresetsEndpointReturnsAllSlots(t *testing.T) {
 func TestGetFavoritePresetsEndpointFiltersSingleSlot(t *testing.T) {
 	path := writeEndpointFavoritesFixture(t, "pc", map[int]bool{4: true})
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestGetFavoritePresetsEndpointFiltersSingleSlot(t *testing.T) {
 func TestGetFavoritePresetsEndpointRejectsOutOfRangeSlots(t *testing.T) {
 	path := writeEndpointFavoritesFixture(t, "pc", nil)
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

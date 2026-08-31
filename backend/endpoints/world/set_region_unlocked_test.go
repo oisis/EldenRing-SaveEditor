@@ -133,7 +133,7 @@ func writeSetRegionFixture(t *testing.T, active bool, initialRegions []uint32) s
 func loadSetRegionSession(t *testing.T, active bool, initial []uint32) (*saveengine.Engine, string) {
 	t.Helper()
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSetRegionFixture(t, active, initial), "")
+	loaded, err := engine.LoadSave(writeSetRegionFixture(t, active, initial), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

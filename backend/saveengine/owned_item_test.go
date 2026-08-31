@@ -13,7 +13,7 @@ func loadOwnedItemContainers(t *testing.T, platform Platform) (*Engine, string) 
 	t.Helper()
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t, platform), string(platform))
+	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t, platform), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

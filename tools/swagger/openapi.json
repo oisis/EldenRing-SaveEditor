@@ -913,7 +913,7 @@
         "operationId": "loadSave",
         "tags": ["Save sessions"],
         "summary": "LoadSave",
-        "description": "Creates a save session from a read-only snapshot of a local save file and returns its metadata. The source path and the expected platform are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Creates a save session from a read-only snapshot of a local save file and returns its metadata. The source path, the expected platform and the source kind are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. A rejected source kind creates no session. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "requestBody": {
           "required": true,
           "content": {
@@ -5554,7 +5554,8 @@
       },
       "LoadSaveRequest": {
         "type": "object",
-        "description": "Body of LoadSave. Both fields reach the endpoint exactly as sent; unknown fields are rejected.",
+        "additionalProperties": false,
+        "description": "Body of LoadSave. All three fields reach the endpoint exactly as sent; unknown fields are rejected.",
         "properties": {
           "source": {
             "type": "string",
@@ -5564,9 +5565,14 @@
             "type": "string",
             "description": "Platform the caller expects. An empty value means the platform is recognised from the container.",
             "enum": ["pc", "ps4", ""]
+          },
+          "sourceKind": {
+            "type": "string",
+            "description": "What the source file is. Required, matched exactly and case-sensitively, with no alias, no empty form and no default: an omitted field is the empty string, which the endpoint rejects without creating a session.",
+            "enum": ["local", "temporary"]
           }
         },
-        "required": ["source"]
+        "required": ["source", "sourceKind"]
       },
       "WriteSaveRequest": {
         "type": "object",
@@ -5654,7 +5660,7 @@
       },
       "SessionInfo": {
         "type": "object",
-        "description": "Safe public metadata of a save session. It carries no path, SteamID, offset, handle or save byte.",
+        "description": "Safe public metadata of a save session. It carries the exact source path and source kind the session was created from and its current save revision, and no SteamID, offset, handle or save byte. The source path is metadata only: the session reads exclusively from its private snapshot and never reopens that file.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -5666,12 +5672,25 @@
           "format": {
             "type": "string"
           },
+          "sourcePath": {
+            "type": "string",
+            "description": "Exact path the private snapshot was created from, carried verbatim. It is never trimmed, recased, resolved or guessed, and never reopened."
+          },
+          "sourceKind": {
+            "type": "string",
+            "enum": ["local", "temporary"],
+            "description": "What the source file is, echoed back exactly as the caller stated it. 'local' is a durable file the user owns; 'temporary' is a working copy that is not one."
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Canonical decimal save revision of the session, \"0\" after LoadSave. A string and not a number, so no consumer can round, increment or reorder it."
+          },
           "unsavedChanges": {
             "type": "boolean",
             "description": "True after a committed in-memory mutation and false after LoadSave or a successful WriteSave."
           }
         },
-        "required": ["saveSessionID", "platform", "format", "unsavedChanges"]
+        "required": ["saveSessionID", "platform", "format", "sourcePath", "sourceKind", "saveRevision", "unsavedChanges"]
       },
       "CharacterSummary": {
         "type": "object",

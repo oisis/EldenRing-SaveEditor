@@ -25,7 +25,7 @@ func TestDiagnosticLog_EmittersLifecycle(t *testing.T) {
 	engine.now = func() time.Time { return fixedTime }
 
 	path := writeTestPCSave(t, "pc_emitter.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -160,7 +160,7 @@ func TestDiagnosticLog_EmittersLifecycle(t *testing.T) {
 func TestDiagnosticLog_RingBufferRolloverAndCursorExpiry(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_ring.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestDiagnosticLog_RingBufferRolloverAndCursorExpiry(t *testing.T) {
 func TestDiagnosticLog_FilteringAndPagination(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_filters.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -362,7 +362,7 @@ func TestDiagnosticLog_FilteringAndPagination(t *testing.T) {
 func TestDiagnosticLog_ValidationAndErrors(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_val.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -413,7 +413,7 @@ func TestDiagnosticLog_ValidationAndErrors(t *testing.T) {
 func TestDiagnosticLog_ApplyRepairsAtomicEmissionAndOrder(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_atomic_repair.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -516,7 +516,7 @@ func TestDiagnosticLog_ApplyRepairsAtomicEmissionAndOrder(t *testing.T) {
 func TestDiagnosticLog_DeepCopyAndPrivacy(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_privacy.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -579,7 +579,7 @@ func TestDiagnosticLog_PCAndPS4_LifecycleAndReload(t *testing.T) {
 		t.Run(platform.name, func(t *testing.T) {
 			engine1 := New()
 			path := writeApplyTemplateFixture(t, platform.savePlat, false)
-			info, err := engine1.LoadSave(path, platform.platStr)
+			info, err := engine1.LoadSave(path, platform.platStr, "local")
 			if err != nil {
 				t.Fatalf("LoadSave (%s): %v", platform.name, err)
 			}
@@ -615,7 +615,7 @@ func TestDiagnosticLog_PCAndPS4_LifecycleAndReload(t *testing.T) {
 
 			// 3. Reload written file in a fresh Engine instance
 			engine2 := New()
-			info2, err := engine2.LoadSave(outPath, platform.platStr)
+			info2, err := engine2.LoadSave(outPath, platform.platStr, "local")
 			if err != nil {
 				t.Fatalf("LoadSave fresh engine (%s): %v", platform.name, err)
 			}
@@ -639,7 +639,7 @@ func TestDiagnosticLog_PCAndPS4_LifecycleAndReload(t *testing.T) {
 func TestDiagnosticLog_ConcurrentReadsAndWrites(t *testing.T) {
 	engine := New()
 	path := writeTestPCSave(t, "pc_race.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

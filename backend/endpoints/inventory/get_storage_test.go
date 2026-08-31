@@ -244,7 +244,7 @@ func loadGetStorageSession(t *testing.T, platform string, active bool, anchorAt 
 	t.Helper()
 
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writeGetStorageFixture(t, platform, active, anchorAt), platform)
+	session, err := engine.LoadSave(writeGetStorageFixture(t, platform, active, anchorAt), platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -470,7 +470,7 @@ func TestGetStorageRejectsASlotWithoutTheStorageMarker(t *testing.T) {
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("write fixture: %v", err)
 	}
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

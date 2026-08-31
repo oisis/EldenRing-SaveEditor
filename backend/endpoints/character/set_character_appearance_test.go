@@ -29,7 +29,7 @@ func TestSetCharacterAppearanceReturnsTheSaveEngineReceipt(t *testing.T) {
 	values := setCharacterAppearanceEndpointValues()
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "")
+		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -62,7 +62,7 @@ func TestSetCharacterAppearanceRejectsMissingEngineAndInvalidValues(t *testing.T
 
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "")
+		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

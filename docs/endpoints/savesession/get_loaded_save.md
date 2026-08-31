@@ -16,7 +16,7 @@ before a successful `LoadSave` is an error, not an implicit load.
 | Kind | Getter |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`tools/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. Also exposed through the Wails bridge method `GetLoadedSave(saveSessionID)`, which the frontend reaches through its save-session port. No CLI command. |
 | Implementation source | [../../../backend/endpoints/savesession/get_loaded_save.go](../../../backend/endpoints/savesession/get_loaded_save.go) |
 | Test source | [../../../backend/endpoints/savesession/get_loaded_save_test.go](../../../backend/endpoints/savesession/get_loaded_save_test.go) |
 | Save access | none — no file is opened, and the session's private snapshot is not read |
@@ -50,6 +50,9 @@ type SessionInfo struct {
 	SaveSessionID  string `json:"saveSessionID"`
 	Platform       string `json:"platform"`
 	Format         string `json:"format"`
+	SourcePath     string `json:"sourcePath"`
+	SourceKind     string `json:"sourceKind"`
+	SaveRevision   string `json:"saveRevision"`
 	UnsavedChanges bool   `json:"unsavedChanges"`
 }
 ```
@@ -59,15 +62,23 @@ type SessionInfo struct {
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
 | `platform` | `string` | The platform recognised when the session was created: `pc` or `ps4`. |
 | `format` | `string` | The recognised container format: `bnd4` for PC and `ps4-container` for PS4. |
-| `unsavedChanges` | `bool` | Always `false`. The session is read-only at this stage, so it can hold no pending change. |
+| `sourcePath` | `string` | The exact path the session's snapshot was created from, as recorded by `LoadSave`. |
+| `sourceKind` | `string` | `local` or `temporary`, as stated at load time. |
+| `saveRevision` | `string` | The session's current canonical decimal revision: `"0"` after `LoadSave`, and the value the last accepted mutation returned afterwards. A refused mutation does not advance it. |
+| `unsavedChanges` | `bool` | Whether the session's private snapshot carries a committed mutation. `false` after `LoadSave` and after a successful `WriteSave`. |
 
 The result is the same metadata model `LoadSave` returns, reused rather than
 duplicated. It is an independent value: changing it does not change the metadata
 SaveEngine keeps.
 
-The result carries no absolute path, no handle, no offset, no raw save byte, and
-no character, inventory, slot, `SteamID`, `UserData10`, `UserData11`, or MD5
-data. None of that is read to produce it.
+`sourcePath` is reported from what the session recorded. It is not re-resolved
+and not checked for existence, so a source file removed, replaced, or rewritten
+after the load changes no field of this result: the session answers from its
+private snapshot alone.
+
+The result carries no handle, no offset, no raw save byte, and no character,
+inventory, slot, `SteamID`, `UserData10`, `UserData11`, or MD5 data. None of
+that is read to produce it.
 
 On any error the result is the zero value.
 

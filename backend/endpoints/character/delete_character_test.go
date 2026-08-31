@@ -10,7 +10,7 @@ import (
 func TestDeleteCharacterReturnsTheSaveEngineReceipt(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

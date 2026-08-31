@@ -50,7 +50,7 @@ func loadGetLoadedSaveSession(t *testing.T) (*saveengine.Engine, LoadSaveResult,
 
 	path := writeGetLoadedSaveFixture(t)
 	engine := saveengine.New()
-	loaded, err := LoadSave(engine, path, "")
+	loaded, err := LoadSave(engine, path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestGetLoadedSaveRejectsUnknownSaveSessionID(t *testing.T) {
 }
 
 func TestGetLoadedSaveResultCarriesOnlySessionMetadata(t *testing.T) {
-	engine, loaded, _ := loadGetLoadedSaveSession(t)
+	engine, loaded, path := loadGetLoadedSaveSession(t)
 
 	result, err := GetLoadedSave(engine, loaded.SaveSessionID)
 	if err != nil {
@@ -129,10 +129,15 @@ func TestGetLoadedSaveResultCarriesOnlySessionMetadata(t *testing.T) {
 		t.Fatalf("unmarshal result: %v", err)
 	}
 
+	// Every approved field is pinned by value, not merely by presence, so a
+	// widened result or a changed encoding of any one of them fails here.
 	want := map[string]any{
 		"saveSessionID":  loaded.SaveSessionID,
 		"platform":       "pc",
 		"format":         "bnd4",
+		"sourcePath":     path,
+		"sourceKind":     "local",
+		"saveRevision":   "0",
 		"unsavedChanges": false,
 	}
 	if len(fields) != len(want) {
@@ -175,5 +180,57 @@ func TestGetLoadedSaveNeitherLoadsNorOpensTheSaveFile(t *testing.T) {
 	}
 	if again != loaded {
 		t.Errorf("second GetLoadedSave = %+v, want %+v", again, loaded)
+	}
+}
+
+// TestGetLoadedSaveReportsTheRevisionOfTheCurrentSession covers the revision the
+// result now carries, through the public surface a user reaches it by: an
+// accepted mutation advances what this getter reports and marks the session
+// changed, and a refused one advances nothing. The source metadata belongs to
+// the session rather than to a revision, so neither outcome may rewrite it.
+func TestGetLoadedSaveReportsTheRevisionOfTheCurrentSession(t *testing.T) {
+	path := writePCFixture(t)
+	engine := saveengine.New()
+	loaded, err := LoadSave(engine, path, "pc", "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	if loaded.SaveRevision != "0" || loaded.UnsavedChanges {
+		t.Fatalf("a freshly loaded session reports %q / %v, want %q / false",
+			loaded.SaveRevision, loaded.UnsavedChanges, "0")
+	}
+
+	if _, err := SetSaveAccountID(engine, loaded.SaveSessionID, "1311768467463790320", "0"); err != nil {
+		t.Fatalf("SetSaveAccountID: %v", err)
+	}
+
+	mutated, err := GetLoadedSave(engine, loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetLoadedSave after the mutation: %v", err)
+	}
+	if mutated.SaveRevision != "1" {
+		t.Errorf("saveRevision = %q, want the revision the mutation produced %q",
+			mutated.SaveRevision, "1")
+	}
+	if !mutated.UnsavedChanges {
+		t.Error("an accepted mutation left unsavedChanges false")
+	}
+	if mutated.SourcePath != path || mutated.SourceKind != "local" {
+		t.Errorf("the mutation changed the source metadata to %q/%q, want %q/%q",
+			mutated.SourcePath, mutated.SourceKind, path, "local")
+	}
+
+	// The stale expectedRevision is now "0", so this mutation is refused. A
+	// refusal must leave every reported value exactly as it was.
+	if _, err := SetSaveAccountID(engine, loaded.SaveSessionID, "42", "0"); err == nil {
+		t.Fatal("SetSaveAccountID accepted a stale expectedRevision")
+	}
+
+	refused, err := GetLoadedSave(engine, loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetLoadedSave after the refusal: %v", err)
+	}
+	if refused != mutated {
+		t.Errorf("a refused mutation changed the session to %+v, want %+v", refused, mutated)
 	}
 }

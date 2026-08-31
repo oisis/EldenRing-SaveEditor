@@ -110,7 +110,7 @@ func writeOwnedItemContainerFixture(t *testing.T, platform Platform) string {
 
 func TestInventoryAndStorageNeverShareAnIdentity(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t, PlatformPC), "")
+	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t, PlatformPC), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

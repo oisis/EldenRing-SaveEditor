@@ -87,7 +87,7 @@ func TestSetEquippedTalismansWritesFourRepresentationsAndReloads(t *testing.T) {
 			path, platform := writeSetEquippedTalismansFixture(
 				t, testCase.platform, testCase.slot, 3)
 			engine := New()
-			loaded, err := engine.LoadSave(path, platform)
+			loaded, err := engine.LoadSave(path, platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -171,7 +171,7 @@ func TestSetEquippedTalismansWritesFourRepresentationsAndReloads(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, platform)
+			reloaded, err := reloadedEngine.LoadSave(target, platform, "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -187,7 +187,7 @@ func TestSetEquippedTalismansWritesFourRepresentationsAndReloads(t *testing.T) {
 func TestSetEquippedTalismansRejectsInvalidPlansWithoutMutation(t *testing.T) {
 	path, platform := writeSetEquippedTalismansFixture(t, PlatformPC, 0, 1)
 	engine := New()
-	loaded, err := engine.LoadSave(path, platform)
+	loaded, err := engine.LoadSave(path, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

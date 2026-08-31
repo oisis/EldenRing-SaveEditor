@@ -49,7 +49,7 @@ func TestSetEquippedTalismansDefinitionMatchesRuntimeContract(t *testing.T) {
 func TestSetEquippedTalismansValidatesCatalogAndCommits(t *testing.T) {
 	path, platform := writeSetEquippedTalismansEndpointFixture(t)
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, platform)
+	loaded, err := engine.LoadSave(path, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

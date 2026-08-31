@@ -121,7 +121,7 @@ func loadSetStartingClassSession(t *testing.T, content setStartingClassTestConte
 	t.Helper()
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeSetStartingClassFixture(t, content), string(content.platform))
+		writeSetStartingClassFixture(t, content), string(content.platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -723,7 +723,7 @@ func TestSetCharacterStartingClassPersistence(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, string(platform))
+			loaded, err := engine.LoadSave(source, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -742,7 +742,7 @@ func TestSetCharacterStartingClassPersistence(t *testing.T) {
 
 			// Reload written file into a new engine
 			reloadedEngine := New()
-			reloadedSession, err := reloadedEngine.LoadSave(targetPath, string(platform))
+			reloadedSession, err := reloadedEngine.LoadSave(targetPath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reloaded LoadSave: %v", err)
 			}

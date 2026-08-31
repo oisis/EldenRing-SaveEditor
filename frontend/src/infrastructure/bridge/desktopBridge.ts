@@ -20,8 +20,10 @@ import {
   GetResourcePresentationSummaries,
   GetResources,
   GetSaveCharacters,
+  GetSaveValidationReport,
   GetStorage,
   LoadSave,
+  SelectSaveFile,
 } from "../../../wailsjs/go/desktop/Bridge";
 import type { schema } from "../../../wailsjs/go/models";
 import type {
@@ -50,6 +52,10 @@ import type {
   CharacterStats,
   SaveCharacters,
 } from "../../application/character/characterPort";
+import type {
+  DiagnosticsPort,
+  SaveValidationReport,
+} from "../../application/diagnostics/diagnosticsPort";
 import type {
   CharacterEquipment,
   CharacterEquippedSpells,
@@ -87,13 +93,55 @@ async function callBridge<T>(call: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Projects the generated session result onto the application port shape. */
+/**
+ * Projects the generated session result onto the application port shape. Every
+ * field is carried verbatim: the source path is not resolved or shortened, the
+ * source kind is not narrowed to a union, and the revision stays the string the
+ * backend sent.
+ */
 function toSaveSession(result: Awaited<ReturnType<typeof GetLoadedSave>>): SaveSession {
   return {
     saveSessionID: result.saveSessionID,
     platform: result.platform,
     format: result.format,
+    sourcePath: result.sourcePath,
+    sourceKind: result.sourceKind,
+    saveRevision: result.saveRevision,
     unsavedChanges: result.unsavedChanges,
+  };
+}
+
+/**
+ * Projects the generated validation report. The counters, the coverage and the
+ * findings are copied into arrays this layer owns and are otherwise untouched:
+ * nothing is recounted, reordered, filtered or reclassified here, because the
+ * verdict is the backend's alone.
+ */
+function toSaveValidationReport(
+  result: Awaited<ReturnType<typeof GetSaveValidationReport>>,
+): SaveValidationReport {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    active: result.active,
+    coverage: result.coverage.map((scope) => ({
+      scope: scope.scope,
+      checked: scope.checked,
+      reason: scope.reason,
+      recordsChecked: scope.recordsChecked,
+      unresolvedRecords: scope.unresolvedRecords,
+    })),
+    issues: result.issues.map((issue) => ({
+      id: issue.id,
+      code: issue.code,
+      severity: issue.severity,
+      scope: issue.scope,
+      message: issue.message,
+      ownedItemID: issue.ownedItemID,
+    })),
+    errorCount: result.errorCount,
+    warningCount: result.warningCount,
   };
 }
 
@@ -490,6 +538,7 @@ function toCatalogItemVariants(
  */
 export const wailsDesktopBridge: ApplicationInfoPort &
   SaveSessionPort &
+  DiagnosticsPort &
   CharacterPort &
   ItemsPort &
   EquipmentPort &
@@ -508,8 +557,16 @@ export const wailsDesktopBridge: ApplicationInfoPort &
     };
   },
 
-  loadSave: async (source, expectedPlatform) =>
-    toSaveSession(await callBridge(() => LoadSave(source, expectedPlatform))),
+  // Cancelling is the host's empty path, so it must survive the boundary as an
+  // empty string rather than becoming an error: only a dialog that actually
+  // failed rejects here.
+  selectSaveFile: async () => callBridge(SelectSaveFile),
+
+  // All three values reach the bridge in the order the backend contract
+  // defines and exactly as received. The adapter supplies no default source
+  // kind: a session must never claim an origin nobody stated.
+  loadSave: async (source, expectedPlatform, sourceKind) =>
+    toSaveSession(await callBridge(() => LoadSave(source, expectedPlatform, sourceKind))),
 
   getLoadedSave: async (saveSessionID) =>
     toSaveSession(await callBridge(() => GetLoadedSave(saveSessionID))),
@@ -517,6 +574,14 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   closeSave: async (saveSessionID) => {
     await callBridge(() => CloseSave(saveSessionID));
   },
+
+  // The scope reaches the bridge exactly as received, the empty string
+  // included: which scopes exist and what an empty one means is the backend's
+  // contract, and this layer neither narrows nor expands it.
+  getSaveValidationReport: async ({ saveSessionID, characterID, scope }) =>
+    toSaveValidationReport(
+      await callBridge(() => GetSaveValidationReport(saveSessionID, characterID, scope)),
+    ),
 
   getSaveCharacters: async (saveSessionID): Promise<SaveCharacters> => {
     const result = await callBridge(() => GetSaveCharacters(saveSessionID));

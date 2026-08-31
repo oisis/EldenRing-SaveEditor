@@ -117,11 +117,20 @@ describe("useLoadSave", () => {
 
     const { result } = renderHook(() => useLoadSave(), { wrapper });
 
-    result.current.mutate({ source: "  /saves/ER0000.sl2  ", expectedPlatform: "  pc  " });
+    result.current.mutate({
+      source: "  /saves/ER0000.sl2  ",
+      expectedPlatform: "  pc  ",
+      sourceKind: "temporary",
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    // The arguments reach the port exactly as given.
-    expect(loadSave).toHaveBeenCalledExactlyOnceWith("  /saves/ER0000.sl2  ", "  pc  ");
+    // All three arguments reach the port exactly as given, the source kind
+    // included: the hook supplies no default for it.
+    expect(loadSave).toHaveBeenCalledExactlyOnceWith(
+      "  /saves/ER0000.sl2  ",
+      "  pc  ",
+      "temporary",
+    );
     expect(queryClient.getQueryData(queryKeys.loadedSave("session-42"))).toEqual(loaded);
     // Nothing is written under any other session.
     expect(queryClient.getQueryData(queryKeys.loadedSave(stubSaveSession.saveSessionID))).toBe(
@@ -135,7 +144,11 @@ describe("useLoadSave", () => {
 
     const { result } = renderHook(() => useLoadSave(), { wrapper });
 
-    result.current.mutate({ source: "/saves/ER0000.sl2", expectedPlatform: "pc" });
+    result.current.mutate({
+      source: "/saves/ER0000.sl2",
+      expectedPlatform: "pc",
+      sourceKind: "local",
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(queryClient.getQueryCache().getAll()).toEqual([]);

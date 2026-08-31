@@ -156,7 +156,7 @@ func loadGesturesSession(t *testing.T, records []uint32, active bool) (*saveengi
 	t.Helper()
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetGesturesFixture(t, records, active), "")
+	loaded, err := engine.LoadSave(writeGetGesturesFixture(t, records, active), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

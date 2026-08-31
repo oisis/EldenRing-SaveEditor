@@ -56,8 +56,25 @@ func (engine *Engine) nowUTC() time.Time {
 // case-sensitively and is never trimmed; an empty value expresses no
 // expectation. Any other value is an error, and a recognised platform differing
 // from a non-empty expectation is rejected before a session exists.
-func (engine *Engine) LoadSave(path string, expectedPlatform string) (SessionInfo, error) {
+//
+// sourceKind accepts exactly "local" and "temporary". Unlike expectedPlatform it
+// has no empty form: the caller states what the file is, and an empty, aliased
+// or differently cased value is an error rejected before the file system is
+// touched, so no session exists for it.
+//
+// path is recorded on the session exactly as received. It is session metadata
+// only: the snapshot is taken here and every later read goes to the snapshot, so
+// the recorded path is never reopened.
+func (engine *Engine) LoadSave(
+	path string,
+	expectedPlatform string,
+	sourceKind string,
+) (SessionInfo, error) {
 	expected, err := parseExpectedPlatform(expectedPlatform)
+	if err != nil {
+		return SessionInfo{}, err
+	}
+	kind, err := parseSourceKind(sourceKind)
 	if err != nil {
 		return SessionInfo{}, err
 	}
@@ -100,7 +117,7 @@ func (engine *Engine) LoadSave(path string, expectedPlatform string) (SessionInf
 		return SessionInfo{}, err
 	}
 
-	session, err := newSession(platform, format)
+	session, err := newSession(platform, format, path, kind)
 	if err != nil {
 		return SessionInfo{}, err
 	}
@@ -122,8 +139,11 @@ func (engine *Engine) LoadSave(path string, expectedPlatform string) (SessionInf
 
 // GetSessionInfo returns the safe metadata of the session registered under
 // saveSessionID. It is the only way an existing session is read back: the
-// session model, its private snapshot, the source path and the save bytes never
-// leave the package, and no file is opened.
+// session model, its private snapshot and the save bytes never leave the
+// package, and no file is opened. The source path the session records is
+// metadata, so it is reported without being resolved, re-read or checked for
+// existence: a source that was removed or replaced after LoadSave changes
+// nothing here.
 //
 // saveSessionID is matched exactly. It is never trimmed, normalised or guessed,
 // so an empty or unknown identifier is rejected instead of resolving to a
@@ -177,6 +197,21 @@ func (engine *Engine) CloseSession(saveSessionID string) error {
 // never guessed.
 var errUnsupportedContainer = fmt.Errorf(
 	"unsupported save container: the file is neither a native PC nor a native PS4 save")
+
+// parseSourceKind validates the caller's statement of what the source file is.
+// It is matched exactly and case-sensitively and is never trimmed, aliased or
+// defaulted: an unstated origin is a rejection, not a "local" file.
+func parseSourceKind(value string) (SourceKind, error) {
+	switch value {
+	case string(SourceKindLocal):
+		return SourceKindLocal, nil
+	case string(SourceKindTemporary):
+		return SourceKindTemporary, nil
+	default:
+		return "", fmt.Errorf("unknown source kind %q, want %q or %q",
+			value, SourceKindLocal, SourceKindTemporary)
+	}
+}
 
 // parseExpectedPlatform validates the caller's platform expectation.
 func parseExpectedPlatform(value string) (Platform, error) {

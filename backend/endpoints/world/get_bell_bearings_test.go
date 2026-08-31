@@ -35,7 +35,7 @@ func writeGetBellBearingsFixture(t *testing.T, active bool) string {
 func loadBellBearingsSession(t *testing.T, active bool) (*saveengine.Engine, string) {
 	t.Helper()
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetBellBearingsFixture(t, active), "pc")
+	loaded, err := engine.LoadSave(writeGetBellBearingsFixture(t, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

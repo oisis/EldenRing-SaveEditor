@@ -5,6 +5,7 @@ import {equipment} from '../models';
 import {saveengine} from '../models';
 import {inventory} from '../models';
 import {catalog} from '../models';
+import {diagnostics} from '../models';
 
 export function CloseSave(arg1:string):Promise<void>;
 
@@ -40,6 +41,10 @@ export function GetResources(arg1:string,arg2:string,arg3:string,arg4:string,arg
 
 export function GetSaveCharacters(arg1:string):Promise<saveengine.SaveCharacters>;
 
+export function GetSaveValidationReport(arg1:string,arg2:number,arg3:string):Promise<diagnostics.GetSaveValidationReportResult>;
+
 export function GetStorage(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetStorageResult>;
 
-export function LoadSave(arg1:string,arg2:string):Promise<saveengine.SessionInfo>;
+export function LoadSave(arg1:string,arg2:string,arg3:string):Promise<saveengine.SessionInfo>;
+
+export function SelectSaveFile():Promise<string>;

@@ -14,7 +14,7 @@ func TestSetCookbookUnlockedMutatesEventFlagBitAndAdvancesRevision(t *testing.T)
 			content := eventFlagTestContent(platform)
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -79,7 +79,7 @@ func TestSetCookbookUnlockedClearsUnlockedFlag(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestSetCookbookUnlockedPreservesAdjacentBitsInSameByte(t *testing.T) {
 	content.set = []uint32{67000, 67001}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestSetCookbookUnlockedHandlesBlockBoundaries(t *testing.T) {
 	content.set = nil
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestSetCookbookUnlockedIsIdempotentRegardingBitState(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestSetCookbookUnlockedRejectsInactiveSlot(t *testing.T) {
 	content.flag = 0 // Inactive slot
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -228,7 +228,7 @@ func TestSetCookbookUnlockedRejectsInactiveSlot(t *testing.T) {
 func TestSetCookbookUnlockedRejectsInvalidRevisionAndSession(t *testing.T) {
 	engine := New()
 	path := writeEventFlagFixture(t, eventFlagTestContent(PlatformPC))
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -284,7 +284,7 @@ func TestSetCookbookUnlockedRejectsUnsupportedFlagsAndCorruptData(t *testing.T) 
 	engine := New()
 
 	load := func(c eventFlagTestFixture) string {
-		l, err := engine.LoadSave(writeEventFlagFixture(t, c), "")
+		l, err := engine.LoadSave(writeEventFlagFixture(t, c), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -404,7 +404,7 @@ func TestSetCookbookUnlockedPersistsToTargetFileOnWriteSave(t *testing.T) {
 			srcPath := writeFullCookbookSaveFixture(t, eventFlagTestContent(platform))
 
 			engine := New()
-			loaded, err := engine.LoadSave(srcPath, string(platform))
+			loaded, err := engine.LoadSave(srcPath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -436,7 +436,7 @@ func TestSetCookbookUnlockedPersistsToTargetFileOnWriteSave(t *testing.T) {
 			}
 
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(targetPath, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(targetPath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave target: %v", err)
 			}

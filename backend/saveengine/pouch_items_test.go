@@ -152,7 +152,7 @@ func TestGetPouchItemsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writePouchItemsFixture(t, content), string(content.platform))
+				writePouchItemsFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -182,7 +182,7 @@ func TestGetPouchItemsReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writePouchItemsFixture(t, content), "")
+	loaded, err := engine.LoadSave(writePouchItemsFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestGetPouchItemsRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content pouchItemsFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writePouchItemsFixture(t, content), "")
+		loaded, err := engine.LoadSave(writePouchItemsFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

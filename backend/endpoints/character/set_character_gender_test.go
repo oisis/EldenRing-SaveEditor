@@ -38,7 +38,7 @@ func TestSetCharacterGenderAppliesTheConfirmedDefaultAppearance(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			engine := saveengine.New()
 			loaded, err := engine.LoadSave(
-				writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "")
+				writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -82,7 +82,7 @@ func TestSetCharacterGenderRejectsInvalidInputWithoutMutation(t *testing.T) {
 	}
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "")
+		writeGetCharacterAppearanceFixture(t, GetCharacterAppearanceResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -184,7 +184,7 @@ func TestGetCharacterAppearanceReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(string(testCase.platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeAppearanceFixture(t, testCase), string(testCase.platform))
+			loaded, err := engine.LoadSave(writeAppearanceFixture(t, testCase), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -216,7 +216,7 @@ func TestGetCharacterAppearanceReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeAppearanceFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeAppearanceFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -237,7 +237,7 @@ func TestGetCharacterAppearanceRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content appearanceFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeAppearanceFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeAppearanceFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

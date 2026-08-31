@@ -51,7 +51,7 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeSetEquippedArmamentsFixture(t, platform), string(platform))
+				writeSetEquippedArmamentsFixture(t, platform), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -129,7 +129,7 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -166,7 +166,7 @@ func TestSetWeaponUpgradeLevelUpdatesGaItemEquipmentAndGaItemDataOnBothPlatforms
 
 func TestSetWeaponUpgradeLevelRejectsAmbiguousGaItemWithoutMutation(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -201,7 +201,7 @@ func TestSetWeaponUpgradeLevelRejectsAmbiguousGaItemWithoutMutation(t *testing.T
 
 func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -245,7 +245,7 @@ func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
 
 func TestSetWeaponUpgradeLevelMatchmakingMonotonicityAndFailClosed(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

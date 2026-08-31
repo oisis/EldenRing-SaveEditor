@@ -106,7 +106,7 @@ func TestGetCharacterAppearanceReturnsTheActiveAppearanceOfALoadedSession(t *tes
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCharacterAppearanceFixture(t, values), "")
+	loaded, err := engine.LoadSave(writeGetCharacterAppearanceFixture(t, values), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

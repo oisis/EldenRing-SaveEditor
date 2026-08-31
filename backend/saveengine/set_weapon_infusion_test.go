@@ -4,7 +4,7 @@ import "testing"
 
 func TestSetWeaponInfusionUsesTheSharedWeaponIDMutation(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

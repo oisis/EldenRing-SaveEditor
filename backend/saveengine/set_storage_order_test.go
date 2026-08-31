@@ -62,7 +62,7 @@ func setStorageOrderTarget(
 	engine := New()
 	path := writeAddItemFixture(t, setStorageOrderFixture(platform))
 	setStorageOrderFixtureCounters(t, path, platform, setStorageOrderTestSlot)
-	loaded, err := engine.LoadSave(path, string(platform))
+	loaded, err := engine.LoadSave(path, string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestSetStorageOrderWritesOnlyIndicesAndReloadsOnBothPlatforms(t *testing.T)
 				t.Fatalf("WriteSave: %v", err)
 			}
 			fresh := New()
-			reloaded, err := fresh.LoadSave(target, string(platform))
+			reloaded, err := fresh.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave after WriteSave: %v", err)
 			}
@@ -279,7 +279,7 @@ func TestSetStorageOrderZeroCounterStartsAtTwoOnBothPlatforms(t *testing.T) {
 				t.Fatalf("write fixture: %v", err)
 			}
 
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}

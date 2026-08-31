@@ -85,7 +85,7 @@ func TestSetEquippedArmorDefinitionMatchesRuntimeContract(t *testing.T) {
 
 func TestSetEquippedArmorValidatesCatalogAndCommits(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmorEndpointFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmorEndpointFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestSetEquippedArmorRejectsWrongSlotAndInvalidDependencies(t *testing.T) {
 		t.Fatal("SetEquippedArmor accepted three positions")
 	}
 
-	loaded, err := engine.LoadSave(writeSetEquippedArmorEndpointFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmorEndpointFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -84,7 +84,7 @@ func TestSetCharacterRunesChangesOnlyTheConfirmedFieldOnBothPlatforms(t *testing
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterRunesFixture(
-				t, platform, true, true, 123), string(platform))
+				t, platform, true, true, 123), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -126,7 +126,7 @@ func TestSetCharacterRunesAcceptsZeroAndTheLegalMaximum(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterRunesFixture(
-				t, PlatformPC, true, true, 1), "")
+				t, PlatformPC, true, true, 1), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -145,7 +145,7 @@ func TestSetCharacterRunesAcceptsZeroAndTheLegalMaximum(t *testing.T) {
 func TestSetCharacterRunesRejectsAboveTheLegalMaximum(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterRunesFixture(t, PlatformPC, true, true, 123), "")
+		writeCharacterRunesFixture(t, PlatformPC, true, true, 123), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestSetCharacterRunesRejectsAboveTheLegalMaximum(t *testing.T) {
 func TestSetCharacterRunesRejectsInvalidSessionSlotAndRevision(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterRunesFixture(t, PlatformPC, true, true, 123), "")
+		writeCharacterRunesFixture(t, PlatformPC, true, true, 123), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -214,8 +214,7 @@ func TestSetCharacterRunesRejectsInactiveAndMissingAnchor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterRunesFixture(
-				t, testCase.platform, testCase.active, testCase.withAnchor, 123),
-				string(testCase.platform))
+				t, testCase.platform, testCase.active, testCase.withAnchor, 123), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -233,7 +232,7 @@ func TestSetCharacterRunesRejectsInactiveAndMissingAnchor(t *testing.T) {
 func TestSetCharacterRunesIdempotentAssignmentAdvancesRevision(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeCharacterRunesFixture(t, PlatformPC, true, true, 500), "")
+		writeCharacterRunesFixture(t, PlatformPC, true, true, 500), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -278,7 +277,7 @@ func TestSetCharacterRunesPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 			sourceBefore := bytes.Clone(data)
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, string(platform))
+			loaded, err := engine.LoadSave(source, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -299,7 +298,7 @@ func TestSetCharacterRunesPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload target: %v", err)
 			}

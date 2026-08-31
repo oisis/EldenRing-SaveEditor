@@ -66,7 +66,7 @@ func TestDeleteFavoritePresetTablePCAndPS4(t *testing.T) {
 			}
 			path := writeDeleteFavoritesFixture(t, platform, active)
 			engine := New()
-			session, err := engine.LoadSave(path, string(platform))
+			session, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -135,7 +135,7 @@ func TestDeleteFavoritePresetInactiveSlotIsNoOpMutation(t *testing.T) {
 	}
 	path := writeDeleteFavoritesFixture(t, PlatformPC, active)
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -177,7 +177,7 @@ func TestDeleteFavoritePresetInactiveSlotIsNoOpMutation(t *testing.T) {
 func TestDeleteFavoritePresetRejectionsDoNotMutateState(t *testing.T) {
 	path := writeDeleteFavoritesFixture(t, PlatformPC, map[int]bool{0: true})
 	engine := New()
-	session, err := engine.LoadSave(path, "")
+	session, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

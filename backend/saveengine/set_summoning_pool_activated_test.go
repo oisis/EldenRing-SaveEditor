@@ -22,7 +22,7 @@ func TestSetSummoningPoolActivatedMutatesOneBitOnBothPlatforms(t *testing.T) {
 			content.set = []uint32{summoningPoolTestNeighbourFlag}
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -88,7 +88,7 @@ func TestSetSummoningPoolActivatedClearsOneBitAndKeepsItsNeighbour(t *testing.T)
 	content.set = []uint32{summoningPoolTestFlag, summoningPoolTestNeighbourFlag}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -119,13 +119,13 @@ func TestSetSummoningPoolActivatedClearsOneBitAndKeepsItsNeighbour(t *testing.T)
 func TestSetSummoningPoolActivatedRejectsWithoutMutating(t *testing.T) {
 	engine := New()
 	active := eventFlagTestContent(PlatformPC)
-	activeLoaded, err := engine.LoadSave(writeEventFlagFixture(t, active), "")
+	activeLoaded, err := engine.LoadSave(writeEventFlagFixture(t, active), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
 	inactive := eventFlagTestContent(PlatformPC)
 	inactive.flag = 0
-	inactiveLoaded, err := engine.LoadSave(writeEventFlagFixture(t, inactive), "")
+	inactiveLoaded, err := engine.LoadSave(writeEventFlagFixture(t, inactive), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave inactive: %v", err)
 	}

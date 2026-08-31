@@ -119,7 +119,7 @@ func TestSetCharacterAppearanceWritesExactFieldsAndReloadsOnBothPlatforms(t *tes
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -174,7 +174,7 @@ func TestSetCharacterAppearanceWritesExactFieldsAndReloadsOnBothPlatforms(t *tes
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload target: %v", err)
 			}
@@ -197,7 +197,7 @@ func TestSetCharacterAppearanceRejectsInvalidInputWithoutMutation(t *testing.T) 
 	values := setAppearanceTestValues(0x21)
 	path, _, _, _ := writeSetAppearanceFixture(t, PlatformPC, values)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

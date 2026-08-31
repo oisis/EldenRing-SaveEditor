@@ -30,7 +30,7 @@ func TestSetSpiritAshUpgradeLevelUpdatesInventoryReferencesAndReloads(t *testing
 					index: 0, handle: spiritAshTestHandle, rawQuantity: 1, acquisition: 7,
 				}},
 				commonCount: 1,
-			}), string(platform))
+			}), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -142,7 +142,7 @@ func TestSetSpiritAshUpgradeLevelUpdatesInventoryReferencesAndReloads(t *testing
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -181,7 +181,7 @@ func TestSetSpiritAshUpgradeLevelRejectsInconsistentInventoryReference(t *testin
 			index: 0, handle: spiritAshTestHandle, rawQuantity: 1, acquisition: 7,
 		}},
 		commonCount: 1,
-	}), "pc")
+	}), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -227,7 +227,7 @@ func TestSetSpiritAshUpgradeLevelSupportsStorageCommon(t *testing.T) {
 			index: 0, handle: spiritAshTestHandle, rawQuantity: 1, acquisition: 7,
 		}},
 		storageCount: 1,
-	}), "pc")
+	}), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

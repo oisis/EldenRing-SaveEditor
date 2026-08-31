@@ -241,7 +241,7 @@ func loadReportFixture(t *testing.T, content reportTestFixture) (*saveengine.Eng
 		content.platform = saveengine.PlatformPC
 	}
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writeReportFixture(t, content), string(content.platform))
+	session, err := engine.LoadSave(writeReportFixture(t, content), string(content.platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

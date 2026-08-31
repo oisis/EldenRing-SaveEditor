@@ -53,7 +53,7 @@ func TestSetWhetbladeUnlockedPersistsCompleteStateOnBothPlatforms(t *testing.T) 
 		t.Run(string(platform), func(t *testing.T) {
 			path, content := setWhetbladeFixture(t, platform)
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -81,7 +81,7 @@ func TestSetWhetbladeUnlockedPersistsCompleteStateOnBothPlatforms(t *testing.T) 
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -93,7 +93,7 @@ func TestSetWhetbladeUnlockedPersistsCompleteStateOnBothPlatforms(t *testing.T) 
 func TestSetWhetbladeUnlockedKeepsMenuUntilTheLastWhetbladeIsLocked(t *testing.T) {
 	path, content := setWhetbladeFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -174,7 +174,7 @@ func TestSetWhetbladeUnlockedKeepsMenuUntilTheLastWhetbladeIsLocked(t *testing.T
 func TestSetWhetbladeUnlockedRejectsInvalidStateWithoutMutation(t *testing.T) {
 	path, content := setWhetbladeFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

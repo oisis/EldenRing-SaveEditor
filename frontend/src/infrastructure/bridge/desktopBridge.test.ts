@@ -17,8 +17,10 @@ import {
   GetResourcePresentationSummaries,
   GetResources,
   GetSaveCharacters,
+  GetSaveValidationReport,
   GetStorage,
   LoadSave,
+  SelectSaveFile,
 } from "../../../wailsjs/go/desktop/Bridge";
 import { application, catalog, equipment, inventory, saveengine } from "../../../wailsjs/go/models";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
@@ -41,14 +43,18 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetResourcePresentationSummaries: vi.fn(),
   GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
+  GetSaveValidationReport: vi.fn(),
   GetStorage: vi.fn(),
   LoadSave: vi.fn(),
+  SelectSaveFile: vi.fn(),
 }));
 
 const getApplicationInfo = vi.mocked(GetApplicationInfo);
 const getLoadedSave = vi.mocked(GetLoadedSave);
 const loadSave = vi.mocked(LoadSave);
 const closeSave = vi.mocked(CloseSave);
+const selectSaveFile = vi.mocked(SelectSaveFile);
+const getSaveValidationReport = vi.mocked(GetSaveValidationReport);
 const getSaveCharacters = vi.mocked(GetSaveCharacters);
 const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
@@ -143,19 +149,33 @@ const session = saveengine.SessionInfo.createFrom({
   saveSessionID: "session-1",
   platform: "pc",
   format: "sl2_v2",
+  // Spaces and mixed case on purpose: the adapter must carry the path verbatim.
+  sourcePath: "  /Volumes/A B/Elden Ring/ER0000.SL2  ",
+  sourceKind: "temporary",
+  saveRevision: "17",
   unsavedChanges: true,
 });
 
 describe("wails save session adapter", () => {
-  it("passes the source and the expected platform to the backend unchanged", async () => {
+  it("passes the source, the expected platform and the source kind unchanged", async () => {
     loadSave.mockResolvedValue(session);
 
-    await wailsDesktopBridge.loadSave("  /Volumes/A B/ER0000.sl2  ", "  PS4  ");
+    await wailsDesktopBridge.loadSave("  /Volumes/A B/ER0000.sl2  ", "  PS4  ", "temporary");
 
-    // No trimming, no normalisation, no fallback: the backend owns path and
-    // platform handling.
-    expect(loadSave).toHaveBeenCalledWith("  /Volumes/A B/ER0000.sl2  ", "  PS4  ");
+    // No trimming, no normalisation, no fallback: the backend owns path,
+    // platform and source-kind handling.
+    expect(loadSave).toHaveBeenCalledWith("  /Volumes/A B/ER0000.sl2  ", "  PS4  ", "temporary");
     expect(loadSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns the chosen path unchanged and reports a cancellation as an empty path", async () => {
+    selectSaveFile.mockResolvedValue("  /Volumes/A B/ER0000.SL2  ");
+    await expect(wailsDesktopBridge.selectSaveFile()).resolves.toBe("  /Volumes/A B/ER0000.SL2  ");
+
+    // Cancelling is an ordinary outcome: an empty path, never a rejection.
+    selectSaveFile.mockResolvedValue("");
+    await expect(wailsDesktopBridge.selectSaveFile()).resolves.toBe("");
+    expect(loadSave).not.toHaveBeenCalled();
   });
 
   it("passes the session identifier to the reader and to the close call unchanged", async () => {
@@ -172,29 +192,41 @@ describe("wails save session adapter", () => {
   it("maps every reported session field without normalising or defaulting it", async () => {
     getLoadedSave.mockResolvedValue(session);
 
-    // Exactly the four fields the backend reports; nothing is added.
+    // Exactly the seven fields the backend reports; nothing is added, and the
+    // path, the kind and the revision are carried byte for byte.
     await expect(wailsDesktopBridge.getLoadedSave("session-1")).resolves.toEqual({
       saveSessionID: "session-1",
       platform: "pc",
       format: "sl2_v2",
+      sourcePath: "  /Volumes/A B/Elden Ring/ER0000.SL2  ",
+      sourceKind: "temporary",
+      saveRevision: "17",
       unsavedChanges: true,
     });
   });
 
-  it("carries an unknown platform and format through without rejecting them", async () => {
+  it("carries an unknown platform, format and source kind through without rejecting them", async () => {
     loadSave.mockResolvedValue(
       saveengine.SessionInfo.createFrom({
         saveSessionID: "session-2",
         platform: "future_platform",
         format: "future_format",
+        sourcePath: "",
+        sourceKind: "future_kind",
+        saveRevision: "0",
         unsavedChanges: false,
       }),
     );
 
-    await expect(wailsDesktopBridge.loadSave("source", "future_platform")).resolves.toEqual({
+    await expect(
+      wailsDesktopBridge.loadSave("source", "future_platform", "local"),
+    ).resolves.toEqual({
       saveSessionID: "session-2",
       platform: "future_platform",
       format: "future_format",
+      sourcePath: "",
+      sourceKind: "future_kind",
+      saveRevision: "0",
       unsavedChanges: false,
     });
   });
@@ -206,11 +238,20 @@ describe("wails save session adapter", () => {
     loadSave.mockRejectedValue(transportError);
     getLoadedSave.mockRejectedValue(transportError);
     closeSave.mockRejectedValue(transportError);
+    selectSaveFile.mockRejectedValue(transportError);
+    getSaveValidationReport.mockRejectedValue(transportError);
 
     for (const call of [
-      () => wailsDesktopBridge.loadSave("/Users/private/ER0000.sl2", "pc"),
+      () => wailsDesktopBridge.loadSave("/Users/private/ER0000.sl2", "pc", "local"),
       () => wailsDesktopBridge.getLoadedSave("session-1"),
       () => wailsDesktopBridge.closeSave("session-1"),
+      () => wailsDesktopBridge.selectSaveFile(),
+      () =>
+        wailsDesktopBridge.getSaveValidationReport({
+          saveSessionID: "session-1",
+          characterID: 0,
+          scope: "",
+        }),
     ]) {
       const failure = await call().then(
         () => undefined,

@@ -173,7 +173,7 @@ func loadEquippedSpellsSession(t *testing.T, occupied []uint32) (*saveengine.Eng
 	t.Helper()
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetEquippedSpellsFixture(t, occupied), "")
+	loaded, err := engine.LoadSave(writeGetEquippedSpellsFixture(t, occupied), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

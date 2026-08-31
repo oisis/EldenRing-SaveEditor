@@ -125,7 +125,7 @@ func TestValidateSerializedReloadsOwnedItemsOnBothPlatformsWithoutTouchingTheSes
 	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
-			info, err := engine.LoadSave(writeOwnedItemContainerFixture(t, platform), "")
+			info, err := engine.LoadSave(writeOwnedItemContainerFixture(t, platform), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -377,7 +377,7 @@ func TestWriteSavePersistsBothPlatformsAndAdvancesACleanRevision(t *testing.T) {
 			}
 
 			engine := New()
-			info, err := engine.LoadSave(source, string(platform))
+			info, err := engine.LoadSave(source, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -427,7 +427,7 @@ func TestWriteSavePersistsBothPlatformsAndAdvancesACleanRevision(t *testing.T) {
 			}
 
 			reloaded := New()
-			if _, err := reloaded.LoadSave(target, string(platform)); err != nil {
+			if _, err := reloaded.LoadSave(target, string(platform), "local"); err != nil {
 				t.Fatalf("reload persisted target: %v", err)
 			}
 		})
@@ -475,7 +475,7 @@ func TestWriteSavePersistsMutationAndClearsDirtyState(t *testing.T) {
 	}
 
 	reloaded := New()
-	reloadedInfo, err := reloaded.LoadSave(target, string(PlatformPC))
+	reloadedInfo, err := reloaded.LoadSave(target, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("reload persisted mutation: %v", err)
 	}

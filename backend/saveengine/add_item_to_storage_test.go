@@ -39,7 +39,7 @@ func TestAddItemToStorageInitialisesEmptyStorageOnPCAndPS4(t *testing.T) {
 				tailMarker: true,
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -97,7 +97,7 @@ func TestAddItemToStorageUsesPopulatedStorageAllocator(t *testing.T) {
 		gaItemData: []uint32{addItemTestGoodsID, addItemTestOtherID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestAddItemToStorageT330ShapeSingleAndAccumulationOnPCAndPS4(t *testing.T) 
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -238,7 +238,7 @@ func TestAddItemToStorageTopUpRefreshesAcquisitionIndex(t *testing.T) {
 				gaItemData:   []uint32{addItemTestGoodsID},
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -303,7 +303,7 @@ func TestAddItemToStorageTopUpRefreshesAcquisitionIndex(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave after WriteSave: %v", err)
 			}
@@ -371,7 +371,7 @@ func TestAddItemToStorageRejectsBeforeMutation(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, testCase.content), string(PlatformPC))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, testCase.content), string(PlatformPC), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -461,7 +461,7 @@ func TestAddItemToStorageDerivesNextEquipIndexFromPhysicalLayout(t *testing.T) {
 				storageCount: uint32(sparseStorageHighest),
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -531,7 +531,7 @@ func TestAddItemToStorageRecomputesStaleNextEquipIndex(t *testing.T) {
 		storageCount: 1, gaItemData: []uint32{addItemTestOtherID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -569,7 +569,7 @@ func TestAddItemToStorageRejectsExistingDuplicateRecords(t *testing.T) {
 		storageCount: 2, gaItemData: []uint32{addItemTestGoodsID},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -18,7 +18,7 @@ func TestGetDiagnosticLog_NilEngine(t *testing.T) {
 func TestGetDiagnosticLog_GetterIsNoOp(t *testing.T) {
 	engine := saveengine.New()
 	path := writeTestPCSave(t, "pc_noop.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestGetSaveValidationReport_DoesNotEmitDiagnosticRecordAndIsNoOpOnJournal(t
 func TestGetDiagnosticLog_Integration(t *testing.T) {
 	engine := saveengine.New()
 	path := writeTestPCSave(t, "pc_endpoint_integration.sl2")
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

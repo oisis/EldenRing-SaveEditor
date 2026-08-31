@@ -10,7 +10,7 @@ import (
 
 func TestSetSaveAccountIDDelegatesToSaveEngine(t *testing.T) {
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writePCFixture(t), "pc")
+	session, err := engine.LoadSave(writePCFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestSetSaveAccountIDRejectsMissingEngineAndForwardsErrors(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writePS4Fixture(t), "ps4")
+	session, err := engine.LoadSave(writePS4Fixture(t), "ps4", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

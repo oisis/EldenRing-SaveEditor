@@ -62,7 +62,7 @@ func writeGetCharacterProfileFixture(t *testing.T) string {
 
 func TestGetCharacterProfileReturnsTheActiveProfileOfALoadedSession(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCharacterProfileFixture(t), "")
+	loaded, err := engine.LoadSave(writeGetCharacterProfileFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

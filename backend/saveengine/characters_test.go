@@ -92,7 +92,7 @@ func TestGetSaveCharactersReadsTheTenSlotsOfBothPlatforms(t *testing.T) {
 			path := writeCharactersFixture(t, platform, content)
 
 			engine := New()
-			info, err := engine.LoadSave(path, string(platform))
+			info, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -135,7 +135,7 @@ func TestGetCharacterProfileReadsAConfirmedProfileOnBothPlatforms(t *testing.T) 
 	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
-			info, err := engine.LoadSave(writeCharactersFixture(t, platform, content), string(platform))
+			info, err := engine.LoadSave(writeCharactersFixture(t, platform, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -162,7 +162,7 @@ func TestGetCharacterProfileReportsAResidualSlotAsInactiveAndZeroed(t *testing.T
 	content.class[7], content.gender[7], content.seconds[7] = 3, 1, 99_999
 
 	engine := New()
-	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, content), "")
+	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestGetCharacterProfileReportsAResidualSlotAsInactiveAndZeroed(t *testing.T
 
 func TestGetCharacterProfileRejectsCharacterIDsOutsideTheSlotRange(t *testing.T) {
 	engine := New()
-	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, charactersFixture{}), "")
+	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, charactersFixture{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -205,7 +205,7 @@ func TestGetCharacterProfileRejectsCharacterIDsOutsideTheSlotRange(t *testing.T)
 func TestGetSaveCharactersRejectsUnusableIdentifiers(t *testing.T) {
 	path := writeCharactersFixture(t, PlatformPC, charactersFixture{})
 	engine := New()
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

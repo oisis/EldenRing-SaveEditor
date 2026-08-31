@@ -59,8 +59,7 @@ func TestGetRegionsReadsBothPlatformsWithoutNormalising(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
 				writeRegionsFixture(t, content, wantIDs, uint32(len(wantIDs))),
-				string(content.platform),
-			)
+				string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -85,7 +84,7 @@ func TestGetRegionsDoesNotReadResidualSlot(t *testing.T) {
 	content := gestureTestFixture{platform: PlatformPC, slot: 4, noAnchor: true}
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeRegionsFixture(t, content, []uint32{6100000}, 1), "")
+		writeRegionsFixture(t, content, []uint32{6100000}, 1), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -107,7 +106,7 @@ func TestGetRegionsRejectsInvalidRequestsAndLayout(t *testing.T) {
 	engine := New()
 	load := func(content gestureTestFixture, count uint32) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeRegionsFixture(t, content, nil, count), "")
+		loaded, err := engine.LoadSave(writeRegionsFixture(t, content, nil, count), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

@@ -736,7 +736,7 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 	source := writePCFixture(t)
 
 	created := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions",
-		`{"source":`+strconv.Quote(source)+`,"expectedPlatform":"pc"}`)
+		`{"source":`+strconv.Quote(source)+`,"expectedPlatform":"pc","sourceKind":"local"}`)
 	assertOK(t, created, "POST /api/v1/save-sessions")
 
 	var session saveengine.SessionInfo
@@ -779,7 +779,7 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 	if writeResult.SaveSessionID != session.SaveSessionID || writeResult.SaveRevision != "1" {
 		t.Fatalf("WriteSave result = %+v, want the session at revision 1", writeResult)
 	}
-	if _, err := saveengine.New().LoadSave(writtenTarget, "pc"); err != nil {
+	if _, err := saveengine.New().LoadSave(writtenTarget, "pc", "local"); err != nil {
 		t.Fatalf("reload WriteSave target: %v", err)
 	}
 
@@ -806,6 +806,30 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 	)
 }
 
+// The LoadSave body is strict, and openapi.json says so with
+// "additionalProperties": false. The contract may only advertise what the
+// handler actually does, so the rejection is pinned here.
+func TestLoadSaveRouteRejectsAnUnknownBodyField(t *testing.T) {
+	saveEngine := saveengine.New()
+	source := strconv.Quote(writePCFixture(t))
+
+	rejected := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions",
+		`{"source":`+source+`,"expectedPlatform":"pc","sourceKind":"local","extra":true}`)
+	if rejected.Code != http.StatusBadRequest {
+		t.Fatalf("unknown field: status = %d, want 400 (body %q)",
+			rejected.Code, rejected.Body.String())
+	}
+	if !strings.Contains(rejected.Body.String(), "unknown field") {
+		t.Fatalf("unknown field: body = %q, want the strict-decoder rejection",
+			rejected.Body.String())
+	}
+	// The rejection happens before anything is created: no session exists to
+	// leak, and the source file is untouched evidence either way.
+	accepted := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions",
+		`{"source":`+source+`,"expectedPlatform":"pc","sourceKind":"local"}`)
+	assertOK(t, accepted, "POST /api/v1/save-sessions")
+}
+
 // A POST declaring text/plain, or declaring nothing at all, is a CORS simple
 // request, so a foreign page can send it without a preflight. Both bodied POST
 // routes must refuse it before they create a session or write a file, and must
@@ -813,7 +837,7 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 func TestBodiedPostRoutesRequireJSONContentType(t *testing.T) {
 	saveEngine := saveengine.New()
 	source := writePCFixture(t)
-	loadBody := `{"source":` + strconv.Quote(source) + `,"expectedPlatform":"pc"}`
+	loadBody := `{"source":` + strconv.Quote(source) + `,"expectedPlatform":"pc","sourceKind":"local"}`
 
 	for _, contentType := range []string{"text/plain", ""} {
 		rejected := doSaveTyped(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", loadBody, contentType)
@@ -863,7 +887,7 @@ func TestBodiedPostRoutesRequireJSONContentType(t *testing.T) {
 
 func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -967,7 +991,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		target string
 		body   string
 	}{
-		{http.MethodPost, "/api/v1/save-sessions", `{"source":"unused-by-a-missing-route","expectedPlatform":""}`},
+		{http.MethodPost, "/api/v1/save-sessions", `{"source":"unused-by-a-missing-route","expectedPlatform":"","sourceKind":"local"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session", ""},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/write", `{"expectedRevision":"0","target":"unused"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/account-id", `{"accountID":"1","expectedRevision":"0"}`},
@@ -2021,7 +2045,7 @@ func writeActiveSpellsFixture(t *testing.T) string {
 // reachable under their own methods, and the mutation body has to stay strict.
 func TestCharacterUndoRoutes(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -2063,7 +2087,7 @@ func TestCharacterUndoRoutes(t *testing.T) {
 
 func TestDeleteCharacterRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2107,7 +2131,7 @@ func TestDeleteCharacterRoute(t *testing.T) {
 
 func TestCloneCharacterRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2157,7 +2181,7 @@ func TestCloneCharacterRoute(t *testing.T) {
 
 func TestSetCharacterActiveRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2191,7 +2215,7 @@ func TestSetCharacterActiveRoute(t *testing.T) {
 
 func TestSetSaveAccountIDRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2230,7 +2254,7 @@ func TestSetCharacterNameRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2257,7 +2281,7 @@ func TestSetCharacterNameRoute(t *testing.T) {
 			t.Errorf("result = %+v, want revision 1 and exact name", got)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -2273,7 +2297,7 @@ func TestSetCharacterNameRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2329,7 +2353,7 @@ func TestSetCharacterAppearanceRoute(t *testing.T) {
 	if err := os.WriteFile(fixture, fixtureData, 0o600); err != nil {
 		t.Fatalf("rewrite fixture: %v", err)
 	}
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2405,7 +2429,7 @@ func TestSetCharacterGenderRoute(t *testing.T) {
 	if err := os.WriteFile(fixture, fixtureData, 0o600); err != nil {
 		t.Fatalf("rewrite fixture: %v", err)
 	}
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2457,7 +2481,7 @@ func TestApplyAppearancePresetRoute(t *testing.T) {
 	if err := os.WriteFile(fixture, fixtureData, 0o600); err != nil {
 		t.Fatalf("rewrite fixture: %v", err)
 	}
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -2539,7 +2563,7 @@ func TestSetCharacterRunesRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2567,7 +2591,7 @@ func TestSetCharacterRunesRoute(t *testing.T) {
 			t.Errorf("result = %+v, want revision 1 and runes %d", got, runes)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -2583,7 +2607,7 @@ func TestSetCharacterRunesRoute(t *testing.T) {
 	})
 
 	t.Run("accepts explicit zero", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2599,7 +2623,7 @@ func TestSetCharacterRunesRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2654,7 +2678,7 @@ func TestSetCharacterStatsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2672,7 +2696,7 @@ func TestSetCharacterStatsRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -2692,7 +2716,7 @@ func TestSetCharacterStatsRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2752,7 +2776,7 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2770,7 +2794,7 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -2786,7 +2810,7 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -2926,7 +2950,7 @@ func writeSetPhysickMixtureRouteFixture(t *testing.T) string {
 func TestSetPhysickMixtureRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
-	session, err := savesession.LoadSave(saveEngine, writeSetPhysickMixtureRouteFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeSetPhysickMixtureRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3031,7 +3055,7 @@ func writeSetQuickItemsRouteFixture(t *testing.T) string {
 func TestSetQuickItemsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
-	session, err := savesession.LoadSave(saveEngine, writeSetQuickItemsRouteFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeSetQuickItemsRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3126,7 +3150,7 @@ func TestSetEquippedArmamentsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
 	session, err := savesession.LoadSave(
-		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3218,7 +3242,7 @@ func writeSetEquippedArmorRouteFixture(t *testing.T) string {
 func TestSetEquippedArmorRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
-	session, err := savesession.LoadSave(saveEngine, writeSetEquippedArmorRouteFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeSetEquippedArmorRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3297,7 +3321,7 @@ func TestSetEquippedTalismansRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
 	session, err := savesession.LoadSave(
-		saveEngine, writeSetEquippedTalismansRouteFixture(t), "pc")
+		saveEngine, writeSetEquippedTalismansRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3339,7 +3363,7 @@ func TestSetEquippedTalismansRoute(t *testing.T) {
 func TestSetPouchItemsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
-	session, err := savesession.LoadSave(saveEngine, writeSetPouchItemsRouteFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeSetPouchItemsRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3415,7 +3439,7 @@ func newFullCatalog(t *testing.T) *gamecatalog.Catalog {
 
 func TestEquippedSpellsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -3453,7 +3477,7 @@ func TestEquippedSpellsRouteMatchesTheGetter(t *testing.T) {
 func TestSetEquippedSpellsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	gameCatalog := newFullCatalog(t)
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -3503,7 +3527,7 @@ func TestSetEquippedSpellsRoute(t *testing.T) {
 
 func TestEquippedSpellsRouteRejectsAMalformedCharacterID(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -3703,7 +3727,7 @@ func networkSettingsParamFile() []byte {
 // -allow-external-bind mode — it must not exist at all.
 func TestNetworkSettingsRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeNetworkSettingsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeNetworkSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -3899,7 +3923,7 @@ func writeInventoryFixture(t *testing.T) string {
 
 func TestInventoryRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -3951,7 +3975,7 @@ func TestInventoryRoute(t *testing.T) {
 
 func TestSetInventoryOrderRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4033,7 +4057,7 @@ func TestSetInventoryOrderRoute(t *testing.T) {
 // come from a container read of that very session.
 func TestOwnedItemRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4093,7 +4117,7 @@ func TestOwnedItemRoute(t *testing.T) {
 // endpoint below it.
 func TestRemoveOwnedItemRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4186,7 +4210,7 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 	}
 
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4254,7 +4278,7 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 
 func TestMoveOwnedItemToStorageRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4324,7 +4348,7 @@ func TestMoveOwnedItemToInventoryRoute(t *testing.T) {
 	}
 
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, path, "")
+	session, err := savesession.LoadSave(saveEngine, path, "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4384,7 +4408,7 @@ func TestMoveOwnedItemToInventoryRoute(t *testing.T) {
 func TestSetWeaponUpgradeLevelRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	session, err := savesession.LoadSave(
-		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4431,7 +4455,7 @@ func TestSetSpiritAshUpgradeLevelRoute(t *testing.T) {
 	}
 
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, path, "pc")
+	session, err := savesession.LoadSave(saveEngine, path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -4476,7 +4500,7 @@ func TestSetSpiritAshUpgradeLevelRoute(t *testing.T) {
 func TestSetWeaponInfusionRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	session, err := savesession.LoadSave(
-		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4530,7 +4554,7 @@ func writeSetWeaponAshOfWarRouteFixture(t *testing.T) string {
 func TestSetWeaponAshOfWarRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	session, err := savesession.LoadSave(
-		saveEngine, writeSetWeaponAshOfWarRouteFixture(t), "pc")
+		saveEngine, writeSetWeaponAshOfWarRouteFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4567,7 +4591,7 @@ func TestSetWeaponAshOfWarRoute(t *testing.T) {
 func TestGetItemCapacityRoute(t *testing.T) {
 	fixture := writeInventoryFixture(t)
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4618,7 +4642,7 @@ func TestAddItemToInventoryRoute(t *testing.T) {
 	// that item, so the add opens a new record.
 	fixture := writeInventoryFixture(t)
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4715,7 +4739,7 @@ func TestAddItemToInventoryRoute(t *testing.T) {
 func TestAddItemToStorageRoute(t *testing.T) {
 	fixture := writeInventoryFixture(t)
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	session, err := savesession.LoadSave(saveEngine, fixture, "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4814,7 +4838,7 @@ func writeStorageFixture(t *testing.T) string {
 
 func TestStorageRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -4874,7 +4898,7 @@ func TestStorageRoute(t *testing.T) {
 
 func TestSetStorageOrderRoute(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5007,7 +5031,7 @@ func writeGesturesFixture(t *testing.T) string {
 
 func TestGesturesRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5103,7 +5127,7 @@ func TestSetGestureUnlockedRoute(t *testing.T) {
 	boolPointer := func(value bool) *bool { return &value }
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -5129,7 +5153,7 @@ func TestSetGestureUnlockedRoute(t *testing.T) {
 			t.Errorf("result = %+v, want revision 1 and unlocked gesture 401EA7AB", got)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -5146,7 +5170,7 @@ func TestSetGestureUnlockedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -5250,7 +5274,7 @@ func writeCookbooksFixture(t *testing.T) string {
 
 func TestCookbooksRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5352,7 +5376,7 @@ func writeBellBearingsRouteFixture(t *testing.T) string {
 
 func TestBellBearingsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5401,7 +5425,7 @@ func TestSetBellBearingUnlockedRoute(t *testing.T) {
 	boolPointer := func(value bool) *bool { return &value }
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -5425,7 +5449,7 @@ func TestSetBellBearingUnlockedRoute(t *testing.T) {
 			t.Errorf("result = %+v, want revision 1 and unlocked Bell Bearing 400022CF", got)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -5442,7 +5466,7 @@ func TestSetBellBearingUnlockedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid body before mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -5511,7 +5535,7 @@ func writeSpectralSteedRouteFixture(t *testing.T) string {
 
 func TestSpectralSteedAttiresRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5542,7 +5566,7 @@ func TestSpectralSteedAttiresRouteMatchesTheGetter(t *testing.T) {
 func TestSetSpectralSteedAttireRoute(t *testing.T) {
 	gameCatalog := newFullCatalog(t)
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -5599,7 +5623,7 @@ func TestSetSpectralSteedAttireRoute(t *testing.T) {
 func TestLockAllSpectralSteedAttiresRoute(t *testing.T) {
 	gameCatalog := newFullCatalog(t)
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeSpectralSteedRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -5661,7 +5685,7 @@ func writeWhetbladesRouteFixture(t *testing.T) string {
 
 func TestWhetbladesRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5704,7 +5728,7 @@ func TestWhetbladesRouteMatchesTheGetter(t *testing.T) {
 
 func TestColosseumsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5731,7 +5755,7 @@ func TestColosseumsRouteMatchesTheGetter(t *testing.T) {
 
 func TestRegionsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5758,7 +5782,7 @@ func TestRegionsRouteMatchesTheGetter(t *testing.T) {
 
 func TestSummoningPoolsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5785,7 +5809,7 @@ func TestSummoningPoolsRouteMatchesTheGetter(t *testing.T) {
 
 func TestGracesRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5854,7 +5878,7 @@ func TestBossDefeatEventFlagOpenAPICoversBlock9Only(t *testing.T) {
 
 func TestBossesRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5922,7 +5946,7 @@ func TestMapRegionVisibilityEventFlagOpenAPICoversBlock62Only(t *testing.T) {
 
 func TestMapRegionsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5950,7 +5974,7 @@ func TestMapRegionsRouteMatchesTheGetter(t *testing.T) {
 
 func TestTutorialsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -5981,7 +6005,7 @@ func TestSetWhetbladeUnlockedRoute(t *testing.T) {
 	gameCatalog := newFullCatalog(t)
 	saveEngine := saveengine.New()
 	unlocked := true
-	session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -6005,7 +6029,7 @@ func TestSetWhetbladeUnlockedRoute(t *testing.T) {
 		t.Errorf("result = %+v, want revision 1 and unlocked Whetblade 4000230C", got)
 	}
 
-	directSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	directSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave direct session: %v", err)
 	}
@@ -6020,7 +6044,7 @@ func TestSetWhetbladeUnlockedRoute(t *testing.T) {
 		t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 	}
 
-	rejectedSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	rejectedSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave rejected session: %v", err)
 	}
@@ -6058,7 +6082,7 @@ func TestSetCookbookUnlockedRoute(t *testing.T) {
 	boolPointer := func(value bool) *bool { return &value }
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6092,7 +6116,7 @@ func TestSetCookbookUnlockedRoute(t *testing.T) {
 			t.Errorf("got = %+v, want revision 1 and unlocked true", got)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6108,7 +6132,7 @@ func TestSetCookbookUnlockedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6179,7 +6203,7 @@ func TestSetBossDefeatedRoute(t *testing.T) {
 	const bossKey = "stormveil_castle_godrick_the_grafted"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6207,7 +6231,7 @@ func TestSetBossDefeatedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6223,7 +6247,7 @@ func TestSetBossDefeatedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6275,7 +6299,7 @@ func TestSetGraceVisitedRoute(t *testing.T) {
 	const graceKey = "limgrave_west_gatefront"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6303,7 +6327,7 @@ func TestSetGraceVisitedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6319,7 +6343,7 @@ func TestSetGraceVisitedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6371,7 +6395,7 @@ func TestSetColosseumUnlockedRoute(t *testing.T) {
 	const colosseumKey = "royal_colosseum"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6399,7 +6423,7 @@ func TestSetColosseumUnlockedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6415,7 +6439,7 @@ func TestSetColosseumUnlockedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6467,7 +6491,7 @@ func TestSetMapRegionRevealedRoute(t *testing.T) {
 	const mapRegionKey = "limgrave_weeping_peninsula"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6488,7 +6512,7 @@ func TestSetMapRegionRevealedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6509,7 +6533,7 @@ func TestSetMapRegionRevealedRoute(t *testing.T) {
 			"unknown field":    `{"mapRegionKind":"map_region","mapRegionKey":"` + mapRegionKey + `","revealed":true,"expectedRevision":"0","extra":1}`,
 		} {
 			t.Run(name, func(t *testing.T) {
-				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 				if err != nil {
 					t.Fatalf("LoadSave: %v", err)
 				}
@@ -6542,7 +6566,7 @@ func TestSetFogOfWarRemovedRoute(t *testing.T) {
 	const target = "/characters/0/fog-of-war"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6561,7 +6585,7 @@ func TestSetFogOfWarRemovedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6582,7 +6606,7 @@ func TestSetFogOfWarRemovedRoute(t *testing.T) {
 			"unknown field":   `{"removed":true,"expectedRevision":"0","extra":1}`,
 		} {
 			t.Run(name, func(t *testing.T) {
-				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "", "local")
 				if err != nil {
 					t.Fatalf("LoadSave: %v", err)
 				}
@@ -6613,7 +6637,7 @@ func TestSetSummoningPoolActivatedRoute(t *testing.T) {
 	activated := true
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6641,7 +6665,7 @@ func TestSetSummoningPoolActivatedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6658,7 +6682,7 @@ func TestSetSummoningPoolActivatedRoute(t *testing.T) {
 	})
 
 	t.Run("rejects invalid bodies", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6809,7 +6833,7 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 	const regionKey = "limgrave_the_first_step"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6830,7 +6854,7 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		direct, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+		direct, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6851,7 +6875,7 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 			"unknown field":    `{"regionKind":"region","regionKey":"` + regionKey + `","unlocked":true,"expectedRevision":"0","extra":1}`,
 		} {
 			t.Run(name, func(t *testing.T) {
-				session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+				session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "", "local")
 				if err != nil {
 					t.Fatalf("LoadSave: %v", err)
 				}
@@ -6905,7 +6929,7 @@ func TestSetTutorialUnlockedRoute(t *testing.T) {
 	const tutorialKey = "2010"
 
 	t.Run("conforms to endpoint mutation", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -6926,7 +6950,7 @@ func TestSetTutorialUnlockedRoute(t *testing.T) {
 			t.Fatalf("unmarshal response: %v", err)
 		}
 
-		direct, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+		direct, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -6947,7 +6971,7 @@ func TestSetTutorialUnlockedRoute(t *testing.T) {
 			"unknown field":    `{"tutorialKind":"tutorial","tutorialKey":"` + tutorialKey + `","unlocked":true,"expectedRevision":"0","extra":1}`,
 		} {
 			t.Run(name, func(t *testing.T) {
-				session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+				session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "", "local")
 				if err != nil {
 					t.Fatalf("LoadSave: %v", err)
 				}
@@ -6975,7 +6999,7 @@ func TestSetTutorialUnlockedRoute(t *testing.T) {
 
 func TestQuestsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -7029,7 +7053,7 @@ func TestSetQuestStepRoute(t *testing.T) {
 	)
 
 	t.Run("applies the quest step", func(t *testing.T) {
-		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -7048,7 +7072,7 @@ func TestSetQuestStepRoute(t *testing.T) {
 			t.Fatalf("decode route result: %v", err)
 		}
 
-		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave direct session: %v", err)
 		}
@@ -7079,7 +7103,7 @@ func TestSetQuestStepRoute(t *testing.T) {
 			"unknown field":    `{"questKind":"quest","questKey":"` + questKey + `","stepKind":"quest_step","stepKey":"` + stepKey + `","expectedRevision":"0","extra":1}`,
 		} {
 			t.Run(name, func(t *testing.T) {
-				session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+				session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "", "local")
 				if err != nil {
 					t.Fatalf("LoadSave: %v", err)
 				}
@@ -7158,7 +7182,7 @@ func TestGetFavoritePresetsRoute(t *testing.T) {
 		0: true,
 		3: true,
 	}
-	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -7230,7 +7254,7 @@ func TestDeleteFavoritePresetRoute(t *testing.T) {
 		0: true,
 		2: true,
 	}
-	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -7283,7 +7307,7 @@ func TestSetFavoritePresetRoute(t *testing.T) {
 		0: true,
 		2: true,
 	}
-	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -7337,7 +7361,7 @@ func TestApplyFavoritePresetRoute(t *testing.T) {
 	path := writeFavoritesSwaggerFixture(t, map[int]bool{3: true})
 
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, path, "pc")
+	session, err := savesession.LoadSave(saveEngine, path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -7980,7 +8004,7 @@ func createBuildTemplate(t *testing.T, handler http.Handler, body string) *httpt
 
 func TestCreateBuildTemplateRoute_Success(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8025,7 +8049,7 @@ func TestCreateBuildTemplateRoute_Success(t *testing.T) {
 
 func TestCreateBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8099,7 +8123,7 @@ func getBuildTemplatePreview(t *testing.T, handler http.Handler, templateID stri
 
 func TestGetBuildTemplatePreviewRoute_Success(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8177,7 +8201,7 @@ func TestGetBuildTemplatePreviewRoute_Success(t *testing.T) {
 
 func TestGetBuildTemplatePreviewRoute_RejectsMalformedBodies(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8207,7 +8231,7 @@ func TestGetBuildTemplatePreviewRoute_RejectsMalformedBodies(t *testing.T) {
 
 func TestGetBuildTemplatePreviewRoute_UnknownTemplate(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8292,7 +8316,7 @@ func applyBuildTemplate(t *testing.T, handler http.Handler, templateID string, b
 
 func TestApplyBuildTemplateRoute_Success(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8371,7 +8395,7 @@ func TestApplyBuildTemplateRoute_Success(t *testing.T) {
 
 func TestApplyBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8402,7 +8426,7 @@ func TestApplyBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
 
 func TestApplyBuildTemplateRoute_UnknownTemplate(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8472,7 +8496,7 @@ func TestApplyBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
 
 func TestApplyBuildTemplateRoute_NonCanonicalRevisionReturns400(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8519,7 +8543,7 @@ func TestApplyBuildTemplateRoute_NonCanonicalRevisionReturns400(t *testing.T) {
 
 func TestApplyBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -8578,7 +8602,7 @@ func TestApplyBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
 
 func TestSaveValidationReportRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8609,7 +8633,7 @@ func TestSaveValidationReportRouteMatchesTheGetter(t *testing.T) {
 // an unknown one must be rejected rather than silently ignored.
 func TestSaveValidationReportRouteForwardsTheScope(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8643,7 +8667,7 @@ func TestSaveValidationReportRouteForwardsTheScope(t *testing.T) {
 
 func TestSaveValidationReportRouteRejectsAMalformedCharacterID(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8759,7 +8783,7 @@ func TestSaveValidationReportRouteIsDescribedInTheOpenAPIDocument(t *testing.T) 
 // the request body must reach the endpoint unchanged.
 func TestRepairPlanRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8804,7 +8828,7 @@ func TestRepairPlanRouteMatchesTheGetter(t *testing.T) {
 // against any revision would silently address findings that have moved.
 func TestRepairPlanRouteRejectsAStaleRevision(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8857,7 +8881,7 @@ func TestRepairPlanRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 
 func TestApplyRepairsRouteForwardsTheSealedSelection(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8930,7 +8954,7 @@ func TestApplyRepairsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 
 func TestGetDiagnosticLogRouteReturnsDiagnosticLog(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8953,7 +8977,7 @@ func TestGetDiagnosticLogRouteReturnsDiagnosticLog(t *testing.T) {
 
 func TestGetDiagnosticLogRouteForwardsParameters(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -8976,7 +9000,7 @@ func TestGetDiagnosticLogRouteForwardsParameters(t *testing.T) {
 
 func TestGetDiagnosticLogRouteRejectsInvalidParameters(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -9212,5 +9236,65 @@ func TestOpenAPIClassDocumentBoundsMatchTheBackend(t *testing.T) {
 	}
 	if level := properties["level"].Properties.Value; level.Maximum != nil && *level.Maximum == 99 {
 		t.Error("ClassDocument.level.value carries the attribute maximum 99; the level range is 1..713")
+	}
+}
+
+// TestLoadSaveRouteRequiresAnExplicitSourceKind pins the transport half of the
+// source-kind contract. The route supplies no default, so a body that omits the
+// field, or states an aliased or differently cased one, is rejected with 400 and
+// leaves no session behind; only the two exact values create one, and the
+// response echoes back the exact source path and kind.
+func TestLoadSaveRouteRequiresAnExplicitSourceKind(t *testing.T) {
+	for _, rejected := range []string{
+		`{"source":%s,"expectedPlatform":"pc"}`,
+		`{"source":%s,"expectedPlatform":"pc","sourceKind":""}`,
+		`{"source":%s,"expectedPlatform":"pc","sourceKind":"Local"}`,
+		`{"source":%s,"expectedPlatform":"pc","sourceKind":"local "}`,
+		`{"source":%s,"expectedPlatform":"pc","sourceKind":"remote"}`,
+	} {
+		t.Run(rejected, func(t *testing.T) {
+			saveEngine := saveengine.New()
+			source := writePCFixture(t)
+			body := fmt.Sprintf(rejected, strconv.Quote(source))
+
+			recorder := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", body)
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+			// No session exists, so the read-back route cannot resolve one either.
+			var session saveengine.SessionInfo
+			_ = json.Unmarshal(recorder.Body.Bytes(), &session)
+			readBack := doSave(t, saveEngine,
+				http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID, "")
+			if readBack.Code == http.StatusOK {
+				t.Error("a rejected source kind left a readable session behind")
+			}
+		})
+	}
+
+	for _, sourceKind := range []string{"local", "temporary"} {
+		t.Run(sourceKind, func(t *testing.T) {
+			saveEngine := saveengine.New()
+			source := writePCFixture(t)
+			body := `{"source":` + strconv.Quote(source) +
+				`,"expectedPlatform":"pc","sourceKind":"` + sourceKind + `"}`
+
+			recorder := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", body)
+			assertOK(t, recorder, "POST /api/v1/save-sessions")
+
+			var session saveengine.SessionInfo
+			if err := json.Unmarshal(recorder.Body.Bytes(), &session); err != nil {
+				t.Fatalf("decode LoadSave body %q: %v", recorder.Body.String(), err)
+			}
+			if session.SourcePath != source {
+				t.Errorf("sourcePath = %q, want the exact source %q", session.SourcePath, source)
+			}
+			if session.SourceKind != sourceKind {
+				t.Errorf("sourceKind = %q, want %q", session.SourceKind, sourceKind)
+			}
+			if session.SaveRevision != "0" {
+				t.Errorf("saveRevision = %q, want %q", session.SaveRevision, "0")
+			}
+		})
 	}
 }

@@ -190,7 +190,7 @@ func writeRebuildFixture(t *testing.T, platform Platform, cfg rebuildFixtureSlot
 	copy(slotBytes, data[slotBase:slotBase+characterSlotDataSize])
 
 	engine := New()
-	info, err := engine.LoadSave(path, "")
+	info, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

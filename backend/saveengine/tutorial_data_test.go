@@ -59,7 +59,7 @@ func TestGetTutorialIDsReadsBothPlatformsAndUsesDeclaredSize(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
 				writeTutorialDataFixture(t, platform, true, 0x24, []uint32{2010, 1590}),
-				string(platform))
+				string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -77,7 +77,7 @@ func TestGetTutorialIDsReadsBothPlatformsAndUsesDeclaredSize(t *testing.T) {
 func TestGetTutorialIDsDoesNotReadResidualSlot(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeTutorialDataFixture(t, PlatformPC, false, 0, nil), "pc")
+		writeTutorialDataFixture(t, PlatformPC, false, 0, nil), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -93,7 +93,7 @@ func TestGetTutorialIDsDoesNotReadResidualSlot(t *testing.T) {
 func TestGetTutorialIDsRejectsCountOutsideTheDeclaredPayload(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeTutorialDataFixture(t, PlatformPC, true, 8, []uint32{2010, 2020}), "pc")
+		writeTutorialDataFixture(t, PlatformPC, true, 8, []uint32{2010, 2020}), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestGetTutorialIDsRejectsCountOutsideTheDeclaredPayload(t *testing.T) {
 func TestGetTutorialIDsRejectsAPayloadTooSmallForTheCount(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeTutorialDataFixture(t, PlatformPC, true, tutorialDataCountSize-1, nil), "pc")
+		writeTutorialDataFixture(t, PlatformPC, true, tutorialDataCountSize-1, nil), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

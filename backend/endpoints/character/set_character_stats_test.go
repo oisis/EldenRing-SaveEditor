@@ -17,7 +17,7 @@ var setCharacterStatsAttributes = CharacterAttributes{
 func TestSetCharacterStatsReturnsTheSaveEngineReceipt(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -58,7 +58,7 @@ func TestSetCharacterStatsRejectsMissingEngine(t *testing.T) {
 func TestSetCharacterStatsDelegatesValidationWithoutMutation(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

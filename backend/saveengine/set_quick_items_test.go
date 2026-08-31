@@ -129,7 +129,7 @@ func TestSetQuickItemsWritesBothPlatformsAndReloads(t *testing.T) {
 			}{{setQuickTestGameID1, 3}, {setQuickTestGameID2, 2}})
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, platform)
+			loaded, err := engine.LoadSave(source, platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -221,7 +221,7 @@ func TestSetQuickItemsWritesBothPlatformsAndReloads(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, platform)
+			reloaded, err := reloadedEngine.LoadSave(target, platform, "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -242,7 +242,7 @@ func TestSetQuickItemsRejectsInvalidPlansWithoutMutation(t *testing.T) {
 		quantity uint32
 	}{{setQuickTestGameID1, 1}, {setQuickTestGameID2, 0}, {setQuickTestAccessory, 1}})
 	engine := New()
-	loaded, err := engine.LoadSave(source, platform)
+	loaded, err := engine.LoadSave(source, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -314,7 +314,7 @@ func TestSetQuickItemsRejectsInconsistentExistingState(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(source, platform)
+	loaded, err := engine.LoadSave(source, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

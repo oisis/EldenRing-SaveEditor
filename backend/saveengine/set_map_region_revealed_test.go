@@ -30,7 +30,7 @@ func TestSetMapRegionRevealedWritesFlagAndFragmentOnBothPlatforms(t *testing.T) 
 		t.Run(string(platform), func(t *testing.T) {
 			path, content := setWhetbladeFixture(t, platform)
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -69,7 +69,7 @@ func TestSetMapRegionRevealedWritesFlagAndFragmentOnBothPlatforms(t *testing.T) 
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -97,7 +97,7 @@ func TestSetMapRegionRevealedWritesFlagAndFragmentOnBothPlatforms(t *testing.T) 
 func TestSetMapRegionRevealedWithoutFragmentWritesOneBit(t *testing.T) {
 	path, content := setWhetbladeFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestSetMapRegionRevealedWithoutFragmentWritesOneBit(t *testing.T) {
 func TestSetMapRegionRevealedRejectsInvalidRequestsWithoutMutating(t *testing.T) {
 	path, content := setWhetbladeFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

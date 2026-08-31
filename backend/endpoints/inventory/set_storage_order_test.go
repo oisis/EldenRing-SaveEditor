@@ -14,7 +14,7 @@ func setStorageOrderEndpointTarget(
 	t.Helper()
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetStorageFixture(t, "pc", true, getStorageAnchorAt), "pc")
+		writeGetStorageFixture(t, "pc", true, getStorageAnchorAt), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestSetStorageOrderLeavesSetInventoryOrderUnaffected(t *testing.T) {
 func TestSetStorageOrderOnPS4(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeGetStorageFixture(t, "ps4", true, getStorageAnchorAt), "ps4")
+		writeGetStorageFixture(t, "ps4", true, getStorageAnchorAt), "ps4", "local")
 	if err != nil {
 		t.Fatalf("LoadSave PS4: %v", err)
 	}

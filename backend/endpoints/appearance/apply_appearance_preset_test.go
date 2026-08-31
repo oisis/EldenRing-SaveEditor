@@ -79,7 +79,7 @@ func TestApplyAppearancePresetCommitsStoredTypeAAndTypeBPresets(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.presetID, func(t *testing.T) {
 			engine := saveengine.New()
-			loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "")
+			loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -112,7 +112,7 @@ func TestApplyAppearancePresetCommitsStoredTypeAAndTypeBPresets(t *testing.T) {
 
 func TestApplyAppearancePresetRejectsInvalidPresetWithoutMutation(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "")
+	loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestApplyAppearancePresetRejectsUnconfirmedCatalogMapping(t *testing.T) {
 		t.Fatalf("NewWithData: %v", err)
 	}
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "")
+	loaded, err := engine.LoadSave(writeApplyAppearanceFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

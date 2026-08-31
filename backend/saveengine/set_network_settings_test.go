@@ -73,7 +73,7 @@ func TestSetNetworkSettingsRoundTripsSupportedLayouts(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, test.platform)
+			loaded, err := engine.LoadSave(source, test.platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -136,7 +136,7 @@ func TestSetNetworkSettingsRoundTripsSupportedLayouts(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloaded := New()
-			again, err := reloaded.LoadSave(target, test.platform)
+			again, err := reloaded.LoadSave(target, test.platform, "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -174,7 +174,7 @@ func TestSetNetworkSettingsRejectsInvalidInputWithoutMutation(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeNetworkPCFixture(t, networkUserData11ForSet(t, "pc", "DFLT")), "pc")
+				writeNetworkPCFixture(t, networkUserData11ForSet(t, "pc", "DFLT")), "pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -196,7 +196,7 @@ func TestSetNetworkSettingsRejectsInvalidInputWithoutMutation(t *testing.T) {
 func TestSetNetworkSettingsRejectsARevisionConflictBeforeMutation(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeNetworkPCFixture(t, networkUserData11ForSet(t, "pc", "DFLT")), "pc")
+		writeNetworkPCFixture(t, networkUserData11ForSet(t, "pc", "DFLT")), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

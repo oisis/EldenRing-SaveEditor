@@ -75,7 +75,7 @@ func loadSpectralSteedSession(
 
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeSpectralSteedFixture(t, flags, inventory, active), "pc")
+		writeSpectralSteedFixture(t, flags, inventory, active), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

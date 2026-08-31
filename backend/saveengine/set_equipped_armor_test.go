@@ -94,7 +94,7 @@ func TestSetEquippedArmorWritesAndClearsFourRepresentationsOnBothPlatforms(t *te
 	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, platform), string(platform))
+			loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, platform), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -163,7 +163,7 @@ func TestSetEquippedArmorWritesAndClearsFourRepresentationsOnBothPlatforms(t *te
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -183,7 +183,7 @@ func TestSetEquippedArmorWritesAndClearsFourRepresentationsOnBothPlatforms(t *te
 
 func TestSetEquippedArmorRejectsInvalidPlansWithoutMutation(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestSetEquippedArmorRejectsInvalidPlansWithoutMutation(t *testing.T) {
 
 func TestSetEquippedArmorRejectsClearWithoutNativeEmptyRecord(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, PlatformPC), "pc")
+	loaded, err := engine.LoadSave(writeSetEquippedArmorFixture(t, PlatformPC), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

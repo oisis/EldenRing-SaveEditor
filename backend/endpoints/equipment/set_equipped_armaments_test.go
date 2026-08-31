@@ -87,7 +87,7 @@ func TestSetEquippedArmamentsDefinitionMatchesRuntimeContract(t *testing.T) {
 func TestSetEquippedArmamentsValidatesCatalogAndCommits(t *testing.T) {
 	engine := saveengine.New()
 	loaded, err := engine.LoadSave(
-		writeSetEquippedArmamentsEndpointFixture(t, setArmamentsEndpointWeaponID), "pc")
+		writeSetEquippedArmamentsEndpointFixture(t, setArmamentsEndpointWeaponID), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestSetEquippedArmamentsRejectsInvalidRequestAndCatalogData(t *testing.T) {
 
 	const disabledEquipmentGameID = uint32(0x02FAF080)
 	loaded, err := engine.LoadSave(
-		writeSetEquippedArmamentsEndpointFixture(t, disabledEquipmentGameID), "pc")
+		writeSetEquippedArmamentsEndpointFixture(t, disabledEquipmentGameID), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

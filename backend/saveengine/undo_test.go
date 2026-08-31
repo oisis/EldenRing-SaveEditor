@@ -59,7 +59,7 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			source, runesAt := writeUndoFixture(t, platform)
 			engine := New()
-			loaded, err := engine.LoadSave(source, string(platform))
+			loaded, err := engine.LoadSave(source, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -155,7 +155,7 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 func TestUndoRejectsAWrongTokenCharacterOrRevisionWithoutChangingAnything(t *testing.T) {
 	source, runesAt := writeUndoFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -212,7 +212,7 @@ func TestUndoRejectsAWrongTokenCharacterOrRevisionWithoutChangingAnything(t *tes
 func TestTheNextCommitReplacesOrInvalidatesTheUndoPoint(t *testing.T) {
 	source, _ := writeUndoFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -277,7 +277,7 @@ func TestTheNextCommitReplacesOrInvalidatesTheUndoPoint(t *testing.T) {
 func TestWriteSaveClearsTheUndoPointOnlyWhenItSucceeds(t *testing.T) {
 	source, _ := writeUndoFixture(t, PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -327,7 +327,7 @@ func TestUndoRestoresTheClonedTargetSlotFlagAndProfileSummary(t *testing.T) {
 		t.Fatalf("read fixture: %v", err)
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -400,7 +400,7 @@ func TestUndoEndpointsRejectAnUnknownSessionOrSlot(t *testing.T) {
 	}
 
 	source, _ := writeUndoFixture(t, PlatformPC)
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -463,7 +463,7 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 			path, _, _, _ := writeSetAppearanceFixture(
 				t, PlatformPC, setAppearanceTestValues(0x11))
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(PlatformPC))
+			loaded, err := engine.LoadSave(path, string(PlatformPC), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -496,7 +496,7 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 func TestCommitCharacterRevisionRequiresAnOperationID(t *testing.T) {
 	engine := New()
 	source, _ := writeUndoFixture(t, PlatformPC)
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -513,7 +513,7 @@ func TestCommitCharacterRevisionRequiresAnOperationID(t *testing.T) {
 func TestCommitCharacterRevisionRefusesTheMutationWhenTheUndoPointCannotBeCaptured(t *testing.T) {
 	engine := New()
 	source, _ := writeUndoFixture(t, PlatformPC)
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

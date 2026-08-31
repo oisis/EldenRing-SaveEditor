@@ -138,7 +138,7 @@ func TestApplyFavoritePresetWritesExactFieldsAndPreservesVoiceAndOpaqueBlock(t *
 			}
 
 			engine := New()
-			loadedSession, err := engine.LoadSave(path, string(platform))
+			loadedSession, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -203,7 +203,7 @@ func TestApplyFavoritePresetWritesExactFieldsAndPreservesVoiceAndOpaqueBlock(t *
 			if _, err := engine.WriteSave(loadedSession.SaveSessionID, "1", savePath); err != nil {
 				t.Fatalf("WriteSave: %v", err)
 			}
-			reloaded, err := engine.LoadSave(savePath, string(platform))
+			reloaded, err := engine.LoadSave(savePath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload LoadSave: %v", err)
 			}
@@ -272,7 +272,7 @@ func TestApplyFavoritePresetUndoAndIdempotence(t *testing.T) {
 	)
 
 	engine := New()
-	loadedSession, err := engine.LoadSave(path, string(PlatformPC))
+	loadedSession, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -329,7 +329,7 @@ func TestApplyFavoritePresetUndoAndIdempotence(t *testing.T) {
 	}
 
 	// 3. Fresh session for testing complete undo restoration
-	loadedSession2, err := engine.LoadSave(path, string(PlatformPC))
+	loadedSession2, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -395,7 +395,7 @@ func TestApplyFavoritePresetRejectsInvalidRequests(t *testing.T) {
 	}
 
 	engine := New()
-	loadedSession, err := engine.LoadSave(path, string(PlatformPC))
+	loadedSession, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

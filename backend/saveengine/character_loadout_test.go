@@ -103,7 +103,7 @@ func TestGetCharacterLoadoutSnapshotReadsOneCoherentSnapshotOnBothPlatforms(t *t
 	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeCharacterLoadoutFixture(t, platform), string(platform))
+			loaded, err := engine.LoadSave(writeCharacterLoadoutFixture(t, platform), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -202,7 +202,7 @@ func TestGetCharacterLoadoutSnapshotRejectsInconsistentOwnedReference(t *testing
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, string(PlatformPC))
+	loaded, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -225,7 +225,7 @@ func TestGetCharacterLoadoutSnapshotRejectsActiveIndexWithoutOccupiedSpell(t *te
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, string(PlatformPC))
+	loaded, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

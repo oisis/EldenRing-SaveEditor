@@ -4,9 +4,8 @@
  * in this directory and never on the transport that fulfils it.
  *
  * `SaveSession` is a projection of the backend session contract as it exists
- * today: the backend reports exactly these four fields and the frontend adds
- * nothing to them. No revision, no source path and no validation status are
- * invented here; when the backend contract grows, this type grows with it.
+ * today and adds nothing to it. Every field is carried verbatim: the frontend
+ * invents no revision, derives no source and computes no change state.
  */
 export type SaveSession = {
   /** Backend session identifier, carried verbatim; the UI does not interpret it. */
@@ -15,16 +14,57 @@ export type SaveSession = {
   platform: string;
   /** Backend save format identifier, carried verbatim and never normalised. */
   format: string;
+  /**
+   * The exact path the backend created the session snapshot from, carried
+   * verbatim. It is display metadata: the frontend never resolves it, never
+   * reads it and never rebuilds a path from it.
+   */
+  sourcePath: string;
+  /** `local` or `temporary`, exactly as the backend reports it. */
+  sourceKind: string;
+  /**
+   * The backend's canonical decimal revision of this session. It stays a string
+   * end to end: the frontend never parses, increments or compares it
+   * numerically.
+   */
+  saveRevision: string;
+  /** The backend's change state. The frontend never derives or overrides it. */
   unsavedChanges: boolean;
 };
 
+/**
+ * What a source file is, as the backend contract defines it. The two values are
+ * the only accepted ones and are sent exactly as written here: the frontend adds
+ * no alias, no empty form and no default, so a caller must always state one.
+ */
+export type SaveSourceKind = "local" | "temporary";
+
 export type SaveSessionPort = {
   /**
-   * Creates a session from a source the host layer supplies. Both arguments are
-   * passed to the backend exactly as received: the backend owns path handling
-   * and platform validation.
+   * Opens the host's native file dialog and resolves with the chosen path.
+   *
+   * Cancelling is an ordinary outcome and not an error: it resolves with an
+   * empty string, and the caller must not load anything for it. The returned
+   * path is passed on to `loadSave` unchanged — the frontend never trims,
+   * resolves or validates it, because recognising a save is the backend's
+   * contract.
+   *
+   * It lives on this port rather than on one of its own because choosing the
+   * file is the first step of the session flow and its only caller; a separate
+   * host port would be a second injection point for a single method.
    */
-  loadSave: (source: string, expectedPlatform: string) => Promise<SaveSession>;
+  selectSaveFile: () => Promise<string>;
+  /**
+   * Creates a session from a source the host layer supplied. All three
+   * arguments are passed to the backend exactly as received: the backend owns
+   * path handling, platform validation and the source-kind rule, and rejects
+   * anything it does not accept.
+   */
+  loadSave: (
+    source: string,
+    expectedPlatform: string,
+    sourceKind: SaveSourceKind,
+  ) => Promise<SaveSession>;
   getLoadedSave: (saveSessionID: string) => Promise<SaveSession>;
   closeSave: (saveSessionID: string) => Promise<void>;
 };

@@ -135,7 +135,7 @@ func TestGetCharacterStatsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(string(testCase.platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeStatsFixture(t, testCase), string(testCase.platform))
+			loaded, err := engine.LoadSave(writeStatsFixture(t, testCase), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -173,7 +173,7 @@ func TestGetCharacterStatsReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeStatsFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeStatsFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -196,7 +196,7 @@ func TestGetCharacterStatsRejectsInvalidRequests(t *testing.T) {
 		slot:     2,
 		flag:     1,
 		noAnchor: true,
-	}), "")
+	}), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

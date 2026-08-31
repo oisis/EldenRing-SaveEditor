@@ -15,18 +15,38 @@ const (
 	PlatformPS4 Platform = "ps4"
 )
 
-// Session is the model of one loaded save. It deliberately holds no file path,
-// no handle, no offsets, no raw bytes and no character data: it recognises and
-// validates a container and carries the identity state of the records read from
-// it.
+// SourceKind states what the file a session was created from is. Only these two
+// values exist; a caller that supplies neither is rejected instead of being
+// defaulted, so a session never claims an origin nobody stated.
+//
+// SourceKindLocal is a durable file the user owns. SourceKindTemporary is a
+// working copy that is not the user's durable save; it exists for the later
+// deployment flow and carries no behaviour of its own at this stage.
+type SourceKind string
+
+const (
+	SourceKindLocal     SourceKind = "local"
+	SourceKindTemporary SourceKind = "temporary"
+)
+
+// Session is the model of one loaded save. It deliberately holds no handle, no
+// offsets, no raw bytes and no character data: it recognises and validates a
+// container and carries the identity state of the records read from it.
+//
+// sourcePath and sourceKind are desktop session metadata describing where the
+// private snapshot came from. They are not permission to read that file again:
+// the snapshot is taken once during LoadSave and every later read goes to it,
+// so removing or replacing the file leaves this session untouched.
 //
 // revision, ownedByLocator, ownedByID and ownedSeq are the private owned-item
-// identity state described in owned_item_id.go. None of them is part of
-// SessionInfo, so none of them leaves the package.
+// identity state described in owned_item_id.go. Of these only revision reaches
+// SessionInfo, and only through its canonical decimal rendering.
 type Session struct {
-	id       string
-	platform Platform
-	format   string
+	id         string
+	platform   Platform
+	format     string
+	sourcePath string
+	sourceKind SourceKind
 
 	// revision is the private saveRevision of this session. It starts at 0 and
 	// only commitRevision advances it.
@@ -55,10 +75,27 @@ type Session struct {
 
 // SessionInfo is the safe, public metadata of a session. It is the only session
 // representation that leaves the package.
+//
+// SourcePath is the exact path the snapshot was created from, carried verbatim:
+// it is never trimmed, recased, resolved or guessed. It is metadata about the
+// origin of the session and nothing more, so it grants no caller the right to
+// reopen that file.
+//
+// SourceKind is the caller's exact statement of what that path is, echoed back
+// unchanged.
+//
+// SaveRevision is the canonical decimal rendering of the private session
+// revision, "0" for a freshly loaded session. It is a string and not a number so
+// no consumer can round, increment or reorder it.
+//
+// The struct still exposes no handle, no offset, no snapshot and no save byte.
 type SessionInfo struct {
 	SaveSessionID string `json:"saveSessionID"`
 	Platform      string `json:"platform"`
 	Format        string `json:"format"`
+	SourcePath    string `json:"sourcePath"`
+	SourceKind    string `json:"sourceKind"`
+	SaveRevision  string `json:"saveRevision"`
 	// UnsavedChanges reports whether the private snapshot of the session carries a
 	// committed mutation. It is false for a freshly loaded session and stays false
 	// while every mutation is rejected or rolled back. A successful WriteSave
@@ -66,8 +103,15 @@ type SessionInfo struct {
 	UnsavedChanges bool `json:"unsavedChanges"`
 }
 
-// newSession creates a session with a fresh, non-empty identifier.
-func newSession(platform Platform, format string) (*Session, error) {
+// newSession creates a session with a fresh, non-empty identifier. sourcePath
+// and sourceKind are stored exactly as the caller validated them; this
+// constructor neither validates nor rewrites either value.
+func newSession(
+	platform Platform,
+	format string,
+	sourcePath string,
+	sourceKind SourceKind,
+) (*Session, error) {
 	id, err := newSessionID()
 	if err != nil {
 		return nil, err
@@ -76,6 +120,8 @@ func newSession(platform Platform, format string) (*Session, error) {
 		id:             id,
 		platform:       platform,
 		format:         format,
+		sourcePath:     sourcePath,
+		sourceKind:     sourceKind,
 		ownedByLocator: make(map[ownedItemLocator]string),
 		ownedByID:      make(map[string]ownedItemLocator),
 	}, nil
@@ -89,12 +135,19 @@ func newSessionID() (string, error) {
 	return hex.EncodeToString(raw), nil
 }
 
-// Info returns the metadata a caller may see.
+// Info returns the metadata a caller may see, as a value: the caller receives
+// an independent copy and can reach neither the session nor its snapshot.
+//
+// The caller must already hold Engine.mutex, like every other session helper:
+// the revision is read here.
 func (session *Session) Info() SessionInfo {
 	return SessionInfo{
 		SaveSessionID:  session.id,
 		Platform:       string(session.platform),
 		Format:         session.format,
+		SourcePath:     session.sourcePath,
+		SourceKind:     string(session.sourceKind),
+		SaveRevision:   session.revisionString(),
 		UnsavedChanges: session.dirty,
 	}
 }

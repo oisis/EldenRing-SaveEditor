@@ -13,6 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: validation.unresolvedRecords
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{0} record(s) could not be resolved."
+msgstr "{0} record(s) could not be resolved."
+
+#. placeholder {0}: validation.uncheckedScopes
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
+msgstr "{0} scope(s) could not be checked, so this save is not confirmed clean."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
+msgstr "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Active characters"
 msgstr "Active characters"
@@ -55,6 +69,10 @@ msgstr "Card {servedPage} of {cardCount}"
 msgid "Category"
 msgstr "Category"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Changes"
+msgstr "Changes"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Characters"
 msgstr "Characters"
@@ -63,6 +81,10 @@ msgstr "Characters"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Close"
 msgstr "Close"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Close Save"
+msgstr "Close Save"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Container"
@@ -92,6 +114,14 @@ msgstr "English"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
 msgstr "Family"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "File"
+msgstr "File"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Format"
+msgstr "Format"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Gestures"
@@ -243,21 +273,45 @@ msgstr "Next storage card"
 msgid "No active character is available."
 msgstr "No active character is available."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No file was chosen."
+msgstr "No file was chosen."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No items match the current search."
 msgstr "No items match the current search."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No save is open."
+msgstr "No save is open."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No save loaded."
 msgstr "No save loaded."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No unsaved changes"
+msgstr "No unsaved changes"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No variants are available."
 msgstr "No variants are available."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Open Save"
+msgstr "Open Save"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Opening save…"
+msgstr "Opening save…"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
 msgstr "Page {servedPage}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Platform"
+msgstr "Platform"
 
 #: src/App.tsx
 msgid "Polish"
@@ -300,9 +354,21 @@ msgstr "Results: {total}"
 msgid "Retry"
 msgstr "Retry"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Retry closing"
+msgstr "Retry closing"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Revision"
+msgstr "Revision"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "RL {level}"
 msgstr "RL {level}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save session"
+msgstr "Save session"
 
 #: src/App.tsx
 msgid "SaveForge 2.0"
@@ -315,6 +381,10 @@ msgstr "Search items"
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
 msgstr "Slot {slotNumber}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Source"
+msgstr "Source"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spells"
@@ -354,9 +424,17 @@ msgstr "Table"
 msgid "Talismans"
 msgstr "Talismans"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
+msgstr "The file chooser could not be opened. No file was selected and nothing was loaded."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
 msgstr "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The save was not opened for editing."
+msgstr "The save was not opened for editing."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -374,6 +452,28 @@ msgstr "This Inventory card is empty."
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr "This message is intentionally left untranslated in Polish."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save could not be checked, so it is not confirmed clean. The session is still open."
+msgstr "This save could not be checked, so it is not confirmed clean. The session is still open."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save could not be checked, so it was not opened for editing."
+msgstr "This save could not be checked, so it was not opened for editing."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save has no active character, so it cannot be edited. It was not opened for editing."
+msgstr "This save has no active character, so it cannot be edited. It was not opened for editing."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save has unsaved changes. Saving and discarding them are not available yet, so it cannot be closed or replaced."
+msgstr "This save has unsaved changes. Saving and discarding them are not available yet, so it cannot be closed or replaced."
+
+#. placeholder {0}: validation.errorCount
+#. placeholder {1}: validation.warningCount
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
+msgstr "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "This Storage card is empty."
@@ -408,6 +508,14 @@ msgstr "Unable to load the Storage Box."
 msgid "Unavailable"
 msgstr "Unavailable"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Unsaved changes"
+msgstr "Unsaved changes"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Validation report"
+msgstr "Validation report"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Variant details unavailable"
 msgstr "Variant details unavailable"
@@ -424,6 +532,10 @@ msgstr "Version"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "View"
 msgstr "View"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "View report"
+msgstr "View report"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"

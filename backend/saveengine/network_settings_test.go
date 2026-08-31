@@ -50,7 +50,7 @@ var wantNetworkSettings = gamecatalog.NetworkParamValues{
 
 func TestGetNetworkSettingsReadsAPCSave(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "DFLT")), "pc")
+	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "DFLT")), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestGetNetworkSettingsReadsAPCSave(t *testing.T) {
 
 func TestGetNetworkSettingsReadsAPS4Save(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeNetworkPS4Fixture(t, networkUserData11(t, "ps4", "DFLT")), "ps4")
+	session, err := engine.LoadSave(writeNetworkPS4Fixture(t, networkUserData11(t, "ps4", "DFLT")), "ps4", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestGetNetworkSettingsReadsAPS4Save(t *testing.T) {
 // decode into exactly the same values as the DFLT one.
 func TestGetNetworkSettingsReadsAZSTDRegulation(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "ZSTD")), "pc")
+	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "ZSTD")), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestGetNetworkSettingsReadsAZSTDRegulation(t *testing.T) {
 
 func TestGetNetworkSettingsRejectsMissingUnknownAndClosedSessions(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "DFLT")), "")
+	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "DFLT")), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -117,11 +117,11 @@ func TestGetNetworkSettingsRejectsMissingUnknownAndClosedSessions(t *testing.T) 
 
 func TestGetNetworkSettingsRejectsAContainerWithoutUserData11(t *testing.T) {
 	engine := New()
-	pc, err := engine.LoadSave(writeNetworkPCFixture(t, nil), "pc")
+	pc, err := engine.LoadSave(writeNetworkPCFixture(t, nil), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
-	ps4, err := engine.LoadSave(writeNetworkPS4Fixture(t, nil), "ps4")
+	ps4, err := engine.LoadSave(writeNetworkPS4Fixture(t, nil), "ps4", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestGetNetworkSettingsRejectsTruncatedUserData11(t *testing.T) {
 		"unaligned ciphertext": full[:len(full)-8],
 	} {
 		engine := New()
-		session, err := engine.LoadSave(writeNetworkPCFixture(t, userData11), "pc")
+		session, err := engine.LoadSave(writeNetworkPCFixture(t, userData11), "pc", "local")
 		if err != nil {
 			t.Fatalf("%s: LoadSave: %v", name, err)
 		}
@@ -171,7 +171,7 @@ func TestGetNetworkSettingsRejectsMalformedContainerData(t *testing.T) {
 		"archive without the param": foreign,
 	} {
 		engine := New()
-		session, err := engine.LoadSave(writeNetworkPCFixture(t, userData11), "pc")
+		session, err := engine.LoadSave(writeNetworkPCFixture(t, userData11), "pc", "local")
 		if err != nil {
 			t.Fatalf("%s: LoadSave: %v", name, err)
 		}
@@ -183,7 +183,7 @@ func TestGetNetworkSettingsRejectsMalformedContainerData(t *testing.T) {
 
 func TestGetNetworkSettingsRejectsAnUnsupportedCompressionFormat(t *testing.T) {
 	engine := New()
-	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "EDGE")), "pc")
+	session, err := engine.LoadSave(writeNetworkPCFixture(t, networkUserData11(t, "pc", "EDGE")), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestGetNetworkSettingsMutatesNothing(t *testing.T) {
 	}
 
 	engine := New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

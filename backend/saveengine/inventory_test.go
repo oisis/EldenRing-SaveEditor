@@ -244,7 +244,7 @@ func TestGetInventoryReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeInventoryFixture(t, content), string(content.platform))
+				writeInventoryFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -275,7 +275,7 @@ func TestGetInventoryReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 func TestGetInventoryFiltersBySection(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeInventoryFixture(t, inventoryTestActiveFixture(PlatformPC, 3, 0x0640)), "")
+		writeInventoryFixture(t, inventoryTestActiveFixture(PlatformPC, 3, 0x0640)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -313,7 +313,7 @@ func TestGetInventoryFiltersBySection(t *testing.T) {
 func TestGetInventoryPagesWithoutLosingTheNativeOrder(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeInventoryFixture(t, inventoryTestActiveFixture(PlatformPC, 1, 0x0640)), "")
+		writeInventoryFixture(t, inventoryTestActiveFixture(PlatformPC, 1, 0x0640)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -365,7 +365,7 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 	content.flag = 0
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -405,7 +405,7 @@ func TestGetInventoryMintsOneIdentityPerPhysicalRecord(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeInventoryFixture(t, content), string(content.platform))
+				writeInventoryFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -477,7 +477,7 @@ func TestGetInventoryRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content inventoryTestFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

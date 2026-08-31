@@ -59,7 +59,7 @@ func setWeaponUpgradeEndpointTarget(
 ) (*saveengine.Engine, string, string) {
 	t.Helper()
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSetWeaponUpgradeEndpointFixture(t, gameID), "pc")
+	loaded, err := engine.LoadSave(writeSetWeaponUpgradeEndpointFixture(t, gameID), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestSetWeaponUpgradeLevelDefinitionAndCatalogLimits(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := saveengine.New()
-			reloadedSession, err := reloadedEngine.LoadSave(targetFile, "pc")
+			reloadedSession, err := reloadedEngine.LoadSave(targetFile, "pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave reloaded: %v", err)
 			}

@@ -12,7 +12,7 @@ import (
 func TestApplyBuildTemplate_Success(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestApplyBuildTemplate_Success(t *testing.T) {
 func TestApplyBuildTemplate_BlockingPreviewCausesZeroMutation(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -219,7 +219,7 @@ func TestApplyBuildTemplate_BlockingPreviewCausesZeroMutation(t *testing.T) {
 func TestApplyBuildTemplate_StaleExpectedRevisionRejection(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -269,7 +269,7 @@ func TestApplyBuildTemplate_StaleExpectedRevisionRejection(t *testing.T) {
 func TestApplyBuildTemplate_NonCanonicalExpectedRevisionRejection(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -924,7 +924,7 @@ func TestRemoveOwnedItemLeavesTheSourceFileToWriteSave(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(source, string(PlatformPC))
+	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -952,7 +952,7 @@ func TestRemoveOwnedItemLeavesTheSourceFileToWriteSave(t *testing.T) {
 
 	// The written save carries the removal: reloading it reports one row less.
 	reloadEngine := New()
-	reloaded, err := reloadEngine.LoadSave(target, string(PlatformPC))
+	reloaded, err := reloadEngine.LoadSave(target, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave of the written save: %v", err)
 	}

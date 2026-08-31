@@ -1,6 +1,21 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 import { useCharacterPort } from "./characterClient";
+import type { CharacterPort } from "./characterPort";
+
+/**
+ * The one description of the character-list query: its key, its call and its
+ * retry rule. Both the hook below and the session flow that has to fetch the
+ * list imperatively build on it, so a session can never be read through two
+ * differently configured queries.
+ */
+export function saveCharactersQuery(port: CharacterPort, saveSessionID: string) {
+  return {
+    queryKey: queryKeys.saveCharacters(saveSessionID),
+    queryFn: () => port.getSaveCharacters(saveSessionID),
+    retry: false,
+  };
+}
 
 /**
  * Reads every character slot of a session. Feature modules use this and never
@@ -18,10 +33,10 @@ export function useSaveCharacters(saveSessionID: string | undefined) {
   // A key placeholder only: with no identifier there is no query function that
   // could pass it to the backend.
   const identifier = saveSessionID ?? "";
+  const query = saveCharactersQuery(port, identifier);
 
   return useQuery({
-    queryKey: queryKeys.saveCharacters(identifier),
-    queryFn: identifier === "" ? skipToken : () => port.getSaveCharacters(identifier),
-    retry: false,
+    ...query,
+    queryFn: identifier === "" ? skipToken : query.queryFn,
   });
 }

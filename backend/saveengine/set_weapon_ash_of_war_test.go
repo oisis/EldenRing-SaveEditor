@@ -59,7 +59,7 @@ func setWeaponAshOfWarTarget(
 	t.Helper()
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeSetWeaponAshOfWarFixture(t, platform, currentAshOfWarHandle), string(platform))
+		writeSetWeaponAshOfWarFixture(t, platform, currentAshOfWarHandle), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -146,7 +146,7 @@ func TestSetWeaponAshOfWarAttachesChangesRemovesAndReloadsOnBothPlatforms(t *tes
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}

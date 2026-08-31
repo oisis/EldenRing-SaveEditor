@@ -7,9 +7,14 @@
 package desktop
 
 import (
+	"context"
+	"errors"
+	"sync"
+
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -32,6 +37,19 @@ type Bridge struct {
 	// root. The bridge only passes it to public endpoints and resolves nothing
 	// through it itself.
 	gameCatalog *gamecatalog.Catalog
+	// chooseSaveFile is the host's native file dialog, injected by the
+	// composition root so the bridge can be exercised without a real window. The
+	// bridge holds no dialog implementation of its own.
+	chooseSaveFile SaveFileChooser
+
+	// mutex guards hostContext only. It is not the session lock: SaveEngine owns
+	// that, and no save state lives here.
+	mutex sync.Mutex
+	// hostContext is the Wails context handed to Startup by the application
+	// lifecycle. It is per-bridge state rather than a package-level variable, so
+	// two bridges never share one host, and it is only ever read through
+	// hostContextOrNil.
+	hostContext context.Context
 }
 
 // NewBridge builds the bridge with the application version, SaveEngine and
@@ -42,12 +60,56 @@ func NewBridge(
 	applicationVersion string,
 	saveEngine *saveengine.Engine,
 	gameCatalog *gamecatalog.Catalog,
+	chooseSaveFile SaveFileChooser,
 ) *Bridge {
 	return &Bridge{
 		applicationVersion: applicationVersion,
 		saveEngine:         saveEngine,
 		gameCatalog:        gameCatalog,
+		chooseSaveFile:     chooseSaveFile,
 	}
+}
+
+// Startup receives the Wails context from the application lifecycle. It is
+// wired as OnStartup by the composition root and is the only way the host
+// context enters the bridge; nothing here reads a package-level context.
+func (b *Bridge) Startup(ctx context.Context) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	b.hostContext = ctx
+}
+
+func (b *Bridge) hostContextOrNil() context.Context {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	return b.hostContext
+}
+
+// SelectSaveFile opens the host's native dialog and returns the path the user
+// chose, exactly as the host reported it. Nothing here trims, resolves,
+// recases or validates the path: recognising a save is SaveEngine's contract,
+// reached later through LoadSave.
+//
+// Cancelling is an ordinary outcome, not an error: it returns an empty path and
+// a nil error, and no session is created for it. This method opens no file,
+// loads nothing and touches no session, so a cancelled or failed dialog leaves
+// the application exactly as it was.
+func (b *Bridge) SelectSaveFile() (string, error) {
+	if b.chooseSaveFile == nil {
+		return "", errors.New("the native file dialog is not available")
+	}
+	ctx := b.hostContextOrNil()
+	if ctx == nil {
+		return "", errors.New("the desktop host is not started yet")
+	}
+	path, err := b.chooseSaveFile(ctx)
+	if err != nil {
+		// Fail closed: a failed dialog yields no path at all, so a caller can
+		// never load whatever partial value the host reported alongside its
+		// error. The error itself is propagated unchanged.
+		return "", err
+	}
+	return path, nil
 }
 
 // GetApplicationInfo delegates to the GetApplicationInfo endpoint and returns
@@ -58,9 +120,16 @@ func (b *Bridge) GetApplicationInfo() (application.GetApplicationInfoResult, err
 }
 
 // LoadSave delegates to the LoadSave endpoint and returns its result and error
-// unchanged. The endpoint and SaveEngine own all file and platform behavior.
-func (b *Bridge) LoadSave(source string, expectedPlatform string) (savesession.LoadSaveResult, error) {
-	return savesession.LoadSave(b.saveEngine, source, expectedPlatform)
+// unchanged. The endpoint and SaveEngine own all file, platform and source-kind
+// behavior. All three values are forwarded exactly as received: the bridge
+// supplies no default source kind, so a caller that states none is rejected by
+// the endpoint rather than silently given "local" here.
+func (b *Bridge) LoadSave(
+	source string,
+	expectedPlatform string,
+	sourceKind string,
+) (savesession.LoadSaveResult, error) {
+	return savesession.LoadSave(b.saveEngine, source, expectedPlatform, sourceKind)
 }
 
 // GetLoadedSave delegates to the GetLoadedSave endpoint and returns its result
@@ -73,6 +142,20 @@ func (b *Bridge) GetLoadedSave(saveSessionID string) (savesession.GetLoadedSaveR
 // unchanged.
 func (b *Bridge) CloseSave(saveSessionID string) error {
 	return savesession.CloseSave(b.saveEngine, saveSessionID)
+}
+
+// GetSaveValidationReport delegates to the GetSaveValidationReport endpoint and
+// returns its result and error unchanged. The session, the slot and the scope
+// are forwarded exactly as received: which scopes exist, how a scope is judged,
+// what coverage means and which findings a report may carry are the endpoint's
+// contract, and the bridge neither restates nor aggregates any of it.
+func (b *Bridge) GetSaveValidationReport(
+	saveSessionID string,
+	characterID int,
+	scope string,
+) (diagnostics.GetSaveValidationReportResult, error) {
+	return diagnostics.GetSaveValidationReport(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, scope)
 }
 
 // GetSaveCharacters delegates to the GetSaveCharacters endpoint and returns

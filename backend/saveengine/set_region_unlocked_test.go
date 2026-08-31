@@ -59,7 +59,7 @@ func TestSetRegionUnlockedPCAndPS4(t *testing.T) {
 			}
 			path, _, loaded := writeRebuildFixture(t, tc.platform, cfg)
 			engine := New()
-			info, err := engine.LoadSave(path, string(tc.platform))
+			info, err := engine.LoadSave(path, string(tc.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -141,7 +141,7 @@ func TestSetRegionUnlockedIdempotent(t *testing.T) {
 	}
 	path, _, _ := writeRebuildFixture(t, PlatformPC, cfg)
 	engine := New()
-	info, err := engine.LoadSave(path, string(PlatformPC))
+	info, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestSetRegionUnlockedRejectsInvalidAndInactiveRequests(t *testing.T) {
 	}
 	path, _, _ := writeRebuildFixture(t, PlatformPC, cfg)
 	engine := New()
-	info, err := engine.LoadSave(path, string(PlatformPC))
+	info, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

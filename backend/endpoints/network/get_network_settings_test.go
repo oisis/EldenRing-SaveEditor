@@ -51,7 +51,7 @@ var wantSettings = gamecatalog.NetworkParamValues{
 
 func TestGetNetworkSettingsReturnsTheStoredParameters(t *testing.T) {
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+	session, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestGetNetworkSettingsReturnsTheStoredParameters(t *testing.T) {
 // decoded value are part of the contract.
 func TestGetNetworkSettingsSerialisesTheExactValues(t *testing.T) {
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+	session, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

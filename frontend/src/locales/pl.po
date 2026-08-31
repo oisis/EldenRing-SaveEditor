@@ -13,6 +13,20 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: validation.unresolvedRecords
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{0} record(s) could not be resolved."
+msgstr "Nie udało się rozpoznać rekordów: {0}."
+
+#. placeholder {0}: validation.uncheckedScopes
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
+msgstr "Nie udało się sprawdzić zakresów: {0}, więc ten save nie jest potwierdzony jako poprawny."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
+msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Active characters"
 msgstr "Aktywne postacie"
@@ -55,6 +69,10 @@ msgstr "Karta {servedPage} z {cardCount}"
 msgid "Category"
 msgstr "Kategoria"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Changes"
+msgstr "Zmiany"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Characters"
 msgstr "Postacie"
@@ -63,6 +81,10 @@ msgstr "Postacie"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Close"
 msgstr "Zamknij"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Close Save"
+msgstr "Zamknij save"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Container"
@@ -92,6 +114,14 @@ msgstr "angielski"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
 msgstr "Rodzina"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "File"
+msgstr "Plik"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Format"
+msgstr "Format"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Gestures"
@@ -243,21 +273,45 @@ msgstr "Następna karta skrzyni"
 msgid "No active character is available."
 msgstr "Brak dostępnej aktywnej postaci."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No file was chosen."
+msgstr "Nie wybrano pliku."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No items match the current search."
 msgstr "Brak przedmiotów pasujących do wyszukiwania."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No save is open."
+msgstr "Żaden save nie jest otwarty."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No save loaded."
 msgstr "Nie wczytano pliku save."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "No unsaved changes"
+msgstr "Brak niezapisanych zmian"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No variants are available."
 msgstr "Brak dostępnych wariantów."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Open Save"
+msgstr "Otwórz save"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Opening save…"
+msgstr "Otwieranie save…"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
 msgstr "Strona {servedPage}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Platform"
+msgstr "Platforma"
 
 #: src/App.tsx
 msgid "Polish"
@@ -300,9 +354,21 @@ msgstr "Wyniki: {total}"
 msgid "Retry"
 msgstr "Ponów"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Retry closing"
+msgstr "Ponów zamykanie"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Revision"
+msgstr "Rewizja"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "RL {level}"
 msgstr "RL {level}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save session"
+msgstr "Sesja save"
 
 #: src/App.tsx
 msgid "SaveForge 2.0"
@@ -315,6 +381,10 @@ msgstr "Szukaj przedmiotów"
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
 msgstr "Slot {slotNumber}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Source"
+msgstr "Źródło"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spells"
@@ -354,9 +424,17 @@ msgstr "Tabela"
 msgid "Talismans"
 msgstr "Talizmany"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
+msgstr "Nie udało się otworzyć okna wyboru pliku. Nie wybrano pliku i niczego nie wczytano."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
 msgstr "Ekwipunek i skrzynia zostały odczytane w różnych rewizjach save. Wczytaj postać ponownie, zanim zaufasz temu widokowi."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The save was not opened for editing."
+msgstr "Save nie został otwarty do edycji."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -374,6 +452,28 @@ msgstr "Ta karta ekwipunku jest pusta."
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr ""
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save could not be checked, so it is not confirmed clean. The session is still open."
+msgstr "Nie udało się sprawdzić tego save, więc nie jest potwierdzony jako poprawny. Sesja pozostaje otwarta."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save could not be checked, so it was not opened for editing."
+msgstr "Nie udało się sprawdzić tego save, więc nie został otwarty do edycji."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save has no active character, so it cannot be edited. It was not opened for editing."
+msgstr "Ten save nie ma aktywnej postaci, więc nie można go edytować. Nie został otwarty do edycji."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save has unsaved changes. Saving and discarding them are not available yet, so it cannot be closed or replaced."
+msgstr "Ten save ma niezapisane zmiany. Zapis i odrzucenie zmian nie są jeszcze dostępne, więc nie można go zamknąć ani zastąpić."
+
+#. placeholder {0}: validation.errorCount
+#. placeholder {1}: validation.warningCount
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
+msgstr "Ten save otwarto z liczbą błędów {0} i ostrzeżeń {1} zgłoszonych przez backend."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "This Storage card is empty."
@@ -408,6 +508,14 @@ msgstr "Nie udało się wczytać skrzyni."
 msgid "Unavailable"
 msgstr "Niedostępne"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Unsaved changes"
+msgstr "Niezapisane zmiany"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Validation report"
+msgstr "Raport walidacji"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Variant details unavailable"
 msgstr "Szczegóły wariantu niedostępne"
@@ -424,6 +532,10 @@ msgstr "Wersja"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "View"
 msgstr "Widok"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "View report"
+msgstr "Pokaż raport"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"

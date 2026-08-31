@@ -245,7 +245,7 @@ func TestGetEquippedSpellsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeSpellsFixture(t, testCase.content), string(testCase.content.platform))
+			loaded, err := engine.LoadSave(writeSpellsFixture(t, testCase.content), string(testCase.content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -278,7 +278,7 @@ func TestGetEquippedSpellsPreservesTheEmptySentinelOfEveryRecord(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -309,7 +309,7 @@ func TestGetEquippedSpellsReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -401,7 +401,7 @@ func TestGetEquippedSpellsComputesTheAvailableMemorySlots(t *testing.T) {
 			content.projectileCount = 7
 
 			engine := New()
-			loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "")
+			loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -422,7 +422,7 @@ func TestGetEquippedSpellsRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content spellsFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeSpellsFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}
@@ -523,7 +523,7 @@ func TestGetEquippedSpellsMutatesNothing(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -567,7 +567,7 @@ func TestSetEquippedSpellsHappyPath(t *testing.T) {
 			}
 			path := writeSpellsFixture(t, content)
 			engine := New()
-			loaded, err := engine.LoadSave(path, "")
+			loaded, err := engine.LoadSave(path, "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -606,7 +606,7 @@ func TestSetEquippedSpellsCapacityWithAndWithoutMoon(t *testing.T) {
 	}
 	pathNoMoon := writeSpellsFixture(t, contentNoMoon)
 	engineNoMoon := New()
-	loadedNoMoon, err := engineNoMoon.LoadSave(pathNoMoon, "")
+	loadedNoMoon, err := engineNoMoon.LoadSave(pathNoMoon, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -624,7 +624,7 @@ func TestSetEquippedSpellsCapacityWithAndWithoutMoon(t *testing.T) {
 	}
 	pathMoon := writeSpellsFixture(t, contentMoon)
 	engineMoon := New()
-	loadedMoon, err := engineMoon.LoadSave(pathMoon, "")
+	loadedMoon, err := engineMoon.LoadSave(pathMoon, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -651,7 +651,7 @@ func TestSetEquippedSpellsRejectsNonEmptyTailPositions(t *testing.T) {
 	}
 	path := writeSpellsFixture(t, content)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -669,7 +669,7 @@ func TestSetEquippedSpellsPreservesPositions13And14Bytes(t *testing.T) {
 	}
 	path := writeSpellsFixture(t, content)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -709,7 +709,7 @@ func TestSetEquippedSpellsActiveIndexBehavior(t *testing.T) {
 	}
 	path := writeSpellsFixture(t, content)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -759,7 +759,7 @@ func TestSetEquippedSpellsRejectsInvalidRecordPairInPlayableSlots(t *testing.T) 
 	}
 	path := writeSpellsFixture(t, content)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

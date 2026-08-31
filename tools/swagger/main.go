@@ -375,9 +375,10 @@ func requireJSONBody(request *http.Request) error {
 	return nil
 }
 
-// loadSaveRequest is the JSON body of POST /api/v1/save-sessions. Both fields
-// reach LoadSave exactly as sent: they are never trimmed, normalised or given a
-// default here.
+// loadSaveRequest is the JSON body of POST /api/v1/save-sessions. All three
+// fields reach LoadSave exactly as sent: they are never trimmed, normalised or
+// given a default here. sourceKind in particular has no default: an omitted
+// field stays the empty string, which the endpoint rejects.
 type getResourcePresentationSummariesRequest struct {
 	Identities []catalog.ResourcePresentationIdentity `json:"identities"`
 }
@@ -385,6 +386,7 @@ type getResourcePresentationSummariesRequest struct {
 type loadSaveRequest struct {
 	Source           string `json:"source"`
 	ExpectedPlatform string `json:"expectedPlatform"`
+	SourceKind       string `json:"sourceKind"`
 }
 
 // writeSaveRequest is the JSON body of POST
@@ -915,7 +917,7 @@ func registerSaveSessionRoutes(
 			writeError(writer, http.StatusBadRequest, err)
 			return
 		}
-		result, err := savesession.LoadSave(saveEngine, body.Source, body.ExpectedPlatform)
+		result, err := savesession.LoadSave(saveEngine, body.Source, body.ExpectedPlatform, body.SourceKind)
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return

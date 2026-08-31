@@ -88,7 +88,7 @@ func TestGetPhysickMixtureReturnsTheActiveMixtureOfALoadedSession(t *testing.T) 
 	tears := [2]uint32{0x40002AF9, 0xFFFFFFFF}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetPhysickMixtureFixture(t, tears), "")
+	loaded, err := engine.LoadSave(writeGetPhysickMixtureFixture(t, tears), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

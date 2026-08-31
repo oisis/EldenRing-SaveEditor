@@ -9,7 +9,7 @@ import (
 func TestDeleteFavoritePresetEndpointSuccess(t *testing.T) {
 	path := writeEndpointFavoritesFixture(t, "pc", map[int]bool{2: true})
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestDeleteFavoritePresetEndpointRejectsMissingEngine(t *testing.T) {
 func TestDeleteFavoritePresetEndpointDelegatesValidation(t *testing.T) {
 	path := writeEndpointFavoritesFixture(t, "pc", nil)
 	engine := saveengine.New()
-	session, err := engine.LoadSave(path, "pc")
+	session, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

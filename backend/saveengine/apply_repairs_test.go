@@ -8,7 +8,7 @@ import (
 func TestApplyRepairPlan_PreflightFailureLeavesTheWholeSnapshotUntouched(t *testing.T) {
 	fixture := writeApplyTemplateFixture(t, PlatformPC, false)
 	engine := New()
-	session, err := engine.LoadSave(fixture, "pc")
+	session, err := engine.LoadSave(fixture, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

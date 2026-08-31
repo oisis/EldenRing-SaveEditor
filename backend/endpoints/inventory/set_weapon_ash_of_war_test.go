@@ -40,7 +40,7 @@ func setWeaponAshOfWarEndpointTarget(
 ) (*saveengine.Engine, string, string) {
 	t.Helper()
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSetWeaponAshOfWarEndpointFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSetWeaponAshOfWarEndpointFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

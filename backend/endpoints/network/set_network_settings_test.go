@@ -9,7 +9,7 @@ import (
 
 func TestSetNetworkSettingsDelegatesTheCompleteAssignment(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

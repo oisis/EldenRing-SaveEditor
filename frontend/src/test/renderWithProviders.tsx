@@ -22,6 +22,11 @@ import type {
   CharacterStats,
   SaveCharacters,
 } from "../application/character/characterPort";
+import { DiagnosticsPortProvider } from "../application/diagnostics/diagnosticsClient";
+import type {
+  DiagnosticsPort,
+  SaveValidationReport,
+} from "../application/diagnostics/diagnosticsPort";
 import { EquipmentPortProvider } from "../application/equipment/equipmentClient";
 import type {
   CharacterEquipment,
@@ -53,6 +58,11 @@ export const stubSaveSession: SaveSession = {
   saveSessionID: "session-1",
   platform: "pc",
   format: "sl2_v2",
+  // Deliberately a path with spaces and mixed case: nothing above the port may
+  // normalise, shorten or rebuild it.
+  sourcePath: "/Users/Tarnished/Elden Ring/ER0000.sl2",
+  sourceKind: "local",
+  saveRevision: "0",
   unsavedChanges: false,
 };
 
@@ -493,8 +503,44 @@ export function makePort(overrides: Partial<ApplicationInfoPort> = {}): Applicat
   };
 }
 
+/**
+ * A clean report: every scope checked, nothing unresolved, no finding. It is
+ * the shape the flow must read as `clean`, and the base every warning stub is
+ * built from so a single differing counter is what changes the outcome.
+ */
+export const stubCleanValidationReport: SaveValidationReport = {
+  saveSessionID: "session-1",
+  saveRevision: "0",
+  characterID: 0,
+  active: true,
+  coverage: ["inventory", "storage", "stats", "equipment", "spells"].map((scope) => ({
+    scope,
+    checked: true,
+    reason: "",
+    recordsChecked: 12,
+    unresolvedRecords: 0,
+  })),
+  issues: [],
+  errorCount: 0,
+  warningCount: 0,
+};
+
+/**
+ * The default port answers about the session and the slot it was asked about,
+ * because a real backend does: a stub that always named one session would make
+ * a second session's report look stale and hide what the flow really does.
+ */
+export function makeDiagnosticsPort(overrides: Partial<DiagnosticsPort> = {}): DiagnosticsPort {
+  return {
+    getSaveValidationReport: ({ saveSessionID, characterID }) =>
+      Promise.resolve({ ...stubCleanValidationReport, saveSessionID, characterID }),
+    ...overrides,
+  };
+}
+
 export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): SaveSessionPort {
   return {
+    selectSaveFile: () => Promise.resolve(stubSaveSession.sourcePath),
     loadSave: () => Promise.resolve(stubSaveSession),
     getLoadedSave: () => Promise.resolve(stubSaveSession),
     closeSave: () => Promise.resolve(),
@@ -529,6 +575,7 @@ export function TestProviders({
   port,
   saveSessionPort,
   characterPort,
+  diagnosticsPort,
   itemsPort,
   equipmentPort,
   catalogPort,
@@ -538,6 +585,7 @@ export function TestProviders({
   port?: ApplicationInfoPort;
   saveSessionPort?: SaveSessionPort;
   characterPort?: CharacterPort;
+  diagnosticsPort?: DiagnosticsPort;
   itemsPort?: ItemsPort;
   equipmentPort?: EquipmentPort;
   catalogPort?: CatalogPort;
@@ -548,11 +596,13 @@ export function TestProviders({
         <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
           <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
             <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-              <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
-                <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
-                  {children}
-                </EquipmentPortProvider>
-              </ItemsPortProvider>
+              <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
+                <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
+                  <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
+                    {children}
+                  </EquipmentPortProvider>
+                </ItemsPortProvider>
+              </DiagnosticsPortProvider>
             </CharacterPortProvider>
           </SaveSessionPortProvider>
         </CatalogPortProvider>
@@ -567,6 +617,7 @@ export async function renderApp(
     port?: ApplicationInfoPort;
     saveSessionPort?: SaveSessionPort;
     characterPort?: CharacterPort;
+    diagnosticsPort?: DiagnosticsPort;
     itemsPort?: ItemsPort;
     equipmentPort?: EquipmentPort;
     catalogPort?: CatalogPort;
@@ -583,6 +634,7 @@ export async function renderApp(
         port={options.port}
         saveSessionPort={options.saveSessionPort}
         characterPort={options.characterPort}
+        diagnosticsPort={options.diagnosticsPort}
         itemsPort={options.itemsPort}
         equipmentPort={options.equipmentPort}
         catalogPort={options.catalogPort}

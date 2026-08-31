@@ -10,7 +10,7 @@ func TestSetQuestStepMutatesBitsOnBothPlatforms(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			content := eventFlagTestContent(platform)
 			engine := New()
-			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -68,7 +68,7 @@ func TestSetQuestStepMergesMultipleFlagsInSameByte(t *testing.T) {
 	// every bit it does not target.
 	content.set = append(content.set, 60842)
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestSetQuestStepMergesMultipleFlagsInSameByte(t *testing.T) {
 func TestSetQuestStepRejectsWithoutMutating(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
 	engine := New()
-	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

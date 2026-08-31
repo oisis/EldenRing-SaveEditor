@@ -52,7 +52,7 @@ func writeGetSaveCharactersFixture(t *testing.T) string {
 
 func TestGetSaveCharactersReturnsTheSlotsOfALoadedSession(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetSaveCharactersFixture(t), "")
+	loaded, err := engine.LoadSave(writeGetSaveCharactersFixture(t), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

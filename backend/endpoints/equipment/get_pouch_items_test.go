@@ -91,7 +91,7 @@ func TestGetPouchItemsReturnsTheActivePouchItemsOfALoadedSession(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetPouchItemsFixture(t, items), "")
+	loaded, err := engine.LoadSave(writeGetPouchItemsFixture(t, items), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

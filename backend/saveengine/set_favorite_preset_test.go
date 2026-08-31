@@ -220,7 +220,7 @@ func TestSetFavoritePresetTablePCAndPS4(t *testing.T) {
 			layout := testLayoutForPlatform(tt.platform)
 
 			engine := New()
-			session, err := engine.LoadSave(path, string(tt.platform))
+			session, err := engine.LoadSave(path, string(tt.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -285,7 +285,7 @@ func TestSetFavoritePresetOverwriteEmptyAndNoOp(t *testing.T) {
 	path := writeSetFavoritesFixture(t, PlatformPC, 0, 1, activePresets)
 
 	engine := New()
-	session, err := engine.LoadSave(path, string(PlatformPC))
+	session, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -385,7 +385,7 @@ func TestSetFavoritePresetMalformedSourceLayout(t *testing.T) {
 	}
 
 	engine := New()
-	session, err := engine.LoadSave(path, string(PlatformPC))
+	session, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -420,7 +420,7 @@ func TestSetFavoritePresetMalformedSourceLayout(t *testing.T) {
 func TestSetFavoritePresetRejections(t *testing.T) {
 	path := writeSetFavoritesFixture(t, PlatformPC, 1, 1, nil)
 	engine := New()
-	session, err := engine.LoadSave(path, string(PlatformPC))
+	session, err := engine.LoadSave(path, string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -11,7 +11,7 @@ import (
 
 func TestWriteSaveDelegatesToSaveEngine(t *testing.T) {
 	engine := saveengine.New()
-	session, err := engine.LoadSave(writePCFixture(t), "pc")
+	session, err := engine.LoadSave(writePCFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestWriteSaveDelegatesToSaveEngine(t *testing.T) {
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("WriteSave result = %+v, want %+v", result, want)
 	}
-	if _, err := saveengine.New().LoadSave(target, "pc"); err != nil {
+	if _, err := saveengine.New().LoadSave(target, "pc", "local"); err != nil {
 		t.Fatalf("reload written target: %v", err)
 	}
 }

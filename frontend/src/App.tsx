@@ -2,14 +2,17 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useLayoutEffect, useState } from "react";
 import { controls, heading, shell } from "./App.css";
 import { ApplicationInfoPanel } from "./features/application-info/ApplicationInfoPanel";
+import { SaveSessionPanel } from "./features/save-session/SaveSessionPanel";
 import { activateLocale, defaultLocale, type Locale, locales } from "./i18n/i18n";
 import { Button } from "./ui/components/Button/Button";
 import { type ThemeName, themeClassNames, themeNames } from "./ui/tokens/themes.css";
 
 /**
  * The foundation screen of the first production slice. It is deliberately not
- * the application shell: there is no main navigation and no save/character
- * panel yet.
+ * the application shell: there is no main navigation, no Home, Character,
+ * Items, Equipment, World or Tools screen, and no Save or Save As. It carries
+ * the one production flow that exists today — opening a save session and seeing
+ * what the backend made of it.
  */
 export function App() {
   const { t } = useLingui();
@@ -67,6 +70,8 @@ export function App() {
           </Button>
         ))}
       </nav>
+
+      <SaveSessionPanel />
 
       <ApplicationInfoPanel />
     </main>

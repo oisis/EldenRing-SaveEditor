@@ -66,7 +66,7 @@ func TestApplyRepairs_ExecutesTheSealedActionsAtomically(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloaded := saveengine.New()
-			loaded, err := reloaded.LoadSave(output, string(platform))
+			loaded, err := reloaded.LoadSave(output, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave repaired output: %v", err)
 			}

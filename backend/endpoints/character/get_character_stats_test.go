@@ -106,7 +106,7 @@ func TestGetCharacterStatsReturnsTheActiveStatsOfALoadedSession(t *testing.T) {
 	}
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCharacterStatsFixture(t, values), "")
+	loaded, err := engine.LoadSave(writeGetCharacterStatsFixture(t, values), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

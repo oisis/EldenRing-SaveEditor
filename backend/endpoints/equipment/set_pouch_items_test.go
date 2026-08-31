@@ -162,7 +162,7 @@ func TestSetPouchItemsRejectsInvalidSelections(t *testing.T) {
 func TestSetPouchItemsRejectsInvalidCatalogData(t *testing.T) {
 	path, platform := writeSetPouchEndpointFixture(t)
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, platform)
+	loaded, err := engine.LoadSave(path, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestSetPouchItemsRejectsInvalidCatalogData(t *testing.T) {
 func TestSetPouchItemsSuccessWithCatalog(t *testing.T) {
 	path, platform := writeSetPouchEndpointFixture(t)
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, platform)
+	loaded, err := engine.LoadSave(path, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

@@ -126,7 +126,7 @@ func TestSetPhysickMixtureWritesBothPlatformsAndReloads(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, string(testCase.platform))
+			loaded, err := engine.LoadSave(source, string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -167,7 +167,7 @@ func TestSetPhysickMixtureWritesBothPlatformsAndReloads(t *testing.T) {
 			}
 
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, string(testCase.platform))
+			reloaded, err := reloadedEngine.LoadSave(target, string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("reload written save: %v", err)
 			}
@@ -241,7 +241,7 @@ func TestSetPhysickMixtureRejectsInvalidPlansWithoutMutation(t *testing.T) {
 				t, PlatformPC, 0, testCase.active, testCase.hasFlask, testCase.owned,
 				[2]uint32{PhysickEmptyTearID, PhysickEmptyTearID})
 			engine := New()
-			loaded, err := engine.LoadSave(source, "pc")
+			loaded, err := engine.LoadSave(source, "pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}

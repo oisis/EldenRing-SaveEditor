@@ -187,7 +187,7 @@ func TestGetGesturesReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeGestureFixture(t, content), string(content.platform))
+				writeGestureFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -213,7 +213,7 @@ func TestGetGesturesReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 func TestGetGesturesKeepsEveryRawRecordAsStored(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeGestureFixture(t, gestureTestActiveFixture(PlatformPC, 2, 0x0640, 11)), "")
+		writeGestureFixture(t, gestureTestActiveFixture(PlatformPC, 2, 0x0640, 11)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -263,7 +263,7 @@ func TestGetGesturesReportsAResidualSlotAsInactive(t *testing.T) {
 	content.flag = 0
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeGestureFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeGestureFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -293,7 +293,7 @@ func TestGetGesturesRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content gestureTestFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeGestureFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeGestureFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

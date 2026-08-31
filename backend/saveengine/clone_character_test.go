@@ -105,7 +105,7 @@ func TestCloneCharacterCopiesOnlyTheTargetAndPersistsOnBothPlatforms(t *testing.
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeCloneCharacterFixture(t, platform, "Ranni"), string(platform))
+				writeCloneCharacterFixture(t, platform, "Ranni"), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -149,7 +149,7 @@ func TestCloneCharacterCopiesOnlyTheTargetAndPersistsOnBothPlatforms(t *testing.
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloaded := New()
-			reloadedSession, err := reloaded.LoadSave(target, string(platform))
+			reloadedSession, err := reloaded.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}
@@ -169,7 +169,7 @@ func TestCloneCharacterCountsResidualNamesWhenChoosingTheSuffix(t *testing.T) {
 	path := writeCloneCharacterFixture(t, PlatformPC, "Ranni")
 	addCloneTestResidualName(t, path, PlatformPC, "Ranni 2")
 	engine := New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestCloneCharacterRejectsAnUnavailableTargetWithoutMutation(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(path, "")
+			loaded, err := engine.LoadSave(path, "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}

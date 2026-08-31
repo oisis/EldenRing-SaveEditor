@@ -200,7 +200,7 @@ func loadCookbooksSession(t *testing.T, active bool) (*saveengine.Engine, string
 	t.Helper()
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeGetCookbooksFixture(t, getCookbooksSetFlags, active), "")
+	loaded, err := engine.LoadSave(writeGetCookbooksFixture(t, getCookbooksSetFlags, active), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -560,7 +560,7 @@ func TestGetCookbooksRejectsInvalidSessionAndCharacter(t *testing.T) {
 	engine, sessionID := loadCookbooksSession(t, true)
 	gameCatalog := newCookbooksCatalog(t)
 
-	closed, err := engine.LoadSave(writeGetCookbooksFixture(t, getCookbooksSetFlags, true), "")
+	closed, err := engine.LoadSave(writeGetCookbooksFixture(t, getCookbooksSetFlags, true), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -762,7 +762,7 @@ func TestGetCookbooksLeavesTheSaveFileUntouched(t *testing.T) {
 	path := writeGetCookbooksFixture(t, getCookbooksSetFlags, true)
 
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, "")
+	loaded, err := engine.LoadSave(path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

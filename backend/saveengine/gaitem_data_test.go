@@ -78,7 +78,7 @@ func TestGaItemDataInsertKeepsTheOrdinaryEntriesSorted(t *testing.T) {
 				gaItemData: testCase.stored,
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -127,7 +127,7 @@ func TestGaItemDataInsertIsIdempotent(t *testing.T) {
 		gaItemData: []uint32{0x40000100, addItemTestGoodsID, 0x80000001},
 	}
 	engine := New()
-	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

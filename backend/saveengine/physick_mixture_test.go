@@ -160,7 +160,7 @@ func TestGetPhysickMixtureReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(string(testCase.platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writePhysickFixture(t, testCase), string(testCase.platform))
+			loaded, err := engine.LoadSave(writePhysickFixture(t, testCase), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -195,7 +195,7 @@ func TestGetPhysickMixtureReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writePhysickFixture(t, content), "")
+	loaded, err := engine.LoadSave(writePhysickFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -216,7 +216,7 @@ func TestGetPhysickMixtureRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content physickFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writePhysickFixture(t, content), "")
+		loaded, err := engine.LoadSave(writePhysickFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

@@ -17,7 +17,7 @@ func TestGetInventoryResolvesBareArmorAndFilledPhysickOnBothPlatforms(t *testing
 				slotBase+getInventoryAnchorAt+getInventoryCommonAt+getInventoryRecordSize)
 
 			engine := saveengine.New()
-			session, err := engine.LoadSave(path, platform)
+			session, err := engine.LoadSave(path, platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -42,7 +42,7 @@ func TestGetStorageResolvesBareArmorAndFilledPhysickOnBothPlatforms(t *testing.T
 				slotBase+sectionAt+getStorageCommonAt+getStorageRecordSize)
 
 			engine := saveengine.New()
-			session, err := engine.LoadSave(path, platform)
+			session, err := engine.LoadSave(path, platform, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}

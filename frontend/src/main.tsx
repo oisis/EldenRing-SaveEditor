@@ -6,6 +6,7 @@ import { App } from "./App";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
 import { CatalogPortProvider } from "./application/catalog/catalogClient";
 import { CharacterPortProvider } from "./application/character/characterClient";
+import { DiagnosticsPortProvider } from "./application/diagnostics/diagnosticsClient";
 import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
@@ -36,11 +37,13 @@ createRoot(container).render(
           <CatalogPortProvider port={wailsDesktopBridge}>
             <SaveSessionPortProvider port={wailsDesktopBridge}>
               <CharacterPortProvider port={wailsDesktopBridge}>
-                <ItemsPortProvider port={wailsDesktopBridge}>
-                  <EquipmentPortProvider port={wailsDesktopBridge}>
-                    <App />
-                  </EquipmentPortProvider>
-                </ItemsPortProvider>
+                <DiagnosticsPortProvider port={wailsDesktopBridge}>
+                  <ItemsPortProvider port={wailsDesktopBridge}>
+                    <EquipmentPortProvider port={wailsDesktopBridge}>
+                      <App />
+                    </EquipmentPortProvider>
+                  </ItemsPortProvider>
+                </DiagnosticsPortProvider>
               </CharacterPortProvider>
             </SaveSessionPortProvider>
           </CatalogPortProvider>

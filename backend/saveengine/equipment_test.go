@@ -175,7 +175,7 @@ func TestGetEquipmentReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(string(testCase.platform), func(t *testing.T) {
 			engine := New()
-			loaded, err := engine.LoadSave(writeEquipmentFixture(t, testCase), string(testCase.platform))
+			loaded, err := engine.LoadSave(writeEquipmentFixture(t, testCase), string(testCase.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -210,7 +210,7 @@ func TestGetEquipmentReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeEquipmentFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeEquipmentFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -231,7 +231,7 @@ func TestGetEquipmentRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content equipmentFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeEquipmentFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeEquipmentFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

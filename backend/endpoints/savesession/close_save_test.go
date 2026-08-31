@@ -49,7 +49,7 @@ func loadCloseSaveSession(t *testing.T) (*saveengine.Engine, LoadSaveResult, str
 
 	path := writeCloseSaveFixture(t)
 	engine := saveengine.New()
-	loaded, err := LoadSave(engine, path, "")
+	loaded, err := LoadSave(engine, path, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

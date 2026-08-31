@@ -13,7 +13,7 @@ func TestApplyNetworkPresetUsesTheCatalogPresetAndSharedWriter(t *testing.T) {
 		t.Fatalf("GetNetworkPresets: %v", err)
 	}
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestApplyNetworkPresetRejectsUnknownAndLegacyIDsWithoutMutation(t *testing.
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			engine := saveengine.New()
-			loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+			loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -73,7 +73,7 @@ func TestApplyNetworkPresetRejectsUnknownAndLegacyIDsWithoutMutation(t *testing.
 
 func TestApplyNetworkPresetDelegatesRevisionValidation(t *testing.T) {
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc")
+	loaded, err := engine.LoadSave(writeSettingsFixture(t), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

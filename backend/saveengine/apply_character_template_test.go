@@ -144,7 +144,7 @@ func TestApplyCharacterTemplate_CombinedSuccess(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			fixturePath := writeApplyTemplateFixture(t, platform, false)
 			engine := New()
-			session, err := engine.LoadSave(fixturePath, string(platform))
+			session, err := engine.LoadSave(fixturePath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -472,7 +472,7 @@ func TestApplyCharacterTemplate_RejectsInvalidRequests(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			engine := New()
-			session, err := engine.LoadSave(tc.fixturePath, "pc")
+			session, err := engine.LoadSave(tc.fixturePath, "pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -531,7 +531,7 @@ func TestApplyCharacterTemplate_PersistsThroughWriteSaveAndReload(t *testing.T) 
 		t.Run(string(platform), func(t *testing.T) {
 			sourcePath := writeApplyTemplateFixture(t, platform, false)
 			engine := New()
-			session, err := engine.LoadSave(sourcePath, string(platform))
+			session, err := engine.LoadSave(sourcePath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -574,7 +574,7 @@ func TestApplyCharacterTemplate_PersistsThroughWriteSaveAndReload(t *testing.T) 
 			}
 
 			reloaded := New()
-			reloadedSession, err := reloaded.LoadSave(targetPath, string(platform))
+			reloadedSession, err := reloaded.LoadSave(targetPath, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave persisted target: %v", err)
 			}

@@ -126,7 +126,7 @@ func TestSetPouchItemsWritesBothPlatformsAndReloads(t *testing.T) {
 			})
 
 			engine := New()
-			loaded, err := engine.LoadSave(source, platformStr)
+			loaded, err := engine.LoadSave(source, platformStr, "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -241,7 +241,7 @@ func TestSetPouchItemsWritesBothPlatformsAndReloads(t *testing.T) {
 			}
 
 			reloadedEngine := New()
-			reloaded, err := reloadedEngine.LoadSave(target, platformStr)
+			reloaded, err := reloadedEngine.LoadSave(target, platformStr, "local")
 			if err != nil {
 				t.Fatalf("reload written save: %v", err)
 			}
@@ -284,7 +284,7 @@ func TestSetPouchItemsRejectsInconsistentExistingState(t *testing.T) {
 	}
 
 	engine := New()
-	loaded, err := engine.LoadSave(source, platformStr)
+	loaded, err := engine.LoadSave(source, platformStr, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -332,7 +332,7 @@ func TestSetPouchItemsRejectsInvalidPlansWithoutMutation(t *testing.T) {
 	})
 
 	engine := New()
-	loaded, err := engine.LoadSave(source, platformStr)
+	loaded, err := engine.LoadSave(source, platformStr, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

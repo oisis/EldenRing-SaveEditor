@@ -43,7 +43,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("build game catalog: %v", err)
 	}
-	bridge := desktop.NewBridge(applicationVersion, saveEngine, gameCatalog)
+	// The native dialog is injected rather than reached for inside the bridge, so
+	// the host capability has one owner and the bridge stays testable without a
+	// real window.
+	bridge := desktop.NewBridge(
+		applicationVersion, saveEngine, gameCatalog, desktop.NewWailsSaveFileChooser())
 
 	err = wails.Run(&options.App{
 		Title:     "Elden Ring SaveForge",
@@ -55,7 +59,10 @@ func main() {
 			Assets:  assets,
 			Handler: catalogassets.New(catalogData),
 		},
-		Bind: []any{bridge},
+		// The bridge receives the Wails context through the ordinary lifecycle;
+		// nothing in the application stores it in a package-level variable.
+		OnStartup: bridge.Startup,
+		Bind:      []any{bridge},
 	})
 	if err != nil {
 		log.Fatal(err)

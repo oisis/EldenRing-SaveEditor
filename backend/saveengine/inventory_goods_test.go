@@ -22,7 +22,7 @@ func TestGetInventoryGoodsPresenceReadsBothRepresentationsOnBothPlatforms(t *tes
 				{index: 5, handle: 0xB000230B, rawQuantity: 0},
 			}
 			engine := New()
-			loaded, err := engine.LoadSave(writeInventoryFixture(t, content), string(platform))
+			loaded, err := engine.LoadSave(writeInventoryFixture(t, content), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -46,7 +46,7 @@ func TestGetInventoryGoodsPresenceReadsBothRepresentationsOnBothPlatforms(t *tes
 func TestGetInventoryGoodsPresenceDoesNotReadResidualInventory(t *testing.T) {
 	content := inventoryTestFixture{platform: PlatformPC, slot: 2, flag: 0, noAnchor: true}
 	engine := New()
-	loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "pc")
+	loaded, err := engine.LoadSave(writeInventoryFixture(t, content), "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

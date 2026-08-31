@@ -85,6 +85,24 @@ export const queryKeys = {
   loadedSave: (saveSessionID: string) => ["save-session", saveSessionID, "loaded"] as const,
   saveCharacters: (saveSessionID: string) => ["save-session", saveSessionID, "characters"] as const,
   /**
+   * One validation report per slot and per revision, below the session scope,
+   * so closing the session drops every report of every revision with it and two
+   * slots never share an entry. The revision takes part in the key because a
+   * report describes one exact save state: asking about another revision is a
+   * different question, and the answer to the previous one may never stand in
+   * for it. The revision is carried as the backend's own string and is never
+   * parsed, ordered or compared numerically here.
+   */
+  saveValidationReport: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "validation-report",
+      saveRevision,
+    ] as const,
+  /**
    * The per-character views are keyed by session and slot, so two characters of
    * one session and one character of two sessions stay separate entries.
    */

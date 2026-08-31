@@ -56,7 +56,7 @@ func TestDeleteCharacterClearsOnlyTheTargetSlotOnBothPlatforms(t *testing.T) {
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(path, string(platform))
+			loaded, err := engine.LoadSave(path, string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -99,7 +99,7 @@ func TestDeleteCharacterClearsOnlyTheTargetSlotOnBothPlatforms(t *testing.T) {
 func TestDeleteCharacterClearsAnInactiveResidualSummary(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(writeCharacterNameFixture(
-		t, PlatformPC, false, false, "", "Residual"), "")
+		t, PlatformPC, false, false, "", "Residual"), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestDeleteCharacterRejectsEmptyAndUnknownSlotsWithoutMutation(t *testing.T)
 			}
 
 			engine := New()
-			loaded, err := engine.LoadSave(path, "")
+			loaded, err := engine.LoadSave(path, "", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -179,7 +179,7 @@ func TestDeleteCharacterPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 		t.Run(string(platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(writeCharacterNameFixture(
-				t, platform, true, true, "Ranni", "Ranni"), string(platform))
+				t, platform, true, true, "Ranni", "Ranni"), string(platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -193,7 +193,7 @@ func TestDeleteCharacterPersistsAndReloadsOnBothPlatforms(t *testing.T) {
 				t.Fatalf("WriteSave: %v", err)
 			}
 			reloaded := New()
-			session, err := reloaded.LoadSave(target, string(platform))
+			session, err := reloaded.LoadSave(target, string(platform), "local")
 			if err != nil {
 				t.Fatalf("reload: %v", err)
 			}

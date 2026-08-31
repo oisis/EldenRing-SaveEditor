@@ -137,7 +137,7 @@ func TestSetSaveAccountIDWritesTheGlobalAndEveryActiveSlotCopy(t *testing.T) {
 
 	path, offsets := writeAccountIDFixture(t, PlatformPC, accountIDTestSlots())
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -181,7 +181,7 @@ func TestSetSaveAccountIDWritesTheGlobalAndEveryActiveSlotCopy(t *testing.T) {
 		t.Fatalf("WriteSave: %v", err)
 	}
 	reloadEngine := New()
-	reloaded, err := reloadEngine.LoadSave(target, "pc")
+	reloaded, err := reloadEngine.LoadSave(target, "pc", "local")
 	if err != nil {
 		t.Fatalf("reload written target: %v", err)
 	}
@@ -202,7 +202,7 @@ func TestSetSaveAccountIDRejectsAnUnparseableActiveSlot(t *testing.T) {
 
 	path, _ := writeAccountIDFixture(t, PlatformPC, slots)
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestSetSaveAccountIDRejectsAnUnparseableActiveSlot(t *testing.T) {
 func TestSetSaveAccountIDRejectsPS4WithoutMutation(t *testing.T) {
 	path, _ := writeAccountIDFixture(t, PlatformPS4, accountIDTestSlots())
 	engine := New()
-	loaded, err := engine.LoadSave(path, "ps4")
+	loaded, err := engine.LoadSave(path, "ps4", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -247,7 +247,7 @@ func TestSetSaveAccountIDRejectsPS4WithoutMutation(t *testing.T) {
 func TestSetSaveAccountIDRejectsANonCanonicalIdentifier(t *testing.T) {
 	path, _ := writeAccountIDFixture(t, PlatformPC, accountIDTestSlots())
 	engine := New()
-	loaded, err := engine.LoadSave(path, "pc")
+	loaded, err := engine.LoadSave(path, "pc", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

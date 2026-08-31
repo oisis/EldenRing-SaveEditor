@@ -156,7 +156,7 @@ func newTestCatalog(t *testing.T) *gamecatalog.Catalog {
 func TestCreateBuildTemplate_Success(t *testing.T) {
 	engine := saveengine.New()
 	savePath, rawBefore := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -235,7 +235,7 @@ func TestCreateBuildTemplate_Success(t *testing.T) {
 func TestCreateBuildTemplate_RejectsInvalidSelections(t *testing.T) {
 	engine := saveengine.New()
 	savePath, _ := writeTestSaveFixture(t)
-	loaded, err := engine.LoadSave(savePath, "")
+	loaded, err := engine.LoadSave(savePath, "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

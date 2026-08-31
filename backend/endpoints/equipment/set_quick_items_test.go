@@ -77,7 +77,7 @@ func TestSetQuickItemsRejectsInvalidSelections(t *testing.T) {
 func TestSetQuickItemsValidatesCatalogAndCommits(t *testing.T) {
 	path, platform := writeSetQuickItemsEndpointFixture(t)
 	engine := saveengine.New()
-	loaded, err := engine.LoadSave(path, platform)
+	loaded, err := engine.LoadSave(path, platform, "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

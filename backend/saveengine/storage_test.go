@@ -271,7 +271,7 @@ func TestGetStorageReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeStorageFixture(t, content), string(content.platform))
+				writeStorageFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -302,7 +302,7 @@ func TestGetStorageReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 func TestGetStorageFiltersBySection(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeStorageFixture(t, storageTestActiveFixture(PlatformPC, 3, 0x0640, 5)), "")
+		writeStorageFixture(t, storageTestActiveFixture(PlatformPC, 3, 0x0640, 5)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -341,7 +341,7 @@ func TestGetStorageFiltersBySection(t *testing.T) {
 func TestGetStoragePagesWithoutLosingTheNativeOrder(t *testing.T) {
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeStorageFixture(t, storageTestActiveFixture(PlatformPC, 1, 0x0640, 0)), "")
+		writeStorageFixture(t, storageTestActiveFixture(PlatformPC, 1, 0x0640, 0)), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -393,7 +393,7 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 	content.flag = 0
 
 	engine := New()
-	loaded, err := engine.LoadSave(writeStorageFixture(t, content), "")
+	loaded, err := engine.LoadSave(writeStorageFixture(t, content), "", "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -433,7 +433,7 @@ func TestGetStorageMintsOneIdentityPerPhysicalRecord(t *testing.T) {
 		t.Run(string(content.platform), func(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
-				writeStorageFixture(t, content), string(content.platform))
+				writeStorageFixture(t, content), string(content.platform), "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
@@ -505,7 +505,7 @@ func TestGetStorageRejectsInvalidRequests(t *testing.T) {
 
 	loadSlot := func(content storageTestFixture) string {
 		t.Helper()
-		loaded, err := engine.LoadSave(writeStorageFixture(t, content), "")
+		loaded, err := engine.LoadSave(writeStorageFixture(t, content), "", "local")
 		if err != nil {
 			t.Fatalf("LoadSave: %v", err)
 		}

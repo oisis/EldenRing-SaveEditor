@@ -19,7 +19,7 @@ func loadTutorialSession(
 
 	engine := New()
 	loaded, err := engine.LoadSave(
-		writeTutorialDataFixture(t, platform, true, size, ids), string(platform))
+		writeTutorialDataFixture(t, platform, true, size, ids), string(platform), "local")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
@@ -194,7 +194,7 @@ func TestSetTutorialUnlockedFailsClosed(t *testing.T) {
 			engine := New()
 			loaded, err := engine.LoadSave(
 				writeTutorialDataFixture(t, PlatformPC, testCase.active, testCase.size, testCase.ids),
-				"pc")
+				"pc", "local")
 			if err != nil {
 				t.Fatalf("LoadSave: %v", err)
 			}
