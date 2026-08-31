@@ -57,6 +57,7 @@ type GetCharacterAppearanceResult = saveengine.CharacterAppearance
 
 type CharacterAppearance struct {
 	SaveSessionID string    `json:"saveSessionID"`
+	SaveRevision  string    `json:"saveRevision"`
 	CharacterID   int       `json:"characterID"`
 	Active        bool      `json:"active"`
 	Gender        uint8     `json:"gender"`
@@ -71,6 +72,7 @@ type CharacterAppearance struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `gender` | `uint8` | The stored body-type identifier of an active slot, as held in the player data. Always `0` for an inactive slot. |

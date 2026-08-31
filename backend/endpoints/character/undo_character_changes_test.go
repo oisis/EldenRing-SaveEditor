@@ -48,6 +48,10 @@ func TestUndoCharacterChangesReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetCharacterStats after undo: %v", err)
 	}
+	if after.SaveRevision != result.SaveRevision {
+		t.Fatalf("statistics revision = %q, want %q", after.SaveRevision, result.SaveRevision)
+	}
+	before.SaveRevision = after.SaveRevision
 	if !reflect.DeepEqual(after, before) {
 		t.Errorf("statistics after undo = %+v, want the pre-mutation %+v", after, before)
 	}

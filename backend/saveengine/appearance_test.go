@@ -196,6 +196,7 @@ func TestGetCharacterAppearanceReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := testCase.values
 			want.SaveSessionID = loaded.SaveSessionID
+			want.SaveRevision = "0"
 			want.CharacterID = testCase.slot
 			want.Active = true
 			if !reflect.DeepEqual(result, want) {
@@ -226,7 +227,7 @@ func TestGetCharacterAppearanceReportsAResidualSlotAsInactive(t *testing.T) {
 		t.Fatalf("GetCharacterAppearance: %v", err)
 	}
 
-	want := CharacterAppearance{SaveSessionID: loaded.SaveSessionID, CharacterID: content.slot}
+	want := CharacterAppearance{SaveSessionID: loaded.SaveSessionID, SaveRevision: "0", CharacterID: content.slot}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}

@@ -47,6 +47,7 @@ type ColosseumEntry struct {
 // GetColosseumsResult is the deterministic result for one character slot.
 type GetColosseumsResult struct {
 	SaveSessionID string           `json:"saveSessionID"`
+	SaveRevision  string           `json:"saveRevision"`
 	CharacterID   int              `json:"characterID"`
 	Active        bool             `json:"active"`
 	Colosseums    []ColosseumEntry `json:"colosseums"`
@@ -83,6 +84,7 @@ func GetColosseums(
 
 	result := GetColosseumsResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Colosseums:    make([]ColosseumEntry, 0, len(declared)),

@@ -63,6 +63,7 @@ import { type ItemContainer, useInventoryAndStorage } from "./useInventoryAndSto
  */
 export type InventoryAndStoragePanelProps = {
   saveSessionID: string | undefined;
+  saveRevision: string | undefined;
   characterID: number | undefined;
   containerSection: string;
 };
@@ -102,6 +103,7 @@ const columnHelper = createColumnHelper<typeof tableFeatureSet, WorkspaceRow>();
 
 export function InventoryAndStoragePanel({
   saveSessionID,
+  saveRevision,
   characterID,
   containerSection,
 }: InventoryAndStoragePanelProps) {
@@ -139,6 +141,7 @@ export function InventoryAndStoragePanel({
 
   const model = useInventoryAndStorage({
     saveSessionID,
+    saveRevision,
     characterID,
     containerSection,
     inventory: { page: inventoryPage, pageSize: cardSize },

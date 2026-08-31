@@ -129,6 +129,7 @@ var eventFlagAnchor = []byte{
 // a false.
 type CharacterEventFlags struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Flags         map[uint32]bool `json:"flags"`
@@ -185,6 +186,7 @@ func (engine *Engine) GetEventFlags(
 
 	result := CharacterEventFlags{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		Flags:         map[uint32]bool{},
 	}

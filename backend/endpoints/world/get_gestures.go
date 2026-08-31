@@ -77,6 +77,7 @@ type GestureEntry struct {
 // catalog gesture as locked, because its GestureGameData is never read.
 type GetGesturesResult struct {
 	SaveSessionID string         `json:"saveSessionID"`
+	SaveRevision  string         `json:"saveRevision"`
 	CharacterID   int            `json:"characterID"`
 	Active        bool           `json:"active"`
 	Gestures      []GestureEntry `json:"gestures"`
@@ -209,6 +210,7 @@ func GetGestures(
 
 	result := GetGesturesResult{
 		SaveSessionID: stored.SaveSessionID,
+		SaveRevision:  stored.SaveRevision,
 		CharacterID:   stored.CharacterID,
 		Active:        stored.Active,
 		Gestures:      make([]GestureEntry, 0, len(entries)),

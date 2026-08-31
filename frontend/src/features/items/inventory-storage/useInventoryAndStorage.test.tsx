@@ -18,6 +18,7 @@ import { type InventoryAndStorageQuery, useInventoryAndStorage } from "./useInve
 
 const query: InventoryAndStorageQuery = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   containerSection: "common",
   inventory: { page: 2, pageSize: 30 },
@@ -201,14 +202,17 @@ describe("useInventoryAndStorage", () => {
         getStorage: () => Promise.resolve(sameStorage),
       }),
     );
-    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+    const { result } = renderHook(
+      () => useInventoryAndStorage({ ...query, saveRevision: "  Revision 09  " }),
+      { wrapper },
+    );
 
     expect(result.current.revisionState).toBe("unavailable");
     await waitFor(() => expect(result.current.revisionState).toBe("consistent"));
     expect(result.current.inventory.data?.saveRevision).toBe("  Revision 09  ");
   });
 
-  it("reports mismatched revisions while preserving both independent results", async () => {
+  it("rejects responses that do not match the requested revision", async () => {
     const inventory = page(stubInventoryPage, { saveRevision: "9" });
     const storage = page(stubStoragePage, { saveRevision: "09" });
     const { wrapper } = setup(
@@ -219,9 +223,11 @@ describe("useInventoryAndStorage", () => {
     );
     const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
 
-    await waitFor(() => expect(result.current.revisionState).toBe("mismatch"));
-    expect(result.current.inventory.data).toBe(inventory);
-    expect(result.current.storage.data).toBe(storage);
+    await waitFor(() => expect(result.current.inventory.isError).toBe(true));
+    await waitFor(() => expect(result.current.storage.isError).toBe(true));
+    expect(result.current.revisionState).toBe("unavailable");
+    expect(result.current.inventory.data).toBeUndefined();
+    expect(result.current.storage.data).toBeUndefined();
   });
 
   it("derives selection from the current cache page instead of copying a record", async () => {
@@ -232,7 +238,10 @@ describe("useInventoryAndStorage", () => {
         getStorage: () => Promise.resolve(page(stubStoragePage, { saveRevision: "revision-7" })),
       }),
     );
-    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+    const { result } = renderHook(
+      () => useInventoryAndStorage({ ...query, saveRevision: "revision-7" }),
+      { wrapper },
+    );
     await waitFor(() => expect(result.current.inventory.data).toBe(inventory));
 
     result.current.selectItem("inventory", "owned-1");
@@ -266,14 +275,18 @@ describe("useInventoryAndStorage", () => {
   it("invalidates selection when its backend revision changes", async () => {
     let inventory = page(stubInventoryPage, { saveRevision: "revision-1" });
     const getInventory = vi.fn(() => Promise.resolve(inventory));
-    const { queryClient, wrapper } = setup(makeItemsPort({ getInventory }));
-    const { result } = renderHook(() => useInventoryAndStorage(query), { wrapper });
+    const { wrapper } = setup(makeItemsPort({ getInventory }));
+    const initial = { ...query, saveRevision: "revision-1" };
+    const { result, rerender } = renderHook(
+      ({ current }: { current: InventoryAndStorageQuery }) => useInventoryAndStorage(current),
+      { wrapper, initialProps: { current: initial } },
+    );
     await waitFor(() => expect(result.current.inventory.data).toBeDefined());
     result.current.selectItem("inventory", "owned-1");
     await waitFor(() => expect(result.current.selected).not.toBeNull());
 
     inventory = page(stubInventoryPage, { saveRevision: "revision-2" });
-    await queryClient.invalidateQueries({ queryKey: ["save-session", "session-1"] });
+    rerender({ current: { ...query, saveRevision: "revision-2" } });
 
     await waitFor(() => expect(result.current.inventory.data?.saveRevision).toBe("revision-2"));
     expect(result.current.selected).toBeNull();
@@ -299,6 +312,7 @@ describe("useInventoryAndStorage", () => {
     // Both sections answer with the same owned-item identity and the same
     // revision: matching values must not resurrect a foreign section's intent.
     const shared = page(stubInventoryPage, { saveRevision: "revision-1" });
+    const revisedQuery = { ...query, saveRevision: "revision-1" };
     const { wrapper } = setup(
       makeItemsPort({
         getInventory: () => Promise.resolve(shared),
@@ -307,18 +321,18 @@ describe("useInventoryAndStorage", () => {
     );
     const { result, rerender } = renderHook(
       ({ current }: { current: InventoryAndStorageQuery }) => useInventoryAndStorage(current),
-      { wrapper, initialProps: { current: query } },
+      { wrapper, initialProps: { current: revisedQuery } },
     );
     await waitFor(() => expect(result.current.inventory.data).toBeDefined());
     result.current.selectItem("inventory", "owned-1");
     await waitFor(() => expect(result.current.selected).not.toBeNull());
 
-    rerender({ current: { ...query, containerSection: "key" } });
+    rerender({ current: { ...revisedQuery, containerSection: "key" } });
     expect(result.current.selected).toBeNull();
     await waitFor(() => expect(result.current.inventory.data).toBe(shared));
     expect(result.current.selected).toBeNull();
 
-    rerender({ current: query });
+    rerender({ current: revisedQuery });
     expect(result.current.selected).toBeNull();
     await waitFor(() => expect(result.current.inventory.data).toBe(shared));
     expect(result.current.selected).toBeNull();

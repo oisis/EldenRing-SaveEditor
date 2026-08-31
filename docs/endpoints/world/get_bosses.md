@@ -106,6 +106,7 @@ read, so the residual bitfield of a deleted character can never leak a state.
 ```go
 type GetBossesResult struct {
     SaveSessionID string      `json:"saveSessionID"`
+    SaveRevision  string      `json:"saveRevision"`
     CharacterID   int         `json:"characterID"`
     Active        bool        `json:"active"`
     Bosses        []BossEntry `json:"bosses"`
@@ -148,3 +149,9 @@ value and no partially populated answer.
 - `SetBossDefeated` stays a contract-only endpoint. It has no handler, no route,
   no OpenAPI operation and no Scalar page, and this document does not present it
   as available.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

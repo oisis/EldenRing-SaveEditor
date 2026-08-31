@@ -48,6 +48,7 @@ type RegionEntry struct {
 // GetRegionsResult is the deterministic region view of one character slot.
 type GetRegionsResult struct {
 	SaveSessionID string        `json:"saveSessionID"`
+	SaveRevision  string        `json:"saveRevision"`
 	CharacterID   int           `json:"characterID"`
 	Active        bool          `json:"active"`
 	Regions       []RegionEntry `json:"regions"`
@@ -83,6 +84,7 @@ func GetRegions(
 
 	result := GetRegionsResult{
 		SaveSessionID: stored.SaveSessionID,
+		SaveRevision:  stored.SaveRevision,
 		CharacterID:   stored.CharacterID,
 		Active:        stored.Active,
 		Regions:       make([]RegionEntry, 0, len(declared)),

@@ -16,6 +16,7 @@ export type PageWindow = {
 
 export type InventoryAndStorageQuery = {
   saveSessionID: string | undefined;
+  saveRevision: string | undefined;
   characterID: number | undefined;
   containerSection: string;
   inventory: PageWindow;
@@ -60,6 +61,7 @@ type SessionEntry = {
 export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
   const inventory = useInventory({
     saveSessionID: query.saveSessionID,
+    saveRevision: query.saveRevision,
     characterID: query.characterID,
     containerSection: query.containerSection,
     page: query.inventory.page,
@@ -67,6 +69,7 @@ export function useInventoryAndStorage(query: InventoryAndStorageQuery) {
   });
   const storage = useStorage({
     saveSessionID: query.saveSessionID,
+    saveRevision: query.saveRevision,
     characterID: query.characterID,
     containerSection: query.containerSection,
     page: query.storage.page,

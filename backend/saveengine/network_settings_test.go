@@ -59,7 +59,10 @@ func TestGetNetworkSettingsReadsAPCSave(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetNetworkSettings: %v", err)
 	}
-	if values != wantNetworkSettings {
+	if values.SaveSessionID != session.SaveSessionID || values.SaveRevision != "0" {
+		t.Fatalf("metadata = %+v", values)
+	}
+	if values.Parameters != wantNetworkSettings {
 		t.Fatalf("values = %+v, want %+v", values, wantNetworkSettings)
 	}
 }
@@ -75,7 +78,10 @@ func TestGetNetworkSettingsReadsAPS4Save(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetNetworkSettings: %v", err)
 	}
-	if values != wantNetworkSettings {
+	if values.SaveSessionID != session.SaveSessionID || values.SaveRevision != "0" {
+		t.Fatalf("metadata = %+v", values)
+	}
+	if values.Parameters != wantNetworkSettings {
 		t.Fatalf("values = %+v, want %+v", values, wantNetworkSettings)
 	}
 }
@@ -93,7 +99,10 @@ func TestGetNetworkSettingsReadsAZSTDRegulation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetNetworkSettings: %v", err)
 	}
-	if values != wantNetworkSettings {
+	if values.SaveSessionID != session.SaveSessionID || values.SaveRevision != "0" {
+		t.Fatalf("metadata = %+v", values)
+	}
+	if values.Parameters != wantNetworkSettings {
 		t.Fatalf("values = %+v, want %+v", values, wantNetworkSettings)
 	}
 }

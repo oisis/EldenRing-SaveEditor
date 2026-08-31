@@ -21,6 +21,20 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
+// requireSameSaveRevision prevents a world projection assembled from more than
+// one SaveEngine read from mixing two committed session snapshots. Revisions
+// are opaque and therefore compared exactly, never parsed or ordered.
+func requireSameSaveRevision(expected string, actual string) error {
+	if actual == expected {
+		return nil
+	}
+	return fmt.Errorf(
+		"save revision changed during read: first read returned %q, later read returned %q",
+		expected,
+		actual,
+	)
+}
+
 // GetSpectralSteedAttiresEndpointID is the stable backend identifier of GetSpectralSteedAttires.
 const GetSpectralSteedAttiresEndpointID = "get_spectral_steed_attires"
 
@@ -106,6 +120,7 @@ type SpectralSteedAttireEntry struct {
 // ActiveAttireKey is filled only when Status is resolved.
 type GetSpectralSteedAttiresResult struct {
 	SaveSessionID   string                     `json:"saveSessionID"`
+	SaveRevision    string                     `json:"saveRevision"`
 	CharacterID     int                        `json:"characterID"`
 	Active          bool                       `json:"active"`
 	Status          string                     `json:"status"`
@@ -155,14 +170,19 @@ func GetSpectralSteedAttires(
 	}
 	owned := map[uint32]bool{}
 	if flags.Active {
-		owned, err = engine.GetInventoryGoodsPresence(saveSessionID, characterID, gameIDs)
+		presence, err := engine.GetInventoryGoodsPresence(saveSessionID, characterID, gameIDs)
 		if err != nil {
 			return GetSpectralSteedAttiresResult{}, err
 		}
+		if err := requireSameSaveRevision(flags.SaveRevision, presence.SaveRevision); err != nil {
+			return GetSpectralSteedAttiresResult{}, err
+		}
+		owned = presence.Presence
 	}
 
 	result := GetSpectralSteedAttiresResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Status:        SpectralSteedAttireStatusLegacy,

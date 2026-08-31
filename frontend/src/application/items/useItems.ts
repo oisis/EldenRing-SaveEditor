@@ -1,5 +1,6 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { noCharacter, queryKeys } from "../queryKeys";
+import { requireCurrentSaveResponse } from "../saveRevision";
 import { useItemsPort } from "./itemsClient";
 import type { ItemPage, ItemPageRequest } from "./itemsPort";
 
@@ -10,6 +11,7 @@ import type { ItemPage, ItemPageRequest } from "./itemsPort";
  */
 export type ItemPageQuery = {
   saveSessionID: string | undefined;
+  saveRevision: string | undefined;
   characterID: number | undefined;
   containerSection: string;
   page: number;
@@ -33,15 +35,26 @@ function useItemPage(
   queryKey: readonly unknown[],
   call: (request: ItemPageRequest) => Promise<ItemPage>,
 ) {
-  const { saveSessionID, characterID, containerSection, page, pageSize } = query;
+  const { saveSessionID, saveRevision, characterID, containerSection, page, pageSize } = query;
   const identifier = saveSessionID ?? "";
 
   return useQuery({
     queryKey,
     queryFn:
-      identifier === "" || characterID === undefined
+      identifier === "" || saveRevision === undefined || characterID === undefined
         ? skipToken
-        : () => call({ saveSessionID: identifier, characterID, containerSection, page, pageSize }),
+        : async () =>
+            requireCurrentSaveResponse(
+              await call({
+                saveSessionID: identifier,
+                characterID,
+                containerSection,
+                page,
+                pageSize,
+              }),
+              identifier,
+              saveRevision,
+            ),
     retry: false,
   });
 }
@@ -57,6 +70,7 @@ export function useInventory(query: ItemPageQuery) {
       query.containerSection,
       query.page,
       query.pageSize,
+      query.saveRevision ?? "",
     ),
     (request) => port.getInventory(request),
   );
@@ -73,6 +87,7 @@ export function useStorage(query: ItemPageQuery) {
       query.containerSection,
       query.page,
       query.pageSize,
+      query.saveRevision ?? "",
     ),
     (request) => port.getStorage(request),
   );

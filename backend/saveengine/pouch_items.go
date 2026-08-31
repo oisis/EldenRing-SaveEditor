@@ -87,6 +87,7 @@ type PouchItemSlot struct {
 // records, and its slot data is never searched or read.
 type CharacterPouchItems struct {
 	SaveSessionID string                            `json:"saveSessionID"`
+	SaveRevision  string                            `json:"saveRevision"`
 	CharacterID   int                               `json:"characterID"`
 	Active        bool                              `json:"active"`
 	Items         [pouchItemSlotCount]PouchItemSlot `json:"items"`
@@ -131,7 +132,11 @@ func (engine *Engine) GetPouchItems(saveSessionID string, characterID int) (Char
 		return CharacterPouchItems{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	pouchItems := CharacterPouchItems{SaveSessionID: saveSessionID, CharacterID: characterID}
+	pouchItems := CharacterPouchItems{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual pouch
 		// items of a deleted character are never located or decoded.

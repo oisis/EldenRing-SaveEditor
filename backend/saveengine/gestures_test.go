@@ -199,6 +199,7 @@ func TestGetGesturesReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterGestures{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
 				Slots:         gestureTestRecords(),
@@ -277,6 +278,7 @@ func TestGetGesturesReportsAResidualSlotAsInactive(t *testing.T) {
 	// fixture, so an empty result proves it was never located or decoded.
 	want := CharacterGestures{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   content.slot,
 		Slots:         []uint32{},
 	}

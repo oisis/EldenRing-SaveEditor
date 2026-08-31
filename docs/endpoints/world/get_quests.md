@@ -125,6 +125,7 @@ synthesised here.
 ```go
 type GetQuestsResult struct {
     SaveSessionID string       `json:"saveSessionID"`
+    SaveRevision  string       `json:"saveRevision"`
     CharacterID   int          `json:"characterID"`
     Active        bool         `json:"active"`
     Quests        []QuestEntry `json:"quests"`
@@ -177,3 +178,9 @@ value and no partially populated answer.
 - [`GetBosses`](get_bosses.md), [`GetGraces`](get_graces.md) and
   [`GetSummoningPools`](get_summoning_pools.md) share the same
   catalog-plus-one-bulk-flag-read shape.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

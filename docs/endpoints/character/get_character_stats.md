@@ -57,6 +57,7 @@ type GetCharacterStatsResult = saveengine.CharacterStats
 
 type CharacterStats struct {
 	SaveSessionID string `json:"saveSessionID"`
+	SaveRevision  string `json:"saveRevision"`
 	CharacterID   int    `json:"characterID"`
 	Active        bool   `json:"active"`
 
@@ -85,6 +86,7 @@ type CharacterStats struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `vigor`, `mind`, `endurance`, `strength`, `dexterity`, `intelligence`, `faith`, `arcane` | `uint32` | The eight stored attributes of an active slot. Always `0` for an inactive slot. |

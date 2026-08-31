@@ -55,6 +55,7 @@ type TutorialEntry struct {
 // GetTutorialsResult is the deterministic result for one character slot.
 type GetTutorialsResult struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Tutorials     []TutorialEntry `json:"tutorials"`
@@ -100,6 +101,7 @@ func GetTutorials(
 
 	result := GetTutorialsResult{
 		SaveSessionID: state.SaveSessionID,
+		SaveRevision:  state.SaveRevision,
 		CharacterID:   state.CharacterID,
 		Active:        state.Active,
 		Tutorials:     make([]TutorialEntry, 0, len(declared)),

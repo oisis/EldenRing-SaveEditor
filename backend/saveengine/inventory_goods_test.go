@@ -36,8 +36,12 @@ func TestGetInventoryGoodsPresenceReadsBothRepresentationsOnBothPlatforms(t *tes
 			want := map[uint32]bool{
 				directGameID: true, encodedGameID: true, missingGameID: false,
 			}
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("presence = %#v, want %#v", got, want)
+			if got.SaveSessionID != loaded.SaveSessionID || got.SaveRevision != "0" ||
+				got.CharacterID != content.slot || !got.Active {
+				t.Fatalf("metadata = %+v", got)
+			}
+			if !reflect.DeepEqual(got.Presence, want) {
+				t.Errorf("presence = %#v, want %#v", got.Presence, want)
 			}
 		})
 	}
@@ -55,7 +59,11 @@ func TestGetInventoryGoodsPresenceDoesNotReadResidualInventory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	if !reflect.DeepEqual(got, map[uint32]bool{0x4000218E: false}) {
+	if got.SaveSessionID != loaded.SaveSessionID || got.SaveRevision != "0" ||
+		got.CharacterID != content.slot || got.Active {
+		t.Fatalf("metadata = %+v", got)
+	}
+	if !reflect.DeepEqual(got.Presence, map[uint32]bool{0x4000218E: false}) {
 		t.Errorf("presence = %#v", got)
 	}
 }

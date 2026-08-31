@@ -114,6 +114,7 @@ func TestGetQuickItemsReturnsTheActiveQuickItemsOfALoadedSession(t *testing.T) {
 
 	want := GetQuickItemsResult{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   getQuickItemsSlot,
 		Active:        true,
 		Items:         items,

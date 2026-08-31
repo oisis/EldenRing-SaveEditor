@@ -52,6 +52,7 @@ type GraceEntry struct {
 // GetGracesResult is the deterministic result for one character slot.
 type GetGracesResult struct {
 	SaveSessionID string       `json:"saveSessionID"`
+	SaveRevision  string       `json:"saveRevision"`
 	CharacterID   int          `json:"characterID"`
 	Active        bool         `json:"active"`
 	Graces        []GraceEntry `json:"graces"`
@@ -90,6 +91,7 @@ func GetGraces(
 
 	result := GetGracesResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Graces:        make([]GraceEntry, 0, len(declared)),

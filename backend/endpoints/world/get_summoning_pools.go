@@ -50,6 +50,7 @@ type SummoningPoolEntry struct {
 // GetSummoningPoolsResult is the deterministic result for one character slot.
 type GetSummoningPoolsResult struct {
 	SaveSessionID  string               `json:"saveSessionID"`
+	SaveRevision   string               `json:"saveRevision"`
 	CharacterID    int                  `json:"characterID"`
 	Active         bool                 `json:"active"`
 	SummoningPools []SummoningPoolEntry `json:"summoningPools"`
@@ -88,6 +89,7 @@ func GetSummoningPools(
 
 	result := GetSummoningPoolsResult{
 		SaveSessionID:  flags.SaveSessionID,
+		SaveRevision:   flags.SaveRevision,
 		CharacterID:    flags.CharacterID,
 		Active:         flags.Active,
 		SummoningPools: make([]SummoningPoolEntry, 0, len(declared)),

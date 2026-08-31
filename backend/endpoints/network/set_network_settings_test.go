@@ -24,7 +24,7 @@ func TestSetNetworkSettingsDelegatesTheCompleteAssignment(t *testing.T) {
 		t.Fatalf("result = %+v", result)
 	}
 	stored, err := engine.GetNetworkSettings(loaded.SaveSessionID)
-	if err != nil || stored != settings {
+	if err != nil || stored.SaveRevision != "1" || stored.Parameters != settings {
 		t.Fatalf("stored settings = %+v, err = %v", stored, err)
 	}
 }

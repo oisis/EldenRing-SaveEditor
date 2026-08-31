@@ -103,6 +103,7 @@ func TestGetPouchItemsReturnsTheActivePouchItemsOfALoadedSession(t *testing.T) {
 
 	want := GetPouchItemsResult{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   getPouchItemsSlot,
 		Active:        true,
 		Items:         items,

@@ -98,6 +98,7 @@ var equipmentAnchor = []byte{
 // and its slot data is never searched or read.
 type CharacterEquipment struct {
 	SaveSessionID string     `json:"saveSessionID"`
+	SaveRevision  string     `json:"saveRevision"`
 	CharacterID   int        `json:"characterID"`
 	Active        bool       `json:"active"`
 	Slots         [22]uint32 `json:"slots"`
@@ -143,7 +144,11 @@ func (engine *Engine) GetEquipment(saveSessionID string, characterID int) (Chara
 		return CharacterEquipment{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	equipment := CharacterEquipment{SaveSessionID: saveSessionID, CharacterID: characterID}
+	equipment := CharacterEquipment{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual
 		// equipment of a deleted character is never located or decoded.

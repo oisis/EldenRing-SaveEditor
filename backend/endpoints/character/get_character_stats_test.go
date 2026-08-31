@@ -118,6 +118,7 @@ func TestGetCharacterStatsReturnsTheActiveStatsOfALoadedSession(t *testing.T) {
 
 	want := values
 	want.SaveSessionID = loaded.SaveSessionID
+	want.SaveRevision = "0"
 	want.CharacterID = getCharacterStatsSlot
 	want.Active = true
 	if !reflect.DeepEqual(result, want) {

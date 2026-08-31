@@ -63,6 +63,7 @@ type QuickItemSlot struct {
 
 type CharacterQuickItems struct {
 	SaveSessionID string            `json:"saveSessionID"`
+	SaveRevision  string            `json:"saveRevision"`
 	CharacterID   int               `json:"characterID"`
 	Active        bool              `json:"active"`
 	Items         [10]QuickItemSlot `json:"items"`
@@ -73,6 +74,7 @@ type CharacterQuickItems struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `items` | `[10]QuickItemSlot` | The ten raw Quick Items records of an active slot, in stored order. Always ten zeroed records for an inactive slot. |

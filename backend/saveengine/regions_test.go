@@ -69,6 +69,7 @@ func TestGetRegionsReadsBothPlatformsWithoutNormalising(t *testing.T) {
 			}
 			want := CharacterRegions{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
 				RegionIDs:     wantIDs,
@@ -94,6 +95,7 @@ func TestGetRegionsDoesNotReadResidualSlot(t *testing.T) {
 	}
 	want := CharacterRegions{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   content.slot,
 		RegionIDs:     []uint32{},
 	}

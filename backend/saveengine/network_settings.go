@@ -112,6 +112,14 @@ var regulationKey = []byte{
 	0x24, 0xD3, 0xAF, 0x4E, 0x49, 0x3F, 0xEF, 0x99,
 }
 
+// NetworkSettingsSnapshot is the network parameter set and the exact session
+// revision whose private snapshot supplied it.
+type NetworkSettingsSnapshot struct {
+	SaveSessionID string                         `json:"saveSessionID"`
+	SaveRevision  string                         `json:"saveRevision"`
+	Parameters    gamecatalog.NetworkParamValues `json:"parameters"`
+}
+
 // regulationHeaderMarker is the confirmed start of the 0x10-byte header the
 // regulation blob sits behind. Only these two bytes are confirmed native
 // evidence, so only they are matched: the platform files use the marker to prove
@@ -137,16 +145,16 @@ var regulationHeaderMarker = []byte{0x20, 0x47}
 // an unaligned or undecryptable blob, a foreign DCX variant, an archive without
 // NetworkParam.param or a row too short for the 22 values — is a hard error, and
 // no partial or guessed parameter set is ever returned.
-func (engine *Engine) GetNetworkSettings(saveSessionID string) (gamecatalog.NetworkParamValues, error) {
+func (engine *Engine) GetNetworkSettings(saveSessionID string) (NetworkSettingsSnapshot, error) {
 	if saveSessionID == "" {
-		return gamecatalog.NetworkParamValues{}, errors.New("saveSessionID is required")
+		return NetworkSettingsSnapshot{}, errors.New("saveSessionID is required")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return gamecatalog.NetworkParamValues{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return NetworkSettingsSnapshot{}, fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 
 	var blob []byte
@@ -158,14 +166,18 @@ func (engine *Engine) GetNetworkSettings(saveSessionID string) (gamecatalog.Netw
 		blob, err = pcRegulationBlob(loaded.snapshot)
 	}
 	if err != nil {
-		return gamecatalog.NetworkParamValues{}, err
+		return NetworkSettingsSnapshot{}, err
 	}
 
 	row, err := networkParamRow(blob)
 	if err != nil {
-		return gamecatalog.NetworkParamValues{}, err
+		return NetworkSettingsSnapshot{}, err
 	}
-	return decodeNetworkParams(row), nil
+	return NetworkSettingsSnapshot{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		Parameters:    decodeNetworkParams(row),
+	}, nil
 }
 
 // networkParamRow turns the encrypted regulation blob into the row 0 data of

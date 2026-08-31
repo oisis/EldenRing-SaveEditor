@@ -114,6 +114,7 @@ var gestureAnchor = []byte{
 // never a short result.
 type CharacterGestures struct {
 	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
 	CharacterID   int      `json:"characterID"`
 	Active        bool     `json:"active"`
 	Slots         []uint32 `json:"slots"`
@@ -164,6 +165,7 @@ func (engine *Engine) GetGestures(saveSessionID string, characterID int) (Charac
 
 	gestures := CharacterGestures{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		Slots:         []uint32{},
 	}

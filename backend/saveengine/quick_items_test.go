@@ -185,6 +185,7 @@ func TestGetQuickItemsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterQuickItems{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   testCase.content.slot,
 				Active:        true,
 				Items:         testCase.content.items,
@@ -214,7 +215,7 @@ func TestGetQuickItemsReportsAResidualSlotAsInactive(t *testing.T) {
 		t.Fatalf("GetQuickItems: %v", err)
 	}
 
-	want := CharacterQuickItems{SaveSessionID: loaded.SaveSessionID, CharacterID: content.slot}
+	want := CharacterQuickItems{SaveSessionID: loaded.SaveSessionID, SaveRevision: "0", CharacterID: content.slot}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}

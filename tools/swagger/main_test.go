@@ -3735,6 +3735,7 @@ func TestNetworkSettingsRoute(t *testing.T) {
 
 	want := network.GetNetworkSettingsResult{
 		SaveSessionID: session.SaveSessionID,
+		SaveRevision:  "0",
 		Parameters: gamecatalog.NetworkParamValues{
 			MaxBreakInTargetListCount:     11,
 			BreakInRequestIntervalTimeSec: 12.5,
@@ -3817,6 +3818,7 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	assertOK(t, stored, target)
 	if !reflect.DeepEqual(decode(t, stored.Body.Bytes()), marshalled(t, network.GetNetworkSettingsResult{
 		SaveSessionID: session.SaveSessionID,
+		SaveRevision:  "1",
 		Parameters:    settings,
 	})) {
 		t.Fatalf("stored network settings body %q differs from the committed values", stored.Body.String())
@@ -3851,6 +3853,7 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	assertOK(t, stored, target)
 	if !reflect.DeepEqual(decode(t, stored.Body.Bytes()), marshalled(t, network.GetNetworkSettingsResult{
 		SaveSessionID: session.SaveSessionID,
+		SaveRevision:  "2",
 		Parameters:    preset.Parameters,
 	})) {
 		t.Fatalf("stored network settings body %q differs from the applied preset", stored.Body.String())

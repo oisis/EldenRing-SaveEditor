@@ -141,6 +141,7 @@ var equippedSpellsAnchor = []byte{
 // capacity, and its slot data is never searched or read.
 type CharacterEquippedSpells struct {
 	SaveSessionID        string                         `json:"saveSessionID"`
+	SaveRevision         string                         `json:"saveRevision"`
 	CharacterID          int                            `json:"characterID"`
 	Active               bool                           `json:"active"`
 	Spells               [equippedSpellSlotCount]uint32 `json:"spells"`
@@ -200,7 +201,11 @@ func (engine *Engine) GetEquippedSpells(saveSessionID string, characterID int) (
 		return CharacterEquippedSpells{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	spells := CharacterEquippedSpells{SaveSessionID: saveSessionID, CharacterID: characterID}
+	spells := CharacterEquippedSpells{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual
 		// spells of a deleted character are never located or decoded.

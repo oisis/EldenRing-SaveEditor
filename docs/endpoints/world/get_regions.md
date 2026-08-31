@@ -79,6 +79,7 @@ with every entry locked, and does not inspect its slot data.
 
     type GetRegionsResult struct {
         SaveSessionID string
+        SaveRevision  string
         CharacterID   int
         Active        bool
         Regions       []RegionEntry
@@ -97,3 +98,9 @@ duplicate catalog region ID. Transport coverage compares the HTTP response with
 the typed getter result.
 
 `SetRegionUnlocked` is documented in [set_region_unlocked.md](set_region_unlocked.md).
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

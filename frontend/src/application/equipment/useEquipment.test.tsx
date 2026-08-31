@@ -52,7 +52,8 @@ function setup(port: EquipmentPort) {
   return { queryClient, wrapper };
 }
 
-const request = { saveSessionID: "  Session ID  ", characterID: 0 };
+const request = { saveSessionID: "session-1", saveRevision: "0", characterID: 0 };
+const backendRequest = { saveSessionID: "session-1", characterID: 0 };
 
 type Getter<T> = (request: EquipmentRequest) => Promise<T>;
 
@@ -65,7 +66,11 @@ type GetterCase<T> = {
   /** Replaces exactly this getter on an otherwise complete stub port. */
   portWith: (call: Getter<T>) => EquipmentPort;
   stub: T;
-  key: (saveSessionID: string, characterID: number | typeof noCharacter) => readonly unknown[];
+  key: (
+    saveSessionID: string,
+    characterID: number | typeof noCharacter,
+    saveRevision: string,
+  ) => readonly unknown[];
 };
 
 const equipmentCase: GetterCase<CharacterEquipment> = {
@@ -122,7 +127,7 @@ function describeGetter<T>(name: string, getter: GetterCase<T>) {
 
       await waitFor(() => expect(result.current.data).toEqual(stub));
       // No trimming and no slot normalisation: the backend owns both.
-      expect(call).toHaveBeenCalledExactlyOnceWith(request);
+      expect(call).toHaveBeenCalledExactlyOnceWith(backendRequest);
     });
 
     it("asks the backend for nothing without a session identifier", async () => {
@@ -144,7 +149,7 @@ function describeGetter<T>(name: string, getter: GetterCase<T>) {
 
       view.rerender({ id: "session-1" });
       await waitFor(() => expect(view.result.current.data).toEqual(stub));
-      expect(call).toHaveBeenCalledExactlyOnceWith({ ...request, saveSessionID: "session-1" });
+      expect(call).toHaveBeenCalledExactlyOnceWith(backendRequest);
     });
 
     it("asks the backend for nothing without a character slot", async () => {
@@ -162,7 +167,7 @@ function describeGetter<T>(name: string, getter: GetterCase<T>) {
       // Slot 0 is an ordinary slot, not an absent one.
       view.rerender({ slot: 0 });
       await waitFor(() => expect(view.result.current.data).toEqual(stub));
-      expect(call).toHaveBeenCalledExactlyOnceWith(request);
+      expect(call).toHaveBeenCalledExactlyOnceWith(backendRequest);
     });
 
     it("cannot reach the port through a manual refetch while an identifier is missing", async () => {
@@ -204,19 +209,30 @@ function describeGetter<T>(name: string, getter: GetterCase<T>) {
     });
 
     it("keeps two sessions and two slots in separate cache entries", async () => {
-      const call = vi.fn<Getter<T>>(() => Promise.resolve(stub));
+      const call = vi.fn<Getter<T>>((requested) =>
+        Promise.resolve({ ...stub, saveSessionID: requested.saveSessionID }),
+      );
       const { queryClient, wrapper } = setup(portWith(call));
 
-      renderHook(() => hook({ saveSessionID: "session-1", characterID: 0 }), { wrapper });
-      renderHook(() => hook({ saveSessionID: "session-2", characterID: 0 }), { wrapper });
-      renderHook(() => hook({ saveSessionID: "session-1", characterID: 1 }), { wrapper });
+      renderHook(() => hook({ saveSessionID: "session-1", saveRevision: "0", characterID: 0 }), {
+        wrapper,
+      });
+      renderHook(() => hook({ saveSessionID: "session-2", saveRevision: "0", characterID: 0 }), {
+        wrapper,
+      });
+      renderHook(() => hook({ saveSessionID: "session-1", saveRevision: "0", characterID: 1 }), {
+        wrapper,
+      });
 
       // Three distinct scopes, three calls and three cached entries: no pair of
       // them shared a key.
       await waitFor(() => expect(call).toHaveBeenCalledTimes(3));
-      expect(queryClient.getQueryData(getter.key("session-1", 0))).toEqual(stub);
-      expect(queryClient.getQueryData(getter.key("session-2", 0))).toEqual(stub);
-      expect(queryClient.getQueryData(getter.key("session-1", 1))).toEqual(stub);
+      expect(queryClient.getQueryData(getter.key("session-1", 0, "0"))).toEqual(stub);
+      expect(queryClient.getQueryData(getter.key("session-2", 0, "0"))).toEqual({
+        ...stub,
+        saveSessionID: "session-2",
+      });
+      expect(queryClient.getQueryData(getter.key("session-1", 1, "0"))).toEqual(stub);
     });
   });
 }
@@ -297,13 +313,13 @@ describe("the six equipment hooks together", () => {
 });
 
 describe("equipment query keys", () => {
-  const keys = (session: string, slot: number | typeof noCharacter) => ({
-    equipment: queryKeys.equipment(session, slot),
-    characterLoadout: queryKeys.characterLoadout(session, slot),
-    quickItems: queryKeys.quickItems(session, slot),
-    pouchItems: queryKeys.pouchItems(session, slot),
-    physickMixture: queryKeys.physickMixture(session, slot),
-    equippedSpells: queryKeys.equippedSpells(session, slot),
+  const keys = (session: string, slot: number | typeof noCharacter, revision = "0") => ({
+    equipment: queryKeys.equipment(session, slot, revision),
+    characterLoadout: queryKeys.characterLoadout(session, slot, revision),
+    quickItems: queryKeys.quickItems(session, slot, revision),
+    pouchItems: queryKeys.pouchItems(session, slot, revision),
+    physickMixture: queryKeys.physickMixture(session, slot, revision),
+    equippedSpells: queryKeys.equippedSpells(session, slot, revision),
   });
 
   it("gives each of the six getters its own cache entry", () => {

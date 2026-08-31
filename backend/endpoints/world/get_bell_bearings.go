@@ -55,6 +55,7 @@ type BellBearingEntry struct {
 // GetBellBearingsResult is the deterministic filtered result for one character.
 type GetBellBearingsResult struct {
 	SaveSessionID string             `json:"saveSessionID"`
+	SaveRevision  string             `json:"saveRevision"`
 	CharacterID   int                `json:"characterID"`
 	Active        bool               `json:"active"`
 	BellBearings  []BellBearingEntry `json:"bellBearings"`
@@ -98,6 +99,7 @@ func GetBellBearings(
 
 	result := GetBellBearingsResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		BellBearings:  make([]BellBearingEntry, 0, len(declared)),

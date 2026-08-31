@@ -172,6 +172,7 @@ func TestGetPhysickMixtureReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterPhysickMixture{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   testCase.slot,
 				Active:        true,
 				Tears:         testCase.tears,
@@ -205,7 +206,7 @@ func TestGetPhysickMixtureReportsAResidualSlotAsInactive(t *testing.T) {
 		t.Fatalf("GetPhysickMixture: %v", err)
 	}
 
-	want := CharacterPhysickMixture{SaveSessionID: loaded.SaveSessionID, CharacterID: content.slot}
+	want := CharacterPhysickMixture{SaveSessionID: loaded.SaveSessionID, SaveRevision: "0", CharacterID: content.slot}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}

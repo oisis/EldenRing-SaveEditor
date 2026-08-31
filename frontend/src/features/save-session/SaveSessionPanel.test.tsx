@@ -15,6 +15,7 @@ const inactiveOnly = makeCharacterPort({
   getSaveCharacters: () =>
     Promise.resolve({
       saveSessionID: stubSaveSession.saveSessionID,
+      saveRevision: stubSaveSession.saveRevision,
       characters: [{ characterID: 0, active: false, name: "", level: 0 }],
     }),
 });

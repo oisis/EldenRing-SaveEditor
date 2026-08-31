@@ -74,10 +74,10 @@ func TestSetMapRegionRevealedCommitsFlagAndFragment(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	if !present[setMapRegionFragmentGameID] {
+	if !present.Presence[setMapRegionFragmentGameID] {
 		t.Error("revealing a region did not add its Map Fragment")
 	}
-	if present[setMapRegionWestGameID] {
+	if present.Presence[setMapRegionWestGameID] {
 		t.Error("hiding a region left its Map Fragment in the inventory")
 	}
 }

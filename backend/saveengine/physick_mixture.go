@@ -91,6 +91,7 @@ var physickMixtureAnchor = []byte{
 // slot data is never searched or read.
 type CharacterPhysickMixture struct {
 	SaveSessionID string    `json:"saveSessionID"`
+	SaveRevision  string    `json:"saveRevision"`
 	CharacterID   int       `json:"characterID"`
 	Active        bool      `json:"active"`
 	Tears         [2]uint32 `json:"tears"`
@@ -137,7 +138,11 @@ func (engine *Engine) GetPhysickMixture(saveSessionID string, characterID int) (
 		return CharacterPhysickMixture{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	mixture := CharacterPhysickMixture{SaveSessionID: saveSessionID, CharacterID: characterID}
+	mixture := CharacterPhysickMixture{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual
 		// mixture of a deleted character is never located or decoded.

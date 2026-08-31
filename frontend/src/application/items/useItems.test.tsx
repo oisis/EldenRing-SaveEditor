@@ -31,13 +31,14 @@ function setup(port: ItemsPort) {
   return { queryClient, wrapper };
 }
 
-const request = {
-  saveSessionID: "  Session ID  ",
+const backendRequest = {
+  saveSessionID: "session-1",
   characterID: 0,
   containerSection: "  Common  ",
   page: 2,
   pageSize: 30,
 };
+const request = { ...backendRequest, saveRevision: "0" };
 
 describe("useInventory and useStorage", () => {
   it("passes every argument to its own port method exactly as given", async () => {
@@ -53,15 +54,18 @@ describe("useInventory and useStorage", () => {
 
     // No trimming, no section default and no paging normalisation: the backend
     // owns all three.
-    expect(getInventory).toHaveBeenCalledExactlyOnceWith(request);
-    expect(getStorage).toHaveBeenCalledExactlyOnceWith(request);
+    expect(getInventory).toHaveBeenCalledExactlyOnceWith(backendRequest);
+    expect(getStorage).toHaveBeenCalledExactlyOnceWith(backendRequest);
   });
 
   it("carries the opaque save revision through untouched", async () => {
     const revised = { ...stubInventoryPage, saveRevision: "  Revision 7  " };
     const { wrapper } = setup(makeItemsPort({ getInventory: () => Promise.resolve(revised) }));
 
-    const { result } = renderHook(() => useInventory(request), { wrapper });
+    const { result } = renderHook(
+      () => useInventory({ ...request, saveRevision: "  Revision 7  " }),
+      { wrapper },
+    );
 
     await waitFor(() => expect(result.current.data).toBeDefined());
     // The revision is neither parsed, compared nor replaced here.
@@ -100,7 +104,7 @@ describe("useInventory and useStorage", () => {
     inventory.rerender({ id: "session-1" });
     await waitFor(() => expect(inventory.result.current.data).toEqual(stubInventoryPage));
     expect(getInventory).toHaveBeenCalledExactlyOnceWith({
-      ...request,
+      ...backendRequest,
       saveSessionID: "session-1",
     });
   });
@@ -127,7 +131,7 @@ describe("useInventory and useStorage", () => {
     // Slot 0 is an ordinary slot, not an absent one.
     inventory.rerender({ slot: 0 });
     await waitFor(() => expect(inventory.result.current.data).toEqual(stubInventoryPage));
-    expect(getInventory).toHaveBeenCalledExactlyOnceWith(request);
+    expect(getInventory).toHaveBeenCalledExactlyOnceWith(backendRequest);
   });
 
   it("cannot reach the port through a manual refetch while an identifier is missing", async () => {
@@ -175,8 +179,8 @@ describe("useInventory and useStorage", () => {
 
 describe("container query keys", () => {
   const key = (session: string, slot: number | typeof noCharacter) => ({
-    inventory: queryKeys.inventory(session, slot, "common", 1, 30),
-    storage: queryKeys.storage(session, slot, "common", 1, 30),
+    inventory: queryKeys.inventory(session, slot, "common", 1, 30, "0"),
+    storage: queryKeys.storage(session, slot, "common", 1, 30, "0"),
   });
 
   it("keeps Inventory and Storage apart", () => {
@@ -185,15 +189,16 @@ describe("container query keys", () => {
   });
 
   it("keeps sessions, slots, sections and page windows apart", () => {
-    const base = queryKeys.inventory("session-1", 0, "common", 1, 30);
+    const base = queryKeys.inventory("session-1", 0, "common", 1, 30, "0");
 
-    expect(queryKeys.inventory("session-2", 0, "common", 1, 30)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", 1, "common", 1, 30)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", noCharacter, "common", 1, 30)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", 0, "key", 1, 30)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", 0, "common", 2, 30)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", 0, "common", 1, 60)).not.toEqual(base);
-    expect(queryKeys.inventory("session-1", 0, "common", 1, 30)).toEqual(base);
+    expect(queryKeys.inventory("session-2", 0, "common", 1, 30, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 1, "common", 1, 30, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", noCharacter, "common", 1, 30, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 0, "key", 1, 30, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 0, "common", 2, 30, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 0, "common", 1, 60, "0")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 0, "common", 1, 30, "1")).not.toEqual(base);
+    expect(queryKeys.inventory("session-1", 0, "common", 1, 30, "0")).toEqual(base);
   });
 
   it("nests both containers under the session prefix that CloseSave removes", () => {

@@ -86,6 +86,7 @@ var appearancePlayerAnchor = []byte{
 // its slot data is never searched or read.
 type CharacterAppearance struct {
 	SaveSessionID string    `json:"saveSessionID"`
+	SaveRevision  string    `json:"saveRevision"`
 	CharacterID   int       `json:"characterID"`
 	Active        bool      `json:"active"`
 	Gender        uint8     `json:"gender"`
@@ -135,7 +136,11 @@ func (engine *Engine) GetCharacterAppearance(saveSessionID string, characterID i
 		return CharacterAppearance{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	appearance := CharacterAppearance{SaveSessionID: saveSessionID, CharacterID: characterID}
+	appearance := CharacterAppearance{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual
 		// appearance of a deleted character is never located or decoded.

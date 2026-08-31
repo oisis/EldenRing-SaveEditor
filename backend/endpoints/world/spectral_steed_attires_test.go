@@ -417,7 +417,7 @@ func TestLockAllSpectralSteedAttiresRemovesTheThreeItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	if !present[spectralSteedUnrelatedID] {
+	if !present.Presence[spectralSteedUnrelatedID] {
 		t.Error("Lock All removed an unrelated Inventory record")
 	}
 }

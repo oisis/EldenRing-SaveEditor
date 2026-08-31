@@ -187,6 +187,7 @@ func TestGetEquipmentReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterEquipment{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   testCase.slot,
 				Active:        true,
 				Slots:         testCase.values,
@@ -220,7 +221,7 @@ func TestGetEquipmentReportsAResidualSlotAsInactive(t *testing.T) {
 		t.Fatalf("GetEquipment: %v", err)
 	}
 
-	want := CharacterEquipment{SaveSessionID: loaded.SaveSessionID, CharacterID: content.slot}
+	want := CharacterEquipment{SaveSessionID: loaded.SaveSessionID, SaveRevision: "0", CharacterID: content.slot}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}

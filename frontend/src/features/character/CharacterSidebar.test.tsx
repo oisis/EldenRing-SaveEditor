@@ -22,7 +22,7 @@ function saveCharacters(
   saveSessionID: string,
   characters: readonly CharacterSummary[],
 ): SaveCharacters {
-  return { saveSessionID, characters };
+  return { saveSessionID, saveRevision: "0", characters };
 }
 
 /**
@@ -31,7 +31,7 @@ function saveCharacters(
  * screen uses: controller above, panel below.
  */
 function Harness({ saveSessionID }: { saveSessionID?: string }) {
-  return <CharacterSidebar model={useCharacterSelection(saveSessionID)} />;
+  return <CharacterSidebar model={useCharacterSelection(saveSessionID, "0")} />;
 }
 
 function listing(characters: readonly CharacterSummary[], overrides: Partial<CharacterPort> = {}) {

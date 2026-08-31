@@ -173,7 +173,7 @@ func spectralSteedItemPresence(
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	return present
+	return present.Presence
 }
 
 func TestSetSpectralSteedAttirePersistsOnBothPlatforms(t *testing.T) {

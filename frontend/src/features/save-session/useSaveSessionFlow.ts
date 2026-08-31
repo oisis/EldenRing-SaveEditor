@@ -137,7 +137,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
   const [unclosedSessionID, setUnclosedSessionID] = useState<string | undefined>(undefined);
   const [opening, setOpening] = useState(false);
 
-  const selection = useCharacterSelection(session?.saveSessionID);
+  const selection = useCharacterSelection(session?.saveSessionID, session?.saveRevision);
   const validation = useSaveValidationReports(
     session?.saveSessionID,
     session?.saveRevision,
@@ -237,7 +237,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         let activeCharacters: readonly { characterID: number }[] = [];
         try {
           const characters = await queryClient.fetchQuery(
-            saveCharactersQuery(characterPort, candidate.saveSessionID),
+            saveCharactersQuery(characterPort, candidate.saveSessionID, candidate.saveRevision),
           );
           activeCharacters = characters.characters.filter((character) => character.active);
         } catch {

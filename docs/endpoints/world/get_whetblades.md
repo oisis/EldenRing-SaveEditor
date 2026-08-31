@@ -91,6 +91,7 @@ type WhetbladeEntry struct {
 
 type GetWhetbladesResult struct {
     SaveSessionID string
+    SaveRevision  string
     CharacterID   int
     Active        bool
     Whetblades    []WhetbladeEntry
@@ -106,3 +107,9 @@ SaveEngine tests cover PC and PS4 event-flag mappings, direct and encoded goods
 records, zero quantities and residual slots. Endpoint tests cover all six
 stored declarations, both unlock signals, filtering and inactive state. The
 transport test compares the HTTP response with the typed getter result.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

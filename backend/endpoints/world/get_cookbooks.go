@@ -71,6 +71,7 @@ type CookbookEntry struct {
 // catalog cookbook as locked, because its event flags are never read.
 type GetCookbooksResult struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Cookbooks     []CookbookEntry `json:"cookbooks"`
@@ -150,6 +151,7 @@ func GetCookbooks(
 
 	result := GetCookbooksResult{
 		SaveSessionID: state.SaveSessionID,
+		SaveRevision:  state.SaveRevision,
 		CharacterID:   state.CharacterID,
 		Active:        state.Active,
 		Cookbooks:     make([]CookbookEntry, 0, len(declared)),

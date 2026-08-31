@@ -37,6 +37,7 @@ var GetNetworkSettingsDefinition = contract.MustDefine(contract.Definition{
 // is the one GameCatalog already owns, so no second 22-field model exists.
 type GetNetworkSettingsResult struct {
 	SaveSessionID string                         `json:"saveSessionID"`
+	SaveRevision  string                         `json:"saveRevision"`
 	Parameters    gamecatalog.NetworkParamValues `json:"parameters"`
 }
 
@@ -57,9 +58,13 @@ func GetNetworkSettings(engine *saveengine.Engine, saveSessionID string) (GetNet
 	if engine == nil {
 		return GetNetworkSettingsResult{}, errors.New("save engine is not available")
 	}
-	parameters, err := engine.GetNetworkSettings(saveSessionID)
+	stored, err := engine.GetNetworkSettings(saveSessionID)
 	if err != nil {
 		return GetNetworkSettingsResult{}, err
 	}
-	return GetNetworkSettingsResult{SaveSessionID: saveSessionID, Parameters: parameters}, nil
+	return GetNetworkSettingsResult{
+		SaveSessionID: stored.SaveSessionID,
+		SaveRevision:  stored.SaveRevision,
+		Parameters:    stored.Parameters,
+	}, nil
 }

@@ -104,6 +104,7 @@ func TestGetEquipmentReturnsTheActiveEquipmentOfALoadedSession(t *testing.T) {
 
 	want := GetEquipmentResult{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   getEquipmentSlot,
 		Active:        true,
 		Slots:         slots,

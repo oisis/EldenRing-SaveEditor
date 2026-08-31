@@ -56,6 +56,7 @@ type BossEntry struct {
 // GetBossesResult is the deterministic result for one character slot.
 type GetBossesResult struct {
 	SaveSessionID string      `json:"saveSessionID"`
+	SaveRevision  string      `json:"saveRevision"`
 	CharacterID   int         `json:"characterID"`
 	Active        bool        `json:"active"`
 	Bosses        []BossEntry `json:"bosses"`
@@ -94,6 +95,7 @@ func GetBosses(
 
 	result := GetBossesResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Bosses:        make([]BossEntry, 0, len(declared)),

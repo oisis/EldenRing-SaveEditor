@@ -209,8 +209,8 @@ func assertMapRegionState(
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	if present[mapRegionWestFragment] != want {
-		t.Errorf("Map Fragment present = %t, want %t", present[mapRegionWestFragment], want)
+	if present.Presence[mapRegionWestFragment] != want {
+		t.Errorf("Map Fragment present = %t, want %t", present.Presence[mapRegionWestFragment], want)
 	}
 	if want {
 		handle, err := gaItemHandleForGameID(mapRegionWestFragment)

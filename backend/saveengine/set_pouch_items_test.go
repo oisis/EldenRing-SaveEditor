@@ -172,6 +172,7 @@ func TestSetPouchItemsWritesBothPlatformsAndReloads(t *testing.T) {
 			if err != nil {
 				t.Fatalf("GetQuickItems after: %v", err)
 			}
+			quickBefore.SaveRevision = quickAfter.SaveRevision
 			if !reflect.DeepEqual(quickBefore, quickAfter) {
 				t.Errorf("QuickItems changed after SetPouchItems; before=%+v, after=%+v", quickBefore, quickAfter)
 			}

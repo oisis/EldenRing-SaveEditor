@@ -100,6 +100,7 @@ func TestGetPhysickMixtureReturnsTheActiveMixtureOfALoadedSession(t *testing.T) 
 
 	want := GetPhysickMixtureResult{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   getPhysickMixtureSlot,
 		Active:        true,
 		Tears:         tears,

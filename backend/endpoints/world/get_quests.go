@@ -67,6 +67,7 @@ type QuestEntry struct {
 // GetQuestsResult is the deterministic result for one character slot.
 type GetQuestsResult struct {
 	SaveSessionID string       `json:"saveSessionID"`
+	SaveRevision  string       `json:"saveRevision"`
 	CharacterID   int          `json:"characterID"`
 	Active        bool         `json:"active"`
 	Quests        []QuestEntry `json:"quests"`
@@ -124,6 +125,7 @@ func GetQuests(
 
 	result := GetQuestsResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Quests:        make([]QuestEntry, 0, len(declared)),

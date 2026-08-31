@@ -74,6 +74,7 @@ func TestGetCharacterProfileReturnsTheActiveProfileOfALoadedSession(t *testing.T
 
 	want := GetCharacterProfileResult{
 		SaveSessionID:   loaded.SaveSessionID,
+		SaveRevision:    "0",
 		CharacterID:     getCharacterProfileSlot,
 		Active:          true,
 		Name:            "Blaidd",

@@ -1303,6 +1303,7 @@ describe("wails catalog item variants adapter", () => {
  */
 const generatedEquipment = saveengine.CharacterEquipment.createFrom({
   saveSessionID: "  Session ID  ",
+  saveRevision: "17",
   characterID: 9,
   active: true,
   slots: [
@@ -1313,6 +1314,7 @@ const generatedEquipment = saveengine.CharacterEquipment.createFrom({
 
 const generatedQuickItems = saveengine.CharacterQuickItems.createFrom({
   saveSessionID: "  Session ID  ",
+  saveRevision: "17",
   characterID: 9,
   active: true,
   items: [
@@ -1332,6 +1334,7 @@ const generatedQuickItems = saveengine.CharacterQuickItems.createFrom({
 
 const generatedPouchItems = saveengine.CharacterPouchItems.createFrom({
   saveSessionID: "  Session ID  ",
+  saveRevision: "17",
   characterID: 9,
   active: true,
   items: [
@@ -1346,6 +1349,7 @@ const generatedPouchItems = saveengine.CharacterPouchItems.createFrom({
 
 const generatedPhysickMixture = saveengine.CharacterPhysickMixture.createFrom({
   saveSessionID: "  Session ID  ",
+  saveRevision: "17",
   characterID: 9,
   active: true,
   tears: [0xffffffff, 0],
@@ -1353,6 +1357,7 @@ const generatedPhysickMixture = saveengine.CharacterPhysickMixture.createFrom({
 
 const generatedEquippedSpells = equipment.GetEquippedSpellsResult.createFrom({
   saveSessionID: "  Session ID  ",
+  saveRevision: "17",
   characterID: 9,
   active: true,
   spells: [
@@ -1522,6 +1527,7 @@ describe("wails equipment adapter", () => {
 
     expect(result).toEqual({
       saveSessionID: "  Session ID  ",
+      saveRevision: "17",
       characterID: 9,
       active: true,
       slots: [
@@ -1532,7 +1538,13 @@ describe("wails equipment adapter", () => {
     // The unknown fields keep their positions and their raw values, the
     // sentinel included: none of them becomes a null, a name or an icon.
     expect(result.slots).toHaveLength(22);
-    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "saveSessionID", "slots"]);
+    expect(Object.keys(result).sort()).toEqual([
+      "active",
+      "characterID",
+      "saveRevision",
+      "saveSessionID",
+      "slots",
+    ]);
   });
 
   it("projects the quick items and keeps the negative active slot", async () => {
@@ -1551,6 +1563,7 @@ describe("wails equipment adapter", () => {
       "activeQuick",
       "characterID",
       "items",
+      "saveRevision",
       "saveSessionID",
     ]);
   });
@@ -1563,7 +1576,13 @@ describe("wails equipment adapter", () => {
     expect(result.items).toEqual(generatedPouchItems.items);
     expect(result.items).toHaveLength(6);
     expect(result.items.map((item) => item.equipIndex)).toEqual([5, 0, 3, 1, 4, 2]);
-    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "items", "saveSessionID"]);
+    expect(Object.keys(result).sort()).toEqual([
+      "active",
+      "characterID",
+      "items",
+      "saveRevision",
+      "saveSessionID",
+    ]);
   });
 
   it("projects both Physick tears unchanged", async () => {
@@ -1574,7 +1593,13 @@ describe("wails equipment adapter", () => {
     expect(result.tears).toEqual([0xffffffff, 0]);
     expect(result.tears).toHaveLength(2);
     // A zero stays a zero: it is neither an empty slot nor a null here.
-    expect(Object.keys(result).sort()).toEqual(["active", "characterID", "saveSessionID", "tears"]);
+    expect(Object.keys(result).sort()).toEqual([
+      "active",
+      "characterID",
+      "saveRevision",
+      "saveSessionID",
+      "tears",
+    ]);
   });
 
   it("carries the resolved spells and the empty records exactly as reported", async () => {
@@ -1603,6 +1628,7 @@ describe("wails equipment adapter", () => {
       "active",
       "availableMemorySlots",
       "characterID",
+      "saveRevision",
       "saveSessionID",
       "spells",
       "usedMemorySlots",
@@ -1615,7 +1641,7 @@ describe("wails equipment adapter", () => {
     ]);
   });
 
-  it("declares no save revision, capability, name or icon of its own", async () => {
+  it("carries the revision but declares no capability, name or icon of its own", async () => {
     getEquipment.mockResolvedValue(generatedEquipment);
     getQuickItems.mockResolvedValue(generatedQuickItems);
     getPouchItems.mockResolvedValue(generatedPouchItems);
@@ -1628,11 +1654,12 @@ describe("wails equipment adapter", () => {
       await wailsDesktopBridge.getPhysickMixture(equipmentRequest),
     ];
 
-    // The backend contract of this stage carries none of these, so the adapter
-    // must not add them either.
+    // The backend now supplies one revision for every save-dependent getter;
+    // the adapter still must not invent presentation or capability fields.
     for (const result of results) {
+      expect(result.saveRevision).toBe("17");
       const keys = Object.keys(result);
-      for (const forbidden of ["saveRevision", "name", "iconPath", "capabilities", "locked"]) {
+      for (const forbidden of ["name", "iconPath", "capabilities", "locked"]) {
         expect(keys).not.toContain(forbidden);
       }
     }

@@ -50,6 +50,7 @@ type GetSaveCharactersResult = saveengine.SaveCharacters
 
 type SaveCharacters struct {
 	SaveSessionID string             `json:"saveSessionID"`
+	SaveRevision  string             `json:"saveRevision"`
 	Characters    []CharacterSummary `json:"characters"`
 }
 
@@ -64,6 +65,7 @@ type CharacterSummary struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characters` | `[]CharacterSummary` | Always exactly ten entries, one per physical slot, in slot order `0..9`. The slice is never `nil` on success. |
 | `characterID` | `int` | The slot index, `0` to `9`. It is positional, so no separate slot field exists and none is needed. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |

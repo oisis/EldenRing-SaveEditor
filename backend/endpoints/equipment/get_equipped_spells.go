@@ -59,6 +59,7 @@ type EquippedSpellSlot struct {
 // zero-value records and both counts zero.
 type GetEquippedSpellsResult struct {
 	SaveSessionID        string              `json:"saveSessionID"`
+	SaveRevision         string              `json:"saveRevision"`
 	CharacterID          int                 `json:"characterID"`
 	Active               bool                `json:"active"`
 	Spells               []EquippedSpellSlot `json:"spells"`
@@ -102,6 +103,7 @@ func GetEquippedSpells(
 	const publicSpellSlotCount = 12
 	result := GetEquippedSpellsResult{
 		SaveSessionID: stored.SaveSessionID,
+		SaveRevision:  stored.SaveRevision,
 		CharacterID:   stored.CharacterID,
 		Active:        stored.Active,
 		Spells:        make([]EquippedSpellSlot, publicSpellSlotCount),

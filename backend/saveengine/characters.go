@@ -63,6 +63,7 @@ type CharacterSummary struct {
 // and one summary per physical slot, always ten of them in slot order.
 type SaveCharacters struct {
 	SaveSessionID string             `json:"saveSessionID"`
+	SaveRevision  string             `json:"saveRevision"`
 	Characters    []CharacterSummary `json:"characters"`
 }
 
@@ -119,7 +120,11 @@ func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, e
 		characters[slot].Level = binary.LittleEndian.Uint32(rawLevel)
 	}
 
-	return SaveCharacters{SaveSessionID: saveSessionID, Characters: characters}, nil
+	return SaveCharacters{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		Characters:    characters,
+	}, nil
 }
 
 // userData10Base is the single source of truth for where the UserData10 data
@@ -146,6 +151,7 @@ func userData10Base(platform Platform) int64 {
 // summary is never read.
 type CharacterProfile struct {
 	SaveSessionID   string `json:"saveSessionID"`
+	SaveRevision    string `json:"saveRevision"`
 	CharacterID     int    `json:"characterID"`
 	Active          bool   `json:"active"`
 	Name            string `json:"name"`
@@ -189,7 +195,11 @@ func (engine *Engine) GetCharacterProfile(saveSessionID string, characterID int)
 		return CharacterProfile{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	profile := CharacterProfile{SaveSessionID: saveSessionID, CharacterID: characterID}
+	profile := CharacterProfile{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so residual summary
 		// values of a deleted character are never decoded or returned.

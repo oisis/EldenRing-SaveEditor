@@ -235,5 +235,5 @@ func whetbladePresence(
 	if err != nil {
 		t.Fatalf("GetInventoryGoodsPresence: %v", err)
 	}
-	return present[gameID]
+	return present.Presence[gameID]
 }

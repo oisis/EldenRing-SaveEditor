@@ -68,6 +68,7 @@ export const stubSaveSession: SaveSession = {
 
 export const stubSaveCharacters: SaveCharacters = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characters: [
     { characterID: 0, active: true, name: "Tarnished", level: 150 },
     { characterID: 1, active: false, name: "", level: 0 },
@@ -76,6 +77,7 @@ export const stubSaveCharacters: SaveCharacters = {
 
 export const stubCharacterProfile: CharacterProfile = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   name: "Tarnished",
@@ -87,6 +89,7 @@ export const stubCharacterProfile: CharacterProfile = {
 
 export const stubCharacterStats: CharacterStats = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   vigor: 40,
@@ -111,7 +114,7 @@ export const stubCharacterStats: CharacterStats = {
 
 export const stubInventoryPage: ItemPage = {
   saveSessionID: "session-1",
-  saveRevision: "revision-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   records: [
@@ -306,6 +309,7 @@ export function makeItemsPort(overrides: Partial<ItemsPort> = {}): ItemsPort {
  */
 export const stubCharacterEquipment: CharacterEquipment = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   // Twenty-two raw fields in the backend's stored order. The unknown ones are
@@ -324,7 +328,7 @@ const emptyLoadoutSlot = (slotType: string, rawValue = 0xffffffff) => ({
 
 export const stubCharacterLoadout: CharacterLoadout = {
   saveSessionID: "session-1",
-  saveRevision: "7",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   rightHand: [
@@ -407,6 +411,7 @@ export const stubCharacterLoadout: CharacterLoadout = {
 
 export const stubCharacterQuickItems: CharacterQuickItems = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   items: [
@@ -427,6 +432,7 @@ export const stubCharacterQuickItems: CharacterQuickItems = {
 
 export const stubCharacterPouchItems: CharacterPouchItems = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   items: [
@@ -441,6 +447,7 @@ export const stubCharacterPouchItems: CharacterPouchItems = {
 
 export const stubCharacterPhysickMixture: CharacterPhysickMixture = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   tears: [0xffffffff, 0],
@@ -454,6 +461,7 @@ export const stubCharacterPhysickMixture: CharacterPhysickMixture = {
  */
 export const stubCharacterEquippedSpells: CharacterEquippedSpells = {
   saveSessionID: "session-1",
+  saveRevision: "0",
   characterID: 0,
   active: true,
   spells: [
@@ -550,9 +558,11 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
 
 export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): CharacterPort {
   return {
-    getSaveCharacters: () => Promise.resolve(stubSaveCharacters),
-    getCharacterProfile: () => Promise.resolve(stubCharacterProfile),
-    getCharacterStats: () => Promise.resolve(stubCharacterStats),
+    getSaveCharacters: (saveSessionID) => Promise.resolve({ ...stubSaveCharacters, saveSessionID }),
+    getCharacterProfile: (saveSessionID, characterID) =>
+      Promise.resolve({ ...stubCharacterProfile, saveSessionID, characterID }),
+    getCharacterStats: (saveSessionID, characterID) =>
+      Promise.resolve({ ...stubCharacterStats, saveSessionID, characterID }),
     ...overrides,
   };
 }

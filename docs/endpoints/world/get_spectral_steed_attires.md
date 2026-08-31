@@ -17,7 +17,7 @@ decided, and which appearances the character owns.
 | Resource identity | Public appearance keys; event flags stay private |
 | Concurrency | None; the getter never mutates |
 
-The result contains `saveSessionID`, `characterID`, `active`, `status`,
+The result contains `saveSessionID`, `saveRevision`, `characterID`, `active`, `status`,
 `activeAttireKey` and the ordered `attires` array. Each entry carries
 `attireKey`, `name`, `owned`, `requiredResourceKind`, `requiredResourceKey` and
 `iconPath`.
@@ -74,3 +74,9 @@ legacy and conflict states, ownership from both native Inventory representations
 the residual-slot rule, that a repeated read reports the same state and advances
 neither the revision nor the dirty flag, the catalog projection including icon
 paths, transport equality with the getter and OpenAPI conformance.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

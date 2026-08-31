@@ -54,6 +54,7 @@ type MapRegionEntry struct {
 // GetMapRegionsResult is the deterministic result for one character slot.
 type GetMapRegionsResult struct {
 	SaveSessionID string           `json:"saveSessionID"`
+	SaveRevision  string           `json:"saveRevision"`
 	CharacterID   int              `json:"characterID"`
 	Active        bool             `json:"active"`
 	MapRegions    []MapRegionEntry `json:"mapRegions"`
@@ -92,6 +93,7 @@ func GetMapRegions(
 
 	result := GetMapRegionsResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		MapRegions:    make([]MapRegionEntry, 0, len(declared)),

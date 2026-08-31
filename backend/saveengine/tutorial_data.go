@@ -21,6 +21,7 @@ const (
 // the residual slot data.
 type CharacterTutorialIDs struct {
 	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
 	CharacterID   int      `json:"characterID"`
 	Active        bool     `json:"active"`
 	IDs           []uint32 `json:"ids"`
@@ -57,6 +58,7 @@ func (engine *Engine) GetTutorialIDs(
 	}
 	result := CharacterTutorialIDs{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		IDs:           []uint32{},
 	}

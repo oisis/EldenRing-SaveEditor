@@ -6,7 +6,7 @@
  *
  * Every type here is a projection of the backend character contract as it
  * exists today, and it carries exactly the fields the backend reports. Nothing
- * is added: no revision, no starting class name, no gender label, no slot
+ * is added: no starting class name, no gender label, no slot
  * status beyond `active`, and no derived value. A raw identifier stays a raw
  * identifier until a backend getter names it.
  */
@@ -22,11 +22,13 @@ export type CharacterSummary = {
 
 export type SaveCharacters = {
   saveSessionID: string;
+  saveRevision: string;
   characters: readonly CharacterSummary[];
 };
 
 export type CharacterProfile = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   name: string;
@@ -45,6 +47,7 @@ export type CharacterProfile = {
  */
 export type CharacterStats = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
 

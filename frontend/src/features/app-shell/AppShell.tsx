@@ -240,6 +240,7 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
             {itemsSection === "inventory" ? (
               <InventoryAndStoragePanel
                 saveSessionID={session?.saveSessionID}
+                saveRevision={session?.saveRevision}
                 characterID={selectedCharacterID}
                 containerSection="common"
               />

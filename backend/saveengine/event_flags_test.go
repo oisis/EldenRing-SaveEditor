@@ -224,6 +224,7 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterEventFlags{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
 				Flags: map[uint32]bool{
@@ -415,6 +416,7 @@ func TestGetEventFlagsReportsAResidualSlotAsInactive(t *testing.T) {
 	// searched or decoded.
 	want := CharacterEventFlags{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   content.slot,
 		Flags:         map[uint32]bool{},
 	}

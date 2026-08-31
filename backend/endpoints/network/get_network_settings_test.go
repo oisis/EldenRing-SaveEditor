@@ -63,6 +63,9 @@ func TestGetNetworkSettingsReturnsTheStoredParameters(t *testing.T) {
 	if result.SaveSessionID != session.SaveSessionID {
 		t.Fatalf("saveSessionID = %q, want %q", result.SaveSessionID, session.SaveSessionID)
 	}
+	if result.SaveRevision != "0" {
+		t.Fatalf("saveRevision = %q, want 0", result.SaveRevision)
+	}
 	if result.Parameters != wantSettings {
 		t.Fatalf("parameters = %+v, want %+v", result.Parameters, wantSettings)
 	}
@@ -88,6 +91,7 @@ func TestGetNetworkSettingsSerialisesTheExactValues(t *testing.T) {
 
 	var decoded struct {
 		SaveSessionID string                 `json:"saveSessionID"`
+		SaveRevision  string                 `json:"saveRevision"`
 		Parameters    map[string]json.Number `json:"parameters"`
 	}
 	decoder := json.NewDecoder(bytes.NewReader(payload))
@@ -98,6 +102,9 @@ func TestGetNetworkSettingsSerialisesTheExactValues(t *testing.T) {
 	}
 	if decoded.SaveSessionID != session.SaveSessionID {
 		t.Fatalf("saveSessionID = %q, want %q", decoded.SaveSessionID, session.SaveSessionID)
+	}
+	if decoded.SaveRevision != "0" {
+		t.Fatalf("saveRevision = %q, want 0", decoded.SaveRevision)
 	}
 
 	want := map[string]string{

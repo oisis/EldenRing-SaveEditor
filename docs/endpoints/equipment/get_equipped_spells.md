@@ -71,6 +71,7 @@ type EquippedSpellSlot struct {
 
 type GetEquippedSpellsResult struct {
 	SaveSessionID        string              `json:"saveSessionID"`
+	SaveRevision         string              `json:"saveRevision"`
 	CharacterID          int                 `json:"characterID"`
 	Active               bool                `json:"active"`
 	Spells               []EquippedSpellSlot `json:"spells"`
@@ -82,6 +83,7 @@ type GetEquippedSpellsResult struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `spells` | array of exactly 12 entries | The twelve public playable memory slots in stored order. |

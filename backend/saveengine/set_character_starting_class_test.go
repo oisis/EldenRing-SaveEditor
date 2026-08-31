@@ -902,6 +902,7 @@ func TestSetCharacterStartingClassLeavesAnUndoPointThatRestoresTheBuild(t *testi
 			if err != nil {
 				t.Fatalf("GetCharacterStats after the undo: %v", err)
 			}
+			statsBefore.SaveRevision = statsAfter.SaveRevision
 			if statsAfter != statsBefore {
 				t.Errorf("stats after undo = %+v, want the restored %+v", statsAfter, statsBefore)
 			}

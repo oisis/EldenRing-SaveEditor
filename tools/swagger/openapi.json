@@ -5720,6 +5720,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characters": {
             "type": "array",
             "items": {
@@ -5727,7 +5731,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characters"]
+        "required": ["saveSessionID", "saveRevision", "characters"]
       },
       "CharacterProfile": {
         "type": "object",
@@ -5735,6 +5739,10 @@
         "properties": {
           "saveSessionID": {
             "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
           },
           "characterID": {
             "type": "integer",
@@ -5765,6 +5773,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "name",
@@ -6228,6 +6237,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -6310,6 +6323,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "vigor",
@@ -6338,6 +6352,10 @@
         "properties": {
           "saveSessionID": {
             "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
           },
           "characterID": {
             "type": "integer",
@@ -6397,6 +6415,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "gender",
@@ -6553,6 +6572,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -6573,6 +6596,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "slots"
@@ -6887,6 +6911,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -6911,6 +6939,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "items",
@@ -6942,6 +6971,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -6961,6 +6994,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "items"
@@ -6972,6 +7006,10 @@
         "properties": {
           "saveSessionID": {
             "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
           },
           "characterID": {
             "type": "integer",
@@ -6993,6 +7031,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "tears"
@@ -7312,6 +7351,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -7341,6 +7384,7 @@
         },
         "required": [
           "saveSessionID",
+          "saveRevision",
           "characterID",
           "active",
           "spells",
@@ -7476,6 +7520,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -7492,7 +7540,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "cookbooks"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "cookbooks"]
       },
       "BellBearingEntry": {
         "type": "object",
@@ -7528,6 +7576,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7544,7 +7596,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "bellBearings"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "bellBearings"]
       },
       "SetBellBearingUnlockedRequest": {
         "type": "object",
@@ -7629,6 +7681,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7645,7 +7701,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "colosseums"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "colosseums"]
       },
       "RegionEntry": {
         "type": "object",
@@ -7681,6 +7737,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7697,7 +7757,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "regions"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "regions"]
       },
       "SummoningPoolEntry": {
         "type": "object",
@@ -7734,6 +7794,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7750,7 +7814,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "summoningPools"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "summoningPools"]
       },
       "GraceEntry": {
         "type": "object",
@@ -7796,6 +7860,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7812,7 +7880,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "graces"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "graces"]
       },
       "BossEntry": {
         "type": "object",
@@ -7858,6 +7926,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7874,7 +7946,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "bosses"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "bosses"]
       },
       "MapRegionEntry": {
         "type": "object",
@@ -7900,6 +7972,10 @@
         "description": "The safe curated map visibility regions of one character slot, ordered by areaLabel, name and key. The array is empty rather than null.",
         "properties": {
           "saveSessionID": {"type": "string"},
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -7912,7 +7988,7 @@
             "items": {"$ref": "#/components/schemas/MapRegionEntry"}
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "mapRegions"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "mapRegions"]
       },
       "SetMapRegionRevealedRequest": {
         "type": "object",
@@ -8018,6 +8094,10 @@
         "description": "The user-facing tutorials of one character slot that passed availabilityFilter, ordered by title and key. The array is empty rather than null.",
         "properties": {
           "saveSessionID": {"type": "string"},
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -8030,7 +8110,7 @@
             "items": {"$ref": "#/components/schemas/TutorialEntry"}
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "tutorials"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "tutorials"]
       },
       "QuestStepEntry": {
         "type": "object",
@@ -8067,6 +8147,10 @@
         "description": "The requested questlines of one character slot, ordered by name and key. The array is empty rather than null.",
         "properties": {
           "saveSessionID": {"type": "string"},
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -8079,7 +8163,7 @@
             "items": {"$ref": "#/components/schemas/QuestEntry"}
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "quests"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "quests"]
       },
       "WhetbladeEntry": {
         "type": "object",
@@ -8111,6 +8195,14 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -8127,7 +8219,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "whetblades"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "whetblades"]
       },
       "SpectralSteedAttireEntry": {
         "type": "object",
@@ -8171,6 +8263,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32",
@@ -8197,7 +8293,15 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "status", "activeAttireKey", "attires"]
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "active",
+          "status",
+          "activeAttireKey",
+          "attires"
+        ]
       },
       "SetSpectralSteedAttireRequest": {
         "type": "object",
@@ -8736,6 +8840,10 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "characterID": {
             "type": "integer",
             "format": "int32"
@@ -8752,7 +8860,7 @@
             }
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "gestures"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "gestures"]
       },
       "SetGestureUnlockedRequest": {
         "type": "object",
@@ -10867,11 +10975,15 @@
           "saveSessionID": {
             "type": "string"
           },
+          "saveRevision": {
+            "type": "string",
+            "description": "Opaque revision of the save session snapshot returned by this read."
+          },
           "parameters": {
             "$ref": "#/components/schemas/NetworkParamValues"
           }
         },
-        "required": ["saveSessionID", "parameters"]
+        "required": ["saveSessionID", "saveRevision", "parameters"]
       },
       "SetNetworkSettingsRequest": {
         "type": "object",

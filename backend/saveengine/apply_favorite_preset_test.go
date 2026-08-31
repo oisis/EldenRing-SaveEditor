@@ -185,6 +185,7 @@ func TestApplyFavoritePresetWritesExactFieldsAndPreservesVoiceAndOpaqueBlock(t *
 			}
 			wantAppearance := CharacterAppearance{
 				SaveSessionID: loadedSession.SaveSessionID,
+				SaveRevision:  "1",
 				CharacterID:   setAppearanceTestSlot,
 				Active:        true,
 				Gender:        0, // inverted from preset bodyType 1
@@ -213,6 +214,7 @@ func TestApplyFavoritePresetWritesExactFieldsAndPreservesVoiceAndOpaqueBlock(t *
 			}
 			wantReloaded := wantAppearance
 			wantReloaded.SaveSessionID = reloaded.SaveSessionID
+			wantReloaded.SaveRevision = "0"
 			if !reflect.DeepEqual(reloadedAppearance, wantReloaded) {
 				t.Errorf("reloadedAppearance = %+v, want %+v", reloadedAppearance, wantReloaded)
 			}
@@ -359,6 +361,7 @@ func TestApplyFavoritePresetUndoAndIdempotence(t *testing.T) {
 	}
 	wantUndone := initialAppearance
 	wantUndone.SaveSessionID = loadedSession2.SaveSessionID
+	wantUndone.SaveRevision = undoRes.SaveRevision
 	if !reflect.DeepEqual(undoneAppearance, wantUndone) {
 		t.Errorf("undone appearance = %+v, want %+v", undoneAppearance, wantUndone)
 	}

@@ -58,6 +58,7 @@ type GetEquipmentResult = saveengine.CharacterEquipment
 
 type CharacterEquipment struct {
 	SaveSessionID string     `json:"saveSessionID"`
+	SaveRevision  string     `json:"saveRevision"`
 	CharacterID   int        `json:"characterID"`
 	Active        bool       `json:"active"`
 	Slots         [22]uint32 `json:"slots"`
@@ -67,6 +68,7 @@ type CharacterEquipment struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | Opaque revision of the exact session snapshot that produced this result. Clients compare it exactly with the current session revision and discard a mismatch. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `slots` | `[22]uint32` | The 22 raw equipment fields of an active slot, in stored order. Always all `0` for an inactive slot. |

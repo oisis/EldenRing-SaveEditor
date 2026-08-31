@@ -49,8 +49,11 @@ export type CharacterSelection = {
  * effective, whether it was inactive from the start or became inactive later.
  * The slot range itself stays the backend's contract and is not validated here.
  */
-export function useCharacterSelection(saveSessionID: string | undefined): CharacterSelection {
-  const characters = useSaveCharacters(saveSessionID);
+export function useCharacterSelection(
+  saveSessionID: string | undefined,
+  saveRevision: string | undefined,
+): CharacterSelection {
+  const characters = useSaveCharacters(saveSessionID, saveRevision);
   const [entry, setEntry] = useState<SessionEntry>({ saveSessionID, characterID: undefined });
 
   /**
@@ -91,8 +94,8 @@ export function useCharacterSelection(saveSessionID: string | undefined): Charac
   // The two per-character queries follow the effective selection. With nothing
   // selected they receive `undefined` and their `skipToken` guard keeps the
   // port out of reach entirely.
-  const profile = useCharacterProfile(saveSessionID, selectedCharacterID);
-  const stats = useCharacterStats(saveSessionID, selectedCharacterID);
+  const profile = useCharacterProfile(saveSessionID, saveRevision, selectedCharacterID);
+  const stats = useCharacterStats(saveSessionID, saveRevision, selectedCharacterID);
 
   return {
     hasSession: (saveSessionID ?? "") !== "",

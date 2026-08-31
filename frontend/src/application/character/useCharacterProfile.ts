@@ -1,5 +1,6 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { noCharacter, queryKeys } from "../queryKeys";
+import { requireCurrentSaveResponse } from "../saveRevision";
 import { useCharacterPort } from "./characterClient";
 
 /**
@@ -15,17 +16,27 @@ import { useCharacterPort } from "./characterClient";
  */
 export function useCharacterProfile(
   saveSessionID: string | undefined,
+  saveRevision: string | undefined,
   characterID: number | undefined,
 ) {
   const port = useCharacterPort();
   const identifier = saveSessionID ?? "";
 
   return useQuery({
-    queryKey: queryKeys.characterProfile(identifier, characterID ?? noCharacter),
+    queryKey: queryKeys.characterProfile(
+      identifier,
+      characterID ?? noCharacter,
+      saveRevision ?? "",
+    ),
     queryFn:
-      identifier === "" || characterID === undefined
+      identifier === "" || saveRevision === undefined || characterID === undefined
         ? skipToken
-        : () => port.getCharacterProfile(identifier, characterID),
+        : async () =>
+            requireCurrentSaveResponse(
+              await port.getCharacterProfile(identifier, characterID),
+              identifier,
+              saveRevision,
+            ),
     retry: false,
   });
 }

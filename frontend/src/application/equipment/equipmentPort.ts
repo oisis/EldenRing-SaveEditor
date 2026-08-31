@@ -18,7 +18,7 @@
  * `memorySlots` are the backend's answer, not a local lookup.
  *
  * The coherent `getCharacterLoadout` result is the frontend-facing projection.
- * It alone carries a `saveRevision`, resolved identities and public slot
+ * It carries resolved identities and public slot
  * states. The five older getters stay available as narrow diagnostic reads;
  * consumers must not combine them into a second loadout model.
  */
@@ -98,6 +98,7 @@ export type CharacterLoadout = {
  */
 export type CharacterEquipment = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   slots: readonly number[];
@@ -116,6 +117,7 @@ export type EquipItemRecord = {
  */
 export type CharacterQuickItems = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   items: readonly EquipItemRecord[];
@@ -125,6 +127,7 @@ export type CharacterQuickItems = {
 /** The six raw pouch records, in the backend's stored order. */
 export type CharacterPouchItems = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   items: readonly EquipItemRecord[];
@@ -133,6 +136,7 @@ export type CharacterPouchItems = {
 /** Both raw Crystal Tear identifiers of the current Physick mixture. */
 export type CharacterPhysickMixture = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   tears: readonly number[];
@@ -158,6 +162,7 @@ export type EquippedSpellSlot = {
  */
 export type CharacterEquippedSpells = {
   saveSessionID: string;
+  saveRevision: string;
   characterID: number;
   active: boolean;
   spells: readonly EquippedSpellSlot[];

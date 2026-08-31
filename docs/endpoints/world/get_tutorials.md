@@ -84,6 +84,7 @@ filter.
 ```go
 type GetTutorialsResult struct {
     SaveSessionID string          `json:"saveSessionID"`
+    SaveRevision  string          `json:"saveRevision"`
     CharacterID   int             `json:"characterID"`
     Active        bool            `json:"active"`
     Tutorials     []TutorialEntry `json:"tutorials"`
@@ -111,3 +112,9 @@ anchor, malformed dynamic length, invalid tutorial count or truncated snapshot.
 [`SetTutorialUnlocked`](set_tutorial_unlocked.md) writes the same
 `TutorialData` membership this getter reads, resolving the tutorial by the same
 public kind and key.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

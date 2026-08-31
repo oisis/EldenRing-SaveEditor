@@ -534,6 +534,7 @@ export namespace equipment {
 	}
 	export class GetEquippedSpellsResult {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    spells: EquippedSpellSlot[];
@@ -547,6 +548,7 @@ export namespace equipment {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.spells = this.convertValues(source["spells"], EquippedSpellSlot);
@@ -731,6 +733,7 @@ export namespace saveengine {
 	
 	export class CharacterEquipment {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    slots: number[];
@@ -742,6 +745,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.slots = source["slots"];
@@ -749,6 +753,7 @@ export namespace saveengine {
 	}
 	export class CharacterPhysickMixture {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    tears: number[];
@@ -760,6 +765,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.tears = source["tears"];
@@ -781,6 +787,7 @@ export namespace saveengine {
 	}
 	export class CharacterPouchItems {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    items: PouchItemSlot[];
@@ -792,6 +799,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.items = this.convertValues(source["items"], PouchItemSlot);
@@ -817,6 +825,7 @@ export namespace saveengine {
 	}
 	export class CharacterProfile {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    name: string;
@@ -832,6 +841,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.name = source["name"];
@@ -857,6 +867,7 @@ export namespace saveengine {
 	}
 	export class CharacterQuickItems {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    items: QuickItemSlot[];
@@ -869,6 +880,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.items = this.convertValues(source["items"], QuickItemSlot);
@@ -895,6 +907,7 @@ export namespace saveengine {
 	}
 	export class CharacterStats {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characterID: number;
 	    active: boolean;
 	    vigor: number;
@@ -923,6 +936,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.vigor = source["vigor"];
@@ -967,6 +981,7 @@ export namespace saveengine {
 	
 	export class SaveCharacters {
 	    saveSessionID: string;
+	    saveRevision: string;
 	    characters: CharacterSummary[];
 	
 	    static createFrom(source: any = {}) {
@@ -976,6 +991,7 @@ export namespace saveengine {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
 	        this.characters = this.convertValues(source["characters"], CharacterSummary);
 	    }
 	

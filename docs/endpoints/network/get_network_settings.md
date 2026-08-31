@@ -51,9 +51,14 @@ rejected instead of resolving to a session.
 ```go
 type GetNetworkSettingsResult struct {
 	SaveSessionID string                         `json:"saveSessionID"`
+	SaveRevision  string                         `json:"saveRevision"`
 	Parameters    gamecatalog.NetworkParamValues `json:"parameters"`
 }
 ```
+
+`saveRevision` is the opaque revision of the exact session snapshot that
+produced the result. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.
 
 `Parameters` holds the 22 values in the field order and with the JSON names of
 `gamecatalog.NetworkParamValues`: `maxBreakInTargetListCount`,

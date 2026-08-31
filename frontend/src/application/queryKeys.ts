@@ -83,7 +83,8 @@ export const queryKeys = {
    */
   saveSession: (saveSessionID: string) => ["save-session", saveSessionID] as const,
   loadedSave: (saveSessionID: string) => ["save-session", saveSessionID, "loaded"] as const,
-  saveCharacters: (saveSessionID: string) => ["save-session", saveSessionID, "characters"] as const,
+  saveCharacters: (saveSessionID: string, saveRevision: string) =>
+    ["save-session", saveSessionID, "characters", saveRevision] as const,
   /**
    * One validation report per slot and per revision, below the session scope,
    * so closing the session drops every report of every revision with it and two
@@ -106,28 +107,42 @@ export const queryKeys = {
    * The per-character views are keyed by session and slot, so two characters of
    * one session and one character of two sessions stay separate entries.
    */
-  characterProfile: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "profile"] as const,
-  characterStats: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "stats"] as const,
+  characterProfile: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "profile", saveRevision] as const,
+  characterStats: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "stats", saveRevision] as const,
   /**
    * The coherent loadout and five narrow equipped views are independent backend getters,
    * so each one keeps its own key below the same session and slot scope. They
    * are never merged into one key: a failure or a refetch of one must not
    * invalidate, replace or hide the other five.
    */
-  equipment: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "equipment"] as const,
-  characterLoadout: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "loadout"] as const,
-  quickItems: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "quick-items"] as const,
-  pouchItems: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "pouch-items"] as const,
-  physickMixture: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "physick-mixture"] as const,
-  equippedSpells: (saveSessionID: string, characterID: CharacterKey) =>
-    ["save-session", saveSessionID, "character", characterID, "equipped-spells"] as const,
+  equipment: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "equipment", saveRevision] as const,
+  characterLoadout: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "loadout", saveRevision] as const,
+  quickItems: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "quick-items", saveRevision] as const,
+  pouchItems: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    ["save-session", saveSessionID, "character", characterID, "pouch-items", saveRevision] as const,
+  physickMixture: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "physick-mixture",
+      saveRevision,
+    ] as const,
+  equippedSpells: (saveSessionID: string, characterID: CharacterKey, saveRevision: string) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "equipped-spells",
+      saveRevision,
+    ] as const,
   /**
    * A container page is identified by its session, slot, container, section and
    * page window: two sections, two pages or two page sizes are different views
@@ -141,6 +156,7 @@ export const queryKeys = {
     containerSection: string,
     page: number,
     pageSize: number,
+    saveRevision: string,
   ) =>
     [
       "save-session",
@@ -151,6 +167,7 @@ export const queryKeys = {
       containerSection,
       page,
       pageSize,
+      saveRevision,
     ] as const,
   storage: (
     saveSessionID: string,
@@ -158,6 +175,7 @@ export const queryKeys = {
     containerSection: string,
     page: number,
     pageSize: number,
+    saveRevision: string,
   ) =>
     [
       "save-session",
@@ -168,5 +186,6 @@ export const queryKeys = {
       containerSection,
       page,
       pageSize,
+      saveRevision,
     ] as const,
 } as const;

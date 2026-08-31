@@ -90,6 +90,7 @@ reading the residual slot contents.
 ```go
 type GetMapRegionsResult struct {
     SaveSessionID string           `json:"saveSessionID"`
+    SaveRevision  string           `json:"saveRevision"`
     CharacterID   int              `json:"characterID"`
     Active        bool             `json:"active"`
     MapRegions    []MapRegionEntry `json:"mapRegions"`
@@ -129,3 +130,9 @@ No failure produces a partial result or substitutes a guessed state.
   visibility state and keeps the catalog-linked Map Fragment in step.
 - [`SetFogOfWarRemoved`](set_fog_of_war_removed.md) removes the separate global
   Fog of War overlay. It names no map region and changes no visibility flag.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

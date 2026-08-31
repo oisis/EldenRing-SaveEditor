@@ -5,6 +5,16 @@ import (
 	"fmt"
 )
 
+// InventoryGoodsPresence is one revision-coherent InventoryHeld membership
+// read. Presence contains one entry for every distinct requested goods game ID.
+type InventoryGoodsPresence struct {
+	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
+	CharacterID   int             `json:"characterID"`
+	Active        bool            `json:"active"`
+	Presence      map[uint32]bool `json:"presence"`
+}
+
 // GetInventoryGoodsPresence reports which requested goods game IDs have a
 // positive-quantity record in common or key InventoryHeld. It accepts both
 // native representations confirmed for goods: the handle-encoded 0xB form and
@@ -13,16 +23,17 @@ func (engine *Engine) GetInventoryGoodsPresence(
 	saveSessionID string,
 	characterID int,
 	gameIDs []uint32,
-) (map[uint32]bool, error) {
+) (InventoryGoodsPresence, error) {
 	if saveSessionID == "" {
-		return nil, errors.New("saveSessionID is required")
+		return InventoryGoodsPresence{}, errors.New("saveSessionID is required")
 	}
 
 	byHandle := make(map[uint32]uint32, len(gameIDs)*2)
 	present := make(map[uint32]bool, len(gameIDs))
 	for _, gameID := range gameIDs {
 		if gameID&gaItemHandleTypeMask != 0x40000000 {
-			return nil, fmt.Errorf("goods game ID must use prefix 4; got 0x%08X", gameID)
+			return InventoryGoodsPresence{}, fmt.Errorf(
+				"goods game ID must use prefix 4; got 0x%08X", gameID)
 		}
 		present[gameID] = false
 		byHandle[gameID] = gameID
@@ -33,24 +44,32 @@ func (engine *Engine) GetInventoryGoodsPresence(
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return nil, fmt.Errorf("unknown save session %q", saveSessionID)
+		return InventoryGoodsPresence{}, fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
-		return nil, fmt.Errorf("characterID %d is outside the range 0..%d",
+		return InventoryGoodsPresence{}, fmt.Errorf("characterID %d is outside the range 0..%d",
 			characterID, characterSlotCount-1)
+	}
+	result := InventoryGoodsPresence{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+		Presence:      present,
 	}
 	flag, err := loaded.snapshot.readAt(
 		userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
+		return InventoryGoodsPresence{}, fmt.Errorf(
+			"cannot read activity of character %d: %w", characterID, err)
 	}
 	if flag[0] != userData10ActiveFlagValue || len(gameIDs) == 0 {
-		return present, nil
+		return result, nil
 	}
+	result.Active = true
 
 	records, err := readInventoryRecords(loaded, characterID)
 	if err != nil {
-		return nil, err
+		return InventoryGoodsPresence{}, err
 	}
 	for _, record := range records {
 		if record.Quantity == 0 {
@@ -60,5 +79,5 @@ func (engine *Engine) GetInventoryGoodsPresence(
 			present[gameID] = true
 		}
 	}
-	return present, nil
+	return result, nil
 }

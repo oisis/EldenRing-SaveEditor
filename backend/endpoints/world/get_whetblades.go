@@ -53,6 +53,7 @@ type WhetbladeEntry struct {
 // GetWhetbladesResult is the deterministic filtered result for one character.
 type GetWhetbladesResult struct {
 	SaveSessionID string           `json:"saveSessionID"`
+	SaveRevision  string           `json:"saveRevision"`
 	CharacterID   int              `json:"characterID"`
 	Active        bool             `json:"active"`
 	Whetblades    []WhetbladeEntry `json:"whetblades"`
@@ -98,14 +99,19 @@ func GetWhetblades(
 	}
 	owned := map[uint32]bool{}
 	if flags.Active {
-		owned, err = engine.GetInventoryGoodsPresence(saveSessionID, characterID, gameIDs)
+		presence, err := engine.GetInventoryGoodsPresence(saveSessionID, characterID, gameIDs)
 		if err != nil {
 			return GetWhetbladesResult{}, err
 		}
+		if err := requireSameSaveRevision(flags.SaveRevision, presence.SaveRevision); err != nil {
+			return GetWhetbladesResult{}, err
+		}
+		owned = presence.Presence
 	}
 
 	result := GetWhetbladesResult{
 		SaveSessionID: flags.SaveSessionID,
+		SaveRevision:  flags.SaveRevision,
 		CharacterID:   flags.CharacterID,
 		Active:        flags.Active,
 		Whetblades:    make([]WhetbladeEntry, 0, len(declared)),

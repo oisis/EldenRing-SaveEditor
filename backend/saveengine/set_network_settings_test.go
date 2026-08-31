@@ -89,7 +89,7 @@ func TestSetNetworkSettingsRoundTripsSupportedLayouts(t *testing.T) {
 			if err != nil {
 				t.Fatalf("GetNetworkSettings: %v", err)
 			}
-			if got != setNetworkSettingsTarget {
+			if got.SaveRevision != "1" || got.Parameters != setNetworkSettingsTarget {
 				t.Fatalf("settings = %+v, want %+v", got, setNetworkSettingsTarget)
 			}
 			snapshot := engine.sessions[loaded.SaveSessionID].snapshot
@@ -141,7 +141,7 @@ func TestSetNetworkSettingsRoundTripsSupportedLayouts(t *testing.T) {
 				t.Fatalf("reload: %v", err)
 			}
 			got, err = reloaded.GetNetworkSettings(again.SaveSessionID)
-			if err != nil || got != setNetworkSettingsTarget {
+			if err != nil || got.SaveRevision != "0" || got.Parameters != setNetworkSettingsTarget {
 				t.Fatalf("reloaded settings = %+v, err = %v", got, err)
 			}
 

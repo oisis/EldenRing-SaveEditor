@@ -181,9 +181,11 @@ describe("useCloseSave", () => {
   it("drops the character views of the closed session and keeps another session's", async () => {
     const { queryClient, wrapper } = setup(makeSaveSessionPort());
     for (const saveSessionID of ["session-1", "session-2"]) {
-      queryClient.setQueryData(queryKeys.saveCharacters(saveSessionID), { saveSessionID });
-      queryClient.setQueryData(queryKeys.characterProfile(saveSessionID, 0), { saveSessionID });
-      queryClient.setQueryData(queryKeys.characterStats(saveSessionID, 9), { saveSessionID });
+      queryClient.setQueryData(queryKeys.saveCharacters(saveSessionID, "0"), { saveSessionID });
+      queryClient.setQueryData(queryKeys.characterProfile(saveSessionID, 0, "0"), {
+        saveSessionID,
+      });
+      queryClient.setQueryData(queryKeys.characterStats(saveSessionID, 9, "0"), { saveSessionID });
     }
 
     const { result } = renderHook(() => useCloseSave(), { wrapper });
@@ -192,16 +194,18 @@ describe("useCloseSave", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     // The session prefix is the only cleanup rule the character views need.
-    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-1"))).toBe(undefined);
-    expect(queryClient.getQueryData(queryKeys.characterProfile("session-1", 0))).toBe(undefined);
-    expect(queryClient.getQueryData(queryKeys.characterStats("session-1", 9))).toBe(undefined);
-    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-2"))).toEqual({
+    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-1", "0"))).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.characterProfile("session-1", 0, "0"))).toBe(
+      undefined,
+    );
+    expect(queryClient.getQueryData(queryKeys.characterStats("session-1", 9, "0"))).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.saveCharacters("session-2", "0"))).toEqual({
       saveSessionID: "session-2",
     });
-    expect(queryClient.getQueryData(queryKeys.characterProfile("session-2", 0))).toEqual({
+    expect(queryClient.getQueryData(queryKeys.characterProfile("session-2", 0, "0"))).toEqual({
       saveSessionID: "session-2",
     });
-    expect(queryClient.getQueryData(queryKeys.characterStats("session-2", 9))).toEqual({
+    expect(queryClient.getQueryData(queryKeys.characterStats("session-2", 9, "0"))).toEqual({
       saveSessionID: "session-2",
     });
   });
@@ -209,10 +213,10 @@ describe("useCloseSave", () => {
   it("drops the container pages of the closed session and keeps another session's", async () => {
     const { queryClient, wrapper } = setup(makeSaveSessionPort());
     for (const saveSessionID of ["session-1", "session-2"]) {
-      queryClient.setQueryData(queryKeys.inventory(saveSessionID, 0, "common", 1, 30), {
+      queryClient.setQueryData(queryKeys.inventory(saveSessionID, 0, "common", 1, 30, "0"), {
         saveSessionID,
       });
-      queryClient.setQueryData(queryKeys.storage(saveSessionID, 0, "common", 2, 30), {
+      queryClient.setQueryData(queryKeys.storage(saveSessionID, 0, "common", 2, 30, "0"), {
         saveSessionID,
       });
     }
@@ -224,18 +228,18 @@ describe("useCloseSave", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     // Both containers are keyed under the session prefix, so the existing close
     // rule removes them without a new cleanup rule of its own.
-    expect(queryClient.getQueryData(queryKeys.inventory("session-1", 0, "common", 1, 30))).toBe(
+    expect(
+      queryClient.getQueryData(queryKeys.inventory("session-1", 0, "common", 1, 30, "0")),
+    ).toBe(undefined);
+    expect(queryClient.getQueryData(queryKeys.storage("session-1", 0, "common", 2, 30, "0"))).toBe(
       undefined,
     );
-    expect(queryClient.getQueryData(queryKeys.storage("session-1", 0, "common", 2, 30))).toBe(
-      undefined,
-    );
-    expect(queryClient.getQueryData(queryKeys.inventory("session-2", 0, "common", 1, 30))).toEqual({
-      saveSessionID: "session-2",
-    });
-    expect(queryClient.getQueryData(queryKeys.storage("session-2", 0, "common", 2, 30))).toEqual({
-      saveSessionID: "session-2",
-    });
+    expect(
+      queryClient.getQueryData(queryKeys.inventory("session-2", 0, "common", 1, 30, "0")),
+    ).toEqual({ saveSessionID: "session-2" });
+    expect(
+      queryClient.getQueryData(queryKeys.storage("session-2", 0, "common", 2, 30, "0")),
+    ).toEqual({ saveSessionID: "session-2" });
   });
 
   it("keeps the cache and reports the failure when the close is rejected", async () => {

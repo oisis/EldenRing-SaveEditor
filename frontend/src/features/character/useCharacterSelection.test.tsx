@@ -28,7 +28,7 @@ function saveCharacters(
   saveSessionID: string,
   characters: readonly CharacterSummary[],
 ): SaveCharacters {
-  return { saveSessionID, characters };
+  return { saveSessionID, saveRevision: "0", characters };
 }
 
 function setup(port: CharacterPort) {
@@ -70,7 +70,7 @@ describe("useCharacterSelection default selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
     expect(getCharacterProfile).toHaveBeenCalledExactlyOnceWith("session-1", 0);
@@ -91,7 +91,7 @@ describe("useCharacterSelection default selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     // "First active" is the first one the backend reports, not the lowest index.
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(4));
@@ -105,7 +105,7 @@ describe("useCharacterSelection default selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.characters.isSuccess).toBe(true));
     expect(result.current.selectedCharacterID).toBeUndefined();
@@ -129,7 +129,7 @@ describe("useCharacterSelection default selection", () => {
     const { wrapper } = setup(port);
 
     const { result, rerender } = renderHook(
-      ({ id }: { id?: string }) => useCharacterSelection(id),
+      ({ id }: { id?: string }) => useCharacterSelection(id, "0"),
       {
         wrapper,
         initialProps: {},
@@ -163,7 +163,7 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
 
@@ -188,7 +188,7 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
 
@@ -206,7 +206,7 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
 
@@ -224,7 +224,7 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
     act(() => result.current.selectCharacter(1));
@@ -251,7 +251,7 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result } = renderHook(() => useCharacterSelection("session-1"), { wrapper });
+    const { result } = renderHook(() => useCharacterSelection("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
     act(() => result.current.selectCharacter(1));
@@ -277,10 +277,13 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result, rerender } = renderHook(({ id }: { id: string }) => useCharacterSelection(id), {
-      wrapper,
-      initialProps: { id: "session-1" },
-    });
+    const { result, rerender } = renderHook(
+      ({ id }: { id: string }) => useCharacterSelection(id, "0"),
+      {
+        wrapper,
+        initialProps: { id: "session-1" },
+      },
+    );
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
     act(() => result.current.selectCharacter(1));
@@ -312,7 +315,7 @@ describe("useCharacterSelection manual selection", () => {
     const { wrapper } = setup(port);
 
     const { result, rerender } = renderHook(
-      ({ id }: { id?: string }) => useCharacterSelection(id),
+      ({ id }: { id?: string }) => useCharacterSelection(id, "0"),
       {
         wrapper,
         initialProps: { id: "session-1" } as { id?: string },
@@ -344,7 +347,7 @@ describe("useCharacterSelection manual selection", () => {
     const { wrapper } = setup(port);
 
     const { result, rerender } = renderHook(
-      ({ id }: { id?: string }) => useCharacterSelection(id),
+      ({ id }: { id?: string }) => useCharacterSelection(id, "0"),
       {
         wrapper,
         initialProps: { id: "session-1" } as { id?: string },
@@ -374,10 +377,13 @@ describe("useCharacterSelection manual selection", () => {
     });
     const { wrapper } = setup(port);
 
-    const { result, rerender } = renderHook(({ id }: { id: string }) => useCharacterSelection(id), {
-      wrapper,
-      initialProps: { id: "session-1" },
-    });
+    const { result, rerender } = renderHook(
+      ({ id }: { id: string }) => useCharacterSelection(id, "0"),
+      {
+        wrapper,
+        initialProps: { id: "session-1" },
+      },
+    );
 
     await waitFor(() => expect(result.current.selectedCharacterID).toBe(0));
     act(() => result.current.selectCharacter(1));

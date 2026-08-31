@@ -186,6 +186,7 @@ function toCharacterEquipment(
 ): CharacterEquipment {
   return {
     saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
     characterID: result.characterID,
     active: result.active,
     slots: [...result.slots],
@@ -271,6 +272,7 @@ function toCharacterQuickItems(
 ): CharacterQuickItems {
   return {
     saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
     characterID: result.characterID,
     active: result.active,
     items: result.items.map((item) => ({ itemID: item.itemID, equipIndex: item.equipIndex })),
@@ -284,6 +286,7 @@ function toCharacterPouchItems(
 ): CharacterPouchItems {
   return {
     saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
     characterID: result.characterID,
     active: result.active,
     items: result.items.map((item) => ({ itemID: item.itemID, equipIndex: item.equipIndex })),
@@ -296,6 +299,7 @@ function toCharacterPhysickMixture(
 ): CharacterPhysickMixture {
   return {
     saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
     characterID: result.characterID,
     active: result.active,
     tears: [...result.tears],
@@ -313,6 +317,7 @@ function toCharacterEquippedSpells(
 ): CharacterEquippedSpells {
   return {
     saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
     characterID: result.characterID,
     active: result.active,
     spells: result.spells.map((spell) => ({
@@ -588,6 +593,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
 
     return {
       saveSessionID: result.saveSessionID,
+      saveRevision: result.saveRevision,
       characters: result.characters.map((summary) => ({
         characterID: summary.characterID,
         active: summary.active,
@@ -602,6 +608,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
 
     return {
       saveSessionID: result.saveSessionID,
+      saveRevision: result.saveRevision,
       characterID: result.characterID,
       active: result.active,
       name: result.name,
@@ -617,6 +624,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
 
     return {
       saveSessionID: result.saveSessionID,
+      saveRevision: result.saveRevision,
       characterID: result.characterID,
       active: result.active,
       vigor: result.vigor,

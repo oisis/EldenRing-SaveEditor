@@ -29,7 +29,7 @@ func TestApplyNetworkPresetUsesTheCatalogPresetAndSharedWriter(t *testing.T) {
 		t.Fatalf("result = %+v", result)
 	}
 	stored, err := engine.GetNetworkSettings(loaded.SaveSessionID)
-	if err != nil || stored != parameters {
+	if err != nil || stored.SaveRevision != "1" || stored.Parameters != parameters {
 		t.Fatalf("stored settings = %+v, err = %v", stored, err)
 	}
 }

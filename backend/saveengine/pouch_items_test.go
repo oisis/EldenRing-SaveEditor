@@ -164,6 +164,7 @@ func TestGetPouchItemsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterPouchItems{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
 				Items:         content.items,
@@ -192,7 +193,7 @@ func TestGetPouchItemsReportsAResidualSlotAsInactive(t *testing.T) {
 		t.Fatalf("GetPouchItems: %v", err)
 	}
 
-	want := CharacterPouchItems{SaveSessionID: loaded.SaveSessionID, CharacterID: content.slot}
+	want := CharacterPouchItems{SaveSessionID: loaded.SaveSessionID, SaveRevision: "0", CharacterID: content.slot}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}

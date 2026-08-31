@@ -78,6 +78,7 @@ var statsAnchor = []byte{
 // slot data is never searched or read.
 type CharacterStats struct {
 	SaveSessionID string `json:"saveSessionID"`
+	SaveRevision  string `json:"saveRevision"`
 	CharacterID   int    `json:"characterID"`
 	Active        bool   `json:"active"`
 
@@ -135,7 +136,11 @@ func (engine *Engine) GetCharacterStats(saveSessionID string, characterID int) (
 		return CharacterStats{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
 	}
 
-	stats := CharacterStats{SaveSessionID: saveSessionID, CharacterID: characterID}
+	stats := CharacterStats{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
+		CharacterID:   characterID,
+	}
 	if flag[0] != userData10ActiveFlagValue {
 		// An inactive slot is reported from its flag alone, so the residual
 		// statistics of a deleted character are never located or decoded.

@@ -98,6 +98,7 @@ type CookbookEntry struct {
 
 type GetCookbooksResult struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Cookbooks     []CookbookEntry `json:"cookbooks"`
@@ -456,3 +457,9 @@ prove that `availabilityFilter` arrives unchanged, that an invalid filter answer
   `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks`,
   and it exists only while the explorer runs without `-allow-external-bind`. No
   Wails binding, no CLI command and no frontend reaches the endpoint.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

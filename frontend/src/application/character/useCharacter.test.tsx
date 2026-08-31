@@ -39,10 +39,13 @@ describe("useSaveCharacters", () => {
     const getSaveCharacters = vi.fn(makeCharacterPort().getSaveCharacters);
     const { wrapper } = setup(makeCharacterPort({ getSaveCharacters }));
 
-    const { result, rerender } = renderHook(({ id }: { id?: string }) => useSaveCharacters(id), {
-      wrapper,
-      initialProps: {},
-    });
+    const { result, rerender } = renderHook(
+      ({ id }: { id?: string }) => useSaveCharacters(id, "0"),
+      {
+        wrapper,
+        initialProps: {},
+      },
+    );
 
     expect(result.current.fetchStatus).toBe("idle");
     expect(getSaveCharacters).not.toHaveBeenCalled();
@@ -52,20 +55,23 @@ describe("useSaveCharacters", () => {
     expect(result.current.fetchStatus).toBe("idle");
     expect(getSaveCharacters).not.toHaveBeenCalled();
 
-    rerender({ id: "  Session ID  " });
+    rerender({ id: "session-1" });
     await waitFor(() => expect(result.current.data).toEqual(stubSaveCharacters));
     // The identifier reaches the port exactly as given.
-    expect(getSaveCharacters).toHaveBeenCalledExactlyOnceWith("  Session ID  ");
+    expect(getSaveCharacters).toHaveBeenCalledExactlyOnceWith("session-1");
   });
 
   it("reaches no port on a manual refetch without a session identifier", async () => {
     const getSaveCharacters = vi.fn(makeCharacterPort().getSaveCharacters);
     const { wrapper } = setup(makeCharacterPort({ getSaveCharacters }));
 
-    const { result, rerender } = renderHook(({ id }: { id?: string }) => useSaveCharacters(id), {
-      wrapper,
-      initialProps: {},
-    });
+    const { result, rerender } = renderHook(
+      ({ id }: { id?: string }) => useSaveCharacters(id, "0"),
+      {
+        wrapper,
+        initialProps: {},
+      },
+    );
 
     expect(getSaveCharacters).not.toHaveBeenCalled();
 
@@ -80,23 +86,29 @@ describe("useSaveCharacters", () => {
   });
 
   it("calls the port again on a manual refetch with a session identifier", async () => {
-    const getSaveCharacters = vi.fn(makeCharacterPort().getSaveCharacters);
-    const { wrapper } = setup(makeCharacterPort({ getSaveCharacters }));
-
-    const { result } = renderHook(() => useSaveCharacters("  Session ID  "), { wrapper });
+    const getSaveCharactersForSession = vi.fn((saveSessionID: string) =>
+      Promise.resolve({ ...stubSaveCharacters, saveSessionID }),
+    );
+    const configured = setup(makeCharacterPort({ getSaveCharacters: getSaveCharactersForSession }));
+    const { result } = renderHook(() => useSaveCharacters("  Session ID  ", "0"), {
+      wrapper: configured.wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     await result.current.refetch();
 
-    expect(getSaveCharacters).toHaveBeenCalledTimes(2);
+    expect(getSaveCharactersForSession).toHaveBeenCalledTimes(2);
     // Both calls carry the identifier unchanged.
-    expect(getSaveCharacters.mock.calls).toEqual([["  Session ID  "], ["  Session ID  "]]);
+    expect(getSaveCharactersForSession.mock.calls).toEqual([
+      ["  Session ID  "],
+      ["  Session ID  "],
+    ]);
   });
 
   it("reports an inactive slot as an ordinary result", async () => {
     const { wrapper } = setup(makeCharacterPort());
 
-    const { result } = renderHook(() => useSaveCharacters("session-1"), { wrapper });
+    const { result } = renderHook(() => useSaveCharacters("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.isError).toBe(false);
@@ -112,13 +124,13 @@ describe("useSaveCharacters", () => {
     const getSaveCharacters = vi.fn(() => Promise.reject(new Error("bridge_call_failed")));
     const { queryClient, wrapper } = setup(makeCharacterPort({ getSaveCharacters }));
 
-    const { result } = renderHook(() => useSaveCharacters("session-1"), { wrapper });
+    const { result } = renderHook(() => useSaveCharacters("session-1", "0"), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error?.message).toBe("bridge_call_failed");
     expect(getSaveCharacters).toHaveBeenCalledTimes(1);
     expect(
-      queryClient.getQueryCache().find({ queryKey: queryKeys.saveCharacters("session-1") }),
+      queryClient.getQueryCache().find({ queryKey: queryKeys.saveCharacters("session-1", "0") }),
     ).toBeDefined();
   });
 });
@@ -131,8 +143,16 @@ describe("useSaveCharacters", () => {
  */
 function characterGetterSuite<T extends object>(config: {
   name: string;
-  hook: (saveSessionID?: string, characterID?: number) => UseQueryResult<T, Error>;
-  key: (saveSessionID: string, characterID: number | typeof noCharacter) => readonly unknown[];
+  hook: (
+    saveSessionID?: string,
+    saveRevision?: string,
+    characterID?: number,
+  ) => UseQueryResult<T, Error>;
+  key: (
+    saveSessionID: string,
+    characterID: number | typeof noCharacter,
+    saveRevision: string,
+  ) => readonly unknown[];
   stub: T;
   portWith: (call: (saveSessionID: string, characterID: number) => Promise<T>) => CharacterPort;
 }) {
@@ -146,7 +166,7 @@ function characterGetterSuite<T extends object>(config: {
       const { wrapper } = setup(portWith(call));
 
       const { result, rerender } = renderHook(
-        ({ id, characterID }: { id?: string; characterID?: number }) => hook(id, characterID),
+        ({ id, characterID }: { id?: string; characterID?: number }) => hook(id, "0", characterID),
         { wrapper, initialProps: { characterID: 0 } as { id?: string; characterID?: number } },
       );
 
@@ -165,7 +185,7 @@ function characterGetterSuite<T extends object>(config: {
       const { wrapper } = setup(portWith(call));
 
       const { result, rerender } = renderHook(
-        ({ id, characterID }: { id?: string; characterID?: number }) => hook(id, characterID),
+        ({ id, characterID }: { id?: string; characterID?: number }) => hook(id, "0", characterID),
         { wrapper, initialProps: { characterID: 0 } as { id?: string; characterID?: number } },
       );
 
@@ -188,7 +208,7 @@ function characterGetterSuite<T extends object>(config: {
       const call = resolving();
       const { wrapper } = setup(portWith(call));
 
-      const { result } = renderHook(() => hook("session-1", 0), { wrapper });
+      const { result } = renderHook(() => hook("session-1", "0", 0), { wrapper });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       await result.current.refetch();
@@ -205,7 +225,7 @@ function characterGetterSuite<T extends object>(config: {
       const call = resolving();
       const { wrapper } = setup(portWith(call));
 
-      const { result } = renderHook(() => hook("session-1", 0), { wrapper });
+      const { result } = renderHook(() => hook("session-1", "0", 0), { wrapper });
 
       await waitFor(() => expect(result.current.data).toEqual(stub));
       expect(call).toHaveBeenCalledExactlyOnceWith("session-1", 0);
@@ -215,7 +235,7 @@ function characterGetterSuite<T extends object>(config: {
       const call = resolving();
       const { wrapper } = setup(portWith(call));
 
-      const { result } = renderHook(() => hook("session-1", -1), { wrapper });
+      const { result } = renderHook(() => hook("session-1", "0", -1), { wrapper });
 
       // The backend owns the slot range; the frontend does not pre-empt it.
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -236,12 +256,14 @@ function characterGetterSuite<T extends object>(config: {
       );
       const { queryClient, wrapper } = setup(portWith(call));
 
-      const { result } = renderHook(() => hook("session-1", 0), { wrapper });
+      const { result } = renderHook(() => hook("session-1", "0", 0), { wrapper });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
       expect(result.current.error?.message).toBe("bridge_call_failed");
       expect(call).toHaveBeenCalledTimes(1);
-      expect(queryClient.getQueryCache().find({ queryKey: key("session-1", 0) })).toBeDefined();
+      expect(
+        queryClient.getQueryCache().find({ queryKey: key("session-1", 0, "0") }),
+      ).toBeDefined();
     });
 
     it("keeps two characters and two sessions apart in the cache", async () => {
@@ -250,23 +272,23 @@ function characterGetterSuite<T extends object>(config: {
       );
       const { queryClient, wrapper } = setup(portWith(call));
 
-      const first = renderHook(() => hook("session-1", 0), { wrapper });
-      const second = renderHook(() => hook("session-1", 1), { wrapper });
-      const other = renderHook(() => hook("session-2", 0), { wrapper });
+      const first = renderHook(() => hook("session-1", "0", 0), { wrapper });
+      const second = renderHook(() => hook("session-1", "0", 1), { wrapper });
+      const other = renderHook(() => hook("session-2", "0", 0), { wrapper });
 
       await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
       await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
       await waitFor(() => expect(other.result.current.isSuccess).toBe(true));
 
-      expect(queryClient.getQueryData(key("session-1", 0))).toMatchObject({
+      expect(queryClient.getQueryData(key("session-1", 0, "0"))).toMatchObject({
         saveSessionID: "session-1",
         characterID: 0,
       });
-      expect(queryClient.getQueryData(key("session-1", 1))).toMatchObject({
+      expect(queryClient.getQueryData(key("session-1", 1, "0"))).toMatchObject({
         saveSessionID: "session-1",
         characterID: 1,
       });
-      expect(queryClient.getQueryData(key("session-2", 0))).toMatchObject({
+      expect(queryClient.getQueryData(key("session-2", 0, "0"))).toMatchObject({
         saveSessionID: "session-2",
         characterID: 0,
       });
@@ -276,7 +298,7 @@ function characterGetterSuite<T extends object>(config: {
     it("keys a disabled query away from every real slot index", () => {
       // A slot index is a number, so the unselected placeholder can never
       // collide with one, negative indices included.
-      expect(key("session-1", noCharacter)).not.toEqual(key("session-1", -1));
+      expect(key("session-1", noCharacter, "0")).not.toEqual(key("session-1", -1, "0"));
     });
   });
 }
@@ -299,33 +321,36 @@ characterGetterSuite({
 
 describe("character query keys", () => {
   it("keeps one source of truth below the session prefix", () => {
-    expect(queryKeys.saveCharacters("session-1")).toEqual([
+    expect(queryKeys.saveCharacters("session-1", "0")).toEqual([
       "save-session",
       "session-1",
       "characters",
+      "0",
     ]);
-    expect(queryKeys.characterProfile("session-1", 0)).toEqual([
+    expect(queryKeys.characterProfile("session-1", 0, "0")).toEqual([
       "save-session",
       "session-1",
       "character",
       0,
       "profile",
+      "0",
     ]);
-    expect(queryKeys.characterStats("session-1", 0)).toEqual([
+    expect(queryKeys.characterStats("session-1", 0, "0")).toEqual([
       "save-session",
       "session-1",
       "character",
       0,
       "stats",
+      "0",
     ]);
 
     // Every character key sits under the session prefix, so closing the session
     // removes them without a second cleanup rule.
     const prefix = queryKeys.saveSession("session-1");
     for (const characterKey of [
-      queryKeys.saveCharacters("session-1"),
-      queryKeys.characterProfile("session-1", 0),
-      queryKeys.characterStats("session-1", 0),
+      queryKeys.saveCharacters("session-1", "0"),
+      queryKeys.characterProfile("session-1", 0, "0"),
+      queryKeys.characterStats("session-1", 0, "0"),
     ]) {
       expect(characterKey.slice(0, prefix.length)).toEqual([...prefix]);
     }

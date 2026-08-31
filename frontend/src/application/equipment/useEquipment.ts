@@ -1,5 +1,6 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { noCharacter, queryKeys } from "../queryKeys";
+import { requireCurrentSaveResponse, type SaveSnapshotIdentity } from "../saveRevision";
 import { useEquipmentPort } from "./equipmentClient";
 import type {
   CharacterEquipment,
@@ -17,6 +18,7 @@ import type {
  */
 export type EquipmentQuery = {
   saveSessionID: string | undefined;
+  saveRevision: string | undefined;
   characterID: number | undefined;
 };
 
@@ -34,27 +36,32 @@ export type EquipmentQuery = {
  * failing desktop bridge call does not become healthy by repeating it, and the
  * failure stays the query's own state rather than becoming a local fallback.
  */
-function useEquipmentQuery<T>(
+function useEquipmentQuery<T extends SaveSnapshotIdentity>(
   query: EquipmentQuery,
   queryKey: readonly unknown[],
   call: (request: EquipmentRequest) => Promise<T>,
 ) {
-  const { saveSessionID, characterID } = query;
+  const { saveSessionID, saveRevision, characterID } = query;
   const identifier = saveSessionID ?? "";
 
   return useQuery({
     queryKey,
     queryFn:
-      identifier === "" || characterID === undefined
+      identifier === "" || saveRevision === undefined || characterID === undefined
         ? skipToken
-        : () => call({ saveSessionID: identifier, characterID }),
+        : async () =>
+            requireCurrentSaveResponse(
+              await call({ saveSessionID: identifier, characterID }),
+              identifier,
+              saveRevision,
+            ),
     retry: false,
   });
 }
 
 /** The key arguments every equipped view is scoped by. */
-function scope(query: EquipmentQuery): [string, number | typeof noCharacter] {
-  return [query.saveSessionID ?? "", query.characterID ?? noCharacter];
+function scope(query: EquipmentQuery): [string, number | typeof noCharacter, string] {
+  return [query.saveSessionID ?? "", query.characterID ?? noCharacter, query.saveRevision ?? ""];
 }
 
 export function useEquipment(query: EquipmentQuery) {

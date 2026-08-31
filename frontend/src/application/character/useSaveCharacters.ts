@@ -1,5 +1,6 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
+import { requireCurrentSaveResponse } from "../saveRevision";
 import { useCharacterPort } from "./characterClient";
 import type { CharacterPort } from "./characterPort";
 
@@ -9,10 +10,19 @@ import type { CharacterPort } from "./characterPort";
  * list imperatively build on it, so a session can never be read through two
  * differently configured queries.
  */
-export function saveCharactersQuery(port: CharacterPort, saveSessionID: string) {
+export function saveCharactersQuery(
+  port: CharacterPort,
+  saveSessionID: string,
+  saveRevision: string,
+) {
   return {
-    queryKey: queryKeys.saveCharacters(saveSessionID),
-    queryFn: () => port.getSaveCharacters(saveSessionID),
+    queryKey: queryKeys.saveCharacters(saveSessionID, saveRevision),
+    queryFn: async () =>
+      requireCurrentSaveResponse(
+        await port.getSaveCharacters(saveSessionID),
+        saveSessionID,
+        saveRevision,
+      ),
     retry: false,
   };
 }
@@ -28,15 +38,19 @@ export function saveCharactersQuery(port: CharacterPort, saveSessionID: string) 
  * The query is not retried: a failing desktop bridge call does not become
  * healthy by repeating it.
  */
-export function useSaveCharacters(saveSessionID: string | undefined) {
+export function useSaveCharacters(
+  saveSessionID: string | undefined,
+  saveRevision: string | undefined,
+) {
   const port = useCharacterPort();
   // A key placeholder only: with no identifier there is no query function that
   // could pass it to the backend.
   const identifier = saveSessionID ?? "";
-  const query = saveCharactersQuery(port, identifier);
+  const revision = saveRevision ?? "";
+  const query = saveCharactersQuery(port, identifier, revision);
 
   return useQuery({
     ...query,
-    queryFn: identifier === "" ? skipToken : query.queryFn,
+    queryFn: identifier === "" || saveRevision === undefined ? skipToken : query.queryFn,
   });
 }

@@ -111,6 +111,7 @@ describe("useSaveSessionFlow", () => {
         getSaveCharacters: () =>
           Promise.resolve({
             saveSessionID: stubSaveSession.saveSessionID,
+            saveRevision: stubSaveSession.saveRevision,
             characters: [
               { characterID: 0, active: false, name: "", level: 0 },
               { characterID: 1, active: false, name: "", level: 0 },
@@ -129,7 +130,9 @@ describe("useSaveSessionFlow", () => {
     expect(closeSave).toHaveBeenCalledExactlyOnceWith(stubSaveSession.saveSessionID);
     await waitFor(() =>
       expect(
-        queryClient.getQueryData(queryKeys.saveCharacters(stubSaveSession.saveSessionID)),
+        queryClient.getQueryData(
+          queryKeys.saveCharacters(stubSaveSession.saveSessionID, stubSaveSession.saveRevision),
+        ),
       ).toBe(undefined),
     );
   });
@@ -199,6 +202,7 @@ describe("useSaveSessionFlow", () => {
         getSaveCharacters: () =>
           Promise.resolve({
             saveSessionID: stubSaveSession.saveSessionID,
+            saveRevision: stubSaveSession.saveRevision,
             characters: [
               { characterID: 0, active: false, name: "", level: 0 },
               { characterID: 3, active: true, name: "Second", level: 60 },
@@ -223,7 +227,9 @@ describe("useSaveSessionFlow", () => {
     act(() => result.current.openSave());
     await waitFor(() => expect(result.current.state).toBe("clean"));
     expect(
-      queryClient.getQueryData(queryKeys.saveCharacters(stubSaveSession.saveSessionID)),
+      queryClient.getQueryData(
+        queryKeys.saveCharacters(stubSaveSession.saveSessionID, stubSaveSession.saveRevision),
+      ),
     ).toEqual(stubSaveCharacters);
 
     act(() => result.current.closeSave());
@@ -348,6 +354,10 @@ describe("useSaveSessionFlow", () => {
         getSaveCharacters: (saveSessionID: string) =>
           Promise.resolve({
             saveSessionID,
+            saveRevision:
+              saveSessionID === candidate.saveSessionID
+                ? candidate.saveRevision
+                : stubSaveSession.saveRevision,
             characters:
               saveSessionID === candidate.saveSessionID
                 ? [{ characterID: 0, active: false, name: "", level: 0 }]
@@ -412,7 +422,9 @@ describe("useSaveSessionFlow", () => {
     // cached views are still there, because the backend never confirmed.
     expect(result.current.session).toEqual(stubSaveSession);
     expect(
-      queryClient.getQueryData(queryKeys.saveCharacters(stubSaveSession.saveSessionID)),
+      queryClient.getQueryData(
+        queryKeys.saveCharacters(stubSaveSession.saveSessionID, stubSaveSession.saveRevision),
+      ),
     ).toEqual(stubSaveCharacters);
 
     act(() => result.current.closeSave());
@@ -423,7 +435,9 @@ describe("useSaveSessionFlow", () => {
     expect(closeSave).toHaveBeenCalledTimes(2);
     await waitFor(() =>
       expect(
-        queryClient.getQueryData(queryKeys.saveCharacters(stubSaveSession.saveSessionID)),
+        queryClient.getQueryData(
+          queryKeys.saveCharacters(stubSaveSession.saveSessionID, stubSaveSession.saveRevision),
+        ),
       ).toBe(undefined),
     );
   });
@@ -714,6 +728,7 @@ describe("useSaveSessionFlow", () => {
         getSaveCharacters: () =>
           Promise.resolve({
             saveSessionID: stubSaveSession.saveSessionID,
+            saveRevision: stubSaveSession.saveRevision,
             characters: [
               { characterID: 0, active: true, name: "First", level: 10 },
               { characterID: 2, active: true, name: "Second", level: 20 },

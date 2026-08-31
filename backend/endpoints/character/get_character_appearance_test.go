@@ -118,6 +118,7 @@ func TestGetCharacterAppearanceReturnsTheActiveAppearanceOfALoadedSession(t *tes
 
 	want := values
 	want.SaveSessionID = loaded.SaveSessionID
+	want.SaveRevision = "0"
 	want.CharacterID = getCharacterAppearanceSlot
 	want.Active = true
 	if !reflect.DeepEqual(result, want) {

@@ -105,6 +105,7 @@ function renderPanel(
   return renderApp(
     <InventoryAndStoragePanel
       saveSessionID={"saveSessionID" in options ? options.saveSessionID : "session-1"}
+      saveRevision="0"
       characterID={"characterID" in options ? options.characterID : 0}
       containerSection="common"
     />,
@@ -137,9 +138,18 @@ function WorkspaceSwitch({
 const servedPagePorts = {
   items: {
     getInventory: (request: ItemPageRequest) =>
-      Promise.resolve({ ...inventoryPage, page: request.page }),
+      Promise.resolve({
+        ...inventoryPage,
+        saveSessionID: request.saveSessionID,
+        page: request.page,
+      }),
     getStorage: (request: ItemPageRequest) =>
-      Promise.resolve({ ...storagePage, total: 45, page: request.page }),
+      Promise.resolve({
+        ...storagePage,
+        saveSessionID: request.saveSessionID,
+        total: 45,
+        page: request.page,
+      }),
   },
 };
 
@@ -163,14 +173,23 @@ async function switchWorkspaceAfterPagingBoth(
 ) {
   await renderApp(
     <WorkspaceSwitch
-      from={{ saveSessionID: "session-1", characterID: 0, containerSection: "common" }}
+      from={{
+        saveSessionID: "session-1",
+        saveRevision: "0",
+        characterID: 0,
+        containerSection: "common",
+      }}
       to={to}
     />,
     { itemsPort: ports.itemsPort, catalogPort: ports.catalogPort },
   );
 
-  fireEvent.click(await screen.findByRole("button", { name: "Next inventory card" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Next storage card" }));
+  const nextInventory = await screen.findByRole("button", { name: "Next inventory card" });
+  const nextStorage = await screen.findByRole("button", { name: "Next storage card" });
+  await waitFor(() => expect(nextInventory).toBeEnabled());
+  await waitFor(() => expect(nextStorage).toBeEnabled());
+  fireEvent.click(nextInventory);
+  fireEvent.click(nextStorage);
   await waitFor(() =>
     expect(ports.getInventory).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })),
   );
@@ -186,6 +205,7 @@ describe("InventoryAndStoragePanel", () => {
     const ports = makePorts();
     await renderPanel(ports);
 
+    await screen.findByRole("button", { name: /Uchigatana/ });
     const inventoryGrid = await screen.findByRole("region", { name: "Inventory items" });
     const storageGrid = screen.getByRole("region", { name: "Storage items" });
     expect(screen.getAllByRole("region", { name: "Inventory and Storage" })).toHaveLength(1);
@@ -256,14 +276,31 @@ describe("InventoryAndStoragePanel", () => {
 
   it("restarts both containers at card 1 after a session and character change", async () => {
     const ports = makePorts(servedPagePorts);
-    const next = { saveSessionID: "session-2", characterID: 1, containerSection: "common" };
+    const next = {
+      saveSessionID: "session-2",
+      saveRevision: "0",
+      characterID: 1,
+      containerSection: "common",
+    };
     await switchWorkspaceAfterPagingBoth(ports, next);
 
     await waitFor(() =>
-      expect(ports.getInventory).toHaveBeenLastCalledWith(expect.objectContaining(next)),
+      expect(ports.getInventory).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          saveSessionID: next.saveSessionID,
+          characterID: next.characterID,
+          containerSection: next.containerSection,
+        }),
+      ),
     );
     await waitFor(() =>
-      expect(ports.getStorage).toHaveBeenLastCalledWith(expect.objectContaining(next)),
+      expect(ports.getStorage).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          saveSessionID: next.saveSessionID,
+          characterID: next.characterID,
+          containerSection: next.containerSection,
+        }),
+      ),
     );
 
     const inventoryCards = cardsRequestedBy(ports.getInventory, { saveSessionID: "session-2" });
@@ -276,14 +313,31 @@ describe("InventoryAndStoragePanel", () => {
 
   it("restarts both containers at card 1 after a container section change", async () => {
     const ports = makePorts(servedPagePorts);
-    const next = { saveSessionID: "session-1", characterID: 0, containerSection: "key" };
+    const next = {
+      saveSessionID: "session-1",
+      saveRevision: "0",
+      characterID: 0,
+      containerSection: "key",
+    };
     await switchWorkspaceAfterPagingBoth(ports, next);
 
     await waitFor(() =>
-      expect(ports.getInventory).toHaveBeenLastCalledWith(expect.objectContaining(next)),
+      expect(ports.getInventory).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          saveSessionID: next.saveSessionID,
+          characterID: next.characterID,
+          containerSection: next.containerSection,
+        }),
+      ),
     );
     await waitFor(() =>
-      expect(ports.getStorage).toHaveBeenLastCalledWith(expect.objectContaining(next)),
+      expect(ports.getStorage).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          saveSessionID: next.saveSessionID,
+          characterID: next.characterID,
+          containerSection: next.containerSection,
+        }),
+      ),
     );
 
     const inventoryCards = cardsRequestedBy(ports.getInventory, { containerSection: "key" });
@@ -371,6 +425,7 @@ describe("InventoryAndStoragePanel", () => {
     });
     await renderPanel(ports);
 
+    await screen.findAllByRole("button", { name: /Name unavailable/ });
     const inventoryGrid = await screen.findByRole("region", { name: "Inventory items" });
     expect(within(inventoryGrid).getAllByRole("button")).toHaveLength(1);
     expect(await screen.findByText("Item names and icons are unavailable.")).toBeInTheDocument();
@@ -399,15 +454,14 @@ describe("InventoryAndStoragePanel", () => {
     ).toHaveLength(30);
   });
 
-  it("warns when the two containers were read at different save revisions", async () => {
+  it("rejects a container response from a different save revision", async () => {
     const ports = makePorts({
       items: { getStorage: () => Promise.resolve({ ...storagePage, saveRevision: "revision-2" }) },
     });
     await renderPanel(ports);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The Inventory and the Storage Box were read at different save revisions.",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load the Storage Box.");
+    expect(screen.queryByText(/read at different save revisions/)).toBeNull();
   });
 
   it("asks for nothing without a session or a character", async () => {

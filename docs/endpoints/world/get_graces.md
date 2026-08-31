@@ -137,6 +137,7 @@ type GraceEntry struct {
 
 type GetGracesResult struct {
     SaveSessionID string
+    SaveRevision  string
     CharacterID   int
     Active        bool
     Graces        []GraceEntry
@@ -170,3 +171,9 @@ result.
 
 `SetGraceVisited` remains contract-only and is deliberately not exposed in
 OpenAPI or Scalar.
+
+## Snapshot identity
+
+The result includes `saveRevision`, the opaque revision of the exact session
+snapshot used by this read. Clients compare it exactly with the current session
+revision and discard a mismatch; they never parse, trim or order it.

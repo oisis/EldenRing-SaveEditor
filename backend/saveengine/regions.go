@@ -40,6 +40,7 @@ const (
 // is never searched or read.
 type CharacterRegions struct {
 	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
 	CharacterID   int      `json:"characterID"`
 	Active        bool     `json:"active"`
 	RegionIDs     []uint32 `json:"regionIDs"`
@@ -90,6 +91,7 @@ func (engine *Engine) GetRegions(saveSessionID string, characterID int) (Charact
 
 	regions := CharacterRegions{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		RegionIDs:     []uint32{},
 	}

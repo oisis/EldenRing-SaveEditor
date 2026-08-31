@@ -147,6 +147,7 @@ func TestGetCharacterProfileReadsAConfirmedProfileOnBothPlatforms(t *testing.T) 
 
 			expected := want
 			expected.SaveSessionID = info.SaveSessionID
+			expected.SaveRevision = "0"
 			if !reflect.DeepEqual(profile, expected) {
 				t.Errorf("profile = %+v, want %+v", profile, expected)
 			}
@@ -172,7 +173,7 @@ func TestGetCharacterProfileReportsAResidualSlotAsInactiveAndZeroed(t *testing.T
 		t.Fatalf("GetCharacterProfile: %v", err)
 	}
 
-	want := CharacterProfile{SaveSessionID: info.SaveSessionID, CharacterID: 7}
+	want := CharacterProfile{SaveSessionID: info.SaveSessionID, SaveRevision: "0", CharacterID: 7}
 	if !reflect.DeepEqual(profile, want) {
 		t.Errorf("profile = %+v, want %+v", profile, want)
 	}
