@@ -39,16 +39,22 @@ describe("localization", () => {
   it("switches the language from the UI, including the application chrome", async () => {
     await renderApp(<App />, { locale: "en" });
 
-    expect(screen.getByRole("navigation", { name: "Language" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Theme" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
+
+    expect(screen.getByRole("combobox", { name: "Language" })).toBeInTheDocument();
+    expect(screen.getAllByRole("combobox", { name: "Theme" })).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Backend" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Polish" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Language" }), {
+      target: { value: "pl" },
+    });
 
     expect(await screen.findByRole("heading", { name: "Backend aplikacji" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Język" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Motyw" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "polski" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Język" })).toBeInTheDocument();
+    expect(screen.getAllByRole("combobox", { name: "Motyw" })).toHaveLength(2);
+    expect(screen.getByRole("option", { name: "polski" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Główna" })).toBeInTheDocument();
+    expect(screen.getByText("Nie wczytano save")).toBeInTheDocument();
   });
 
   it("keeps the semantic document language in sync with the active locale", async () => {
@@ -66,9 +72,12 @@ describe("localization", () => {
     const getApplicationInfo = vi.fn(makePort().getApplicationInfo);
 
     await renderApp(<App />, { locale: "en", port: { getApplicationInfo } });
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
     expect(await screen.findByText(stubApplicationInfo.version)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Polish" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Language" }), {
+      target: { value: "pl" },
+    });
     expect(await screen.findByRole("heading", { name: "Backend aplikacji" })).toBeInTheDocument();
 
     // Same query key, same cache entry, same data: no refetch was triggered.

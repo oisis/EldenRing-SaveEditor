@@ -9,11 +9,19 @@ export const layout = style({
   "@media": { "screen and (max-width: 720px)": { gridTemplateColumns: "1fr" } },
 });
 
+export const layoutSingle = style({ minWidth: 0 });
+
 export const stack = style({
   display: "flex",
   minWidth: 0,
   flexDirection: "column",
   gap: tokens.space.md,
+});
+
+export const actions = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: tokens.space.sm,
 });
 
 /**

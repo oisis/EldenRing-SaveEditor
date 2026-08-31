@@ -17,12 +17,16 @@ describe("App", () => {
 
     expect(activeThemeClasses()).toEqual([themeClassNames.light]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Dark" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Theme" }), {
+      target: { value: "dark" },
+    });
 
     // Exactly one theme class stays active and the previous one is removed.
     expect(activeThemeClasses()).toEqual([themeClassNames.dark]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Elden Ring" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Theme" }), {
+      target: { value: "elden-ring" },
+    });
 
     expect(activeThemeClasses()).toEqual([themeClassNames["elden-ring"]]);
 

@@ -41,7 +41,7 @@ Run the tests and the build sequentially: both use `frontend/dist`.
 ```
 src/
   main.tsx                 composition root: picks the concrete port implementation
-  App.tsx                  foundation screen
+  App.tsx                  composition of the production application shell
   application/             ports, TanStack Query keys and public hooks
   infrastructure/bridge/   the Wails adapters implementing the application ports
   features/                feature modules composed from the application layer and UI
@@ -88,6 +88,9 @@ generator after any change to the bound Go methods or their result types.
 
 Implemented:
 
+- the production application shell with the accepted module order, persistent
+  save/character sidebar, session-operation toolbar, theme selector, centered
+  collapsible console and responsive desktop layout;
 - one vertical flow: `GetApplicationInfo` endpoint → Wails host bridge →
   generated binding → infrastructure adapter → application port → TanStack
   Query → React component;
@@ -100,11 +103,15 @@ Implemented:
   the canonical `Button`, `Card` and `Badge`, a visible focus ring and
   `prefers-reduced-motion`;
 - Lingui localization with English as the source and fallback locale, and a
-  Polish catalog used to prove switching and fallback.
+  Polish catalog used by the visible selector in `Tools`.
 
-Not implemented yet, and deliberately absent from this slice: the application
-shell and main navigation, `Save`, `Save As`, Character editing, the production
-Inventory & Storage, Item Database and Equipment screens, World, Templates,
-Tools, Settings, deployment and SSH, and update checks. The language list of
-the first release is not decided here, and no visible language selector in
-`Tools → Settings` exists yet.
+The shell exposes the existing read-only `Inventory & Storage` and `Item
+Database` slices under `Items`, and the application-information slice under
+`Tools`. `Save`, `Save As`, Undo, Redo and Review Changes are visible but
+disabled until their backend-owned contracts exist.
+
+Not implemented yet: Character editing, the production Equipment and World
+workspaces, advanced save operations, the remaining Tools screens, deployment
+and SSH, update checks, the diagnostic log bridge, and the complete Save
+Lifecycle. The language list of the first release remains a separate product
+decision.

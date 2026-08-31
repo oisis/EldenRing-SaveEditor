@@ -31,10 +31,23 @@ msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zo
 msgid "Active characters"
 msgstr "Aktywne postacie"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Advanced"
+msgstr "Zaawansowane"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Advanced save features"
+msgstr "Zaawansowane funkcje save"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Advanced save features are not available yet."
+msgstr "Zaawansowane funkcje save nie są jeszcze dostępne."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "All families"
 msgstr "Wszystkie rodziny"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
 msgstr "Aplikacja"
@@ -42,6 +55,14 @@ msgstr "Aplikacja"
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application information"
 msgstr "Informacje o aplikacji"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Application settings"
+msgstr "Ustawienia aplikacji"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Application settings and tools"
+msgstr "Ustawienia i narzędzia aplikacji"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Armor"
@@ -69,14 +90,24 @@ msgstr "Karta {servedPage} z {cardCount}"
 msgid "Category"
 msgstr "Kategoria"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Changes"
 msgstr "Zmiany"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Character"
+msgstr "Postać"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Character profile and appearance"
+msgstr "Profil i wygląd postaci"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Characters"
 msgstr "Postacie"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Close"
@@ -86,6 +117,10 @@ msgstr "Zamknij"
 msgid "Close Save"
 msgstr "Zamknij save"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Console"
+msgstr "Konsola"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Container"
 msgstr "Kontener"
@@ -94,7 +129,7 @@ msgstr "Kontener"
 msgid "Could not read application information from the backend."
 msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
 msgid "Dark"
 msgstr "Ciemny"
 
@@ -103,13 +138,25 @@ msgstr "Ciemny"
 msgid "Details"
 msgstr "Szczegóły"
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
+msgid "Diagnostic console"
+msgstr "Konsola diagnostyczna"
+
+#: src/features/app-shell/AppShell.tsx
 msgid "Elden Ring"
 msgstr "Elden Ring"
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
 msgid "English"
 msgstr "angielski"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Equipment"
+msgstr "Wyposażenie"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Equipment and quick slots"
+msgstr "Wyposażenie i szybkie sloty"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
@@ -136,6 +183,10 @@ msgstr "Przedmioty"
 msgid "Grid"
 msgstr "Siatka"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Home"
+msgstr "Główna"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
 msgstr "Nieaktywny slot"
@@ -147,6 +198,10 @@ msgstr "Nieaktywne sloty"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Inventory"
 msgstr "Ekwipunek"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Inventory & Storage"
+msgstr "Ekwipunek i skrzynia"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Inventory and Storage"
@@ -164,6 +219,11 @@ msgstr "Karty ekwipunku"
 msgid "Inventory items"
 msgstr "Przedmioty w ekwipunku"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Inventory, Storage and Item Database"
+msgstr "Ekwipunek, skrzynia i baza przedmiotów"
+
+#: src/features/app-shell/AppShell.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item Database"
 msgstr "Baza przedmiotów"
@@ -189,17 +249,29 @@ msgstr "Nazwy i ikony przedmiotów są niedostępne."
 msgid "Item results"
 msgstr "Wyniki wyszukiwania przedmiotów"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Items"
+msgstr "Przedmioty"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Items sections"
+msgstr "Sekcje przedmiotów"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Items: {total}"
 msgstr "Przedmioty: {total}"
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
 msgid "Language"
 msgstr "Język"
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
 msgid "Light"
 msgstr "Jasny"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Live diagnostic messages are not available in this build yet."
+msgstr "Bieżące komunikaty diagnostyczne nie są jeszcze dostępne w tej wersji."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Load a save and select a character to read the Inventory and the Storage Box."
@@ -246,6 +318,14 @@ msgstr "Maksimum w ekwipunku"
 msgid "Maximum in Storage"
 msgstr "Maksimum w skrzyni"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Modified"
+msgstr "Zmodyfikowano"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Modules"
+msgstr "Moduły"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name"
@@ -281,9 +361,17 @@ msgstr "Nie wybrano pliku."
 msgid "No items match the current search."
 msgstr "Brak przedmiotów pasujących do wyszukiwania."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "No live messages"
+msgstr "Brak bieżących komunikatów"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No save is open."
 msgstr "Żaden save nie jest otwarty."
+
+#: src/features/app-shell/AppShell.tsx
+msgid "No save loaded"
+msgstr "Nie wczytano save"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "No save loaded."
@@ -297,6 +385,10 @@ msgstr "Brak niezapisanych zmian"
 msgid "No variants are available."
 msgstr "Brak dostępnych wariantów."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Open a save from Home to see its character slots."
+msgstr "Otwórz save na ekranie Główna, aby zobaczyć jego sloty postaci."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Open Save"
 msgstr "Otwórz save"
@@ -304,6 +396,10 @@ msgstr "Otwórz save"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Opening save…"
 msgstr "Otwieranie save…"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Operation history is not available yet"
+msgstr "Historia operacji nie jest jeszcze dostępna"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
@@ -313,7 +409,7 @@ msgstr "Strona {servedPage}"
 msgid "Platform"
 msgstr "Platforma"
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
 msgid "Polish"
 msgstr "polski"
 
@@ -346,6 +442,10 @@ msgstr "Informacje tylko do odczytu z GameCatalog."
 msgid "Read-only information from the save and GameCatalog."
 msgstr "Informacje tylko do odczytu z save i GameCatalog."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Redo"
+msgstr "Ponów"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Results: {total}"
 msgstr "Wyniki: {total}"
@@ -358,6 +458,10 @@ msgstr "Ponów"
 msgid "Retry closing"
 msgstr "Ponów zamykanie"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Review Changes is not available yet"
+msgstr "Review Changes nie jest jeszcze dostępne"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Revision"
 msgstr "Rewizja"
@@ -367,16 +471,40 @@ msgid "RL {level}"
 msgstr "RL {level}"
 
 #: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save"
+msgstr "Zapisz"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save As"
+msgstr "Zapisz jako"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save As is not available yet"
+msgstr "Zapisz jako nie jest jeszcze dostępne"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Save is not available yet"
+msgstr "Zapis nie jest jeszcze dostępny"
+
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save session"
 msgstr "Sesja save"
 
-#: src/App.tsx
-msgid "SaveForge 2.0"
-msgstr "SaveForge 2.0"
+#: src/features/app-shell/AppShell.tsx
+msgid "Saved"
+msgstr "Zapisano"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Szukaj przedmiotów"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Session operations"
+msgstr "Operacje sesji"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Session overview and file actions"
+msgstr "Podsumowanie sesji i operacje na pliku"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
@@ -424,6 +552,14 @@ msgstr "Tabela"
 msgid "Talismans"
 msgstr "Talizmany"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "The Character workspace will be implemented in a later frontend stage."
+msgstr "Workspace postaci zostanie zaimplementowany na późniejszym etapie frontendu."
+
+#: src/features/app-shell/AppShell.tsx
+msgid "The Equipment workspace will be implemented in a later frontend stage."
+msgstr "Workspace wyposażenia zostanie zaimplementowany na późniejszym etapie frontendu."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
 msgstr "Nie udało się otworzyć okna wyboru pliku. Nie wybrano pliku i niczego nie wczytano."
@@ -441,7 +577,11 @@ msgstr "Save nie został otwarty do edycji."
 msgid "The selected resource has no item details."
 msgstr "Wybrany zasób nie zawiera szczegółów przedmiotu."
 
-#: src/App.tsx
+#: src/features/app-shell/AppShell.tsx
+msgid "The World workspace will be implemented in a later frontend stage."
+msgstr "Workspace świata zostanie zaimplementowany na późniejszym etapie frontendu."
+
+#: src/features/app-shell/AppShell.tsx
 msgid "Theme"
 msgstr "Motyw"
 
@@ -479,6 +619,10 @@ msgstr "Ten save otwarto z liczbą błędów {0} i ostrzeżeń {1} zgłoszonych 
 msgid "This Storage card is empty."
 msgstr "Ta karta skrzyni jest pusta."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Tools"
+msgstr "Narzędzia"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
 msgstr "Nie udało się wczytać postaci."
@@ -507,6 +651,10 @@ msgstr "Nie udało się wczytać skrzyni."
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unavailable"
 msgstr "Niedostępne"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Undo"
+msgstr "Cofnij"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Unsaved changes"
@@ -540,3 +688,11 @@ msgstr "Pokaż raport"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
 msgstr "Bronie"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "World"
+msgstr "Świat"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "World progress and unlocks"
+msgstr "Postęp świata i odblokowane elementy"

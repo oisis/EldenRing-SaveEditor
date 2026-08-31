@@ -13,14 +13,16 @@ import {
 } from "../../ui/patterns/panel.css";
 import { CharacterSidebar } from "../character/CharacterSidebar";
 import {
+  actions,
   layout,
+  layoutSingle,
   reportItem,
   reportList,
   reportScope,
   stack,
   warningBanner,
 } from "./SaveSessionPanel.css";
-import { useSaveSessionFlow } from "./useSaveSessionFlow";
+import { type SaveSessionFlow, useSaveSessionFlow } from "./useSaveSessionFlow";
 
 /**
  * The minimal production screen of the save session: open a file, see what was
@@ -35,8 +37,24 @@ import { useSaveSessionFlow } from "./useSaveSessionFlow";
  * inspects a save.
  */
 export function SaveSessionPanel() {
-  const { t } = useLingui();
   const flow = useSaveSessionFlow();
+
+  return <SaveSessionContent flow={flow} showCharacterSidebar />;
+}
+
+/**
+ * The session workspace without ownership of the session controller. AppShell
+ * uses this form so one flow can feed Home, the global sidebar and the global
+ * status controls without copying session state into another store.
+ */
+export function SaveSessionContent({
+  flow,
+  showCharacterSidebar = false,
+}: {
+  flow: SaveSessionFlow;
+  showCharacterSidebar?: boolean;
+}) {
+  const { t } = useLingui();
   const [reportVisible, setReportVisible] = useState(false);
 
   const { state, session, validation, selection, failure, unclosedSessionID } = flow;
@@ -53,9 +71,9 @@ export function SaveSessionPanel() {
 
   return (
     <Card aria-label={t`Save session`}>
-      <div className={layout}>
+      <div className={showCharacterSidebar ? layout : layoutSingle}>
         <div className={stack}>
-          <div>
+          <div className={actions}>
             <Button
               tone="accent"
               onClick={flow.openSave}
@@ -63,6 +81,12 @@ export function SaveSessionPanel() {
               aria-busy={flow.isBusy}
             >
               <Trans>Open Save</Trans>
+            </Button>
+            <Button disabled title={t`Save is not available yet`}>
+              <Trans>Save</Trans>
+            </Button>
+            <Button disabled title={t`Save As is not available yet`}>
+              <Trans>Save As</Trans>
             </Button>
           </div>
 
@@ -282,7 +306,7 @@ export function SaveSessionPanel() {
         {/* The sidebar is presentational and follows the same selection
             controller the flow already owns; it is shown only for a session the
             user may actually edit. */}
-        {hasSession && <CharacterSidebar model={selection} />}
+        {showCharacterSidebar && hasSession && <CharacterSidebar model={selection} />}
       </div>
     </Card>
   );
