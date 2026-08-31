@@ -19,10 +19,14 @@ const (
 	firePotHandle    = uint32(0xB000012C)
 	crackedPotHandle = uint32(0xB000251C)
 
-	sparkAromaticID     = uint32(0x40000DB6)
-	upliftingAromaticID = uint32(0x40000DAC)
-	upliftingHandle     = uint32(0xB0000DAC)
-	perfumeBottleHandle = uint32(0xB0002526)
+	sparkAromaticID             = uint32(0x40000DB6)
+	reportedSparkAromaticHandle = uint32(0xB0000DB6)
+	upliftingAromaticID         = uint32(0x40000DAC)
+	upliftingHandle             = uint32(0xB0000DAC)
+	perfumeBottleHandle         = uint32(0xB0002526)
+	acidSpraymistHandle         = uint32(0xB0000E1A)
+	poisonSpraymistHandle       = uint32(0xB0000DFC)
+	perfumedOilOfRanahHandle    = uint32(0xB01E90C4)
 )
 
 // findKeyItem returns the row and quantity of the first KeyItems record with the
@@ -368,6 +372,63 @@ func TestContainerSaveCharacterPerfume(t *testing.T) {
 		t.Fatalf("SaveCharacter: %v", err)
 	}
 	assertContainerSaved(t, slot, perfumeBottleHandle, data.PerfumeBottleKeyItemID, 2)
+}
+
+// TestContainerPerfumedOilDoesNotRaisePerfumeBottle covers the public scan and
+// SaveCharacter paths using the reported quantities. Perfumed Oil of Ranah is
+// reusable and must neither trigger container_overuse nor increase the bottle
+// stack or its pickup flags.
+func TestContainerPerfumedOilDoesNotRaisePerfumeBottle(t *testing.T) {
+	app := remembranceGameLimitsFixture()
+	slot := &app.save.Slots[0]
+	rows := []struct {
+		handle uint32
+		qty    uint32
+	}{
+		{reportedSparkAromaticHandle, 1},
+		{upliftingHandle, 1},
+		{acidSpraymistHandle, 3},
+		{poisonSpraymistHandle, 3},
+		{perfumedOilOfRanahHandle, 1},
+		{perfumeBottleHandle, 8},
+	}
+	for row, item := range rows {
+		addCommonItemFixtureRow(t, app, row, item.handle, 900+uint32(2*row), item.qty)
+	}
+	withContainerEventFlags(app)
+
+	report, err := app.ScanRepairIssuesLoaded(0)
+	if err != nil {
+		t.Fatalf("ScanRepairIssuesLoaded: %v", err)
+	}
+	for _, issue := range report.Issues {
+		if issue.Key.Code == core.RepairCodeContainerOveruse {
+			t.Fatalf("valid Perfume Bottle inventory reported container_overuse: %s", issue.Description)
+		}
+	}
+
+	charVM, err := app.GetCharacter(0)
+	if err != nil {
+		t.Fatalf("GetCharacter: %v", err)
+	}
+	if err := app.SaveCharacter(0, *charVM); err != nil {
+		t.Fatalf("SaveCharacter: %v", err)
+	}
+	if _, qty := findCommonItem(slot, perfumeBottleHandle); qty != 8 {
+		t.Errorf("Perfume Bottle qty after unchanged SaveCharacter = %d, want 8", qty)
+	}
+	invStart := slot.MagicOffset + core.InvStartFromMagic
+	if got, ok := quantityInRecords(slot.Data, invStart, core.CommonItemCount, perfumeBottleHandle); !ok || got != 8 {
+		t.Errorf("binary Perfume Bottle qty after unchanged SaveCharacter = %d, want 8", got)
+	}
+	if row, _ := findKeyItem(slot, perfumeBottleHandle); row >= 0 {
+		t.Error("Perfume Bottle duplicated into KeyItems")
+	}
+	flags := slot.Data[slot.EventFlagsOffset:]
+	ninthPickup := data.ContainerPickupFlags[data.PerfumeBottleKeyItemID][8]
+	if set, err := db.GetEventFlag(flags, ninthPickup); err != nil || set {
+		t.Errorf("ninth Perfume Bottle pickup flag set=%v err=%v, want unset", set, err)
+	}
 }
 
 // TestContainerSaveCharacterFullKeyItems: a full KeyItems section does not block

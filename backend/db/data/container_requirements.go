@@ -75,14 +75,13 @@ var RequiredContainer = map[uint32]uint32{
 	0x401E8728: HeftyCrackedPotKeyItemID, // Hefty Furnace Pot
 	0x401E8732: HeftyCrackedPotKeyItemID, // Hefty Red Lightning Pot
 
-	// === Perfume Bottle (cap 10) — 7 Aromatics (Tools/Perfume Arts) ===
+	// === Perfume Bottle (cap 10) — 6 Aromatics (Tools/Perfume Arts) ===
 	0x40000DAC: PerfumeBottleKeyItemID, // Uplifting Aromatic
 	0x40000DB6: PerfumeBottleKeyItemID, // Spark Aromatic
 	0x40000DC0: PerfumeBottleKeyItemID, // Ironjar Aromatic
 	0x40000DDE: PerfumeBottleKeyItemID, // Bloodboil Aromatic
 	0x40000DFC: PerfumeBottleKeyItemID, // Poison Spraymist
 	0x40000E1A: PerfumeBottleKeyItemID, // Acid Spraymist
-	0x401E90C4: PerfumeBottleKeyItemID, // Perfumed Oil of Ranah (DLC)
 }
 
 // GetRequiredContainer returns the container key-item ID that the given craftable

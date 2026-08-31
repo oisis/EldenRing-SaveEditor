@@ -66,6 +66,15 @@ const crackedPotHandle = uint32(0xB000251C)
 // Throwing Pot sharing the Cracked Pot container with Volcano Pot.
 const firePotHandle = uint32(0xB000012C)
 
+const (
+	sparkAromaticHandle      = uint32(0xB0000DB6)
+	upliftingAromaticHandle  = uint32(0xB0000DAC)
+	acidSpraymistHandle      = uint32(0xB0000E1A)
+	poisonSpraymistHandle    = uint32(0xB0000DFC)
+	perfumedOilOfRanahHandle = uint32(0xB01E90C4)
+	perfumeBottleHandle      = uint32(0xB0002526)
+)
+
 func TestScanQuantity_InventoryBoundary_NoIssue(t *testing.T) {
 	recs := []ResolvedRecord{resolveRec(repairScopeInventoryCommon, 0, smithingStoneHandle, 999, nil)}
 	if recs[0].Resolution != ResolutionKnownDB || recs[0].MaxInventory != 999 {
@@ -486,6 +495,39 @@ func TestScanQuantity_MultiPotAggregateOveruse(t *testing.T) {
 			t.Errorf("aggregate issue must not address a single row, got row %d", i.Key.Row)
 		}
 	}
+}
+
+// TestScanQuantity_PerfumedOilDoesNotConsumePerfumeBottle reproduces the
+// reported 1.7.1 save: eight crafted aromatics, one reusable Perfumed Oil of
+// Ranah, and eight Perfume Bottles. Only the crafted aromatics consume bottles.
+func TestScanQuantity_PerfumedOilDoesNotConsumePerfumeBottle(t *testing.T) {
+	buildRecords := func(sparkQty uint32) []ResolvedRecord {
+		return []ResolvedRecord{
+			resolveRec(repairScopeInventoryCommon, 0, sparkAromaticHandle, sparkQty, nil),
+			resolveRec(repairScopeInventoryCommon, 1, upliftingAromaticHandle, 1, nil),
+			resolveRec(repairScopeInventoryCommon, 2, acidSpraymistHandle, 3, nil),
+			resolveRec(repairScopeInventoryCommon, 3, poisonSpraymistHandle, 3, nil),
+			resolveRec(repairScopeInventoryCommon, 4, perfumedOilOfRanahHandle, 1, nil),
+			resolveRec(repairScopeInventoryKey, 0, perfumeBottleHandle, 8, nil),
+		}
+	}
+
+	t.Run("reported eight aromatics plus perfumed oil", func(t *testing.T) {
+		issues := ScanRepairIssuesFromRecords(0, bareSlot(), buildRecords(1))
+		if got := countCode(issues, RepairCodeContainerOveruse); got != 0 {
+			t.Fatalf("eight aromatics plus Perfumed Oil with eight bottles produced %d container_overuse issue(s)", got)
+		}
+		if got := countCode(issues, RepairCodeQuantityAboveMax); got != 0 {
+			t.Fatalf("valid reported quantities produced %d quantity_above_max issue(s)", got)
+		}
+	})
+
+	t.Run("nine real aromatics still exceed eight bottles", func(t *testing.T) {
+		issues := ScanRepairIssuesFromRecords(0, bareSlot(), buildRecords(2))
+		if got := countCode(issues, RepairCodeContainerOveruse); got != 1 {
+			t.Fatalf("nine real aromatics with eight bottles produced %d container_overuse issue(s), want 1", got)
+		}
+	})
 }
 
 func TestScanQuantity_PotMissingContainer_NotAllowed(t *testing.T) {

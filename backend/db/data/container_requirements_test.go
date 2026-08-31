@@ -25,6 +25,16 @@ func TestRequiredContainer_Consistency(t *testing.T) {
 	}
 }
 
+// Perfumed Oil of Ranah is a reusable FP tool, not a crafted aromatic. Its
+// Regulation row has potGroupId=-1 and isConsume=0, so it must not consume a
+// Perfume Bottle despite being grouped under Perfume Arts in the UI.
+func TestRequiredContainer_PerfumedOilOfRanahIsNotGated(t *testing.T) {
+	const perfumedOilOfRanahID = uint32(0x401E90C4)
+	if containerID, ok := GetRequiredContainer(perfumedOilOfRanahID); ok {
+		t.Fatalf("Perfumed Oil of Ranah maps to container 0x%08X, want no required container", containerID)
+	}
+}
+
 // TestRequiredContainer_KeyItemsExist verifies all four containers have entries
 // in the KeyItems DB with sensible MaxInventory values.
 func TestRequiredContainer_KeyItemsExist(t *testing.T) {

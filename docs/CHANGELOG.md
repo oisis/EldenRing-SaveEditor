@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### fix(inventory): exclude Perfumed Oil of Ranah from Perfume Bottle capacity
+
+Repair Issues no longer counts the reusable Perfumed Oil of Ranah as a crafted
+aromatic that consumes a Perfume Bottle. Inventory saves and item adds therefore
+no longer create or increase Perfume Bottles for this item.
+
 ## [1.7.1] - 2026-08-29
 
 ### fix(diagnostics): accept Regulation 1.17 starting classes
