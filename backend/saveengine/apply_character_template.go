@@ -22,10 +22,13 @@ type ApplyCharacterTemplatePlan struct {
 }
 
 // ApplyCharacterTemplateResult reports the committed result of applying a template plan.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type ApplyCharacterTemplateResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
+	MutationReceipt
+	CharacterID int `json:"characterID"`
 }
 
 // ApplyCharacterTemplate atomically applies the resolved target plan (name, statistics,
@@ -235,8 +238,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 	}
 
 	return ApplyCharacterTemplateResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
 	}, nil
 }

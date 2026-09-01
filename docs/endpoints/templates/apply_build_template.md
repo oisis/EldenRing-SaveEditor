@@ -79,21 +79,55 @@ type ApplyBuildTemplateRequest struct {
 
 ```go
 type ApplyBuildTemplateResult struct {
+	saveengine.MutationReceipt
 	TemplateID       string                   `json:"templateID"`
 	TemplateRevision string                   `json:"templateRevision"`
-	SaveSessionID    string                   `json:"saveSessionID"`
-	SaveRevision     string                   `json:"saveRevision"`
 	CharacterID      int                      `json:"characterID"`
 	Plan             BuildTemplatePreviewPlan `json:"plan"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `templateID`, `templateRevision`, `characterID`, `plan` all
+sit at the top level, and there is no nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `apply_build_template`.
+- `changedScopes` are exactly `save.session`, `character.list`,
+  `character.profile`, `character.stats`, `equipment.loadout`,
+  `diagnostics.report`, in that canonical order.
+
+`ApplyBuildTemplate` commits through a lower SaveEngine character writer. The
+receipt keeps the kind of the public endpoint that was called, so it reports
+`apply_build_template` and never the kind of that writer.
 
 | Field | Type | Meaning |
 |---|---|---|
 | `templateID` | `string` | Identifier of the applied template. |
 | `templateRevision` | `string` | Revision of the template in the library used during application. |
-| `saveSessionID` | `string` | Identifier of the save session. |
-| `saveRevision` | `string` | New save revision advanced by the atomic mutation. |
+| `operationID` | `string` | Opaque identifier of this one execution. |
+| `operationKind` | `string` | Stable kind of the mutation, exactly `apply_build_template`. |
+| `saveSessionID` | `string` | Identifier of the session that was modified. |
+| `saveRevision` | `string` | New canonical decimal save revision after the mutation (incremented by 1). |
+| `changedScopes` | `[]string` | Backend read scopes this mutation invalidated, in the one canonical order. |
 | `characterID` | `int` | Character slot index. |
 | `plan` | `BuildTemplatePreviewPlan` | The exact execution plan that was applied. |
 

@@ -12,11 +12,14 @@ const (
 )
 
 // SetCharacterRunesResult reports one committed held-runes assignment.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type SetCharacterRunesResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Runes         uint32 `json:"runes"`
+	MutationReceipt
+	CharacterID int    `json:"characterID"`
+	Runes       uint32 `json:"runes"`
 }
 
 // SetCharacterRunes assigns the held runes of one active character. Held runes
@@ -95,9 +98,8 @@ func (engine *Engine) SetCharacterRunes(
 	}
 
 	return SetCharacterRunesResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Runes:         runes,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Runes:           runes,
 	}, nil
 }

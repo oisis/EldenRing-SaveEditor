@@ -28,18 +28,21 @@ func TestSetCharacterStatsReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetCharacterStats: %v", err)
 	}
+	assertMutationReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+		SetCharacterStatsEndpointID, "1")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := SetCharacterStatsResult{
-		SaveSessionID: loaded.SaveSessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCharacterStatsSlot,
-		Attributes:    setCharacterStatsAttributes,
-		Level:         44,
+		MutationReceipt: result.MutationReceipt,
+		CharacterID:     getCharacterStatsSlot,
+		Attributes:      setCharacterStatsAttributes,
+		Level:           44,
 		// The fixture is a Vagabond, whose base level is 9. The absolute total
 		// for level 44 is 177486; the 473 runes of the class base level are not
 		// owed, so the floor SaveEngine writes is 177013.
 		SoulMemory: 177_486 - 473,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 }

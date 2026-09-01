@@ -20,12 +20,15 @@ func TestDeleteCharacterReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DeleteCharacter: %v", err)
 	}
+	assertMutationReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+		DeleteCharacterEndpointID, "1")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := DeleteCharacterResult{
-		SaveSessionID: loaded.SaveSessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCharacterStatsSlot,
+		MutationReceipt: result.MutationReceipt,
+		CharacterID:     getCharacterStatsSlot,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 }

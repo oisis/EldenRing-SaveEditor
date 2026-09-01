@@ -26,12 +26,16 @@ type CharacterAppearanceValues struct {
 }
 
 // SetCharacterAppearanceResult reports one committed complete appearance
-// assignment.
+// assignment. The embedded receipt is the one the shared writer produced, so it
+// names the public entry point that was called: SetCharacterAppearance,
+// SetCharacterGender or ApplyCharacterAppearancePreset.
+//
+// The receipt is embedded anonymously, so saveSessionID and saveRevision keep
+// their previous JSON names and the three new members join them flat.
 type SetCharacterAppearanceResult struct {
-	SaveSessionID string                    `json:"saveSessionID"`
-	SaveRevision  string                    `json:"saveRevision"`
-	CharacterID   int                       `json:"characterID"`
-	Appearance    CharacterAppearanceValues `json:"appearance"`
+	MutationReceipt
+	CharacterID int                       `json:"characterID"`
+	Appearance  CharacterAppearanceValues `json:"appearance"`
 }
 
 // SetCharacterAppearance atomically replaces the confirmed writable appearance
@@ -129,10 +133,9 @@ func (engine *Engine) setCharacterAppearance(
 	}
 
 	return SetCharacterAppearanceResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Appearance:    appearance,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Appearance:      appearance,
 	}, nil
 }
 

@@ -43,12 +43,13 @@ type ApplyBuildTemplateRequest struct {
 	ExpectedRevision string                            `json:"expectedRevision"`
 }
 
-// ApplyBuildTemplateResult is the typed return of ApplyBuildTemplate.
+// ApplyBuildTemplateResult is the typed return of ApplyBuildTemplate. It embeds
+// the receipt the central SaveEngine commit path produced, so operationKind is
+// apply_build_template and never the kind of a lower writer.
 type ApplyBuildTemplateResult struct {
+	saveengine.MutationReceipt
 	TemplateID       string                   `json:"templateID"`
 	TemplateRevision string                   `json:"templateRevision"`
-	SaveSessionID    string                   `json:"saveSessionID"`
-	SaveRevision     string                   `json:"saveRevision"`
 	CharacterID      int                      `json:"characterID"`
 	Plan             BuildTemplatePreviewPlan `json:"plan"`
 }
@@ -112,10 +113,9 @@ func ApplyBuildTemplate(
 	}
 
 	return ApplyBuildTemplateResult{
+		MutationReceipt:  mutationResult.MutationReceipt,
 		TemplateID:       resolved.previewResult.TemplateID,
 		TemplateRevision: resolved.previewResult.TemplateRevision,
-		SaveSessionID:    mutationResult.SaveSessionID,
-		SaveRevision:     mutationResult.SaveRevision,
 		CharacterID:      mutationResult.CharacterID,
 		Plan:             resolved.previewResult.Plan,
 	}, nil

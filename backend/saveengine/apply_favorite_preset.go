@@ -6,11 +6,14 @@ import (
 )
 
 // ApplyFavoritePresetResult reports one committed Mirror Favorites application.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type ApplyFavoritePresetResult struct {
-	SaveSessionID  string `json:"saveSessionID"`
-	SaveRevision   string `json:"saveRevision"`
-	CharacterID    int    `json:"characterID"`
-	FavoriteSlotID int    `json:"favoriteSlotID"`
+	MutationReceipt
+	CharacterID    int `json:"characterID"`
+	FavoriteSlotID int `json:"favoriteSlotID"`
 }
 
 // ApplyFavoritePreset applies the appearance fields represented by Mirror Favorites
@@ -120,9 +123,8 @@ func (engine *Engine) ApplyFavoritePreset(
 	}
 
 	return ApplyFavoritePresetResult{
-		SaveSessionID:  saveSessionID,
-		SaveRevision:   committed.SaveRevision,
-		CharacterID:    characterID,
-		FavoriteSlotID: favoriteSlotID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		FavoriteSlotID:  favoriteSlotID,
 	}, nil
 }

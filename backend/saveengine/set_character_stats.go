@@ -220,13 +220,16 @@ func (attributes CharacterAttributes) ordered() [characterAttributeCount]uint32 
 // SetCharacterStatsResult reports one committed statistics assignment. It
 // returns the accepted attributes together with the two values SaveEngine
 // derived from them, and exposes no offset, raw byte or starting class.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type SetCharacterStatsResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	Attributes    CharacterAttributes `json:"attributes"`
-	Level         uint32              `json:"level"`
-	SoulMemory    uint32              `json:"soulMemory"`
+	MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	Attributes  CharacterAttributes `json:"attributes"`
+	Level       uint32              `json:"level"`
+	SoulMemory  uint32              `json:"soulMemory"`
 }
 
 // SetCharacterStats atomically assigns the eight attributes of one active
@@ -315,12 +318,11 @@ func (engine *Engine) SetCharacterStats(
 	}
 
 	return SetCharacterStatsResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Attributes:    attributes,
-		Level:         level,
-		SoulMemory:    soulMemory,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Attributes:      attributes,
+		Level:           level,
+		SoulMemory:      soulMemory,
 	}, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -566,7 +567,7 @@ func TestUndoRefusesBeforeRestoringWhenTheOperationIDCannotBeMinted(t *testing.T
 	if !errors.Is(err, failure) {
 		t.Fatalf("UndoCharacterChanges error = %v, want the generator failure", err)
 	}
-	if result != (UndoCharacterChangesResult{}) {
+	if !reflect.DeepEqual(result, UndoCharacterChangesResult{}) {
 		t.Errorf("result = %+v, want the zero result", result)
 	}
 	if string(held.snapshot.data) != snapshotBefore {
@@ -671,5 +672,44 @@ func assertCommittedReceipt(
 	}
 	if strings.Join(receipt.ChangedScopes, ",") != strings.Join(wantScopes, ",") {
 		t.Errorf("changedScopes = %v, want %v", receipt.ChangedScopes, wantScopes)
+	}
+}
+
+// assertUndoReceipt fails unless receipt is the complete receipt of one undo
+// execution. Undo carries two kinds: its own operationKind, which is always
+// kindUndoCharacterChanges, and the kind of the mutation it reverted, which
+// decides the changed scopes. kindUndoCharacterChanges owns no domain scope of
+// its own, so the expected list is exactly the scope list of undoneKind.
+func assertUndoReceipt(
+	t *testing.T,
+	receipt MutationReceipt,
+	saveSessionID string,
+	undoneKind string,
+	saveRevision string,
+) {
+	t.Helper()
+
+	if receipt.OperationID == "" {
+		t.Errorf("receipt = %+v, want a minted operationID", receipt)
+	}
+	if receipt.OperationKind != kindUndoCharacterChanges {
+		t.Errorf("operationKind = %q, want %q", receipt.OperationKind, kindUndoCharacterChanges)
+	}
+	if receipt.OperationKind == undoneKind {
+		t.Errorf("undo reported the reverted kind %q as its own operationKind", undoneKind)
+	}
+	if receipt.SaveSessionID != saveSessionID {
+		t.Errorf("saveSessionID = %q, want %q", receipt.SaveSessionID, saveSessionID)
+	}
+	if receipt.SaveRevision != saveRevision {
+		t.Errorf("saveRevision = %q, want %q", receipt.SaveRevision, saveRevision)
+	}
+	wantScopes, err := ChangedScopesForMutationKind(undoneKind)
+	if err != nil {
+		t.Fatalf("ChangedScopesForMutationKind(%q): %v", undoneKind, err)
+	}
+	if strings.Join(receipt.ChangedScopes, ",") != strings.Join(wantScopes, ",") {
+		t.Errorf("changedScopes = %v, want the scopes of the reverted %q: %v",
+			receipt.ChangedScopes, undoneKind, wantScopes)
 	}
 }

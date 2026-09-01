@@ -5,10 +5,13 @@ import (
 )
 
 // DeleteFavoritePresetResult reports one committed Mirror Favorites deletion.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type DeleteFavoritePresetResult struct {
-	SaveSessionID  string `json:"saveSessionID"`
-	SaveRevision   string `json:"saveRevision"`
-	FavoriteSlotID int    `json:"favoriteSlotID"`
+	MutationReceipt
+	FavoriteSlotID int `json:"favoriteSlotID"`
 }
 
 // DeleteFavoritePreset clears the 0x130 bytes of one active Mirror Favorites
@@ -60,8 +63,7 @@ func (engine *Engine) DeleteFavoritePreset(
 	}
 
 	return DeleteFavoritePresetResult{
-		SaveSessionID:  saveSessionID,
-		SaveRevision:   committed.SaveRevision,
-		FavoriteSlotID: favoriteSlotID,
+		MutationReceipt: committed,
+		FavoriteSlotID:  favoriteSlotID,
 	}, nil
 }

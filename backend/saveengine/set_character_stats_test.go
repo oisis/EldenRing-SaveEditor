@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -222,15 +223,18 @@ func TestSetCharacterStatsWritesTheConfirmedFieldsOnBothPlatforms(t *testing.T) 
 				t.Fatalf("SetCharacterStats: %v", err)
 			}
 
+			assertCommittedReceipt(t, result.MutationReceipt, sessionID,
+				kindSetCharacterStats, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetCharacterStatsResult{
-				SaveSessionID: sessionID,
-				SaveRevision:  "1",
-				CharacterID:   setStatsTestSlot,
-				Attributes:    setStatsTestAttributes,
-				Level:         setStatsTestLevel,
-				SoulMemory:    setStatsTestRequiredSoulMemory,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     setStatsTestSlot,
+				Attributes:      setStatsTestAttributes,
+				Level:           setStatsTestLevel,
+				SoulMemory:      setStatsTestRequiredSoulMemory,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

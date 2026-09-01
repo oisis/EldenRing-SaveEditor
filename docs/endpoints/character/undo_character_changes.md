@@ -57,12 +57,39 @@ The transport requires both body fields and rejects unknown JSON fields:
 
 ```go
 type UndoCharacterChangesResult struct {
-	SaveSessionID       string `json:"saveSessionID"`
-	SaveRevision        string `json:"saveRevision"`
+	MutationReceipt
 	CharacterID         int    `json:"characterID"`
 	UndoneOperationKind string `json:"undoneOperationKind"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `characterID`, `undoneOperationKind` all sit at the top
+level, and there is no nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `undo_character_changes`.
+- `changedScopes` are the scopes of the mutation that was reverted, resolved from
+  `undoneOperationKind` at commit time. An undo of a statistics change reports the
+  statistics scopes; it never reports a catch-all.
 
 `UndoneOperationKind` is the stable kind of the mutation that was reverted,
 equal to the `EndpointID` of the endpoint that performed it. It names a kind of

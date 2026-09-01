@@ -34,13 +34,18 @@ func TestUndoCharacterChangesReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UndoCharacterChanges: %v", err)
 	}
+	// Undo owns two kinds at once: its own operationKind and the kind of the
+	// mutation it reverted. They must not collapse into one value.
+	assertUndoReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+		SetCharacterStatsEndpointID, "2")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := UndoCharacterChangesResult{
-		SaveSessionID:       loaded.SaveSessionID,
-		SaveRevision:        "2",
+		MutationReceipt:     result.MutationReceipt,
 		CharacterID:         getCharacterStatsSlot,
 		UndoneOperationKind: SetCharacterStatsEndpointID,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

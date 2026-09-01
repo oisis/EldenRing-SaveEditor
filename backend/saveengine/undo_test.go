@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -114,13 +115,19 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("UndoCharacterChanges: %v", err)
 			}
+			// Undo owns two kinds at once: its own operationKind and the kind of the
+			// mutation it reverted. Its changed scopes are the undone mutation's
+			// scopes on top of the undo baseline, so they are resolved from the
+			// reverted kind, not from kindUndoCharacterChanges.
+			assertUndoReceipt(t, result.MutationReceipt, session, kindSetCharacterRunes, "2")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := UndoCharacterChangesResult{
-				SaveSessionID:       session,
-				SaveRevision:        "2",
+				MutationReceipt:     result.MutationReceipt,
 				CharacterID:         setRunesTestSlot,
 				UndoneOperationKind: "set_character_runes",
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 			if got := undoTestRunes(t, engine, session, runesAt); got != 123 {
@@ -187,7 +194,7 @@ func TestUndoRejectsAWrongTokenCharacterOrRevisionWithoutChangingAnything(t *tes
 			if err == nil {
 				t.Fatalf("UndoCharacterChanges succeeded with %+v, want a rejection", result)
 			}
-			if result != (UndoCharacterChangesResult{}) {
+			if !reflect.DeepEqual(result, UndoCharacterChangesResult{}) {
 				t.Errorf("result = %+v, want the zero value", result)
 			}
 			if got := undoTestRunes(t, engine, session, runesAt); got != setRunesTestMaximum {

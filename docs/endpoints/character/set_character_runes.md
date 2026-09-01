@@ -51,12 +51,38 @@ mistaken for the valid explicit value `0`.
 
 ```go
 type SetCharacterRunesResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
+	MutationReceipt
 	CharacterID   int    `json:"characterID"`
 	Runes         uint32 `json:"runes"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `characterID`, `runes` all sit at the top level, and there
+is no nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_character_runes`.
+- `changedScopes` are exactly `save.session`, `diagnostics.report`, in that
+  canonical order.
 
 The receipt returns the exact accepted value and the revision created by the
 mutation. It exposes no save offset or private save bytes.

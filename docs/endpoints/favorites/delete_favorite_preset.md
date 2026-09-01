@@ -69,16 +69,45 @@ func DeleteFavoritePreset(
 
 ```go
 type DeleteFavoritePresetResult struct {
-	SaveSessionID  string `json:"saveSessionID"`
-	SaveRevision   string `json:"saveRevision"`
+	MutationReceipt
 	FavoriteSlotID int    `json:"favoriteSlotID"`
+}
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
 }
 ```
 
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `favoriteSlotID` all sit at the top level, and there is no
+nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `delete_favorite_preset`.
+- `changedScopes` are exactly `save.session`, `favorites`, `diagnostics.report`,
+  in that canonical order.
+
 | Field | Type | Meaning |
 |---|---|---|
+| `operationID` | `string` | Opaque identifier of this one execution. |
+| `operationKind` | `string` | Stable kind of the mutation, exactly `delete_favorite_preset`. |
 | `saveSessionID` | `string` | Identifier of the session that was modified. |
 | `saveRevision` | `string` | New canonical decimal save revision after the mutation (incremented by 1). |
+| `changedScopes` | `[]string` | Backend read scopes this mutation invalidated, in the one canonical order. |
 | `favoriteSlotID` | `int` | Physical slot index in `0..14` that was deleted. |
 
 ## How the slot is deleted
@@ -124,8 +153,11 @@ Request body (JSON, strict, `DisallowUnknownFields`):
 Response (`200 OK`):
 ```json
 {
+  "operationID": "op-0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "operationKind": "delete_favorite_preset",
   "saveSessionID": "sess-12345678",
   "saveRevision": "1",
+  "changedScopes": ["save.session", "favorites", "diagnostics.report"],
   "favoriteSlotID": 2
 }
 ```

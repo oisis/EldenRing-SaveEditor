@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -95,13 +96,16 @@ func TestSetCharacterRunesChangesOnlyTheConfirmedFieldOnBothPlatforms(t *testing
 			if err != nil {
 				t.Fatalf("SetCharacterRunes: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindSetCharacterRunes, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetCharacterRunesResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   setRunesTestSlot,
-				Runes:         456_789,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     setRunesTestSlot,
+				Runes:           456_789,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

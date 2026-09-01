@@ -53,7 +53,35 @@ type CharacterAttributes struct {
 	Faith        uint32 `json:"faith"`
 	Arcane       uint32 `json:"arcane"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `characterID`, `attributes`, `level`, `soulMemory` all sit
+at the top level, and there is no nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_character_stats`.
+- `changedScopes` are exactly `save.session`, `character.list`,
+  `character.profile`, `character.stats`, `diagnostics.report`, in that
+  canonical order.
 
 The transport requires all three body fields, requires all eight attribute
 fields and rejects unknown JSON fields at both levels. It uses nullable decoder
@@ -72,8 +100,7 @@ level that contradicts the attributes it ships with.
 
 ```go
 type SetCharacterStatsResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
+	MutationReceipt
 	CharacterID   int                 `json:"characterID"`
 	Attributes    CharacterAttributes `json:"attributes"`
 	Level         uint32              `json:"level"`

@@ -128,11 +128,14 @@ func TestSetCharacterAppearanceWritesExactFieldsAndReloadsOnBothPlatforms(t *tes
 			if err != nil {
 				t.Fatalf("SetCharacterAppearance: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindSetCharacterAppearance, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			wantResult := SetCharacterAppearanceResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   setAppearanceTestSlot,
-				Appearance:    afterValues,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     setAppearanceTestSlot,
+				Appearance:      afterValues,
 			}
 			if !reflect.DeepEqual(result, wantResult) {
 				t.Errorf("result = %+v, want %+v", result, wantResult)

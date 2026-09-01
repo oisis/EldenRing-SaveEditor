@@ -39,11 +39,14 @@ func TestSetCharacterAppearanceReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetCharacterAppearance: %v", err)
 	}
+	assertMutationReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+		SetCharacterAppearanceEndpointID, "1")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := SetCharacterAppearanceResult{
-		SaveSessionID: loaded.SaveSessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCharacterAppearanceSlot,
-		Appearance:    values,
+		MutationReceipt: result.MutationReceipt,
+		CharacterID:     getCharacterAppearanceSlot,
+		Appearance:      values,
 	}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)

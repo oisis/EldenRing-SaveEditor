@@ -2115,12 +2115,15 @@ func TestDeleteCharacterRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		character.DeleteCharacterEndpointID, "1")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := character.DeleteCharacterResult{
-		SaveSessionID: session.SaveSessionID,
-		SaveRevision:  "1",
-		CharacterID:   0,
+		MutationReceipt: got.MutationReceipt,
+		CharacterID:     0,
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("result = %+v, want %+v", got, want)
 	}
 	profile, err := saveEngine.GetCharacterProfile(session.SaveSessionID, 0)
@@ -2163,14 +2166,17 @@ func TestCloneCharacterRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		character.CloneCharacterEndpointID, "2")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := character.CloneCharacterResult{
-		SaveSessionID:     session.SaveSessionID,
-		SaveRevision:      "2",
+		MutationReceipt:   got.MutationReceipt,
 		SourceCharacterID: 0,
 		TargetSlotID:      1,
 		Name:              "Ranni 2",
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("result = %+v, want %+v", got, want)
 	}
 	profile, err := saveEngine.GetCharacterProfile(session.SaveSessionID, 1)
@@ -2295,8 +2301,13 @@ func TestSetCharacterNameRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("character.SetCharacterName: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, character.SetCharacterNameEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -2605,8 +2616,13 @@ func TestSetCharacterRunesRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("character.SetCharacterRunes: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, character.SetCharacterRunesEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -2714,8 +2730,13 @@ func TestSetCharacterStatsRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("character.SetCharacterStats: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, character.SetCharacterStatsEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -2808,8 +2829,13 @@ func TestSetCharacterStartingClassRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("character.SetCharacterStartingClass: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, character.SetCharacterStartingClassEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})

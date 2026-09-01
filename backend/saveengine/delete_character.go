@@ -7,10 +7,13 @@ import (
 
 // DeleteCharacterResult identifies the physical slot removed by one committed
 // deletion. No deleted save bytes are exposed in the receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type DeleteCharacterResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
+	MutationReceipt
+	CharacterID int `json:"characterID"`
 }
 
 // DeleteCharacter permanently clears one active or residual character in
@@ -105,9 +108,8 @@ func (engine *Engine) DeleteCharacter(
 	}
 
 	return DeleteCharacterResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
 	}, nil
 }
 

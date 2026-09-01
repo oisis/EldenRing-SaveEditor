@@ -495,7 +495,7 @@ func TestApplyCharacterTemplate_RejectsInvalidRequests(t *testing.T) {
 			if err == nil {
 				t.Fatalf("ApplyCharacterTemplate(%s) accepted invalid request", tc.name)
 			}
-			if res != (ApplyCharacterTemplateResult{}) {
+			if !reflect.DeepEqual(res, ApplyCharacterTemplateResult{}) {
 				t.Errorf("ApplyCharacterTemplate(%s) returned non-zero result on error: %+v", tc.name, res)
 			}
 			if !bytes.Equal(loaded.snapshot.data, snapshotBefore) {

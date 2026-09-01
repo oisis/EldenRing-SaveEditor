@@ -32,14 +32,15 @@ var ApplyAppearancePresetDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Applies a verified appearance preset through the same domain operation as SetCharacterAppearance.",
 })
 
-// ApplyAppearancePresetResult reports the selected preset and the committed
-// appearance assignment.
+// ApplyAppearancePresetResult embeds the receipt of the committed mutation and
+// adds the selected preset and the committed appearance assignment. The receipt
+// is the one the shared SaveEngine appearance writer produced, so operationKind
+// is apply_appearance_preset and never set_character_appearance.
 type ApplyAppearancePresetResult struct {
-	SaveSessionID string                               `json:"saveSessionID"`
-	SaveRevision  string                               `json:"saveRevision"`
-	CharacterID   int                                  `json:"characterID"`
-	PresetID      string                               `json:"presetID"`
-	Appearance    saveengine.CharacterAppearanceValues `json:"appearance"`
+	saveengine.MutationReceipt
+	CharacterID int                                  `json:"characterID"`
+	PresetID    string                               `json:"presetID"`
+	Appearance  saveengine.CharacterAppearanceValues `json:"appearance"`
 }
 
 // ApplyAppearancePreset resolves one catalog preset and applies it through the
@@ -81,10 +82,9 @@ func ApplyAppearancePreset(
 		return ApplyAppearancePresetResult{}, err
 	}
 	return ApplyAppearancePresetResult{
-		SaveSessionID: committed.SaveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   committed.CharacterID,
-		PresetID:      selected.ID,
-		Appearance:    committed.Appearance,
+		MutationReceipt: committed.MutationReceipt,
+		CharacterID:     committed.CharacterID,
+		PresetID:        selected.ID,
+		Appearance:      committed.Appearance,
 	}, nil
 }

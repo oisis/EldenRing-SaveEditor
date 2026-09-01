@@ -6,20 +6,42 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
 // receiptMigratedResults are the mutation result schemas that carry the shared
 // MutationReceipt today. Stage 3b.1 migrated the SaveSession and Network batch
-// and nothing else: the remaining domains still return their old shape, and
+// and stage 3b.2 added the Character, Appearance, Templates and Favorites batch.
+// Inventory, Equipment, World and Diagnostics still return their old shape, and
 // this list must grow only together with their migration.
 var receiptMigratedResults = []string{
+	// Stage 3b.1: SaveSession and Network.
 	"WriteSaveResult",
 	"SetSaveAccountIDResult",
 	"SetNetworkSettingsResult",
 	"ApplyNetworkPresetResult",
+	// Stage 3b.2: Character.
+	"CloneCharacterResult",
+	"DeleteCharacterResult",
+	"SetCharacterAppearanceResult",
+	"SetCharacterGenderResult",
+	"SetCharacterNameResult",
+	"SetCharacterRunesResult",
+	"SetCharacterStartingClassResult",
+	"SetCharacterStatsResult",
+	"UndoCharacterChangesResult",
+	// Stage 3b.2: Appearance, Templates and Favorites.
+	"ApplyAppearancePresetResult",
+	"ApplyBuildTemplateResult",
+	"ApplyFavoritePresetResult",
+	"DeleteFavoritePresetResult",
+	"SetFavoritePresetResult",
 }
 
 // receiptProperties are the five members every migrated result exposes flat.
@@ -123,15 +145,31 @@ func TestOpenAPIMigratedMutationResultsRequireTheSharedReceipt(t *testing.T) {
 	}
 }
 
-// The four migrated results must report their own EndpointID as operationKind.
-// Sharing a SaveEngine writer, as the two network endpoints do, must not merge
-// two kinds into one.
+// Every migrated result must report its own EndpointID as operationKind. Sharing
+// a SaveEngine writer, as the two network endpoints and the three appearance
+// entry points do, must not merge two kinds into one.
 func TestMigratedMutationKindsAreTheirOwnEndpointIDs(t *testing.T) {
 	kinds := map[string]string{
 		"write_save":           savesession.WriteSaveEndpointID,
 		"set_save_account_id":  savesession.SetSaveAccountIDEndpointID,
 		"set_network_settings": network.SetNetworkSettingsEndpointID,
 		"apply_network_preset": network.ApplyNetworkPresetEndpointID,
+
+		"clone_character":              character.CloneCharacterEndpointID,
+		"delete_character":             character.DeleteCharacterEndpointID,
+		"set_character_appearance":     character.SetCharacterAppearanceEndpointID,
+		"set_character_gender":         character.SetCharacterGenderEndpointID,
+		"set_character_name":           character.SetCharacterNameEndpointID,
+		"set_character_runes":          character.SetCharacterRunesEndpointID,
+		"set_character_starting_class": character.SetCharacterStartingClassEndpointID,
+		"set_character_stats":          character.SetCharacterStatsEndpointID,
+		"undo_character_changes":       character.UndoCharacterChangesEndpointID,
+
+		"apply_appearance_preset": appearance.ApplyAppearancePresetEndpointID,
+		"apply_build_template":    templates.ApplyBuildTemplateEndpointID,
+		"apply_favorite_preset":   favorites.ApplyFavoritePresetEndpointID,
+		"delete_favorite_preset":  favorites.DeleteFavoritePresetEndpointID,
+		"set_favorite_preset":     favorites.SetFavoritePresetEndpointID,
 	}
 	registered := make(map[string]bool)
 	for _, kind := range saveengine.MutationKinds() {

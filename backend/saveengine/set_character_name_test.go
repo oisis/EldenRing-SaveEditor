@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"unicode/utf16"
@@ -122,13 +123,16 @@ func TestSetCharacterNameSynchronizesBothCopiesOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("SetCharacterName: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindSetCharacterName, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetCharacterNameResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   setNameTestSlot,
-				Name:          name,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     setNameTestSlot,
+				Name:            name,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

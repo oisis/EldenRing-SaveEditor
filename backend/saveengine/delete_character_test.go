@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -67,12 +68,15 @@ func TestDeleteCharacterClearsOnlyTheTargetSlotOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("DeleteCharacter: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindDeleteCharacter, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := DeleteCharacterResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   deleteTestSlot,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     deleteTestSlot,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

@@ -151,13 +151,16 @@ func TestApplyFavoritePresetWritesExactFieldsAndPreservesVoiceAndOpaqueBlock(t *
 			if err != nil {
 				t.Fatalf("ApplyFavoritePreset: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loadedSession.SaveSessionID,
+				kindApplyFavoritePreset, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			wantResult := ApplyFavoritePresetResult{
-				SaveSessionID:  loadedSession.SaveSessionID,
-				SaveRevision:   "1",
-				CharacterID:    setAppearanceTestSlot,
-				FavoriteSlotID: 3,
+				MutationReceipt: result.MutationReceipt,
+				CharacterID:     setAppearanceTestSlot,
+				FavoriteSlotID:  3,
 			}
-			if result != wantResult {
+			if !reflect.DeepEqual(result, wantResult) {
 				t.Errorf("result = %+v, want %+v", result, wantResult)
 			}
 
@@ -436,7 +439,7 @@ func TestApplyFavoritePresetRejectsInvalidRequests(t *testing.T) {
 			if err == nil {
 				t.Fatalf("ApplyFavoritePreset(%s) accepted invalid request", tc.name)
 			}
-			if res != (ApplyFavoritePresetResult{}) {
+			if !reflect.DeepEqual(res, ApplyFavoritePresetResult{}) {
 				t.Errorf("ApplyFavoritePreset(%s) returned non-zero result on error: %+v", tc.name, res)
 			}
 			if !bytes.Equal(loaded.snapshot.data, snapshotBefore) {

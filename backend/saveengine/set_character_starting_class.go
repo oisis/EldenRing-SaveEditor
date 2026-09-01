@@ -11,9 +11,12 @@ import (
 // It returns the session ID, the new revision, the character ID, the applied
 // startingClassID, the eight base attributes of that class, its base level and
 // the SoulMemory the character keeps, which this mutation never changes.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type SetCharacterStartingClassResult struct {
-	SaveSessionID   string              `json:"saveSessionID"`
-	SaveRevision    string              `json:"saveRevision"`
+	MutationReceipt
 	CharacterID     int                 `json:"characterID"`
 	StartingClassID uint8               `json:"startingClassID"`
 	Attributes      CharacterAttributes `json:"attributes"`
@@ -213,8 +216,7 @@ func (engine *Engine) SetCharacterStartingClass(
 	}
 
 	return SetCharacterStartingClassResult{
-		SaveSessionID:   saveSessionID,
-		SaveRevision:    committed.SaveRevision,
+		MutationReceipt: committed,
 		CharacterID:     characterID,
 		StartingClassID: startingClassID,
 		Attributes:      resultingAttributes,

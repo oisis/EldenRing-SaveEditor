@@ -49,13 +49,41 @@ accepts only `application/json`.
 
 ```go
 type CloneCharacterResult struct {
-	SaveSessionID     string `json:"saveSessionID"`
-	SaveRevision      string `json:"saveRevision"`
+	MutationReceipt
 	SourceCharacterID int    `json:"sourceCharacterID"`
 	TargetSlotID      int    `json:"targetSlotID"`
 	Name              string `json:"name"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members and `sourceCharacterID`, `targetSlotID`, `name` all sit at the
+top level, and there is no nested `receipt` object.
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `clone_character`.
+- `changedScopes` are exactly `save.session`, `character.list`,
+  `character.profile`, `character.stats`, `character.appearance`, `inventory`,
+  `storage`, `equipment.loadout`, `world.flags`, `diagnostics.report`, in that
+  canonical order.
 
 `Name` is the exact unique name written into both the cloned PlayerGameData and
 ProfileSummary. The receipt contains no save bytes, account identifier or

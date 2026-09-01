@@ -8,9 +8,12 @@ import (
 
 // CloneCharacterResult identifies both physical slots and the unique name
 // assigned to one committed clone.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type CloneCharacterResult struct {
-	SaveSessionID     string `json:"saveSessionID"`
-	SaveRevision      string `json:"saveRevision"`
+	MutationReceipt
 	SourceCharacterID int    `json:"sourceCharacterID"`
 	TargetSlotID      int    `json:"targetSlotID"`
 	Name              string `json:"name"`
@@ -175,8 +178,7 @@ func (engine *Engine) CloneCharacter(
 	}
 
 	return CloneCharacterResult{
-		SaveSessionID:     saveSessionID,
-		SaveRevision:      committed.SaveRevision,
+		MutationReceipt:   committed,
 		SourceCharacterID: sourceCharacterID,
 		TargetSlotID:      targetSlotID,
 		Name:              cloneName,

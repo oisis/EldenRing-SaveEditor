@@ -13,11 +13,14 @@ import (
 const playerCharacterNameOffset = int64(-0x11B)
 
 // SetCharacterNameResult reports one committed character-name assignment.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type SetCharacterNameResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Name          string `json:"name"`
+	MutationReceipt
+	CharacterID int    `json:"characterID"`
+	Name        string `json:"name"`
 }
 
 // SetCharacterName assigns the name of one active character slot. The save
@@ -115,10 +118,9 @@ func (engine *Engine) SetCharacterName(
 	}
 
 	return SetCharacterNameResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Name:          name,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Name:            name,
 	}, nil
 }
 

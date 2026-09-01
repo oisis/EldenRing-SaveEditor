@@ -7,11 +7,14 @@ import (
 )
 
 // SetFavoritePresetResult reports one committed Mirror Favorites write.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type SetFavoritePresetResult struct {
-	SaveSessionID     string `json:"saveSessionID"`
-	SaveRevision      string `json:"saveRevision"`
-	FavoriteSlotID    int    `json:"favoriteSlotID"`
-	SourceCharacterID int    `json:"sourceCharacterID"`
+	MutationReceipt
+	FavoriteSlotID    int `json:"favoriteSlotID"`
+	SourceCharacterID int `json:"sourceCharacterID"`
 }
 
 // SetFavoritePreset saves all appearance fields represented by Mirror Favorites
@@ -136,8 +139,7 @@ func (engine *Engine) SetFavoritePreset(
 	}
 
 	return SetFavoritePresetResult{
-		SaveSessionID:     saveSessionID,
-		SaveRevision:      committed.SaveRevision,
+		MutationReceipt:   committed,
 		FavoriteSlotID:    favoriteSlotID,
 		SourceCharacterID: sourceCharacterID,
 	}, nil

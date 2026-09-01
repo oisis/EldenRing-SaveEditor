@@ -32,14 +32,16 @@ var SetCharacterGenderDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Sets the body type or gender and every required confirmed dependency of that change.",
 })
 
-// SetCharacterGenderResult reports the default preset selected for the body
-// type and the complete appearance committed by SaveEngine.
+// SetCharacterGenderResult embeds the receipt of the committed mutation and
+// adds the default preset selected for the body type and the complete
+// appearance committed by SaveEngine. The receipt is the one the shared
+// SaveEngine appearance writer produced, so operationKind is
+// set_character_gender and never set_character_appearance.
 type SetCharacterGenderResult struct {
-	SaveSessionID string                               `json:"saveSessionID"`
-	SaveRevision  string                               `json:"saveRevision"`
-	CharacterID   int                                  `json:"characterID"`
-	PresetID      string                               `json:"presetID"`
-	Appearance    saveengine.CharacterAppearanceValues `json:"appearance"`
+	saveengine.MutationReceipt
+	CharacterID int                                  `json:"characterID"`
+	PresetID    string                               `json:"presetID"`
+	Appearance  saveengine.CharacterAppearanceValues `json:"appearance"`
 }
 
 // SetCharacterGender applies the complete confirmed default appearance for one
@@ -81,10 +83,9 @@ func SetCharacterGender(
 		return SetCharacterGenderResult{}, err
 	}
 	return SetCharacterGenderResult{
-		SaveSessionID: committed.SaveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   committed.CharacterID,
-		PresetID:      preset.ID,
-		Appearance:    committed.Appearance,
+		MutationReceipt: committed.MutationReceipt,
+		CharacterID:     committed.CharacterID,
+		PresetID:        preset.ID,
+		Appearance:      committed.Appearance,
 	}, nil
 }

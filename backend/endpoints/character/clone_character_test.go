@@ -24,14 +24,17 @@ func TestCloneCharacterReturnsTheSaveEngineReceipt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CloneCharacter: %v", err)
 	}
+	assertMutationReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+		CloneCharacterEndpointID, "2")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := CloneCharacterResult{
-		SaveSessionID:     loaded.SaveSessionID,
-		SaveRevision:      "2",
+		MutationReceipt:   result.MutationReceipt,
 		SourceCharacterID: getCharacterStatsSlot,
 		TargetSlotID:      5,
 		Name:              "Ranni 2",
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 }

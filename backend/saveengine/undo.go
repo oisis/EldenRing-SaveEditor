@@ -169,10 +169,16 @@ func (engine *Engine) GetUndoState(saveSessionID string, characterID int) (Chara
 	return state, nil
 }
 
-// UndoCharacterChangesResult reports one consumed undo point.
+// UndoCharacterChangesResult reports one consumed undo point. It carries two
+// kinds: the embedded receipt's OperationKind is always kindUndoCharacterChanges,
+// the kind of this mutation, while UndoneOperationKind names the mutation that
+// was reverted.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat.
 type UndoCharacterChangesResult struct {
-	SaveSessionID       string `json:"saveSessionID"`
-	SaveRevision        string `json:"saveRevision"`
+	MutationReceipt
 	CharacterID         int    `json:"characterID"`
 	UndoneOperationKind string `json:"undoneOperationKind"`
 }
@@ -293,8 +299,7 @@ func (engine *Engine) UndoCharacterChanges(
 	session.dirty = point.dirtyBefore
 	receipt := pending.receipt(saveSessionID, session.advanceRevision())
 	return UndoCharacterChangesResult{
-		SaveSessionID:       receipt.SaveSessionID,
-		SaveRevision:        receipt.SaveRevision,
+		MutationReceipt:     receipt,
 		CharacterID:         characterID,
 		UndoneOperationKind: undoneKind,
 	}, nil
