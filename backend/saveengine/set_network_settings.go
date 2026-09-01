@@ -33,6 +33,31 @@ func (engine *Engine) SetNetworkSettings(
 	networkSettings gamecatalog.NetworkParamValues,
 	expectedRevision string,
 ) (SetNetworkSettingsResult, error) {
+	return engine.setNetworkSettings(
+		saveSessionID, networkSettings, expectedRevision, kindSetNetworkSettings)
+}
+
+// ApplyNetworkPreset is SetNetworkSettings for a preset the caller resolved. It
+// exists so the receipt reports the preset operation instead of the plain
+// settings one; it shares every rule and byte of the writer below.
+func (engine *Engine) ApplyNetworkPreset(
+	saveSessionID string,
+	networkSettings gamecatalog.NetworkParamValues,
+	expectedRevision string,
+) (SetNetworkSettingsResult, error) {
+	return engine.setNetworkSettings(
+		saveSessionID, networkSettings, expectedRevision, kindApplyNetworkPreset)
+}
+
+// setNetworkSettings is the one writer behind both public entry points.
+// operationKind is chosen by those entry points and never by a caller outside
+// this package.
+func (engine *Engine) setNetworkSettings(
+	saveSessionID string,
+	networkSettings gamecatalog.NetworkParamValues,
+	expectedRevision string,
+	operationKind string,
+) (SetNetworkSettingsResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
 		return SetNetworkSettingsResult{}, fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
@@ -41,7 +66,7 @@ func (engine *Engine) SetNetworkSettings(
 		return SetNetworkSettingsResult{}, err
 	}
 
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	committed, err := engine.commitRevision(saveSessionID, operationKind, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -83,7 +108,7 @@ func (engine *Engine) SetNetworkSettings(
 
 	return SetNetworkSettingsResult{
 		SaveSessionID:   saveSessionID,
-		SaveRevision:    saveRevision,
+		SaveRevision:    committed.SaveRevision,
 		NetworkSettings: networkSettings,
 	}, nil
 }

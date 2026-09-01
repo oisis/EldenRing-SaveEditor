@@ -269,8 +269,8 @@ func TestApplyCharacterTemplate_CombinedSuccess(t *testing.T) {
 			if !undoState.Available {
 				t.Fatalf("expected undo point to be available")
 			}
-			if undoState.OperationID != opApplyBuildTemplate {
-				t.Errorf("undo operationID = %q, want %q", undoState.OperationID, opApplyBuildTemplate)
+			if undoState.OperationKind != kindApplyBuildTemplate {
+				t.Errorf("undo operationKind = %q, want %q", undoState.OperationKind, kindApplyBuildTemplate)
 			}
 
 			// Undo the mutation and verify complete byte-for-byte restoration.
@@ -283,8 +283,8 @@ func TestApplyCharacterTemplate_CombinedSuccess(t *testing.T) {
 			if err != nil {
 				t.Fatalf("UndoCharacterChanges: %v", err)
 			}
-			if undoRes.UndoneOperationID != opApplyBuildTemplate {
-				t.Errorf("undoneOperationID = %q, want %q", undoRes.UndoneOperationID, opApplyBuildTemplate)
+			if undoRes.UndoneOperationKind != kindApplyBuildTemplate {
+				t.Errorf("undoneOperationKind = %q, want %q", undoRes.UndoneOperationKind, kindApplyBuildTemplate)
 			}
 
 			snapshotAfterUndo := engine.sessions[session.SaveSessionID].snapshot.data

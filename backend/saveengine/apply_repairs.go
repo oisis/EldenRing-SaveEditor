@@ -14,7 +14,6 @@ const (
 	RepairOperationSetOwnedItemQuantity = "set_owned_item_quantity"
 	RepairOperationRemoveOwnedItem      = "remove_owned_item"
 	RepairOperationSetCharacterStats    = "set_character_stats"
-	opApplyRepairs                      = "apply_repairs"
 )
 
 // RepairAction is the executable projection of a diagnostics repair plan. It
@@ -60,9 +59,9 @@ func (engine *Engine) ApplyRepairPlan(
 		return engine.confirmNoRepairActions(saveSessionID, characterID, expectedRevision)
 	}
 
-	saveRevision, err := engine.commitCharacterRevisionWithHook(
+	committed, err := engine.commitCharacterRevisionWithHook(
 		saveSessionID,
-		opApplyRepairs,
+		kindApplyRepairs,
 		characterID,
 		func(loaded *loadedSave) error {
 			if expectedRevision != loaded.session.revisionString() {
@@ -98,7 +97,7 @@ func (engine *Engine) ApplyRepairPlan(
 
 	return ApplyRepairPlanResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Applied:       true,
 	}, nil

@@ -42,7 +42,7 @@ func (engine *Engine) CloneCharacter(
 	}
 
 	cloneName := ""
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opCloneCharacter, targetSlotID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindCloneCharacter, targetSlotID, func(loaded *loadedSave) error {
 		if sourceCharacterID == targetSlotID {
 			return errors.New("sourceCharacterID and targetSlotID must differ")
 		}
@@ -176,7 +176,7 @@ func (engine *Engine) CloneCharacter(
 
 	return CloneCharacterResult{
 		SaveSessionID:     saveSessionID,
-		SaveRevision:      saveRevision,
+		SaveRevision:      committed.SaveRevision,
 		SourceCharacterID: sourceCharacterID,
 		TargetSlotID:      targetSlotID,
 		Name:              cloneName,

@@ -36,7 +36,7 @@ type SetCharacterStartingClassResult struct {
 // is read or written, so the save and the revision stay exactly as they were.
 //
 // A committed reset leaves the ordinary single undo point of the session under
-// opSetCharacterStartingClass, so UndoCharacterChanges restores the previous
+// kindSetCharacterStartingClass, so UndoCharacterChanges restores the previous
 // class, level, attributes, SoulMemory and held runes. That point is one level
 // deep and not durable: the next mutation replaces it and WriteSave ends the
 // possibility of undoing, exactly as for every other character mutation.
@@ -76,7 +76,7 @@ func (engine *Engine) SetCharacterStartingClass(
 		resultingSoulMemory uint32
 	)
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterStartingClass, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterStartingClass, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -214,7 +214,7 @@ func (engine *Engine) SetCharacterStartingClass(
 
 	return SetCharacterStartingClassResult{
 		SaveSessionID:   saveSessionID,
-		SaveRevision:    saveRevision,
+		SaveRevision:    committed.SaveRevision,
 		CharacterID:     characterID,
 		StartingClassID: startingClassID,
 		Attributes:      resultingAttributes,

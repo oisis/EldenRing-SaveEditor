@@ -6004,9 +6004,9 @@
             "type": "string",
             "description": "Opaque identifier of the available undo point. Absent when available is false. It is not a GameResource reference."
           },
-          "operationID": {
+          "operationKind": {
             "type": "string",
-            "description": "EndpointID of the mutation the undo point would revert, such as set_character_stats. Absent when available is false."
+            "description": "Stable kind of the mutation the undo point would revert, equal to the EndpointID of the endpoint that performed it, such as set_character_stats. Absent when available is false."
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "available"]
@@ -6043,12 +6043,12 @@
             "type": "integer",
             "format": "int32"
           },
-          "undoneOperationID": {
+          "undoneOperationKind": {
             "type": "string",
-            "description": "EndpointID of the mutation that was reverted."
+            "description": "Stable kind of the mutation that was reverted, equal to the EndpointID of the endpoint that performed it."
           }
         },
-        "required": ["saveSessionID", "saveRevision", "characterID", "undoneOperationID"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "undoneOperationKind"]
       },
       "SetCharacterRunesRequest": {
         "type": "object",

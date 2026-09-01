@@ -95,7 +95,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 		}
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opApplyBuildTemplate, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindApplyBuildTemplate, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -236,7 +236,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 
 	return ApplyCharacterTemplateResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 	}, nil
 }

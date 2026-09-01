@@ -859,8 +859,8 @@ func TestSetCharacterStartingClassLeavesAnUndoPointThatRestoresTheBuild(t *testi
 			if !state.Available || state.UndoToken == "" {
 				t.Fatalf("undo state after the reset = %+v, want an available point with a token", state)
 			}
-			if state.OperationID != opSetCharacterStartingClass {
-				t.Errorf("operationID = %q, want %q", state.OperationID, opSetCharacterStartingClass)
+			if state.OperationKind != kindSetCharacterStartingClass {
+				t.Errorf("operationKind = %q, want %q", state.OperationKind, kindSetCharacterStartingClass)
 			}
 			if state.SaveRevision != "1" {
 				t.Errorf("saveRevision of the undo point = %q, want 1", state.SaveRevision)
@@ -880,9 +880,9 @@ func TestSetCharacterStartingClassLeavesAnUndoPointThatRestoresTheBuild(t *testi
 			if err != nil {
 				t.Fatalf("UndoCharacterChanges: %v", err)
 			}
-			if result.UndoneOperationID != opSetCharacterStartingClass {
-				t.Errorf("undoneOperationID = %q, want %q",
-					result.UndoneOperationID, opSetCharacterStartingClass)
+			if result.UndoneOperationKind != kindSetCharacterStartingClass {
+				t.Errorf("undoneOperationKind = %q, want %q",
+					result.UndoneOperationKind, kindSetCharacterStartingClass)
 			}
 
 			profileAfter, err := engine.GetCharacterProfile(session, setStartingClassTestSlot)

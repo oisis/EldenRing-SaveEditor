@@ -598,14 +598,15 @@ func TestGetSessionInfoReportsTheCurrentRevisionAfterAMutation(t *testing.T) {
 	}
 
 	for _, want := range []string{"1", "2", "3"} {
-		revision, err := engine.commitRevision(loaded.SaveSessionID, func(*loadedSave) error {
-			return nil
-		})
+		receipt, err := engine.commitRevision(
+			loaded.SaveSessionID, kindSetSaveAccountID, func(*loadedSave) error {
+				return nil
+			})
 		if err != nil {
 			t.Fatalf("commitRevision: %v", err)
 		}
-		if revision != want {
-			t.Fatalf("commitRevision = %q, want %q", revision, want)
+		if receipt.SaveRevision != want {
+			t.Fatalf("commitRevision = %q, want %q", receipt.SaveRevision, want)
 		}
 
 		info, err := engine.GetSessionInfo(loaded.SaveSessionID)
@@ -650,14 +651,19 @@ func TestRejectedMutationChangesNeitherRevisionNorSessionState(t *testing.T) {
 			t.Fatalf("saveRevision = %q, want %q", before.SaveRevision, want)
 		}
 
-		revision, err := engine.commitRevision(loaded.SaveSessionID, func(*loadedSave) error {
-			return errors.New("refused by the mutation")
-		})
+		receipt, err := engine.commitRevision(
+			loaded.SaveSessionID, kindSetSaveAccountID, func(*loadedSave) error {
+				return errors.New("refused by the mutation")
+			})
 		if err == nil {
 			t.Fatal("commitRevision accepted a refused mutation")
 		}
-		if revision != "" {
-			t.Errorf("a refused mutation returned revision %q, want an empty value", revision)
+		if receipt.SaveRevision != "" {
+			t.Errorf("a refused mutation returned revision %q, want an empty value", receipt.SaveRevision)
+		}
+		if receipt.OperationID != "" || receipt.OperationKind != "" ||
+			receipt.SaveSessionID != "" || receipt.ChangedScopes != nil {
+			t.Errorf("a refused mutation returned receipt %+v, want the zero receipt", receipt)
 		}
 
 		after, err := engine.GetSessionInfo(loaded.SaveSessionID)
@@ -668,9 +674,10 @@ func TestRejectedMutationChangesNeitherRevisionNorSessionState(t *testing.T) {
 			t.Errorf("a refused mutation changed the session to %+v, want %+v", after, before)
 		}
 
-		if _, err := engine.commitRevision(loaded.SaveSessionID, func(*loadedSave) error {
-			return nil
-		}); err != nil {
+		if _, err := engine.commitRevision(
+			loaded.SaveSessionID, kindSetSaveAccountID, func(*loadedSave) error {
+				return nil
+			}); err != nil {
 			t.Fatalf("commitRevision: %v", err)
 		}
 	}

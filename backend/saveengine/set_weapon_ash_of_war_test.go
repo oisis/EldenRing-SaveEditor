@@ -216,3 +216,27 @@ func TestSetWeaponAshOfWarRejectsUnsafeReferencesWithoutMutation(t *testing.T) {
 		})
 	}
 }
+
+// The Ash of War writer addresses its target through the shared OwnedItemID
+// registry too, so it accepts a Storage common weapon. This is the evidence for
+// the storage scope kindSetWeaponAshOfWar reports.
+func TestSetWeaponAshOfWarSupportsStorageCommon(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(
+		writeSetWeaponAshOfWarFixture(t, PlatformPC, legacyNoCustomAshOfWarHandle), "pc", "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	ownedItemID := moveArmamentWeaponToStorageCommon(t, engine, loaded.SaveSessionID)
+
+	result, err := engine.SetWeaponAshOfWar(
+		loaded.SaveSessionID, setArmamentsSlot, ownedItemID, "0",
+		setArmamentsWeaponGameID, setWeaponAoWFirstGameID)
+	if err != nil {
+		t.Fatalf("SetWeaponAshOfWar: %v", err)
+	}
+	if result.Container != ownedContainerStorage ||
+		result.AshOfWarGameID != setWeaponAoWFirstGameID {
+		t.Fatalf("result = %+v", result)
+	}
+}

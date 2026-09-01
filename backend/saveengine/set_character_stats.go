@@ -262,7 +262,7 @@ func (engine *Engine) SetCharacterStats(
 	}
 
 	var soulMemory uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterStats, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterStats, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -316,7 +316,7 @@ func (engine *Engine) SetCharacterStats(
 
 	return SetCharacterStatsResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Attributes:    attributes,
 		Level:         level,

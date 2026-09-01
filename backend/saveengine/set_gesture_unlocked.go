@@ -57,7 +57,7 @@ func (engine *Engine) SetGestureUnlocked(
 			"gesture slot ID %d is not a supported canonical odd slot ID", slotID)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetGestureUnlocked, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetGestureUnlocked, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -125,7 +125,7 @@ func (engine *Engine) SetGestureUnlocked(
 
 	return SetGestureUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

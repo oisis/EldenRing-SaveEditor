@@ -93,7 +93,7 @@ func (engine *Engine) SetQuestStep(
 
 	offsets := slices.Sorted(maps.Keys(masks))
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetQuestStep, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetQuestStep, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -140,7 +140,7 @@ func (engine *Engine) SetQuestStep(
 
 	return SetQuestStepResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 	}, nil
 }

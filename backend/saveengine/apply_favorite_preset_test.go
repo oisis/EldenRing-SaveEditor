@@ -300,8 +300,8 @@ func TestApplyFavoritePresetUndoAndIdempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUndoState: %v", err)
 	}
-	if !undoState1.Available || undoState1.OperationID != opApplyFavoritePreset {
-		t.Errorf("undoState = %+v, want Available=true, op=%s", undoState1, opApplyFavoritePreset)
+	if !undoState1.Available || undoState1.OperationKind != kindApplyFavoritePreset {
+		t.Errorf("undoState = %+v, want Available=true, op=%s", undoState1, kindApplyFavoritePreset)
 	}
 
 	// 2. Idempotent second mutation with same values
@@ -343,8 +343,8 @@ func TestApplyFavoritePresetUndoAndIdempotence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUndoState: %v", err)
 	}
-	if undoToken.OperationID != opApplyFavoritePreset {
-		t.Errorf("undoToken.OperationID = %q, want %q", undoToken.OperationID, opApplyFavoritePreset)
+	if undoToken.OperationKind != kindApplyFavoritePreset {
+		t.Errorf("undoToken.OperationKind = %q, want %q", undoToken.OperationKind, kindApplyFavoritePreset)
 	}
 
 	undoRes, err := engine.UndoCharacterChanges(loadedSession2.SaveSessionID, setAppearanceTestSlot, undoToken.UndoToken, "1")

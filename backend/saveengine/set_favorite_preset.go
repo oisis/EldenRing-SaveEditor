@@ -44,7 +44,7 @@ func (engine *Engine) SetFavoritePreset(
 			"sourceCharacterID %d is outside the range 0..%d", sourceCharacterID, characterSlotCount-1)
 	}
 
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	committed, err := engine.commitRevision(saveSessionID, kindSetFavoritePreset, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -137,7 +137,7 @@ func (engine *Engine) SetFavoritePreset(
 
 	return SetFavoritePresetResult{
 		SaveSessionID:     saveSessionID,
-		SaveRevision:      saveRevision,
+		SaveRevision:      committed.SaveRevision,
 		FavoriteSlotID:    favoriteSlotID,
 		SourceCharacterID: sourceCharacterID,
 	}, nil

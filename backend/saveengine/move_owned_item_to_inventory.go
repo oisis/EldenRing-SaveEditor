@@ -50,7 +50,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 	}
 
 	var moved movedInventoryRecord
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opMoveOwnedItemToInventory, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindMoveOwnedItemToInventory, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -76,7 +76,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 
 	return MoveOwnedItemToInventoryResult{
 		SaveSessionID:    saveSessionID,
-		SaveRevision:     saveRevision,
+		SaveRevision:     committed.SaveRevision,
 		OwnedItemID:      ownedItemID,
 		CharacterID:      characterID,
 		GameID:           moved.gameID,

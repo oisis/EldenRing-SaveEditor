@@ -42,8 +42,9 @@ type ApplyNetworkPresetResult struct {
 }
 
 // ApplyNetworkPreset resolves one backend preset and applies it through the
-// same SaveEngine mutation as direct settings. It owns no binary rule and does
-// not recognise the legacy aliases absent from GameCatalog.
+// same SaveEngine writer as direct settings, under this endpoint's own
+// operation kind. It owns no binary rule and does not recognise the legacy
+// aliases absent from GameCatalog.
 func ApplyNetworkPreset(
 	engine *saveengine.Engine,
 	gameCatalog *gamecatalog.Catalog,
@@ -62,7 +63,7 @@ func ApplyNetworkPreset(
 	if err != nil {
 		return ApplyNetworkPresetResult{}, err
 	}
-	committed, err := engine.SetNetworkSettings(
+	committed, err := engine.ApplyNetworkPreset(
 		saveSessionID, preset.Parameters, expectedRevision)
 	if err != nil {
 		return ApplyNetworkPresetResult{}, err

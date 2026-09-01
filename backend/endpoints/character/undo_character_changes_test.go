@@ -35,10 +35,10 @@ func TestUndoCharacterChangesReturnsTheSaveEngineReceipt(t *testing.T) {
 		t.Fatalf("UndoCharacterChanges: %v", err)
 	}
 	want := UndoCharacterChangesResult{
-		SaveSessionID:     loaded.SaveSessionID,
-		SaveRevision:      "2",
-		CharacterID:       getCharacterStatsSlot,
-		UndoneOperationID: SetCharacterStatsEndpointID,
+		SaveSessionID:       loaded.SaveSessionID,
+		SaveRevision:        "2",
+		CharacterID:         getCharacterStatsSlot,
+		UndoneOperationKind: SetCharacterStatsEndpointID,
 	}
 	if result != want {
 		t.Errorf("result = %+v, want %+v", result, want)

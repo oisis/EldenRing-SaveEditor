@@ -8,7 +8,7 @@ import (
 // setOwnedWeaponGameID is the single binary mutation used by weapon upgrade
 // and infusion setters. It changes no allocation, handle, row or AoW state.
 //
-// operationID names the public setter that requested the change, so the undo
+// operationKind names the public setter that requested the change, so the undo
 // point of a shared write is never attributed to the wrong endpoint.
 func (engine *Engine) setOwnedWeaponGameID(
 	saveSessionID string,
@@ -17,7 +17,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 	expectedRevision string,
 	expectedGameID uint32,
 	targetGameID uint32,
-	operationID string,
+	operationKind string,
 	matchmakingLevel uint8,
 ) (string, string, error) {
 	if expectedGameID&gaItemHandleTypeMask != 0 || targetGameID&gaItemHandleTypeMask != 0 {
@@ -31,7 +31,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 	}
 
 	var container string
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, operationID, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, operationKind, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -118,7 +118,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 			writes = append(writes, gaItemDataWrites...)
 		}
 
-		if operationID == opSetWeaponUpgradeLevel {
+		if operationKind == kindSetWeaponUpgradeLevel {
 			matchmakingWrites, err := planWeaponMatchmakingLevelWrite(loaded, characterID, matchmakingLevel)
 			if err != nil {
 				return err
@@ -138,7 +138,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 	if err != nil {
 		return "", "", err
 	}
-	return saveRevision, container, nil
+	return committed.SaveRevision, container, nil
 }
 
 // planWeaponMatchmakingLevelWrite locates the character's stats anchor and plans

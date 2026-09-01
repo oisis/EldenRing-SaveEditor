@@ -45,7 +45,7 @@ func (engine *Engine) SetEquippedArmor(
 	}
 
 	var targetGameIDs [equippedArmorSlotCount]uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetEquippedArmor, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetEquippedArmor, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -167,7 +167,7 @@ func (engine *Engine) SetEquippedArmor(
 
 	return SetEquippedArmorResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		GameIDs:       targetGameIDs,
 	}, nil

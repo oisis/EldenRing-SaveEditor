@@ -26,7 +26,7 @@ func (engine *Engine) DeleteCharacter(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opDeleteCharacter, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindDeleteCharacter, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -106,7 +106,7 @@ func (engine *Engine) DeleteCharacter(
 
 	return DeleteCharacterResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 	}, nil
 }

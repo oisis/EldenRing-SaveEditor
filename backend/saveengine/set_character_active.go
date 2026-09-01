@@ -38,7 +38,7 @@ func (engine *Engine) SetCharacterActive(
 		target = userData10ActiveFlagValue
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterActive, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterActive, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -88,6 +88,9 @@ func (engine *Engine) SetCharacterActive(
 		return fmt.Errorf("activity mutation of character %d could not be verified; the save is unchanged",
 			characterID)
 	})
+	// An idempotent request commits nothing, so it keeps the revision it matched
+	// and carries the zero receipt of a mutation that never happened.
+	saveRevision := committed.SaveRevision
 	if errors.Is(err, errCharacterActivityUnchanged) {
 		saveRevision = expectedRevision
 	} else if err != nil {

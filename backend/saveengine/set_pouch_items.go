@@ -38,7 +38,7 @@ func (engine *Engine) SetPouchItems(
 	}
 
 	var targetGoodsIDs [6]uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetPouchItems, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetPouchItems, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -247,7 +247,7 @@ func (engine *Engine) SetPouchItems(
 
 	return SetPouchItemsResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		GameIDs:       targetGoodsIDs,
 	}, nil

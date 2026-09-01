@@ -42,7 +42,7 @@ func (engine *Engine) SetEquippedTalismans(
 
 	gameIDs := make([]uint32, len(orderedOwnedItemIDs))
 	unlockedSlots := 0
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetEquippedTalismans, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetEquippedTalismans, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -194,7 +194,7 @@ func (engine *Engine) SetEquippedTalismans(
 
 	return SetEquippedTalismansResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		GameIDs:       gameIDs,
 		UnlockedSlots: unlockedSlots,

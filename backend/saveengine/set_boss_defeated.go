@@ -64,7 +64,7 @@ func (engine *Engine) SetBossDefeated(
 		return SetBossDefeatedResult{}, err
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetBossDefeated, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetBossDefeated, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -128,7 +128,7 @@ func (engine *Engine) SetBossDefeated(
 
 	return SetBossDefeatedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Defeated:      defeated,
 	}, nil

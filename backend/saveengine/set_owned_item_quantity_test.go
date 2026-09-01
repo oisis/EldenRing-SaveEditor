@@ -114,14 +114,14 @@ func TestCommitRevisionOwnsTheUnsavedChangesFlag(t *testing.T) {
 
 	rejected := errors.New("validation rejected the plan")
 	if _, err := engine.commitRevision(
-		saveSessionID, func(*loadedSave) error { return rejected }); !errors.Is(err, rejected) {
+		saveSessionID, kindSetSaveAccountID, func(*loadedSave) error { return rejected }); !errors.Is(err, rejected) {
 		t.Fatalf("commitRevision error = %v, want the commit error", err)
 	}
 	if _, dirty := quantityTestSession(t, engine, saveSessionID); dirty {
 		t.Fatal("a failed commit reported unsaved changes")
 	}
 
-	if _, err := engine.commitRevision(saveSessionID, func(*loadedSave) error { return nil }); err != nil {
+	if _, err := engine.commitRevision(saveSessionID, kindSetSaveAccountID, func(*loadedSave) error { return nil }); err != nil {
 		t.Fatalf("commitRevision: %v", err)
 	}
 	if _, dirty := quantityTestSession(t, engine, saveSessionID); !dirty {

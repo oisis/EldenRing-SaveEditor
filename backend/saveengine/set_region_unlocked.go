@@ -37,9 +37,9 @@ func (engine *Engine) SetRegionUnlocked(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(
+	committed, err := engine.commitCharacterRevision(
 		saveSessionID,
-		opSetRegionUnlocked,
+		kindSetRegionUnlocked,
 		characterID,
 		func(loaded *loadedSave) error {
 			if characterID < 0 || characterID >= characterSlotCount {
@@ -141,7 +141,7 @@ func (engine *Engine) SetRegionUnlocked(
 
 	return SetRegionUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

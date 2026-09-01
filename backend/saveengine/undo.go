@@ -22,80 +22,13 @@ import (
 // reaches a save file. The PC MD5 prefixes are outside its scope because
 // WriteSave regenerates all eleven of them from the data it is about to write.
 
-// Operation identifiers of the mutations that own a character slot. They are
-// the EndpointIDs of the public endpoints in snake_case and are reported back
-// through GetUndoState, so a shared writer must never report the wrong one.
-//
-// setOwnedWeaponGameID and setCharacterAppearance serve more than one public
-// endpoint, so they receive their operation identifier as a parameter. Both are
-// private writers, and every public entry point picks one of these constants
-// itself: no caller outside this package can name an operation.
-const (
-	opAddItemToInventory        = "add_item_to_inventory"
-	opApplyAppearancePreset     = "apply_appearance_preset"
-	opApplyBuildTemplate        = "apply_build_template"
-	opApplyFavoritePreset       = "apply_favorite_preset"
-	opAddItemToStorage          = "add_item_to_storage"
-	opCloneCharacter            = "clone_character"
-	opDeleteCharacter           = "delete_character"
-	opMoveOwnedItemToInventory  = "move_owned_item_to_inventory"
-	opMoveOwnedItemToStorage    = "move_owned_item_to_storage"
-	opRemoveOwnedItem           = "remove_owned_item"
-	opSetBellBearingUnlocked    = "set_bell_bearing_unlocked"
-	opSetCharacterActive        = "set_character_active"
-	opSetCharacterAppearance    = "set_character_appearance"
-	opSetCharacterGender        = "set_character_gender"
-	opSetCharacterName          = "set_character_name"
-	opSetCharacterRunes         = "set_character_runes"
-	opSetCharacterStartingClass = "set_character_starting_class"
-	opSetCharacterStats         = "set_character_stats"
-	opSetCookbookUnlocked       = "set_cookbook_unlocked"
-	opSetEquippedArmaments      = "set_equipped_armaments"
-	opSetEquippedArmor          = "set_equipped_armor"
-	opSetEquippedSpells         = "set_equipped_spells"
-	opSetEquippedTalismans      = "set_equipped_talismans"
-	opSetGestureUnlocked        = "set_gesture_unlocked"
-	opSetInventoryOrder         = "set_inventory_order"
-	opSetOwnedItemQuantity      = "set_owned_item_quantity"
-	opSetPhysickMixture         = "set_physick_mixture"
-	opSetPouchItems             = "set_pouch_items"
-	opSetQuickItems             = "set_quick_items"
-	opSetSpectralSteedAttire    = "set_spectral_steed_attire"
-	opSetSpiritAshUpgradeLevel  = "set_spirit_ash_upgrade_level"
-	opSetStorageOrder           = "set_storage_order"
-	opSetWeaponAshOfWar         = "set_weapon_ash_of_war"
-	opSetWeaponInfusion         = "set_weapon_infusion"
-	opSetWeaponUpgradeLevel     = "set_weapon_upgrade_level"
-	opSetWhetbladeUnlocked      = "set_whetblade_unlocked"
-)
-
-const opSetSummoningPoolActivated = "set_summoning_pool_activated"
-
-const opSetBossDefeated = "set_boss_defeated"
-
-const opSetGraceVisited = "set_grace_visited"
-
-const opSetColosseumUnlocked = "set_colosseum_unlocked"
-
-const opSetRegionUnlocked = "set_region_unlocked"
-
-const opSetMapRegionRevealed = "set_map_region_revealed"
-
-const opSetFogOfWarRemoved = "set_fog_of_war_removed"
-
-const opSetQuestStep = "set_quest_step"
-
-const opSetTutorialUnlocked = "set_tutorial_unlocked"
-
-const opLockAllSpectralSteedAttires = "lock_all_spectral_steed_attires"
-
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and
 // one revision.
 type undoPoint struct {
-	characterID int
-	operationID string
-	token       string
+	characterID   int
+	operationKind string
+	token         string
 	// revision is the revision this point restores away from. It is the
 	// revision the mutation created, so a later mutation makes it unusable.
 	revision uint64
@@ -122,7 +55,7 @@ type undoPoint struct {
 // instead of running it without the undo point it promised.
 //
 // The caller must already hold Engine.mutex.
-func captureUndoPoint(loaded *loadedSave, characterID int, operationID string) (*undoPoint, error) {
+func captureUndoPoint(loaded *loadedSave, characterID int, operationKind string) (*undoPoint, error) {
 	if characterID < 0 || characterID >= characterSlotCount {
 		return nil, fmt.Errorf("characterID %d is outside the range 0..%d",
 			characterID, characterSlotCount-1)
@@ -153,15 +86,15 @@ func captureUndoPoint(loaded *loadedSave, characterID int, operationID string) (
 	}
 
 	return &undoPoint{
-		characterID: characterID,
-		operationID: operationID,
-		token:       token,
-		slotAt:      slotAt,
-		slot:        slot,
-		summaryAt:   summaryAt,
-		summary:     summary,
-		flagAt:      flagAt,
-		flag:        flag,
+		characterID:   characterID,
+		operationKind: operationKind,
+		token:         token,
+		slotAt:        slotAt,
+		slot:          slot,
+		summaryAt:     summaryAt,
+		summary:       summary,
+		flagAt:        flagAt,
+		flag:          flag,
 	}, nil
 }
 
@@ -194,7 +127,7 @@ type CharacterUndoState struct {
 	CharacterID   int    `json:"characterID"`
 	Available     bool   `json:"available"`
 	UndoToken     string `json:"undoToken,omitempty"`
-	OperationID   string `json:"operationID,omitempty"`
+	OperationKind string `json:"operationKind,omitempty"`
 }
 
 // GetUndoState returns the undo state of one character slot. It reads the
@@ -203,7 +136,7 @@ type CharacterUndoState struct {
 //
 // saveSessionID is matched exactly. Available is true only when the session's
 // single undo point belongs to this character and to the current revision;
-// otherwise the token and the operation identifier stay empty.
+// otherwise the token and the operation kind stay empty.
 func (engine *Engine) GetUndoState(saveSessionID string, characterID int) (CharacterUndoState, error) {
 	if saveSessionID == "" {
 		return CharacterUndoState{}, errors.New("saveSessionID is required")
@@ -232,16 +165,16 @@ func (engine *Engine) GetUndoState(saveSessionID string, characterID int) (Chara
 	}
 	state.Available = true
 	state.UndoToken = point.token
-	state.OperationID = point.operationID
+	state.OperationKind = point.operationKind
 	return state, nil
 }
 
 // UndoCharacterChangesResult reports one consumed undo point.
 type UndoCharacterChangesResult struct {
-	SaveSessionID     string `json:"saveSessionID"`
-	SaveRevision      string `json:"saveRevision"`
-	CharacterID       int    `json:"characterID"`
-	UndoneOperationID string `json:"undoneOperationID"`
+	SaveSessionID       string `json:"saveSessionID"`
+	SaveRevision        string `json:"saveRevision"`
+	CharacterID         int    `json:"characterID"`
+	UndoneOperationKind string `json:"undoneOperationKind"`
 }
 
 // UndoCharacterChanges restores the three ranges the last committed mutation of
@@ -305,6 +238,18 @@ func (engine *Engine) UndoCharacterChanges(
 			"undoToken does not match the undo point of character %d", characterID)
 	}
 
+	// The undo produces its own receipt through the shared mutation path. It is
+	// prepared here, before the first write: an unknown kind or a failing
+	// identifier generator refuses the undo instead of surfacing after the
+	// restore has already committed a revision. Its changed scopes are the scopes
+	// of the mutation being reverted, taken from the point, so an undo never
+	// reports a catch-all.
+	pending, err := engine.prepareMutation(
+		kindUndoCharacterChanges, undoneChangedScopes(point.operationKind)...)
+	if err != nil {
+		return UndoCharacterChangesResult{}, err
+	}
+
 	// The pre-undo image of all three ranges is read before the first write, so
 	// a failure halfway through can be reverted completely.
 	slotNow, slotErr := loaded.snapshot.readAt(point.slotAt, len(point.slot))
@@ -343,12 +288,26 @@ func (engine *Engine) UndoCharacterChanges(
 			"the restored data of character %d could not be verified", characterID))
 	}
 
+	undoneKind := point.operationKind
 	session.undo = nil
 	session.dirty = point.dirtyBefore
+	receipt := pending.receipt(saveSessionID, session.advanceRevision())
 	return UndoCharacterChangesResult{
-		SaveSessionID:     saveSessionID,
-		SaveRevision:      session.advanceRevision(),
-		CharacterID:       characterID,
-		UndoneOperationID: point.operationID,
+		SaveSessionID:       receipt.SaveSessionID,
+		SaveRevision:        receipt.SaveRevision,
+		CharacterID:         characterID,
+		UndoneOperationKind: undoneKind,
 	}, nil
+}
+
+// undoneChangedScopes resolves the scopes the reverted mutation owned. An
+// unregistered kind cannot reach a stored undo point, because commitWithHook
+// validates the kind before it captures one, so an empty result here only
+// happens for a kind that carries no domain scope of its own.
+func undoneChangedScopes(undoneKind string) []string {
+	scopes, err := changedScopesForMutationKind(undoneKind)
+	if err != nil {
+		return nil
+	}
+	return scopes
 }

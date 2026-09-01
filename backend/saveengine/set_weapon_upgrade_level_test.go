@@ -199,14 +199,19 @@ func TestSetWeaponUpgradeLevelRejectsAmbiguousGaItemWithoutMutation(t *testing.T
 	}
 }
 
-func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
-	engine := New()
-	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
-	if err != nil {
-		t.Fatalf("LoadSave: %v", err)
-	}
+// moveArmamentWeaponToStorageCommon rewrites the shared armament fixture of an
+// already loaded session so the weapon carrying setWeaponUpgradeHandle sits in
+// Storage common instead of Inventory common, and returns its OwnedItemID.
+//
+// Every weapon writer resolves its target through the same opaque OwnedItemID,
+// so this one piece of fixture surgery is what proves that each of them accepts
+// a Storage record. That is the evidence behind the storage scope those kinds
+// report in TestRepresentativeMutationsReportTheirExactChangedScopes.
+func moveArmamentWeaponToStorageCommon(t *testing.T, engine *Engine, saveSessionID string) string {
+	t.Helper()
+
 	engine.mutex.Lock()
-	snapshot := engine.sessions[loaded.SaveSessionID].snapshot
+	snapshot := engine.sessions[saveSessionID].snapshot
 	slotBase := addItemTestSlotBase(t, PlatformPC, setArmamentsSlot)
 	anchor := slotBase + setArmamentsAnchorAt
 	inventoryRow := slotBase + setArmamentsInventoryAt
@@ -228,12 +233,23 @@ func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
 	engine.mutex.Unlock()
 
 	storage, err := engine.GetStorage(
-		loaded.SaveSessionID, setArmamentsSlot, StorageSectionCommon, 1, 50)
+		saveSessionID, setArmamentsSlot, StorageSectionCommon, 1, 50)
 	if err != nil || len(storage.Records) != 1 {
 		t.Fatalf("GetStorage: %v, len=%d", err, len(storage.Records))
 	}
+	return storage.Records[0].OwnedItemID
+}
+
+func TestSetWeaponUpgradeLevelSupportsStorageCommon(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	ownedItemID := moveArmamentWeaponToStorageCommon(t, engine, loaded.SaveSessionID)
+
 	result, err := engine.SetWeaponUpgradeLevel(
-		loaded.SaveSessionID, setArmamentsSlot, storage.Records[0].OwnedItemID, 5, "0",
+		loaded.SaveSessionID, setArmamentsSlot, ownedItemID, 5, "0",
 		setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
 	if err != nil {
 		t.Fatalf("SetWeaponUpgradeLevel: %v", err)

@@ -112,7 +112,7 @@ func (engine *Engine) SetOwnedItemQuantity(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetOwnedItemQuantity, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetOwnedItemQuantity, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -137,7 +137,7 @@ func (engine *Engine) SetOwnedItemQuantity(
 
 	return SetOwnedItemQuantityResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		OwnedItemID:   ownedItemID,
 		CharacterID:   characterID,
 		Quantity:      quantity,

@@ -54,7 +54,7 @@ func (engine *Engine) SetBellBearingUnlocked(
 		return SetBellBearingUnlockedResult{}, err
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetBellBearingUnlocked, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetBellBearingUnlocked, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -108,7 +108,7 @@ func (engine *Engine) SetBellBearingUnlocked(
 
 	return SetBellBearingUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

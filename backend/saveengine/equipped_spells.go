@@ -315,7 +315,7 @@ func (engine *Engine) SetEquippedSpells(
 	}
 
 	var availableSlots int
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetEquippedSpells, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetEquippedSpells, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -446,7 +446,7 @@ func (engine *Engine) SetEquippedSpells(
 
 	return CharacterEquippedSpellsMutation{
 		SaveSessionID:        saveSessionID,
-		SaveRevision:         saveRevision,
+		SaveRevision:         committed.SaveRevision,
 		CharacterID:          characterID,
 		RawMagicParamIDs:     rawSpellIDs,
 		UsedMemorySlots:      usedMemorySlots,

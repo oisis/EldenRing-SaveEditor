@@ -95,7 +95,7 @@ func (engine *Engine) SetSaveAccountID(
 				"without a sign, prefix, padding or separator")
 	}
 
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	committed, err := engine.commitRevision(saveSessionID, kindSetSaveAccountID, func(loaded *loadedSave) error {
 		if loaded.session.platform != PlatformPC {
 			return fmt.Errorf(
 				"the account identifier is confirmed for PC saves only; this session is a %s save",
@@ -142,7 +142,7 @@ func (engine *Engine) SetSaveAccountID(
 	if err != nil {
 		return SetSaveAccountIDResult{}, err
 	}
-	return SetSaveAccountIDResult{SaveSessionID: saveSessionID, SaveRevision: saveRevision}, nil
+	return SetSaveAccountIDResult{SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision}, nil
 }
 
 // pcAccountIDFieldAt resolves the account identifier of one active PC slot by

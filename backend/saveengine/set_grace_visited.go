@@ -135,7 +135,7 @@ func (engine *Engine) SetGraceVisited(
 	}
 	offsets := slices.Sorted(maps.Keys(masks))
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetGraceVisited, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetGraceVisited, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -181,7 +181,7 @@ func (engine *Engine) SetGraceVisited(
 
 	return SetGraceVisitedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Visited:       visited,
 	}, nil

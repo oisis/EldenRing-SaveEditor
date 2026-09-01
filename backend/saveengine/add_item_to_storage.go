@@ -65,7 +65,7 @@ func (engine *Engine) AddItemToStorage(
 	}
 
 	var outcome addedStorageRecord
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opAddItemToStorage, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindAddItemToStorage, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -88,7 +88,7 @@ func (engine *Engine) AddItemToStorage(
 
 	return AddItemToStorageResult{
 		SaveSessionID:    saveSessionID,
-		SaveRevision:     saveRevision,
+		SaveRevision:     committed.SaveRevision,
 		CharacterID:      characterID,
 		GameID:           gameID,
 		Added:            quantity,

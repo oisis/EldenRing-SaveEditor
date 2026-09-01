@@ -107,7 +107,7 @@ func (engine *Engine) SetColosseumUnlocked(
 	}
 	offsets := slices.Sorted(maps.Keys(masks))
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetColosseumUnlocked, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetColosseumUnlocked, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -156,7 +156,7 @@ func (engine *Engine) SetColosseumUnlocked(
 
 	return SetColosseumUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

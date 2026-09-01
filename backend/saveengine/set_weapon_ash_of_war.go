@@ -47,7 +47,7 @@ func (engine *Engine) SetWeaponAshOfWar(
 
 	var container string
 	var previousAshOfWarGameID uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetWeaponAshOfWar, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetWeaponAshOfWar, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -209,7 +209,7 @@ func (engine *Engine) SetWeaponAshOfWar(
 		return SetWeaponAshOfWarResult{}, err
 	}
 	return SetWeaponAshOfWarResult{
-		SaveSessionID: saveSessionID, SaveRevision: saveRevision,
+		SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision,
 		WeaponOwnedItemID: weaponOwnedItemID, CharacterID: characterID,
 		Container: container, WeaponGameID: expectedWeaponGameID,
 		PreviousAshOfWarGameID: previousAshOfWarGameID,

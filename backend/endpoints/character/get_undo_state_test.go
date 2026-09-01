@@ -39,7 +39,7 @@ func TestGetUndoStateReturnsTheSaveEngineState(t *testing.T) {
 		t.Fatalf("GetUndoState after the mutation: %v", err)
 	}
 	if !state.Available || state.UndoToken == "" ||
-		state.OperationID != SetCharacterStatsEndpointID || state.SaveRevision != "1" {
+		state.OperationKind != SetCharacterStatsEndpointID || state.SaveRevision != "1" {
 		t.Errorf("undo state = %+v, want an available set_character_stats point at revision 1", state)
 	}
 }

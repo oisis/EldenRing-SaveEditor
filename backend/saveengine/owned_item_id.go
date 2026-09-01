@@ -154,13 +154,19 @@ func (session *Session) advanceRevision() string {
 // under saveSessionID and, only when it succeeds, advances the revision by one,
 // marks the session dirty and drops every identity minted under the previous
 // revision. The registry is not rebuilt here: it re-materialises when a
-// container is read again. The new revision is returned as its canonical decimal
-// string, so the caller reports exactly the value the next request has to match.
+// container is read again. The committed revision is returned inside the shared
+// MutationReceipt, whose SaveRevision is exactly the canonical decimal value the
+// next request has to match.
+//
+// operationKind is the stable kind of the mutation, equal to the EndpointID of
+// the public endpoint that initiated it. It is validated and resolved into
+// changed scopes, and the receipt's unpredictable operationID is minted, before
+// the mutation runs.
 //
 // A commit error leaves the revision, the dirty flag, both registry maps and the
-// sequence exactly as they were and returns an empty revision, so a validation
-// failure or a rollback never invalidates an identity, and never claims an
-// unsaved change, for a change that did not happen.
+// sequence exactly as they were and returns the zero receipt, so a validation
+// failure or a rollback never invalidates an identity, never claims an unsaved
+// change, and never publishes an operationID, for a change that did not happen.
 //
 // commit receives the loaded session it is about to mutate and runs under the
 // existing process-wide Engine.mutex, which this function takes exactly once. It
@@ -178,15 +184,16 @@ func (session *Session) advanceRevision() string {
 // express.
 func (engine *Engine) commitRevision(
 	saveSessionID string,
+	operationKind string,
 	commit func(*loadedSave) error,
-) (string, error) {
-	return engine.commit(saveSessionID, "", 0, commit)
+) (MutationReceipt, error) {
+	return engine.commit(saveSessionID, operationKind, false, 0, commit)
 }
 
 // commitCharacterRevision is commitRevision for a mutation that owns one
 // character slot. In addition to the revision contract it records the session's
 // single undo point: the three ranges of characterID as they were before
-// commit, attributed to operationID.
+// commit, attributed to operationKind.
 //
 // The point replaces any earlier one. A commit that changes none of the three
 // ranges records no point and drops the earlier one, so an undo can never
@@ -196,74 +203,78 @@ func (engine *Engine) commitRevision(
 // so a character mutation never succeeds without the undo point it promises.
 func (engine *Engine) commitCharacterRevision(
 	saveSessionID string,
-	operationID string,
+	operationKind string,
 	characterID int,
 	commit func(*loadedSave) error,
-) (string, error) {
-	if operationID == "" {
-		return "", errors.New("operationID is required")
-	}
-	return engine.commit(saveSessionID, operationID, characterID, commit)
+) (MutationReceipt, error) {
+	return engine.commit(saveSessionID, operationKind, true, characterID, commit)
 }
 
 // commitCharacterRevisionWithHook runs commitCharacterRevision and executes
 // afterCommit under the engine mutex immediately after the revision advances.
 func (engine *Engine) commitCharacterRevisionWithHook(
 	saveSessionID string,
-	operationID string,
+	operationKind string,
 	characterID int,
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
-) (string, error) {
-	if operationID == "" {
-		return "", errors.New("operationID is required")
-	}
-	return engine.commitWithHook(saveSessionID, operationID, characterID, commit, afterCommit)
+) (MutationReceipt, error) {
+	return engine.commitWithHook(saveSessionID, operationKind, true, characterID, commit, afterCommit)
 }
 
-// commit is the one implementation behind both entry points. An empty
-// operationID marks a global mutation, which records no undo point.
+// commit is the one implementation behind both entry points. characterScoped
+// false marks a global mutation, which records no undo point.
 func (engine *Engine) commit(
 	saveSessionID string,
-	operationID string,
+	operationKind string,
+	characterScoped bool,
 	characterID int,
 	commit func(*loadedSave) error,
-) (string, error) {
-	return engine.commitWithHook(saveSessionID, operationID, characterID, commit, nil)
+) (MutationReceipt, error) {
+	return engine.commitWithHook(saveSessionID, operationKind, characterScoped, characterID, commit, nil)
 }
 
 func (engine *Engine) commitWithHook(
 	saveSessionID string,
-	operationID string,
+	operationKind string,
+	characterScoped bool,
 	characterID int,
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
-) (string, error) {
+) (MutationReceipt, error) {
 	if saveSessionID == "" {
-		return "", errors.New("saveSessionID is required")
+		return MutationReceipt{}, errors.New("saveSessionID is required")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return "", fmt.Errorf("unknown save session %q", saveSessionID)
+		return MutationReceipt{}, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+
+	// Fail closed: an unknown operation kind and a failing identifier generator
+	// both reject the mutation here, before the undo point is captured and before
+	// the first byte can change.
+	pending, err := engine.prepareMutation(operationKind)
+	if err != nil {
+		return MutationReceipt{}, err
 	}
 
 	// Fail closed: a character mutation that cannot get its undo point does not
 	// run at all. Returning here leaves the earlier point, the revision, the
 	// dirty flag and both registries exactly as they were.
 	var point *undoPoint
-	if operationID != "" {
-		captured, err := captureUndoPoint(loaded, characterID, operationID)
+	if characterScoped {
+		captured, err := captureUndoPoint(loaded, characterID, operationKind)
 		if err != nil {
-			return "", err
+			return MutationReceipt{}, err
 		}
 		point = captured
 	}
 
 	if err := commit(loaded); err != nil {
-		return "", err
+		return MutationReceipt{}, err
 	}
 
 	session := loaded.session
@@ -282,5 +293,5 @@ func (engine *Engine) commitWithHook(
 	if afterCommit != nil {
 		afterCommit(loaded, revision)
 	}
-	return revision, nil
+	return pending.receipt(saveSessionID, revision), nil
 }

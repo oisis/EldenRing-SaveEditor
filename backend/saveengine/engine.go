@@ -21,6 +21,16 @@ type Engine struct {
 	mutex    sync.Mutex
 	sessions map[string]*loadedSave
 	now      func() time.Time
+	// newOperationID mints the identifier of one mutation execution. A nil value
+	// selects the package generator; only a test replaces it, and only to prove
+	// that a generator failure or a repeated value rejects the mutation before
+	// anything changes.
+	newOperationID func() (string, error)
+	// reservedOperationIDs holds every operationID this engine has already handed
+	// to a mutation. It is read and written under mutex by mintOperationID, which
+	// is what makes the identifiers of one running engine literally unique instead
+	// of merely improbable to repeat.
+	reservedOperationIDs map[string]bool
 }
 
 // loadedSave is the private state of one session: its metadata model and mutable
@@ -34,8 +44,9 @@ type loadedSave struct {
 // New returns an engine holding no session.
 func New() *Engine {
 	return &Engine{
-		sessions: make(map[string]*loadedSave),
-		now:      time.Now,
+		sessions:             make(map[string]*loadedSave),
+		now:                  time.Now,
+		reservedOperationIDs: make(map[string]bool),
 	}
 }
 

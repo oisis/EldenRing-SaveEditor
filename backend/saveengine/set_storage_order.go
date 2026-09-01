@@ -44,7 +44,7 @@ func (engine *Engine) SetStorageOrder(
 	}
 
 	var gameIDs, acquisitionIndices []uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetStorageOrder, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetStorageOrder, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -185,7 +185,7 @@ func (engine *Engine) SetStorageOrder(
 
 	return SetStorageOrderResult{
 		SaveSessionID:      saveSessionID,
-		SaveRevision:       saveRevision,
+		SaveRevision:       committed.SaveRevision,
 		CharacterID:        characterID,
 		GameIDs:            gameIDs,
 		AcquisitionIndices: acquisitionIndices,

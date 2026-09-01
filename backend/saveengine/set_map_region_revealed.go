@@ -76,7 +76,7 @@ func (engine *Engine) SetMapRegionRevealed(
 			"Map Fragment game ID 0x%08X is not a goods ID", mapFragmentGameID)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetMapRegionRevealed, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetMapRegionRevealed, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -139,7 +139,7 @@ func (engine *Engine) SetMapRegionRevealed(
 
 	return SetMapRegionRevealedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Revealed:      revealed,
 	}, nil

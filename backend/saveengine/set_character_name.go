@@ -40,7 +40,7 @@ func (engine *Engine) SetCharacterName(
 		return SetCharacterNameResult{}, err
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterName, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterName, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -116,7 +116,7 @@ func (engine *Engine) SetCharacterName(
 
 	return SetCharacterNameResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Name:          name,
 	}, nil

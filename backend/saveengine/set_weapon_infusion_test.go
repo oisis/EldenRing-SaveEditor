@@ -31,3 +31,31 @@ func TestSetWeaponInfusionUsesTheSharedWeaponIDMutation(t *testing.T) {
 		t.Fatalf("resolved game ID = %v, err=%v", gameIDs, err)
 	}
 }
+
+// The infusion writer addresses its target through the shared OwnedItemID
+// registry, so a Storage common record is as valid as an Inventory one. This is
+// the evidence for the storage scope kindSetWeaponInfusion reports.
+func TestSetWeaponInfusionSupportsStorageCommon(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(writeSetEquippedArmamentsFixture(t, PlatformPC), "pc", "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	ownedItemID := moveArmamentWeaponToStorageCommon(t, engine, loaded.SaveSessionID)
+
+	const targetGameID = setWeaponUpgradeCurrent + 105
+	result, err := engine.SetWeaponInfusion(
+		loaded.SaveSessionID, setArmamentsSlot, ownedItemID, "0",
+		setWeaponUpgradeCurrent, targetGameID)
+	if err != nil {
+		t.Fatalf("SetWeaponInfusion: %v", err)
+	}
+	if result.Container != ownedContainerStorage || result.GameID != targetGameID {
+		t.Fatalf("result = %+v", result)
+	}
+	gameIDs, err := engine.ResolveGaItemIDs(
+		loaded.SaveSessionID, setArmamentsSlot, []uint32{setWeaponUpgradeHandle})
+	if err != nil || gameIDs[0] != targetGameID {
+		t.Fatalf("resolved game ID = %v, err=%v", gameIDs, err)
+	}
+}

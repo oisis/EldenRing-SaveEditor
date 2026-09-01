@@ -39,7 +39,7 @@ func (engine *Engine) SetQuickItems(
 	}
 
 	var targetGameIDs [quickItemSlotCount]uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetQuickItems, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetQuickItems, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -262,7 +262,7 @@ func (engine *Engine) SetQuickItems(
 
 	return SetQuickItemsResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		GameIDs:       targetGameIDs,
 	}, nil

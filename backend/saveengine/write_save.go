@@ -49,6 +49,15 @@ func (engine *Engine) WriteSave(
 			expectedRevision, current)
 	}
 
+	// WriteSave produces its receipt through the same shared path as every other
+	// mutation, and prepares it before the candidate exists: a failing identifier
+	// generator must reject the write, never surface after the file has already
+	// been replaced.
+	pending, err := engine.prepareMutation(kindWriteSave)
+	if err != nil {
+		return WriteSaveResult{}, err
+	}
+
 	candidate, err := serializeContainer(loaded)
 	if err != nil {
 		return WriteSaveResult{}, fmt.Errorf("cannot serialize save session %q: %w", saveSessionID, err)
@@ -66,7 +75,8 @@ func (engine *Engine) WriteSave(
 	// mutation is retired together with the revision it belonged to. A failed
 	// write returns above and leaves it untouched.
 	loaded.session.undo = nil
-	newRevision := loaded.session.advanceRevision()
+	receipt := pending.receipt(saveSessionID, loaded.session.advanceRevision())
+	newRevision := receipt.SaveRevision
 	loaded.session.appendDiagnosticRecord(
 		engine.nowUTC(),
 		DiagnosticScopeSession,
@@ -77,8 +87,8 @@ func (engine *Engine) WriteSave(
 		newRevision,
 	)
 	return WriteSaveResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  newRevision,
+		SaveSessionID: receipt.SaveSessionID,
+		SaveRevision:  receipt.SaveRevision,
 	}, nil
 }
 

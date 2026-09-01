@@ -29,7 +29,7 @@ func (engine *Engine) DeleteFavoritePreset(
 			"favoriteSlotID %d is outside the range 0..%d", favoriteSlotID, favoriteSlotCount-1)
 	}
 
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	committed, err := engine.commitRevision(saveSessionID, kindDeleteFavoritePreset, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -61,7 +61,7 @@ func (engine *Engine) DeleteFavoritePreset(
 
 	return DeleteFavoritePresetResult{
 		SaveSessionID:  saveSessionID,
-		SaveRevision:   saveRevision,
+		SaveRevision:   committed.SaveRevision,
 		FavoriteSlotID: favoriteSlotID,
 	}, nil
 }

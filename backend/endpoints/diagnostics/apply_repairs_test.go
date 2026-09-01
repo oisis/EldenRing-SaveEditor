@@ -55,7 +55,7 @@ func TestApplyRepairs_ExecutesTheSealedActionsAtomically(t *testing.T) {
 			if err != nil {
 				t.Fatalf("GetUndoState: %v", err)
 			}
-			if !undo.Available || undo.OperationID != "apply_repairs" {
+			if !undo.Available || undo.OperationKind != "apply_repairs" {
 				t.Errorf("undo = %+v, want one apply_repairs point", undo)
 			}
 

@@ -144,8 +144,8 @@ func TestApplyBuildTemplate_Success(t *testing.T) {
 	if !undo.Available {
 		t.Errorf("expected undo point available")
 	}
-	if undo.OperationID != "apply_build_template" {
-		t.Errorf("undo operationID = %q, want 'apply_build_template'", undo.OperationID)
+	if undo.OperationKind != "apply_build_template" {
+		t.Errorf("undo operationKind = %q, want 'apply_build_template'", undo.OperationKind)
 	}
 }
 

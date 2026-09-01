@@ -23,7 +23,7 @@ func (engine *Engine) SetWeaponInfusion(
 ) (SetWeaponInfusionResult, error) {
 	saveRevision, container, err := engine.setOwnedWeaponGameID(
 		saveSessionID, characterID, ownedItemID, expectedRevision, expectedGameID, targetGameID,
-		opSetWeaponInfusion, 0)
+		kindSetWeaponInfusion, 0)
 	if err != nil {
 		return SetWeaponInfusionResult{}, err
 	}

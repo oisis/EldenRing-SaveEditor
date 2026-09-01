@@ -51,7 +51,7 @@ func (engine *Engine) SetSpiritAshUpgradeLevel(
 	}
 
 	var container string
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetSpiritAshUpgradeLevel, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetSpiritAshUpgradeLevel, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -130,7 +130,7 @@ func (engine *Engine) SetSpiritAshUpgradeLevel(
 		return SetSpiritAshUpgradeLevelResult{}, err
 	}
 	return SetSpiritAshUpgradeLevelResult{
-		SaveSessionID: saveSessionID, SaveRevision: saveRevision, OwnedItemID: ownedItemID,
+		SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision, OwnedItemID: ownedItemID,
 		CharacterID: characterID, Container: container, PreviousGameID: expectedGameID,
 		GameID: targetGameID, UpgradeLevel: upgradeLevel,
 	}, nil

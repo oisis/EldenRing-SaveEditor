@@ -44,7 +44,7 @@ func (engine *Engine) SetCharacterAppearance(
 	expectedRevision string,
 ) (SetCharacterAppearanceResult, error) {
 	return engine.setCharacterAppearance(
-		saveSessionID, characterID, appearance, expectedRevision, opSetCharacterAppearance)
+		saveSessionID, characterID, appearance, expectedRevision, kindSetCharacterAppearance)
 }
 
 // SetCharacterGenderAppearance is SetCharacterAppearance for the gender change,
@@ -58,7 +58,7 @@ func (engine *Engine) SetCharacterGenderAppearance(
 	expectedRevision string,
 ) (SetCharacterAppearanceResult, error) {
 	return engine.setCharacterAppearance(
-		saveSessionID, characterID, appearance, expectedRevision, opSetCharacterGender)
+		saveSessionID, characterID, appearance, expectedRevision, kindSetCharacterGender)
 }
 
 // ApplyCharacterAppearancePreset is SetCharacterAppearance for an appearance
@@ -71,11 +71,11 @@ func (engine *Engine) ApplyCharacterAppearancePreset(
 	expectedRevision string,
 ) (SetCharacterAppearanceResult, error) {
 	return engine.setCharacterAppearance(
-		saveSessionID, characterID, appearance, expectedRevision, opApplyAppearancePreset)
+		saveSessionID, characterID, appearance, expectedRevision, kindApplyAppearancePreset)
 }
 
 // setCharacterAppearance is the one writer behind the three public appearance
-// entry points. operationID is chosen by those entry points and never by a
+// entry points. operationKind is chosen by those entry points and never by a
 // caller outside this package, so the undo point reports the operation the user
 // actually performed.
 func (engine *Engine) setCharacterAppearance(
@@ -83,7 +83,7 @@ func (engine *Engine) setCharacterAppearance(
 	characterID int,
 	appearance CharacterAppearanceValues,
 	expectedRevision string,
-	operationID string,
+	operationKind string,
 ) (SetCharacterAppearanceResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
 		return SetCharacterAppearanceResult{}, fmt.Errorf(
@@ -100,7 +100,7 @@ func (engine *Engine) setCharacterAppearance(
 			appearance.VoiceType, appearanceMaximumVoiceType)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, operationID, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, operationKind, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -130,7 +130,7 @@ func (engine *Engine) setCharacterAppearance(
 
 	return SetCharacterAppearanceResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Appearance:    appearance,
 	}, nil

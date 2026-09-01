@@ -53,7 +53,7 @@ func (engine *Engine) SetTutorialUnlocked(
 		return SetTutorialUnlockedResult{}, fmt.Errorf("tutorial ID must be non-zero")
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetTutorialUnlocked, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetTutorialUnlocked, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -109,7 +109,7 @@ func (engine *Engine) SetTutorialUnlocked(
 
 	return SetTutorialUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

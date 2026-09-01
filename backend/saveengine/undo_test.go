@@ -69,7 +69,7 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("GetUndoState before any mutation: %v", err)
 			}
-			if fresh.Available || fresh.UndoToken != "" || fresh.OperationID != "" {
+			if fresh.Available || fresh.UndoToken != "" || fresh.OperationKind != "" {
 				t.Fatalf("undo state of a fresh session = %+v, want an unavailable point", fresh)
 			}
 
@@ -85,8 +85,8 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 			if !state.Available || state.UndoToken == "" {
 				t.Fatalf("undo state = %+v, want an available point with a token", state)
 			}
-			if state.OperationID != "set_character_runes" {
-				t.Errorf("operationID = %q, want set_character_runes", state.OperationID)
+			if state.OperationKind != "set_character_runes" {
+				t.Errorf("operationKind = %q, want set_character_runes", state.OperationKind)
 			}
 			if state.SaveRevision != "1" {
 				t.Errorf("saveRevision = %q, want 1", state.SaveRevision)
@@ -115,10 +115,10 @@ func TestUndoRestoresOneCharacterMutationOnBothPlatforms(t *testing.T) {
 				t.Fatalf("UndoCharacterChanges: %v", err)
 			}
 			want := UndoCharacterChangesResult{
-				SaveSessionID:     session,
-				SaveRevision:      "2",
-				CharacterID:       setRunesTestSlot,
-				UndoneOperationID: "set_character_runes",
+				SaveSessionID:       session,
+				SaveRevision:        "2",
+				CharacterID:         setRunesTestSlot,
+				UndoneOperationKind: "set_character_runes",
 			}
 			if result != want {
 				t.Errorf("result = %+v, want %+v", result, want)
@@ -260,7 +260,7 @@ func TestTheNextCommitReplacesOrInvalidatesTheUndoPoint(t *testing.T) {
 	if _, err := engine.SetCharacterRunes(session, setRunesTestSlot, 900, "3"); err != nil {
 		t.Fatalf("SetCharacterRunes before the global commit: %v", err)
 	}
-	if _, err := engine.commitRevision(session, func(*loadedSave) error { return nil }); err != nil {
+	if _, err := engine.commitRevision(session, kindSetSaveAccountID, func(*loadedSave) error { return nil }); err != nil {
 		t.Fatalf("global commitRevision: %v", err)
 	}
 	global, err := engine.GetUndoState(session, setRunesTestSlot)
@@ -347,7 +347,7 @@ func TestUndoRestoresTheClonedTargetSlotFlagAndProfileSummary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUndoState for the target slot: %v", err)
 	}
-	if !state.Available || state.OperationID != "clone_character" {
+	if !state.Available || state.OperationKind != "clone_character" {
 		t.Fatalf("target slot undo state = %+v, want an available clone_character point", state)
 	}
 
@@ -425,13 +425,13 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 	after.VoiceType = 5
 
 	testCases := []struct {
-		name        string
-		operationID string
-		mutate      func(engine *Engine, saveSessionID string) error
+		name          string
+		operationKind string
+		mutate        func(engine *Engine, saveSessionID string) error
 	}{
 		{
-			name:        "SetCharacterAppearance",
-			operationID: "set_character_appearance",
+			name:          "SetCharacterAppearance",
+			operationKind: "set_character_appearance",
 			mutate: func(engine *Engine, saveSessionID string) error {
 				_, err := engine.SetCharacterAppearance(
 					saveSessionID, setAppearanceTestSlot, after, "0")
@@ -439,8 +439,8 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 			},
 		},
 		{
-			name:        "SetCharacterGenderAppearance",
-			operationID: "set_character_gender",
+			name:          "SetCharacterGenderAppearance",
+			operationKind: "set_character_gender",
 			mutate: func(engine *Engine, saveSessionID string) error {
 				_, err := engine.SetCharacterGenderAppearance(
 					saveSessionID, setAppearanceTestSlot, after, "0")
@@ -448,8 +448,8 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 			},
 		},
 		{
-			name:        "ApplyCharacterAppearancePreset",
-			operationID: "apply_appearance_preset",
+			name:          "ApplyCharacterAppearancePreset",
+			operationKind: "apply_appearance_preset",
 			mutate: func(engine *Engine, saveSessionID string) error {
 				_, err := engine.ApplyCharacterAppearancePreset(
 					saveSessionID, setAppearanceTestSlot, after, "0")
@@ -484,8 +484,8 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 			if state.SaveRevision != "1" {
 				t.Errorf("saveRevision = %q, want \"1\"", state.SaveRevision)
 			}
-			if state.OperationID != testCase.operationID {
-				t.Errorf("operationID = %q, want %q", state.OperationID, testCase.operationID)
+			if state.OperationKind != testCase.operationKind {
+				t.Errorf("operationKind = %q, want %q", state.OperationKind, testCase.operationKind)
 			}
 		})
 	}
@@ -493,7 +493,7 @@ func TestEachAppearanceEntryPointRecordsItsOwnOperationID(t *testing.T) {
 
 // commitCharacterRevision is the one hook every character mutation goes through,
 // so an unnamed operation is a programming error rather than an anonymous point.
-func TestCommitCharacterRevisionRequiresAnOperationID(t *testing.T) {
+func TestCommitCharacterRevisionRequiresAnOperationKind(t *testing.T) {
 	engine := New()
 	source, _ := writeUndoFixture(t, PlatformPC)
 	loaded, err := engine.LoadSave(source, string(PlatformPC), "local")
@@ -502,8 +502,8 @@ func TestCommitCharacterRevisionRequiresAnOperationID(t *testing.T) {
 	}
 	_, err = engine.commitCharacterRevision(
 		loaded.SaveSessionID, "", 0, func(*loadedSave) error { return errors.New("must not run") })
-	if err == nil || err.Error() != "operationID is required" {
-		t.Fatalf("error = %v, want the missing-operationID rejection", err)
+	if err == nil || err.Error() != "operationKind is required" {
+		t.Fatalf("error = %v, want the missing-operationKind rejection", err)
 	}
 }
 
@@ -533,7 +533,7 @@ func TestCommitCharacterRevisionRefusesTheMutationWhenTheUndoPointCannotBeCaptur
 
 	ran := false
 	_, err = engine.commitCharacterRevision(
-		loaded.SaveSessionID, opSetCharacterRunes, setRunesTestSlot,
+		loaded.SaveSessionID, kindSetCharacterRunes, setRunesTestSlot,
 		func(*loadedSave) error {
 			ran = true
 			return nil

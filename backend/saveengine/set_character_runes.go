@@ -38,7 +38,7 @@ func (engine *Engine) SetCharacterRunes(
 			"runes %d exceeds the maximum %d", runes, characterRunesLimit)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterRunes, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterRunes, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -96,7 +96,7 @@ func (engine *Engine) SetCharacterRunes(
 
 	return SetCharacterRunesResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Runes:         runes,
 	}, nil

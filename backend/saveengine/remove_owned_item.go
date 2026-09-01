@@ -151,7 +151,7 @@ func (engine *Engine) RemoveOwnedItem(
 	}
 
 	var gameID uint32
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opRemoveOwnedItem, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindRemoveOwnedItem, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -176,7 +176,7 @@ func (engine *Engine) RemoveOwnedItem(
 
 	return RemoveOwnedItemResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		OwnedItemID:   ownedItemID,
 		CharacterID:   characterID,
 		GameID:        gameID,

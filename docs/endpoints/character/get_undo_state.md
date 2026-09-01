@@ -44,18 +44,20 @@ type CharacterUndoState struct {
 	CharacterID   int    `json:"characterID"`
 	Available     bool   `json:"available"`
 	UndoToken     string `json:"undoToken,omitempty"`
-	OperationID   string `json:"operationID,omitempty"`
+	OperationKind string `json:"operationKind,omitempty"`
 }
 ```
 
 `Available` is true only when the session's single undo point belongs to this
 character **and** its revision is the session's current revision. When it is
-false, `UndoToken` and `OperationID` are empty and omitted from JSON.
+false, `UndoToken` and `OperationKind` are empty and omitted from JSON.
 
 `UndoToken` is an opaque SaveEngine identifier. It is not a GameResource
 reference, carries no offset, no slot address and no save byte, and no consumer
-parses it. `OperationID` is the `EndpointID` of the mutation the point would
-revert, for example `set_character_stats` or `set_weapon_infusion`.
+parses it. `OperationKind` is the stable kind of the mutation the point would
+revert, equal to the `EndpointID` of the endpoint that performed it, for example
+`set_character_stats` or `set_weapon_infusion`. It names a kind of mutation, not
+one concrete execution: every execution of that endpoint reports the same value.
 
 ## The undo point
 
@@ -115,7 +117,7 @@ helper or structural snapshot.
 ## Verification coverage
 
 SaveEngine coverage proves that the getter is non-mutating, that it reports the
-token and operation identifier of a real mutation, and that `available` turns
+token and operation kind of a real mutation, and that `available` turns
 false for the wrong character or a stale revision. Endpoint coverage proves the
 delegation and the missing-engine rejection; transport coverage proves the GET
 route, its loopback-only registration and its OpenAPI conformance.

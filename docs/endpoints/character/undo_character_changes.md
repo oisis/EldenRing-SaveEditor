@@ -57,15 +57,17 @@ The transport requires both body fields and rejects unknown JSON fields:
 
 ```go
 type UndoCharacterChangesResult struct {
-	SaveSessionID     string `json:"saveSessionID"`
-	SaveRevision      string `json:"saveRevision"`
-	CharacterID       int    `json:"characterID"`
-	UndoneOperationID string `json:"undoneOperationID"`
+	SaveSessionID       string `json:"saveSessionID"`
+	SaveRevision        string `json:"saveRevision"`
+	CharacterID         int    `json:"characterID"`
+	UndoneOperationKind string `json:"undoneOperationKind"`
 }
 ```
 
-`UndoneOperationID` is the `EndpointID` of the mutation that was reverted. The
-receipt exposes no save offset, no undo byte and no private session state.
+`UndoneOperationKind` is the stable kind of the mutation that was reverted,
+equal to the `EndpointID` of the endpoint that performed it. It names a kind of
+mutation, not one concrete execution. The receipt exposes no save offset, no undo
+byte and no private session state.
 
 ## Save mutation
 

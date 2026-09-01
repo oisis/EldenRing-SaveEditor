@@ -91,7 +91,7 @@ func (engine *Engine) SetWhetbladeUnlocked(
 		seenGameIDs[state.GameID] = struct{}{}
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetWhetbladeUnlocked, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetWhetbladeUnlocked, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)
@@ -155,7 +155,7 @@ func (engine *Engine) SetWhetbladeUnlocked(
 	}
 	return SetWhetbladeUnlockedResult{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 		Unlocked:      unlocked,
 	}, nil

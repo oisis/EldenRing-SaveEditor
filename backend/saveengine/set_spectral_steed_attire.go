@@ -60,8 +60,8 @@ func (engine *Engine) SetSpectralSteedAttire(
 			"event flag %d is not one of the Spectral Steed Attire appearances", selectedEventFlagID)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(
-		saveSessionID, opSetSpectralSteedAttire, characterID,
+	committed, err := engine.commitCharacterRevision(
+		saveSessionID, kindSetSpectralSteedAttire, characterID,
 		func(loaded *loadedSave) error {
 			if err := checkSpectralSteedSlot(loaded, characterID, expectedRevision); err != nil {
 				return err
@@ -94,7 +94,7 @@ func (engine *Engine) SetSpectralSteedAttire(
 	}
 	return SpectralSteedAttireMutation{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 	}, nil
 }
@@ -131,8 +131,8 @@ func (engine *Engine) LockAllSpectralSteedAttires(
 		gameIDs = append(gameIDs, attire.GameID)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(
-		saveSessionID, opLockAllSpectralSteedAttires, characterID,
+	committed, err := engine.commitCharacterRevision(
+		saveSessionID, kindLockAllSpectralSteedAttires, characterID,
 		func(loaded *loadedSave) error {
 			if err := checkSpectralSteedSlot(loaded, characterID, expectedRevision); err != nil {
 				return err
@@ -158,7 +158,7 @@ func (engine *Engine) LockAllSpectralSteedAttires(
 	}
 	return SpectralSteedAttireMutation{
 		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
+		SaveRevision:  committed.SaveRevision,
 		CharacterID:   characterID,
 	}, nil
 }

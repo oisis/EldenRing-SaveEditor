@@ -153,12 +153,12 @@ func TestCommitRevisionAdvancesAndInvalidatesIdentities(t *testing.T) {
 	locator := inventoryLocator(0, InventorySectionCommon, 3)
 	stale := session.mintOwnedItemID(locator)
 
-	committed, err := engine.commitRevision(saveSessionID, func(*loadedSave) error { return nil })
+	committed, err := engine.commitRevision(saveSessionID, kindSetSaveAccountID, func(*loadedSave) error { return nil })
 	if err != nil {
 		t.Fatalf("commitRevision: %v", err)
 	}
-	if committed != "1" {
-		t.Fatalf("commitRevision returned revision %q, want \"1\"", committed)
+	if committed.SaveRevision != "1" {
+		t.Fatalf("commitRevision returned revision %q, want \"1\"", committed.SaveRevision)
 	}
 
 	if session.revision != 1 {
@@ -182,12 +182,12 @@ func TestCommitRevisionLeavesEverythingUntouchedWhenTheCommitFails(t *testing.T)
 	token := session.mintOwnedItemID(locator)
 
 	rejected := errors.New("validation rejected the plan")
-	committed, err := engine.commitRevision(saveSessionID, func(*loadedSave) error { return rejected })
+	committed, err := engine.commitRevision(saveSessionID, kindSetSaveAccountID, func(*loadedSave) error { return rejected })
 	if !errors.Is(err, rejected) {
 		t.Fatalf("commitRevision error = %v, want the commit error", err)
 	}
-	if committed != "" {
-		t.Fatalf("a failed commit returned revision %q, want an empty one", committed)
+	if committed.SaveRevision != "" {
+		t.Fatalf("a failed commit returned revision %q, want an empty one", committed.SaveRevision)
 	}
 
 	if session.revision != 0 {
@@ -243,7 +243,8 @@ func TestOwnedItemIdentityIsSerialisedByTheEngineMutex(t *testing.T) {
 				}
 				if round%10 == 0 {
 					if _, err := engine.commitRevision(
-						saveSessionID, func(*loadedSave) error { return nil }); err != nil {
+						saveSessionID, kindSetSaveAccountID,
+						func(*loadedSave) error { return nil }); err != nil {
 						t.Errorf("commitRevision: %v", err)
 						return
 					}

@@ -40,7 +40,7 @@ func (engine *Engine) ApplyFavoritePreset(
 			"characterID %d is outside the range 0..%d", characterID, characterSlotCount-1)
 	}
 
-	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opApplyFavoritePreset, characterID, func(loaded *loadedSave) error {
+	committed, err := engine.commitCharacterRevision(saveSessionID, kindApplyFavoritePreset, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -121,7 +121,7 @@ func (engine *Engine) ApplyFavoritePreset(
 
 	return ApplyFavoritePresetResult{
 		SaveSessionID:  saveSessionID,
-		SaveRevision:   saveRevision,
+		SaveRevision:   committed.SaveRevision,
 		CharacterID:    characterID,
 		FavoriteSlotID: favoriteSlotID,
 	}, nil

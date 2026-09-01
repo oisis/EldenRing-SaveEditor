@@ -119,9 +119,9 @@ func TestSetFogOfWarRemovedRecordsItsOwnUndoPoint(t *testing.T) {
 	if undo == nil {
 		t.Fatal("no undo point was recorded")
 	}
-	if undo.operationID != "set_fog_of_war_removed" || undo.characterID != content.slot {
+	if undo.operationKind != "set_fog_of_war_removed" || undo.characterID != content.slot {
 		t.Fatalf("undo point = %q/%d, want set_fog_of_war_removed/%d",
-			undo.operationID, undo.characterID, content.slot)
+			undo.operationKind, undo.characterID, content.slot)
 	}
 }
 

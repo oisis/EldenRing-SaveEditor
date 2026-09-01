@@ -212,7 +212,7 @@ func TestGetOwnedItemRejectsAStaleToken(t *testing.T) {
 	}
 	stale := inventory.Records[0].OwnedItemID
 
-	if _, err := engine.commitRevision(saveSessionID, func(*loadedSave) error { return nil }); err != nil {
+	if _, err := engine.commitRevision(saveSessionID, kindSetSaveAccountID, func(*loadedSave) error { return nil }); err != nil {
 		t.Fatalf("commitRevision: %v", err)
 	}
 
