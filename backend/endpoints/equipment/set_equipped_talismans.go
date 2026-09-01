@@ -35,9 +35,11 @@ var SetEquippedTalismansDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetEquippedTalismansResult reports the committed loadout in public catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetEquippedTalismansResult struct {
-	SaveSessionID    string               `json:"saveSessionID"`
-	SaveRevision     string               `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID      int                  `json:"characterID"`
 	OrderedResources []schema.ResourceRef `json:"orderedResources"`
 	UnlockedSlots    int                  `json:"unlockedSlots"`
@@ -104,8 +106,7 @@ func SetEquippedTalismans(
 	}
 
 	return SetEquippedTalismansResult{
-		SaveSessionID:    mutation.SaveSessionID,
-		SaveRevision:     mutation.SaveRevision,
+		MutationReceipt:  mutation.MutationReceipt,
 		CharacterID:      mutation.CharacterID,
 		OrderedResources: resources,
 		UnlockedSlots:    mutation.UnlockedSlots,

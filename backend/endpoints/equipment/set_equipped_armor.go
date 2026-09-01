@@ -42,9 +42,11 @@ var equippedArmorSlots = [4]schema.EquipmentSlot{
 }
 
 // SetEquippedArmorResult reports the committed assignment in catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetEquippedArmorResult struct {
-	SaveSessionID   string                 `json:"saveSessionID"`
-	SaveRevision    string                 `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID     int                    `json:"characterID"`
 	SlotAssignments [4]*schema.ResourceRef `json:"slotAssignments"`
 }
@@ -117,8 +119,7 @@ func SetEquippedArmor(
 	}
 
 	return SetEquippedArmorResult{
-		SaveSessionID:   mutation.SaveSessionID,
-		SaveRevision:    mutation.SaveRevision,
+		MutationReceipt: mutation.MutationReceipt,
 		CharacterID:     mutation.CharacterID,
 		SlotAssignments: resolved,
 	}, nil

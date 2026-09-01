@@ -37,9 +37,11 @@ var SetEquippedSpellsDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetEquippedSpellsResult reports the committed spell loadout in public catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetEquippedSpellsResult struct {
-	SaveSessionID        string                `json:"saveSessionID"`
-	SaveRevision         string                `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID          int                   `json:"characterID"`
 	OrderedResources     []*schema.ResourceRef `json:"orderedResources"`
 	UsedMemorySlots      int                   `json:"usedMemorySlots"`
@@ -112,8 +114,7 @@ func SetEquippedSpells(
 	}
 
 	return SetEquippedSpellsResult{
-		SaveSessionID:        mutation.SaveSessionID,
-		SaveRevision:         mutation.SaveRevision,
+		MutationReceipt:      mutation.MutationReceipt,
 		CharacterID:          mutation.CharacterID,
 		OrderedResources:     resolvedRefs,
 		UsedMemorySlots:      mutation.UsedMemorySlots,

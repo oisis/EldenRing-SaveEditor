@@ -3031,6 +3031,8 @@ func TestSetPhysickMixtureRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetPhysickMixtureEndpointID, "1")
 	if got.SaveRevision != "1" || got.CharacterID != 0 ||
 		got.CrystalTearResources[0] == nil || got.CrystalTearResources[1] != nil {
 		t.Fatalf("result = %+v, want revision 1 and one occupied position", got)
@@ -3142,6 +3144,8 @@ func TestSetQuickItemsRoute(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetQuickItemsEndpointID, "1")
 	if got.SaveRevision != "1" || got.CharacterID != 0 ||
 		got.SlotAssignments[0] == nil || got.SlotAssignments[0].Key != "400006A4" {
 		t.Fatalf("result = %+v", got)
@@ -3239,6 +3243,8 @@ func TestSetEquippedArmamentsRoute(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetEquippedArmamentsEndpointID, "1")
 	if got.SaveRevision != "1" || got.SlotAssignments[0] == nil ||
 		got.SlotAssignments[0].Key != "000F4240" {
 		t.Fatalf("result = %+v", got)
@@ -3331,6 +3337,8 @@ func TestSetEquippedArmorRoute(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetEquippedArmorEndpointID, "1")
 	if got.SaveRevision != "1" || got.SlotAssignments[0] == nil ||
 		got.SlotAssignments[0].Key != "10009C40" {
 		t.Fatalf("result = %+v", got)
@@ -3405,6 +3413,8 @@ func TestSetEquippedTalismansRoute(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetEquippedTalismansEndpointID, "1")
 	if got.SaveRevision != "1" || got.UnlockedSlots != 1 ||
 		len(got.OrderedResources) != 1 || got.OrderedResources[0].Key != "20000474" {
 		t.Fatalf("result = %+v", got)
@@ -3455,6 +3465,8 @@ func TestSetPouchItemsRoute(t *testing.T) {
 	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
 		t.Fatalf("json.Unmarshal: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetPouchItemsEndpointID, "1")
 	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" || got.CharacterID != 0 {
 		t.Fatalf("result header = %+v", got)
 	}
@@ -3559,6 +3571,8 @@ func TestSetEquippedSpellsRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		equipment.SetEquippedSpellsEndpointID, "1")
 	if got.SaveRevision != "1" || got.CharacterID != 0 {
 		t.Fatalf("result = %+v, want revision 1 and character 0", got)
 	}

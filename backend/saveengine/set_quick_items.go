@@ -18,11 +18,15 @@ const (
 )
 
 // SetQuickItemsResult reports one committed ten-slot Quick Items assignment.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetQuickItemsResult struct {
-	SaveSessionID string                     `json:"saveSessionID"`
-	SaveRevision  string                     `json:"saveRevision"`
-	CharacterID   int                        `json:"characterID"`
-	GameIDs       [quickItemSlotCount]uint32 `json:"gameIDs"`
+	MutationReceipt
+	CharacterID int                        `json:"characterID"`
+	GameIDs     [quickItemSlotCount]uint32 `json:"gameIDs"`
 }
 
 // SetQuickItems atomically replaces the ten Quick Items positions of one character.
@@ -261,9 +265,8 @@ func (engine *Engine) SetQuickItems(
 	}
 
 	return SetQuickItemsResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		GameIDs:       targetGameIDs,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		GameIDs:         targetGameIDs,
 	}, nil
 }

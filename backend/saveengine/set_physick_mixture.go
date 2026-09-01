@@ -20,11 +20,15 @@ const (
 // SetPhysickMixtureResult reports one committed two-slot Physick assignment.
 // Tears contains the exact save-side IDs written to the two positions;
 // 0xFFFFFFFF is the native empty value.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetPhysickMixtureResult struct {
-	SaveSessionID string    `json:"saveSessionID"`
-	SaveRevision  string    `json:"saveRevision"`
-	CharacterID   int       `json:"characterID"`
-	Tears         [2]uint32 `json:"tears"`
+	MutationReceipt
+	CharacterID int       `json:"characterID"`
+	Tears       [2]uint32 `json:"tears"`
 }
 
 // SetPhysickMixture atomically replaces both active Crystal Tear positions of
@@ -132,10 +136,9 @@ func (engine *Engine) SetPhysickMixture(
 	}
 
 	return SetPhysickMixtureResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Tears:         tears,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Tears:           tears,
 	}, nil
 }
 

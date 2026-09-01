@@ -14,11 +14,15 @@ const (
 
 // SetEquippedArmamentsResult reports one committed six-slot hand-armament assignment.
 // A zero GameID means the corresponding public slot was cleared.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetEquippedArmamentsResult struct {
-	SaveSessionID string                            `json:"saveSessionID"`
-	SaveRevision  string                            `json:"saveRevision"`
-	CharacterID   int                               `json:"characterID"`
-	GameIDs       [equippedArmamentSlotCount]uint32 `json:"gameIDs"`
+	MutationReceipt
+	CharacterID int                               `json:"characterID"`
+	GameIDs     [equippedArmamentSlotCount]uint32 `json:"gameIDs"`
 }
 
 // SetEquippedArmaments atomically replaces left 1, right 1, left 2, right 2,
@@ -158,10 +162,9 @@ func (engine *Engine) SetEquippedArmaments(
 	}
 
 	return SetEquippedArmamentsResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		GameIDs:       targetGameIDs,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		GameIDs:         targetGameIDs,
 	}, nil
 }
 

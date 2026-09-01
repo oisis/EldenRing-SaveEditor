@@ -8,6 +8,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
@@ -18,10 +19,10 @@ import (
 
 // receiptMigratedResults are the mutation result schemas that carry the shared
 // MutationReceipt today. Stage 3b.1 migrated the SaveSession and Network batch,
-// stage 3b.2 added the Character, Appearance, Templates and Favorites batch and
-// stage 3b.3a added the twelve Inventory mutations. Equipment, World and
-// Diagnostics still return their old shape, and this list must grow only
-// together with their migration.
+// stage 3b.2 added the Character, Appearance, Templates and Favorites batch,
+// stage 3b.3a added the twelve Inventory mutations and stage 3b.3b added the
+// seven Equipment mutations. World and Diagnostics still return their old
+// shape, and this list must grow only together with their migration.
 var receiptMigratedResults = []string{
 	// Stage 3b.1: SaveSession and Network.
 	"WriteSaveResult",
@@ -57,6 +58,14 @@ var receiptMigratedResults = []string{
 	"SetWeaponInfusionResult",
 	"SetWeaponUpgradeLevelResult",
 	"SetSpiritAshUpgradeLevelResult",
+	// Stage 3b.3b: Equipment.
+	"SetEquippedArmamentsResult",
+	"SetEquippedArmorResult",
+	"SetEquippedTalismansResult",
+	"SetEquippedSpellsResult",
+	"SetPhysickMixtureResult",
+	"SetPouchItemsResult",
+	"SetQuickItemsResult",
 }
 
 // receiptProperties are the five members every migrated result exposes flat.
@@ -201,6 +210,16 @@ func TestMigratedMutationKindsAreTheirOwnEndpointIDs(t *testing.T) {
 		"set_weapon_infusion":          inventory.SetWeaponInfusionEndpointID,
 		"set_weapon_upgrade_level":     inventory.SetWeaponUpgradeLevelEndpointID,
 		"set_spirit_ash_upgrade_level": inventory.SetSpiritAshUpgradeLevelEndpointID,
+
+		// The seven Equipment mutations each own a separate SaveEngine writer, so
+		// none of them can inherit another endpoint's kind.
+		"set_equipped_armaments": equipment.SetEquippedArmamentsEndpointID,
+		"set_equipped_armor":     equipment.SetEquippedArmorEndpointID,
+		"set_equipped_talismans": equipment.SetEquippedTalismansEndpointID,
+		"set_equipped_spells":    equipment.SetEquippedSpellsEndpointID,
+		"set_physick_mixture":    equipment.SetPhysickMixtureEndpointID,
+		"set_pouch_items":        equipment.SetPouchItemsEndpointID,
+		"set_quick_items":        equipment.SetQuickItemsEndpointID,
 	}
 	registered := make(map[string]bool)
 	for _, kind := range saveengine.MutationKinds() {

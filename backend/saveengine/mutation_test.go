@@ -143,6 +143,21 @@ func TestRepresentativeMutationsReportTheirExactChangedScopes(t *testing.T) {
 			"save.session", "inventory", "storage", "equipment.loadout", "diagnostics.report"}},
 		{kindSetSpiritAshUpgradeLevel, []string{
 			"save.session", "inventory", "storage", "equipment.loadout", "diagnostics.report"}},
+		// Equipment writes only the loadout fields of the slot: no owned record is
+		// created, removed, moved or re-quantified, so neither container is
+		// invalidated. All seven share one scope list, stated literally here.
+		{kindSetEquippedArmaments, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
+		{kindSetEquippedTalismans, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
+		{kindSetEquippedSpells, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
+		{kindSetPhysickMixture, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
+		{kindSetPouchItems, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
+		{kindSetQuickItems, []string{
+			"save.session", "equipment.loadout", "diagnostics.report"}},
 		{kindSetEquippedArmor, []string{"save.session", "equipment.loadout", "diagnostics.report"}},
 		{kindSetCharacterStats, []string{
 			"save.session", "character.list", "character.profile", "character.stats",
@@ -809,6 +824,57 @@ func TestTheSharedWeaponWriterRefusesWhenTheOperationIDCannotBeMinted(t *testing
 	}
 	if string(held.snapshot.data) != snapshotBefore {
 		t.Error("a refused weapon mutation changed the snapshot")
+	}
+	after, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo after the rejection: %v", err)
+	}
+	if after != before {
+		t.Errorf("session = %+v, want the unchanged %+v", after, before)
+	}
+}
+
+// Every Equipment setter mints its identifier through the same commit path, so a
+// generator failure refuses the change before the first byte moves. This is the
+// SaveEngine half of the guarantee for the Equipment batch; the seven public
+// endpoints are covered in backend/endpoints/equipment/mutation_receipt_test.go.
+func TestSetEquippedArmamentsRefusesWhenTheOperationIDCannotBeMinted(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(
+		writeSetEquippedArmamentsFixture(t, PlatformPC), string(PlatformPC), "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	inventory, err := engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	var assignments [6]*string
+	for slot := range assignments {
+		token := inventory.Records[slot+1].OwnedItemID
+		assignments[slot] = &token
+	}
+	held := engine.sessions[loaded.SaveSessionID]
+	snapshotBefore := string(held.snapshot.data)
+	before, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+
+	failure := errors.New("no entropy available")
+	engine.newOperationID = func() (string, error) { return "", failure }
+
+	result, err := engine.SetEquippedArmaments(
+		loaded.SaveSessionID, setArmamentsSlot, assignments, "0", validateSetArmamentGameID)
+	if !errors.Is(err, failure) {
+		t.Fatalf("error = %v, want the generator failure", err)
+	}
+	if !reflect.DeepEqual(result, SetEquippedArmamentsResult{}) {
+		t.Errorf("result = %+v, want the complete zero result", result)
+	}
+	if string(held.snapshot.data) != snapshotBefore {
+		t.Error("a refused Equipment mutation changed the snapshot")
 	}
 	after, err := engine.GetSessionInfo(loaded.SaveSessionID)
 	if err != nil {

@@ -6838,34 +6838,35 @@
         "required": ["slotAssignments", "expectedRevision"]
       },
       "SetEquippedArmamentsResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete hand-armament assignment, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed complete hand-armament assignment, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_equipped_armaments.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slotAssignments": {
-            "type": "array",
-            "minItems": 6,
-            "maxItems": 6,
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/EquippedArmamentAssignment"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "slotAssignments": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/EquippedArmamentAssignment"
+                    }
+                  ],
+                  "nullable": true
                 }
-              ],
-              "nullable": true
-            }
+              }
+            },
+            "required": ["characterID", "slotAssignments"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
+        ]
       },
       "EquippedArmamentAssignment": {
         "type": "object",
@@ -6912,34 +6913,35 @@
         "required": ["slotAssignments", "expectedRevision"]
       },
       "SetEquippedArmorResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete armor assignment, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed complete armor assignment, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_equipped_armor.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slotAssignments": {
-            "type": "array",
-            "minItems": 4,
-            "maxItems": 4,
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/ResourceRef"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "slotAssignments": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResourceRef"
+                    }
+                  ],
+                  "nullable": true
                 }
-              ],
-              "nullable": true
-            }
+              }
+            },
+            "required": ["characterID", "slotAssignments"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
+        ]
       },
       "QuickItemSlot": {
         "type": "object",
@@ -7120,34 +7122,35 @@
         "required": ["crystalTearResources", "expectedRevision"]
       },
       "SetPhysickMixtureResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete Physick assignment, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed complete Physick assignment, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_physick_mixture.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "crystalTearResources": {
-            "type": "array",
-            "minItems": 2,
-            "maxItems": 2,
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/ResourceRef"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "crystalTearResources": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResourceRef"
+                    }
+                  ],
+                  "nullable": true
                 }
-              ],
-              "nullable": true
-            }
+              }
+            },
+            "required": ["characterID", "crystalTearResources"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "crystalTearResources"]
+        ]
       },
       "SetQuickItemsRequest": {
         "type": "object",
@@ -7173,34 +7176,35 @@
         "required": ["slotAssignments", "expectedRevision"]
       },
       "SetQuickItemsResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete Quick Items assignment, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed complete Quick Items assignment, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_quick_items.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slotAssignments": {
-            "type": "array",
-            "minItems": 10,
-            "maxItems": 10,
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/ResourceRef"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "slotAssignments": {
+                "type": "array",
+                "minItems": 10,
+                "maxItems": 10,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResourceRef"
+                    }
+                  ],
+                  "nullable": true
                 }
-              ],
-              "nullable": true
-            }
+              }
+            },
+            "required": ["characterID", "slotAssignments"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
+        ]
       },
       "SetPouchItemsRequest": {
         "type": "object",
@@ -7226,34 +7230,35 @@
         "required": ["slotAssignments", "expectedRevision"]
       },
       "SetPouchItemsResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete Pouch assignment, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed complete Pouch assignment, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_pouch_items.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slotAssignments": {
-            "type": "array",
-            "minItems": 6,
-            "maxItems": 6,
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/ResourceRef"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "slotAssignments": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResourceRef"
+                    }
+                  ],
+                  "nullable": true
                 }
-              ],
-              "nullable": true
-            }
+              }
+            },
+            "required": ["characterID", "slotAssignments"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
+        ]
       },
       "SetEquippedSpellsRequest": {
         "type": "object",
@@ -7277,42 +7282,41 @@
         "required": ["orderedResources", "expectedRevision"]
       },
       "SetEquippedSpellsResult": {
-        "type": "object",
-        "description": "Receipt for one committed equipped-spells update, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed equipped-spells update, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_equipped_spells.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderedResources": {
-            "type": "array",
-            "maxItems": 12,
-            "items": {
-              "$ref": "#/components/schemas/ResourceRef"
-            }
-          },
-          "usedMemorySlots": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "availableMemorySlots": {
-            "type": "integer",
-            "format": "int32"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "orderedResources": {
+                "type": "array",
+                "maxItems": 12,
+                "items": {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              },
+              "usedMemorySlots": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "availableMemorySlots": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "required": [
+              "characterID",
+              "orderedResources",
+              "usedMemorySlots",
+              "availableMemorySlots"
+            ]
           }
-        },
-        "required": [
-          "saveSessionID",
-          "saveRevision",
-          "characterID",
-          "orderedResources",
-          "usedMemorySlots",
-          "availableMemorySlots"
         ]
       },
       "SetEquippedTalismansRequest": {
@@ -7338,39 +7342,38 @@
         "required": ["orderedOwnedItemIDs", "expectedRevision"]
       },
       "SetEquippedTalismansResult": {
-        "type": "object",
-        "description": "Receipt for one committed talisman loadout, expressed with public catalog identities.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt for one committed talisman loadout, expressed with public catalog identities. The shared mutation receipt is composed flat: operationKind is set_equipped_talismans.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderedResources": {
-            "type": "array",
-            "maxItems": 4,
-            "items": {
-              "$ref": "#/components/schemas/ResourceRef"
-            }
-          },
-          "unlockedSlots": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1,
-            "maximum": 4
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "orderedResources": {
+                "type": "array",
+                "maxItems": 4,
+                "items": {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              },
+              "unlockedSlots": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 1,
+                "maximum": 4
+              }
+            },
+            "required": [
+              "characterID",
+              "orderedResources",
+              "unlockedSlots"
+            ]
           }
-        },
-        "required": [
-          "saveSessionID",
-          "saveRevision",
-          "characterID",
-          "orderedResources",
-          "unlockedSlots"
         ]
       },
       "EquippedSpellSlot": {

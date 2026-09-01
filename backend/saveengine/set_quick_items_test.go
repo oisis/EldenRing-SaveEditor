@@ -280,7 +280,10 @@ func TestSetQuickItemsRejectsInvalidPlansWithoutMutation(t *testing.T) {
 			if err == nil || !strings.Contains(err.Error(), testCase.want) {
 				t.Fatalf("error = %v, want containing %q", err, testCase.want)
 			}
-			if result != (SetQuickItemsResult{}) {
+			// The result embeds MutationReceipt, whose scope slice makes the
+			// struct non-comparable. DeepEqual keeps the same assertion: the
+			// complete zero result, receipt and domain fields alike.
+			if !reflect.DeepEqual(result, SetQuickItemsResult{}) {
 				t.Errorf("result = %+v, want zero", result)
 			}
 			if !bytes.Equal(session.snapshot.data, before) {

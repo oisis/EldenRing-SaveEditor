@@ -17,11 +17,15 @@ const (
 )
 
 // SetPouchItemsResult reports one committed six-slot Pouch assignment.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetPouchItemsResult struct {
-	SaveSessionID string    `json:"saveSessionID"`
-	SaveRevision  string    `json:"saveRevision"`
-	CharacterID   int       `json:"characterID"`
-	GameIDs       [6]uint32 `json:"gameIDs"`
+	MutationReceipt
+	CharacterID int       `json:"characterID"`
+	GameIDs     [6]uint32 `json:"gameIDs"`
 }
 
 // SetPouchItems atomically replaces the six Pouch slot positions of one character.
@@ -246,9 +250,8 @@ func (engine *Engine) SetPouchItems(
 	}
 
 	return SetPouchItemsResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		GameIDs:       targetGoodsIDs,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		GameIDs:         targetGoodsIDs,
 	}, nil
 }

@@ -35,9 +35,11 @@ var SetQuickItemsDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetQuickItemsResult is the typed result of SetQuickItems.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetQuickItemsResult struct {
-	SaveSessionID   string                  `json:"saveSessionID"`
-	SaveRevision    string                  `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID     int                     `json:"characterID"`
 	SlotAssignments [10]*schema.ResourceRef `json:"slotAssignments"`
 }
@@ -114,8 +116,7 @@ func SetQuickItems(
 	}
 
 	return SetQuickItemsResult{
-		SaveSessionID:   mutation.SaveSessionID,
-		SaveRevision:    mutation.SaveRevision,
+		MutationReceipt: mutation.MutationReceipt,
 		CharacterID:     mutation.CharacterID,
 		SlotAssignments: resolved,
 	}, nil

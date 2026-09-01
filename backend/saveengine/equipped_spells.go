@@ -149,9 +149,13 @@ type CharacterEquippedSpells struct {
 }
 
 // CharacterEquippedSpellsMutation reports one committed equipped-spells update.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type CharacterEquippedSpellsMutation struct {
-	SaveSessionID        string   `json:"saveSessionID"`
-	SaveRevision         string   `json:"saveRevision"`
+	MutationReceipt
 	CharacterID          int      `json:"characterID"`
 	RawMagicParamIDs     []uint32 `json:"rawMagicParamIDs"`
 	UsedMemorySlots      int      `json:"usedMemorySlots"`
@@ -445,8 +449,7 @@ func (engine *Engine) SetEquippedSpells(
 	}
 
 	return CharacterEquippedSpellsMutation{
-		SaveSessionID:        saveSessionID,
-		SaveRevision:         committed.SaveRevision,
+		MutationReceipt:      committed,
 		CharacterID:          characterID,
 		RawMagicParamIDs:     rawSpellIDs,
 		UsedMemorySlots:      usedMemorySlots,
