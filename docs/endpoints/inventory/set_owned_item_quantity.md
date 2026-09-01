@@ -141,13 +141,43 @@ widened or clamped. Unknown catalog data rejects the request instead.
 
 ```go
 type SetOwnedItemQuantityResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
+	MutationReceipt
 	OwnedItemID   string `json:"ownedItemID"`
 	CharacterID   int    `json:"characterID"`
 	Quantity      uint32 `json:"quantity"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_owned_item_quantity`.
+- `changedScopes` are exactly `save.session`, `inventory`, `storage`,
+  `equipment.loadout`, `diagnostics.report`, in that canonical order.
+
+`equipment.loadout` is part of the list because a quantity change can address
+a record a Quick Item or Pouch slot reports.
 
 | Field | Type | Meaning |
 |---|---|---|

@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -127,12 +128,15 @@ func TestAddItemToInventoryTopsUpThroughTheCatalogLimits(t *testing.T) {
 		t.Fatalf("AddItemToInventory: %v", err)
 	}
 
+	assertMutationReceipt(t, result.MutationReceipt, sessionID, AddItemToInventoryEndpointID, "1")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := AddItemToInventoryResult{
-		SaveSessionID: sessionID, SaveRevision: "1", CharacterID: getInventorySlot,
+		MutationReceipt: result.MutationReceipt, CharacterID: getInventorySlot,
 		GameID: addItemTestEndpointGameID, Added: 5, Quantity: 8, CreatedRecord: false,
 		ContainerSection: "common", PhysicalIndex: 1,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("AddItemToInventory = %+v, want %+v", result, want)
 	}
 

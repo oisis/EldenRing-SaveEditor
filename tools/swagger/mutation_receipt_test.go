@@ -9,6 +9,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
@@ -16,10 +17,11 @@ import (
 )
 
 // receiptMigratedResults are the mutation result schemas that carry the shared
-// MutationReceipt today. Stage 3b.1 migrated the SaveSession and Network batch
-// and stage 3b.2 added the Character, Appearance, Templates and Favorites batch.
-// Inventory, Equipment, World and Diagnostics still return their old shape, and
-// this list must grow only together with their migration.
+// MutationReceipt today. Stage 3b.1 migrated the SaveSession and Network batch,
+// stage 3b.2 added the Character, Appearance, Templates and Favorites batch and
+// stage 3b.3a added the twelve Inventory mutations. Equipment, World and
+// Diagnostics still return their old shape, and this list must grow only
+// together with their migration.
 var receiptMigratedResults = []string{
 	// Stage 3b.1: SaveSession and Network.
 	"WriteSaveResult",
@@ -42,6 +44,19 @@ var receiptMigratedResults = []string{
 	"ApplyFavoritePresetResult",
 	"DeleteFavoritePresetResult",
 	"SetFavoritePresetResult",
+	// Stage 3b.3a: Inventory.
+	"AddItemToInventoryResult",
+	"AddItemToStorageResult",
+	"MoveOwnedItemToInventoryResult",
+	"MoveOwnedItemToStorageResult",
+	"RemoveOwnedItemResult",
+	"SetOwnedItemQuantityResult",
+	"SetInventoryOrderResult",
+	"SetStorageOrderResult",
+	"SetWeaponAshOfWarResult",
+	"SetWeaponInfusionResult",
+	"SetWeaponUpgradeLevelResult",
+	"SetSpiritAshUpgradeLevelResult",
 }
 
 // receiptProperties are the five members every migrated result exposes flat.
@@ -170,6 +185,22 @@ func TestMigratedMutationKindsAreTheirOwnEndpointIDs(t *testing.T) {
 		"apply_favorite_preset":   favorites.ApplyFavoritePresetEndpointID,
 		"delete_favorite_preset":  favorites.DeleteFavoritePresetEndpointID,
 		"set_favorite_preset":     favorites.SetFavoritePresetEndpointID,
+
+		"add_item_to_inventory":        inventory.AddItemToInventoryEndpointID,
+		"add_item_to_storage":          inventory.AddItemToStorageEndpointID,
+		"move_owned_item_to_inventory": inventory.MoveOwnedItemToInventoryEndpointID,
+		"move_owned_item_to_storage":   inventory.MoveOwnedItemToStorageEndpointID,
+		"remove_owned_item":            inventory.RemoveOwnedItemEndpointID,
+		"set_owned_item_quantity":      inventory.SetOwnedItemQuantityEndpointID,
+		"set_inventory_order":          inventory.SetInventoryOrderEndpointID,
+		"set_storage_order":            inventory.SetStorageOrderEndpointID,
+		// Every result keeps its own public EndpointID as operationKind. That
+		// matters twice over for set_weapon_infusion and set_weapon_upgrade_level,
+		// which are the two callers of the shared setOwnedWeaponGameID writer.
+		"set_weapon_ash_of_war":        inventory.SetWeaponAshOfWarEndpointID,
+		"set_weapon_infusion":          inventory.SetWeaponInfusionEndpointID,
+		"set_weapon_upgrade_level":     inventory.SetWeaponUpgradeLevelEndpointID,
+		"set_spirit_ash_upgrade_level": inventory.SetSpiritAshUpgradeLevelEndpointID,
 	}
 	registered := make(map[string]bool)
 	for _, kind := range saveengine.MutationKinds() {

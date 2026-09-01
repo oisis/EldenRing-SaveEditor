@@ -32,9 +32,13 @@ var SetWeaponInfusionDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Sets the affinity of one owned weapon while preserving its upgrade level.",
 })
 
+// SetWeaponInfusionResult reports the committed affinity change together with
+// the catalog terms of the new weapon.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetWeaponInfusionResult struct {
-	SaveSessionID  string          `json:"saveSessionID"`
-	SaveRevision   string          `json:"saveRevision"`
+	saveengine.MutationReceipt
 	OwnedItemID    string          `json:"ownedItemID"`
 	CharacterID    int             `json:"characterID"`
 	Container      string          `json:"container"`
@@ -81,8 +85,8 @@ func SetWeaponInfusion(
 		return SetWeaponInfusionResult{}, err
 	}
 	return SetWeaponInfusionResult{
-		SaveSessionID: mutation.SaveSessionID, SaveRevision: mutation.SaveRevision,
-		OwnedItemID: mutation.OwnedItemID, CharacterID: mutation.CharacterID,
+		MutationReceipt: mutation.MutationReceipt,
+		OwnedItemID:     mutation.OwnedItemID, CharacterID: mutation.CharacterID,
 		Container: mutation.Container, PreviousGameID: mutation.PreviousGameID,
 		GameID: mutation.GameID, Affinity: affinity, UpgradeLevel: upgradeLevel,
 	}, nil

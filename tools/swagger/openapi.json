@@ -9202,62 +9202,70 @@
         "required": ["kind", "key", "quantity", "expectedRevision"]
       },
       "AddItemToInventoryResult": {
-        "type": "object",
-        "description": "Receipt for one committed add. It carries no ownedItemID: the successful mutation advanced saveRevision and retired every identity of the previous one, so the row is addressed again by reading the container back.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed add. It carries no ownedItemID: the successful mutation advanced saveRevision and retired every identity of the previous one, so the row is addressed again by reading the container back. The shared mutation receipt is composed flat: operationKind is add_item_to_inventory.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "gameID": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 0,
-            "maximum": 4294967295,
-            "description": "Save-side game ID of the resolved resource or variant."
-          },
-          "added": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 2147483647,
-            "description": "The delta that was applied."
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 2147483647,
-            "description": "The value the written record stores now."
-          },
-          "createdRecord": {
-            "type": "boolean",
-            "description": "True when a new record was opened, false when an existing one was topped up."
-          },
-          "containerSection": {
-            "type": "string",
-            "enum": ["common"],
-            "description": "Always the common section; this endpoint never writes the key section."
-          },
-          "physicalIndex": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "description": "Physical row of the written record inside the common section."
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295,
+                "description": "Save-side game ID of the resolved resource or variant."
+              },
+              "added": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647,
+                "description": "The delta that was applied."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647,
+                "description": "The value the written record stores now."
+              },
+              "createdRecord": {
+                "type": "boolean",
+                "description": "True when a new record was opened, false when an existing one was topped up."
+              },
+              "containerSection": {
+                "type": "string",
+                "enum": [
+                  "common"
+                ],
+                "description": "Always the common section; this endpoint never writes the key section."
+              },
+              "physicalIndex": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "description": "Physical row of the written record inside the common section."
+              }
+            },
+            "required": [
+              "characterID",
+              "gameID",
+              "added",
+              "quantity",
+              "createdRecord",
+              "containerSection",
+              "physicalIndex"
+            ]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "gameID", "added", "quantity", "createdRecord", "containerSection", "physicalIndex"]
+        ]
       },
       "AddItemToStorageRequest": {
         "type": "object",
@@ -9299,56 +9307,64 @@
         "required": ["kind", "key", "quantity", "expectedRevision"]
       },
       "AddItemToStorageResult": {
-        "type": "object",
-        "description": "Receipt for one committed common-Storage add. It carries physical coordinates rather than an ownedItemID because the mutation retires every identity of the previous revision.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed common-Storage add. It carries physical coordinates rather than an ownedItemID because the mutation retires every identity of the previous revision. The shared mutation receipt is composed flat: operationKind is add_item_to_storage.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "gameID": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 0,
-            "maximum": 4294967295
-          },
-          "added": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "createdRecord": {
-            "type": "boolean"
-          },
-          "containerSection": {
-            "type": "string",
-            "enum": ["common"]
-          },
-          "physicalIndex": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "added": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "createdRecord": {
+                "type": "boolean"
+              },
+              "containerSection": {
+                "type": "string",
+                "enum": [
+                  "common"
+                ]
+              },
+              "physicalIndex": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "characterID",
+              "gameID",
+              "added",
+              "quantity",
+              "createdRecord",
+              "containerSection",
+              "physicalIndex"
+            ]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "gameID", "added", "quantity", "createdRecord", "containerSection", "physicalIndex"]
+        ]
       },
       "RemoveOwnedItemRequest": {
         "type": "object",
@@ -9365,38 +9381,40 @@
         "required": ["expectedRevision"]
       },
       "RemoveOwnedItemResult": {
-        "type": "object",
-        "description": "Receipt for one committed removal. The echoed ownedItemID is already stale: the successful mutation advanced saveRevision, and the record it addressed no longer exists.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed removal. The echoed ownedItemID is already stale: the successful mutation advanced saveRevision, and the record it addressed no longer exists. The shared mutation receipt is composed flat: operationKind is remove_owned_item.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "ownedItemID": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The identifier the removal was performed with, echoed unchanged and already stale."
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "gameID": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 0,
-            "maximum": 4294967295,
-            "description": "The save-side game ID the removed record's GaItem handle resolved to under the mutation lock."
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The identifier the removal was performed with, echoed unchanged and already stale."
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295,
+                "description": "The save-side game ID the removed record's GaItem handle resolved to under the mutation lock."
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "gameID"
+            ]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "gameID"]
+        ]
       },
       "SetOwnedItemQuantityRequest": {
         "type": "object",
@@ -9420,37 +9438,39 @@
         "required": ["quantity", "expectedRevision"]
       },
       "SetOwnedItemQuantityResult": {
-        "type": "object",
-        "description": "Receipt for one committed quantity mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed quantity mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is set_owned_item_quantity.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "ownedItemID": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The identifier used for the mutation, echoed unchanged and already stale."
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 2147483647
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The identifier used for the mutation, echoed unchanged and already stale."
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "quantity"
+            ]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "quantity"]
+        ]
       },
       "SetInventoryOrderRequest": {
         "type": "object",
@@ -9478,52 +9498,48 @@
         "required": ["orderedOwnedItemIDs", "expectedRevision"]
       },
       "SetInventoryOrderResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete supported Inventory order. Every ownedItemID used by the request is stale after the revision advance.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed complete supported Inventory order. Every ownedItemID used by the request is stale after the revision advance. The shared mutation receipt is composed flat: operationKind is set_inventory_order.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "orderedResources": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 2688,
-            "description": "Committed order expressed with stable GameCatalog resource identities.",
-            "items": {
-              "$ref": "#/components/schemas/ResourceRef"
-            }
-          },
-          "acquisitionIndices": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 2688,
-            "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
-            "items": {
-              "type": "integer",
-              "format": "int64",
-              "minimum": 434,
-              "maximum": 9999
-            }
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "orderedResources": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2688,
+                "description": "Committed order expressed with stable GameCatalog resource identities.",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              },
+              "acquisitionIndices": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2688,
+                "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
+                "items": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 434,
+                  "maximum": 9999
+                }
+              }
+            },
+            "required": [
+              "characterID",
+              "orderedResources",
+              "acquisitionIndices"
+            ]
           }
-        },
-        "required": [
-          "saveSessionID",
-          "saveRevision",
-          "characterID",
-          "orderedResources",
-          "acquisitionIndices"
         ]
       },
       "SetStorageOrderRequest": {
@@ -9552,52 +9568,48 @@
         "required": ["orderedOwnedItemIDs", "expectedRevision"]
       },
       "SetStorageOrderResult": {
-        "type": "object",
-        "description": "Receipt for one committed complete supported Storage order. Every ownedItemID used by the request is stale after the revision advance.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
+        "description": "Receipt for one committed complete supported Storage order. Every ownedItemID used by the request is stale after the revision advance. The shared mutation receipt is composed flat: operationKind is set_storage_order.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "orderedResources": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 1920,
-            "description": "Committed order expressed with stable GameCatalog resource identities.",
-            "items": {
-              "$ref": "#/components/schemas/ResourceRef"
-            }
-          },
-          "acquisitionIndices": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 1920,
-            "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
-            "items": {
-              "type": "integer",
-              "format": "int64",
-              "minimum": 2,
-              "maximum": 9999
-            }
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "orderedResources": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1920,
+                "description": "Committed order expressed with stable GameCatalog resource identities.",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              },
+              "acquisitionIndices": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1920,
+                "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
+                "items": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 2,
+                  "maximum": 9999
+                }
+              }
+            },
+            "required": [
+              "characterID",
+              "orderedResources",
+              "acquisitionIndices"
+            ]
           }
-        },
-        "required": [
-          "saveSessionID",
-          "saveRevision",
-          "characterID",
-          "orderedResources",
-          "acquisitionIndices"
         ]
       },
       "MoveOwnedItemToInventoryRequest": {
@@ -9622,21 +9634,73 @@
         "required": ["targetPosition", "expectedRevision"]
       },
       "MoveOwnedItemToInventoryResult": {
-        "type": "object",
-        "description": "Receipt for one committed Storage-to-Inventory move. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "ownedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295},
-          "quantity": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 2147483647},
-          "containerSection": {"type": "string", "enum": ["common"]},
-          "targetPosition": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 2688},
-          "physicalIndex": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 2687},
-          "acquisitionIndex": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295}
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "gameID", "quantity", "containerSection", "targetPosition", "physicalIndex", "acquisitionIndex"]
+        "description": "Receipt for one committed Storage-to-Inventory move. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is move_owned_item_to_inventory.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "containerSection": {
+                "type": "string",
+                "enum": [
+                  "common"
+                ]
+              },
+              "targetPosition": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 2688
+              },
+              "physicalIndex": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 2687
+              },
+              "acquisitionIndex": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "gameID",
+              "quantity",
+              "containerSection",
+              "targetPosition",
+              "physicalIndex",
+              "acquisitionIndex"
+            ]
+          }
+        ]
       },
       "MoveOwnedItemToStorageRequest": {
         "type": "object",
@@ -9660,21 +9724,73 @@
         "required": ["targetPosition", "expectedRevision"]
       },
       "MoveOwnedItemToStorageResult": {
-        "type": "object",
-        "description": "Receipt for one committed Inventory-to-Storage move. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "ownedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295},
-          "quantity": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 2147483647},
-          "containerSection": {"type": "string", "enum": ["common"]},
-          "targetPosition": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 1920},
-          "physicalIndex": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 1919},
-          "acquisitionIndex": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295}
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "gameID", "quantity", "containerSection", "targetPosition", "physicalIndex", "acquisitionIndex"]
+        "description": "Receipt for one committed Inventory-to-Storage move. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is move_owned_item_to_storage.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "containerSection": {
+                "type": "string",
+                "enum": [
+                  "common"
+                ]
+              },
+              "targetPosition": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 1920
+              },
+              "physicalIndex": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 1919
+              },
+              "acquisitionIndex": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 4294967295
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "gameID",
+              "quantity",
+              "containerSection",
+              "targetPosition",
+              "physicalIndex",
+              "acquisitionIndex"
+            ]
+          }
+        ]
       },
       "SetWeaponUpgradeLevelRequest": {
         "type": "object",
@@ -9698,19 +9814,60 @@
         "required": ["upgradeLevel", "expectedRevision"]
       },
       "SetWeaponUpgradeLevelResult": {
-        "type": "object",
-        "description": "Receipt for one committed weapon upgrade-level mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "ownedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "container": {"type": "string", "enum": ["inventory", "storage"]},
-          "previousGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
-          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
-          "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "upgradeLevel"]
+        "description": "Receipt for one committed weapon upgrade-level mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is set_weapon_upgrade_level.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "container": {
+                "type": "string",
+                "enum": [
+                  "inventory",
+                  "storage"
+                ]
+              },
+              "previousGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 268435455
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 268435455
+              },
+              "upgradeLevel": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 25
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "container",
+              "previousGameID",
+              "gameID",
+              "upgradeLevel"
+            ]
+          }
+        ]
       },
       "SetSpiritAshUpgradeLevelRequest": {
         "type": "object",
@@ -9734,19 +9891,60 @@
         "required": ["upgradeLevel", "expectedRevision"]
       },
       "SetSpiritAshUpgradeLevelResult": {
-        "type": "object",
-        "description": "Receipt for one committed Spirit Ash upgrade-level mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "ownedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "container": {"type": "string", "enum": ["inventory", "storage"]},
-          "previousGameID": {"type": "integer", "format": "int64", "minimum": 1073741824, "maximum": 1342177279},
-          "gameID": {"type": "integer", "format": "int64", "minimum": 1073741824, "maximum": 1342177279},
-          "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 10}
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "upgradeLevel"]
+        "description": "Receipt for one committed Spirit Ash upgrade-level mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is set_spirit_ash_upgrade_level.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "container": {
+                "type": "string",
+                "enum": [
+                  "inventory",
+                  "storage"
+                ]
+              },
+              "previousGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1073741824,
+                "maximum": 1342177279
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1073741824,
+                "maximum": 1342177279
+              },
+              "upgradeLevel": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 10
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "container",
+              "previousGameID",
+              "gameID",
+              "upgradeLevel"
+            ]
+          }
+        ]
       },
       "SetWeaponInfusionRequest": {
         "type": "object",
@@ -9768,20 +9966,79 @@
         "required": ["affinity", "expectedRevision"]
       },
       "SetWeaponInfusionResult": {
-        "type": "object",
-        "description": "Receipt for one committed weapon affinity mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "ownedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "container": {"type": "string", "enum": ["inventory", "storage"]},
-          "previousGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
-          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
-          "affinity": {"type": "string", "enum": ["standard", "heavy", "keen", "quality", "fire", "flame_art", "lightning", "sacred", "magic", "cold", "poison", "blood", "occult"]},
-          "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
-        },
-        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "affinity", "upgradeLevel"]
+        "description": "Receipt for one committed weapon affinity mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision. The shared mutation receipt is composed flat: operationKind is set_weapon_infusion.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "container": {
+                "type": "string",
+                "enum": [
+                  "inventory",
+                  "storage"
+                ]
+              },
+              "previousGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 268435455
+              },
+              "gameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 268435455
+              },
+              "affinity": {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "heavy",
+                  "keen",
+                  "quality",
+                  "fire",
+                  "flame_art",
+                  "lightning",
+                  "sacred",
+                  "magic",
+                  "cold",
+                  "poison",
+                  "blood",
+                  "occult"
+                ]
+              },
+              "upgradeLevel": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 25
+              }
+            },
+            "required": [
+              "ownedItemID",
+              "characterID",
+              "container",
+              "previousGameID",
+              "gameID",
+              "affinity",
+              "upgradeLevel"
+            ]
+          }
+        ]
       },
       "SetWeaponAshOfWarRequest": {
         "type": "object",
@@ -9810,19 +10067,60 @@
         "required": ["ashOfWarKind", "ashOfWarKey", "expectedRevision"]
       },
       "SetWeaponAshOfWarResult": {
-        "type": "object",
-        "description": "Receipt for one committed weapon Ash of War mutation. Zero in either Ash game-ID field means no custom Ash. The echoed weaponOwnedItemID is already stale under the returned revision.",
-        "properties": {
-          "saveSessionID": {"type": "string", "minLength": 1},
-          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
-          "weaponOwnedItemID": {"type": "string", "minLength": 1},
-          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
-          "container": {"type": "string", "enum": ["inventory", "storage"]},
-          "weaponGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
-          "previousAshOfWarGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 2415919103},
-          "ashOfWarGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 2415919103}
-        },
-        "required": ["saveSessionID", "saveRevision", "weaponOwnedItemID", "characterID", "container", "weaponGameID", "previousAshOfWarGameID", "ashOfWarGameID"]
+        "description": "Receipt for one committed weapon Ash of War mutation. Zero in either Ash game-ID field means no custom Ash. The echoed weaponOwnedItemID is already stale under the returned revision. The shared mutation receipt is composed flat: operationKind is set_weapon_ash_of_war.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "weaponOwnedItemID": {
+                "type": "string",
+                "minLength": 1
+              },
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "container": {
+                "type": "string",
+                "enum": [
+                  "inventory",
+                  "storage"
+                ]
+              },
+              "weaponGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 268435455
+              },
+              "previousAshOfWarGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 2415919103
+              },
+              "ashOfWarGameID": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 2415919103
+              }
+            },
+            "required": [
+              "weaponOwnedItemID",
+              "characterID",
+              "container",
+              "weaponGameID",
+              "previousAshOfWarGameID",
+              "ashOfWarGameID"
+            ]
+          }
+        ]
       },
       "Error": {
         "type": "object",

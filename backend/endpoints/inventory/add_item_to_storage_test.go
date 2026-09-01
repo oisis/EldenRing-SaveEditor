@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -37,12 +38,15 @@ func TestAddItemToStorageUsesCatalogStorageRules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AddItemToStorage: %v", err)
 	}
+	assertMutationReceipt(t, result.MutationReceipt, sessionID, AddItemToStorageEndpointID, "1")
+	// The receipt is pinned from the result because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := AddItemToStorageResult{
-		SaveSessionID: sessionID, SaveRevision: "1", CharacterID: getInventorySlot,
+		MutationReceipt: result.MutationReceipt, CharacterID: getInventorySlot,
 		GameID: addItemTestEndpointGameID, Added: 5, Quantity: 5, CreatedRecord: true,
 		ContainerSection: saveengine.StorageSectionCommon, PhysicalIndex: 0,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("AddItemToStorage = %+v, want %+v", result, want)
 	}
 

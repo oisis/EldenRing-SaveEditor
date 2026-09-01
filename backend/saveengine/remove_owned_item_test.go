@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -194,14 +195,17 @@ func TestRemoveOwnedItemCommitsInBothContainersOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("RemoveOwnedItem: %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, saveSessionID,
+				kindRemoveOwnedItem, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := RemoveOwnedItemResult{
-				SaveSessionID: saveSessionID,
-				SaveRevision:  "1",
-				OwnedItemID:   id,
-				CharacterID:   ownedContainerTestSlot,
-				GameID:        ownedContainerTestGameID,
+				MutationReceipt: result.MutationReceipt,
+				OwnedItemID:     id,
+				CharacterID:     ownedContainerTestSlot,
+				GameID:          ownedContainerTestGameID,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 
@@ -770,7 +774,7 @@ func TestRemoveOwnedItemRejectsWithoutChangingAnything(t *testing.T) {
 			if err == nil {
 				t.Fatalf("RemoveOwnedItem accepted %s: %+v", name, result)
 			}
-			if result != (RemoveOwnedItemResult{}) {
+			if !reflect.DeepEqual(result, RemoveOwnedItemResult{}) {
 				t.Errorf("result = %+v, want the zero value", result)
 			}
 

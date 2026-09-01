@@ -10,9 +10,13 @@ const (
 // SetWeaponAshOfWarResult reports one committed in-place Ash of War reference
 // change. Handles stay private because they are save-format implementation
 // details, not stable public identities.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetWeaponAshOfWarResult struct {
-	SaveSessionID          string `json:"saveSessionID"`
-	SaveRevision           string `json:"saveRevision"`
+	MutationReceipt
 	WeaponOwnedItemID      string `json:"weaponOwnedItemID"`
 	CharacterID            int    `json:"characterID"`
 	Container              string `json:"container"`
@@ -209,7 +213,7 @@ func (engine *Engine) SetWeaponAshOfWar(
 		return SetWeaponAshOfWarResult{}, err
 	}
 	return SetWeaponAshOfWarResult{
-		SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision,
+		MutationReceipt:   committed,
 		WeaponOwnedItemID: weaponOwnedItemID, CharacterID: characterID,
 		Container: container, WeaponGameID: expectedWeaponGameID,
 		PreviousAshOfWarGameID: previousAshOfWarGameID,

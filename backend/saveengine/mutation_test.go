@@ -124,6 +124,13 @@ func TestRepresentativeMutationsReportTheirExactChangedScopes(t *testing.T) {
 		{kindRemoveOwnedItem, []string{"save.session", "inventory", "storage", "diagnostics.report"}},
 		{kindSetOwnedItemQuantity, []string{
 			"save.session", "inventory", "storage", "equipment.loadout", "diagnostics.report"}},
+		{kindSetInventoryOrder, []string{"save.session", "inventory", "diagnostics.report"}},
+		{kindSetStorageOrder, []string{"save.session", "storage", "diagnostics.report"}},
+		// Both moves change the source and the destination container.
+		{kindMoveOwnedItemToInventory, []string{
+			"save.session", "inventory", "storage", "diagnostics.report"}},
+		{kindMoveOwnedItemToStorage, []string{
+			"save.session", "inventory", "storage", "diagnostics.report"}},
 		// All four weapon writers resolve one common record through an opaque
 		// OwnedItemID, so each of them accepts an Inventory or a Storage record and
 		// must report both containers. The four *SupportsStorageCommon tests of
@@ -711,5 +718,103 @@ func assertUndoReceipt(
 	if strings.Join(receipt.ChangedScopes, ",") != strings.Join(wantScopes, ",") {
 		t.Errorf("changedScopes = %v, want the scopes of the reverted %q: %v",
 			receipt.ChangedScopes, undoneKind, wantScopes)
+	}
+}
+
+// setOwnedWeaponGameID is shared by exactly two public setters, SetWeaponInfusion
+// and SetWeaponUpgradeLevel, and receives its operation kind from whichever one
+// called it. Both therefore commit through one writer and still report their own
+// kind. This is the SaveEngine half of that guarantee; the endpoint half, which
+// also covers the separately implemented SetWeaponAshOfWar, lives in
+// backend/endpoints/inventory/mutation_receipt_test.go.
+func TestTheSharedWeaponWriterReportsTheKindItWasGiven(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(
+		writeSetEquippedArmamentsFixture(t, PlatformPC), string(PlatformPC), "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	equipSetWeaponUpgradeFixture(t, engine, loaded.SaveSessionID, PlatformPC)
+	inventory, err := engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+
+	upgrade, err := engine.SetWeaponUpgradeLevel(
+		loaded.SaveSessionID, setArmamentsSlot, inventory.Records[1].OwnedItemID, 5, "0",
+		setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
+	if err != nil {
+		t.Fatalf("SetWeaponUpgradeLevel: %v", err)
+	}
+	assertCommittedReceipt(t, upgrade.MutationReceipt, loaded.SaveSessionID,
+		kindSetWeaponUpgradeLevel, "1")
+
+	inventory, err = engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory under the new revision: %v", err)
+	}
+	infusion, err := engine.SetWeaponInfusion(
+		loaded.SaveSessionID, setArmamentsSlot, inventory.Records[1].OwnedItemID, "1",
+		setWeaponUpgradeTarget, setWeaponUpgradeTarget)
+	if err != nil {
+		t.Fatalf("SetWeaponInfusion: %v", err)
+	}
+	assertCommittedReceipt(t, infusion.MutationReceipt, loaded.SaveSessionID,
+		kindSetWeaponInfusion, "2")
+
+	if upgrade.OperationKind == infusion.OperationKind {
+		t.Fatalf("both weapon setters reported operationKind %q", upgrade.OperationKind)
+	}
+	if upgrade.OperationID == infusion.OperationID {
+		t.Fatalf("two executions shared operationID %q", upgrade.OperationID)
+	}
+}
+
+// setOwnedWeaponGameID mints its identifier through the same commit path as
+// every other mutation, so a generator failure refuses the change before the
+// first byte moves. SetWeaponUpgradeLevel is one of its two callers.
+func TestTheSharedWeaponWriterRefusesWhenTheOperationIDCannotBeMinted(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(
+		writeSetEquippedArmamentsFixture(t, PlatformPC), string(PlatformPC), "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	equipSetWeaponUpgradeFixture(t, engine, loaded.SaveSessionID, PlatformPC)
+	inventory, err := engine.GetInventory(
+		loaded.SaveSessionID, setArmamentsSlot, InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	held := engine.sessions[loaded.SaveSessionID]
+	snapshotBefore := string(held.snapshot.data)
+	before, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+
+	failure := errors.New("no entropy available")
+	engine.newOperationID = func() (string, error) { return "", failure }
+
+	result, err := engine.SetWeaponUpgradeLevel(
+		loaded.SaveSessionID, setArmamentsSlot, inventory.Records[1].OwnedItemID, 5, "0",
+		setWeaponUpgradeCurrent, setWeaponUpgradeTarget, 5)
+	if !errors.Is(err, failure) {
+		t.Fatalf("error = %v, want the generator failure", err)
+	}
+	if !reflect.DeepEqual(result, SetWeaponUpgradeLevelResult{}) {
+		t.Errorf("result = %+v, want the complete zero result", result)
+	}
+	if string(held.snapshot.data) != snapshotBefore {
+		t.Error("a refused weapon mutation changed the snapshot")
+	}
+	after, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo after the rejection: %v", err)
+	}
+	if after != before {
+		t.Errorf("session = %+v, want the unchanged %+v", after, before)
 	}
 }

@@ -8,9 +8,13 @@ import (
 // AddItemToStorageResult reports one committed common-Storage add. The receipt
 // carries physical coordinates instead of an OwnedItemID because committing the
 // mutation retires every identity minted under the previous revision.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type AddItemToStorageResult struct {
-	SaveSessionID    string `json:"saveSessionID"`
-	SaveRevision     string `json:"saveRevision"`
+	MutationReceipt
 	CharacterID      int    `json:"characterID"`
 	GameID           uint32 `json:"gameID"`
 	Added            uint32 `json:"added"`
@@ -87,8 +91,7 @@ func (engine *Engine) AddItemToStorage(
 	}
 
 	return AddItemToStorageResult{
-		SaveSessionID:    saveSessionID,
-		SaveRevision:     committed.SaveRevision,
+		MutationReceipt:  committed,
 		CharacterID:      characterID,
 		GameID:           gameID,
 		Added:            quantity,

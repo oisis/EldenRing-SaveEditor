@@ -9,7 +9,9 @@ import (
 // and infusion setters. It changes no allocation, handle, row or AoW state.
 //
 // operationKind names the public setter that requested the change, so the undo
-// point of a shared write is never attributed to the wrong endpoint.
+// point of a shared write is never attributed to the wrong endpoint, and the
+// returned receipt reports that same kind. The receipt is the one the central
+// commit path produced; this writer never builds one of its own.
 func (engine *Engine) setOwnedWeaponGameID(
 	saveSessionID string,
 	characterID int,
@@ -19,14 +21,14 @@ func (engine *Engine) setOwnedWeaponGameID(
 	targetGameID uint32,
 	operationKind string,
 	matchmakingLevel uint8,
-) (string, string, error) {
+) (MutationReceipt, string, error) {
 	if expectedGameID&gaItemHandleTypeMask != 0 || targetGameID&gaItemHandleTypeMask != 0 {
-		return "", "", fmt.Errorf(
+		return MutationReceipt{}, "", fmt.Errorf(
 			"weapon game IDs must use prefix 0; got 0x%08X and 0x%08X",
 			expectedGameID, targetGameID)
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return "", "", fmt.Errorf(
+		return MutationReceipt{}, "", fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
@@ -136,9 +138,9 @@ func (engine *Engine) setOwnedWeaponGameID(
 		return nil
 	})
 	if err != nil {
-		return "", "", err
+		return MutationReceipt{}, "", err
 	}
-	return committed.SaveRevision, container, nil
+	return committed, container, nil
 }
 
 // planWeaponMatchmakingLevelWrite locates the character's stats anchor and plans

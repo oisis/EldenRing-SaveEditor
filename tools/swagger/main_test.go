@@ -1709,6 +1709,30 @@ func TestGraceVisitEventFlagOpenAPIExcludesBlock75(t *testing.T) {
 // SaveEngine stores a quantity in 31 bits because 0x80000000 is a preserved
 // record flag, so a document promising the full uint32 range would advertise
 // values SetOwnedItemQuantity rejects.
+// schemaProperties returns the declared properties of one schema, whether it
+// declares them directly or contributes them through an allOf part. A result
+// that composes the shared MutationReceipt keeps its domain properties inside
+// that composition, and a caller asking for one of them must still find it.
+func schemaProperties(schema map[string]any) map[string]any {
+	properties := map[string]any{}
+	for name, value := range direct(schema) {
+		properties[name] = value
+	}
+	parts, _ := schema["allOf"].([]any)
+	for _, part := range parts {
+		member, _ := part.(map[string]any)
+		for name, value := range direct(member) {
+			properties[name] = value
+		}
+	}
+	return properties
+}
+
+func direct(schema map[string]any) map[string]any {
+	properties, _ := schema["properties"].(map[string]any)
+	return properties
+}
+
 func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
 	t.Helper()
 
@@ -1720,7 +1744,7 @@ func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
 		"MoveOwnedItemToStorageResult",
 	} {
 		schema, _ := schemas[name].(map[string]any)
-		properties, _ := schema["properties"].(map[string]any)
+		properties := schemaProperties(schema)
 		quantity, _ := properties["quantity"].(map[string]any)
 		if quantity["maximum"] != float64(2147483647) {
 			t.Fatalf("%s.quantity maximum = %v, want 2147483647", name, quantity["maximum"])
@@ -4219,12 +4243,15 @@ func TestRemoveOwnedItemRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
 		t.Fatalf("decode RemoveOwnedItem body %q: %v", recorder.Body.String(), err)
 	}
+	assertRouteReceipt(t, result.MutationReceipt, session.SaveSessionID,
+		inventory.RemoveOwnedItemEndpointID, "1")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := inventory.RemoveOwnedItemResult{
-		SaveSessionID: session.SaveSessionID,
-		SaveRevision:  "1",
-		OwnedItemID:   ownedItemID,
-		CharacterID:   0,
-		GameID:        listed.Records[0].GameID,
+		MutationReceipt: result.MutationReceipt,
+		OwnedItemID:     ownedItemID,
+		CharacterID:     0,
+		GameID:          listed.Records[0].GameID,
 	}
 	if !reflect.DeepEqual(result, want) {
 		t.Fatalf("RemoveOwnedItem result = %+v, want %+v", result, want)
@@ -4310,12 +4337,15 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
 		t.Fatalf("decode SetOwnedItemQuantity body %q: %v", recorder.Body.String(), err)
 	}
+	assertRouteReceipt(t, result.MutationReceipt, session.SaveSessionID,
+		inventory.SetOwnedItemQuantityEndpointID, "1")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := inventory.SetOwnedItemQuantityResult{
-		SaveSessionID: session.SaveSessionID,
-		SaveRevision:  "1",
-		OwnedItemID:   ownedItemID,
-		CharacterID:   0,
-		Quantity:      4,
+		MutationReceipt: result.MutationReceipt,
+		OwnedItemID:     ownedItemID,
+		CharacterID:     0,
+		Quantity:        4,
 	}
 	if !reflect.DeepEqual(result, want) {
 		t.Fatalf("SetOwnedItemQuantity result = %+v, want %+v", result, want)
@@ -4757,9 +4787,12 @@ func TestAddItemToInventoryRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
 		t.Fatalf("decode AddItemToInventory body %q: %v", recorder.Body.String(), err)
 	}
+	assertRouteReceipt(t, result.MutationReceipt, session.SaveSessionID,
+		inventory.AddItemToInventoryEndpointID, "1")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member is asserted above.
 	want := inventory.AddItemToInventoryResult{
-		SaveSessionID:    session.SaveSessionID,
-		SaveRevision:     "1",
+		MutationReceipt:  result.MutationReceipt,
 		CharacterID:      0,
 		GameID:           0x400006A4,
 		Added:            3,

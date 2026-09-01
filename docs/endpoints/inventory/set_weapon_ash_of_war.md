@@ -117,8 +117,7 @@ on the retired GaItem repacker and is deliberately not part of this endpoint.
 
 ```go
 type SetWeaponAshOfWarResult struct {
-    SaveSessionID          string
-    SaveRevision           string
+    MutationReceipt
     WeaponOwnedItemID      string
     CharacterID            int
     Container              string
@@ -126,7 +125,41 @@ type SetWeaponAshOfWarResult struct {
     PreviousAshOfWarGameID uint32
     AshOfWarGameID         uint32
 }
+
+type MutationReceipt struct {
+    OperationID   string
+    OperationKind string
+    SaveSessionID string
+    SaveRevision  string
+    ChangedScopes []string
+}
 ```
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_weapon_ash_of_war`.
+- `changedScopes` are exactly `save.session`, `inventory`, `storage`,
+  `equipment.loadout`, `diagnostics.report`, in that canonical order.
+
+This endpoint owns its complete mutation path in SaveEngine and its own central
+commit; it does not go through the `setOwnedWeaponGameID` writer that
+[`SetWeaponInfusion`](set_weapon_infusion.md) and
+[`SetWeaponUpgradeLevel`](set_weapon_upgrade_level.md) share. Its receipt
+therefore reports `set_weapon_ash_of_war` and never one of those two kinds.
 
 `Container` is `inventory` or `storage`. A zero Ash game ID means that side of
 the change had no custom Ash. No raw GaItem handle is exposed. The returned

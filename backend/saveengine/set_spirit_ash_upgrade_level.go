@@ -7,9 +7,13 @@ import (
 
 // SetSpiritAshUpgradeLevelResult reports one committed Spirit Ash upgrade.
 // OwnedItemID is stale after the returned revision advances.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetSpiritAshUpgradeLevelResult struct {
-	SaveSessionID  string `json:"saveSessionID"`
-	SaveRevision   string `json:"saveRevision"`
+	MutationReceipt
 	OwnedItemID    string `json:"ownedItemID"`
 	CharacterID    int    `json:"characterID"`
 	Container      string `json:"container"`
@@ -130,7 +134,7 @@ func (engine *Engine) SetSpiritAshUpgradeLevel(
 		return SetSpiritAshUpgradeLevelResult{}, err
 	}
 	return SetSpiritAshUpgradeLevelResult{
-		SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision, OwnedItemID: ownedItemID,
+		MutationReceipt: committed, OwnedItemID: ownedItemID,
 		CharacterID: characterID, Container: container, PreviousGameID: expectedGameID,
 		GameID: targetGameID, UpgradeLevel: upgradeLevel,
 	}, nil

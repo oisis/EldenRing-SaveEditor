@@ -9,9 +9,13 @@ import (
 // MoveOwnedItemToInventoryResult reports one committed Storage-to-Inventory move.
 // OwnedItemID is the now-stale source identity. The destination receives a new
 // identity on the next Inventory read under SaveRevision.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type MoveOwnedItemToInventoryResult struct {
-	SaveSessionID    string `json:"saveSessionID"`
-	SaveRevision     string `json:"saveRevision"`
+	MutationReceipt
 	OwnedItemID      string `json:"ownedItemID"`
 	CharacterID      int    `json:"characterID"`
 	GameID           uint32 `json:"gameID"`
@@ -75,8 +79,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 	}
 
 	return MoveOwnedItemToInventoryResult{
-		SaveSessionID:    saveSessionID,
-		SaveRevision:     committed.SaveRevision,
+		MutationReceipt:  committed,
 		OwnedItemID:      ownedItemID,
 		CharacterID:      characterID,
 		GameID:           moved.gameID,

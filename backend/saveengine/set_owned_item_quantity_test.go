@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"errors"
+	"reflect"
 	"strconv"
 	"sync"
 	"testing"
@@ -159,14 +160,17 @@ func TestSetOwnedItemQuantityCommitsInBothContainers(t *testing.T) {
 				t.Fatalf("SetOwnedItemQuantity: %v", err)
 			}
 
+			assertCommittedReceipt(t, result.MutationReceipt, saveSessionID,
+				kindSetOwnedItemQuantity, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetOwnedItemQuantityResult{
-				SaveSessionID: saveSessionID,
-				SaveRevision:  "1",
-				OwnedItemID:   id,
-				CharacterID:   ownedContainerTestSlot,
-				Quantity:      wanted,
+				MutationReceipt: result.MutationReceipt,
+				OwnedItemID:     id,
+				CharacterID:     ownedContainerTestSlot,
+				Quantity:        wanted,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 
@@ -307,7 +311,7 @@ func TestSetOwnedItemQuantityRejectsWithoutChangingAnything(t *testing.T) {
 			if err == nil {
 				t.Fatalf("SetOwnedItemQuantity accepted %s: %+v", name, result)
 			}
-			if result != (SetOwnedItemQuantityResult{}) {
+			if !reflect.DeepEqual(result, SetOwnedItemQuantityResult{}) {
 				t.Errorf("result = %+v, want the zero value", result)
 			}
 

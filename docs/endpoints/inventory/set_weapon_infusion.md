@@ -79,8 +79,7 @@ affinities it permits.
 
 ```go
 type SetWeaponInfusionResult struct {
-    SaveSessionID    string
-    SaveRevision     string
+    MutationReceipt
     OwnedItemID      string
     CharacterID      int
     Container        string
@@ -89,7 +88,43 @@ type SetWeaponInfusionResult struct {
     Affinity         schema.Affinity
     UpgradeLevel     uint8
 }
+
+type MutationReceipt struct {
+    OperationID   string
+    OperationKind string
+    SaveSessionID string
+    SaveRevision  string
+    ChangedScopes []string
+}
 ```
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_weapon_infusion`.
+- `changedScopes` are exactly `save.session`, `inventory`, `storage`,
+  `equipment.loadout`, `diagnostics.report`, in that canonical order.
+
+This endpoint commits through the SaveEngine writer `setOwnedWeaponGameID`,
+which it shares with exactly one other endpoint,
+[`SetWeaponUpgradeLevel`](set_weapon_upgrade_level.md). The writer receives its
+kind from the public entry point, so the receipt of this endpoint always reports
+`set_weapon_infusion` and never `set_weapon_upgrade_level`.
+[`SetWeaponAshOfWar`](set_weapon_ash_of_war.md) does not use that writer at
+all.
 
 `Container` is `inventory` or `storage`. `GameID` is the exact infused ID now
 stored; `PreviousGameID` records the value replaced. The returned `OwnedItemID`

@@ -206,12 +206,15 @@ func TestSetOwnedItemQuantityCommitsInBothContainers(t *testing.T) {
 			if err != nil {
 				t.Fatalf("SetOwnedItemQuantity: %v", err)
 			}
+			assertMutationReceipt(t, result.MutationReceipt, sessionID,
+				SetOwnedItemQuantityEndpointID, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetOwnedItemQuantityResult{
-				SaveSessionID: sessionID,
-				SaveRevision:  "1",
-				OwnedItemID:   ownedItemID,
-				CharacterID:   quantityTestSlot(container),
-				Quantity:      42,
+				MutationReceipt: result.MutationReceipt,
+				OwnedItemID:     ownedItemID,
+				CharacterID:     quantityTestSlot(container),
+				Quantity:        42,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)

@@ -34,12 +34,16 @@ const ownedItemQuantityFlag uint32 = 0x80000000
 //
 // Quantity is the masked value now stored in the record, which equals the
 // requested quantity.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetOwnedItemQuantityResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	OwnedItemID   string `json:"ownedItemID"`
-	CharacterID   int    `json:"characterID"`
-	Quantity      uint32 `json:"quantity"`
+	MutationReceipt
+	OwnedItemID string `json:"ownedItemID"`
+	CharacterID int    `json:"characterID"`
+	Quantity    uint32 `json:"quantity"`
 }
 
 // SetOwnedItemQuantity sets the stored quantity of the one physical record
@@ -136,11 +140,10 @@ func (engine *Engine) SetOwnedItemQuantity(
 	}
 
 	return SetOwnedItemQuantityResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		OwnedItemID:   ownedItemID,
-		CharacterID:   characterID,
-		Quantity:      quantity,
+		MutationReceipt: committed,
+		OwnedItemID:     ownedItemID,
+		CharacterID:     characterID,
+		Quantity:        quantity,
 	}, nil
 }
 

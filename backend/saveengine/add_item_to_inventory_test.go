@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -389,12 +390,16 @@ func TestAddItemToInventoryCreatesARecordOnBothPlatforms(t *testing.T) {
 				t.Fatalf("AddItemToInventory: %v", err)
 			}
 
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindAddItemToInventory, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := AddItemToInventoryResult{
-				SaveSessionID: loaded.SaveSessionID, SaveRevision: "1", CharacterID: content.slot,
+				MutationReceipt: result.MutationReceipt, CharacterID: content.slot,
 				GameID: addItemTestGoodsID, Added: 5, Quantity: 5, CreatedRecord: true,
 				ContainerSection: InventorySectionCommon, PhysicalIndex: 1,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("AddItemToInventory = %+v, want %+v", result, want)
 			}
 

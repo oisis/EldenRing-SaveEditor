@@ -37,9 +37,11 @@ var SetInventoryOrderDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetInventoryOrderResult reports the committed order in stable catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetInventoryOrderResult struct {
-	SaveSessionID      string               `json:"saveSessionID"`
-	SaveRevision       string               `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID        int                  `json:"characterID"`
 	OrderedResources   []schema.ResourceRef `json:"orderedResources"`
 	AcquisitionIndices []uint32             `json:"acquisitionIndices"`
@@ -81,8 +83,7 @@ func SetInventoryOrder(
 	}
 
 	return SetInventoryOrderResult{
-		SaveSessionID:      mutation.SaveSessionID,
-		SaveRevision:       mutation.SaveRevision,
+		MutationReceipt:    mutation.MutationReceipt,
 		CharacterID:        mutation.CharacterID,
 		OrderedResources:   resources,
 		AcquisitionIndices: mutation.AcquisitionIndices,

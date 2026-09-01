@@ -106,12 +106,15 @@ func TestRemoveOwnedItemCommitsInBothContainers(t *testing.T) {
 			if err != nil {
 				t.Fatalf("RemoveOwnedItem: %v", err)
 			}
+			assertMutationReceipt(t, result.MutationReceipt, sessionID,
+				RemoveOwnedItemEndpointID, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := RemoveOwnedItemResult{
-				SaveSessionID: sessionID,
-				SaveRevision:  "1",
-				OwnedItemID:   ownedItemID,
-				CharacterID:   removeTestSlot(container),
-				GameID:        0x4000272E,
+				MutationReceipt: result.MutationReceipt,
+				OwnedItemID:     ownedItemID,
+				CharacterID:     removeTestSlot(container),
+				GameID:          0x4000272E,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)

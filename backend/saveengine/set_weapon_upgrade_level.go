@@ -3,9 +3,13 @@ package saveengine
 // SetWeaponUpgradeLevelResult reports one committed upgrade-level change.
 // OwnedItemID identifies the record that was changed but is stale after the
 // returned revision advances, like every other owned-item mutation receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetWeaponUpgradeLevelResult struct {
-	SaveSessionID  string `json:"saveSessionID"`
-	SaveRevision   string `json:"saveRevision"`
+	MutationReceipt
 	OwnedItemID    string `json:"ownedItemID"`
 	CharacterID    int    `json:"characterID"`
 	Container      string `json:"container"`
@@ -26,14 +30,14 @@ func (engine *Engine) SetWeaponUpgradeLevel(
 	targetGameID uint32,
 	matchmakingLevel uint8,
 ) (SetWeaponUpgradeLevelResult, error) {
-	saveRevision, container, err := engine.setOwnedWeaponGameID(
+	committed, container, err := engine.setOwnedWeaponGameID(
 		saveSessionID, characterID, ownedItemID, expectedRevision, expectedGameID, targetGameID,
 		kindSetWeaponUpgradeLevel, matchmakingLevel)
 	if err != nil {
 		return SetWeaponUpgradeLevelResult{}, err
 	}
 	return SetWeaponUpgradeLevelResult{
-		SaveSessionID: saveSessionID, SaveRevision: saveRevision, OwnedItemID: ownedItemID,
+		MutationReceipt: committed, OwnedItemID: ownedItemID,
 		CharacterID: characterID, Container: container, PreviousGameID: expectedGameID,
 		GameID: targetGameID, UpgradeLevel: upgradeLevel,
 	}, nil

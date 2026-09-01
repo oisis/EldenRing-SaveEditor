@@ -104,12 +104,16 @@ const (
 // GameID is the save-side game ID the removed record's handle resolved to under
 // the lock, so the caller learns what was removed without addressing the record
 // again.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type RemoveOwnedItemResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	OwnedItemID   string `json:"ownedItemID"`
-	CharacterID   int    `json:"characterID"`
-	GameID        uint32 `json:"gameID"`
+	MutationReceipt
+	OwnedItemID string `json:"ownedItemID"`
+	CharacterID int    `json:"characterID"`
+	GameID      uint32 `json:"gameID"`
 }
 
 // RemoveOwnedItem removes the one physical record ownedItemID was minted for.
@@ -175,11 +179,10 @@ func (engine *Engine) RemoveOwnedItem(
 	}
 
 	return RemoveOwnedItemResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		OwnedItemID:   ownedItemID,
-		CharacterID:   characterID,
-		GameID:        gameID,
+		MutationReceipt: committed,
+		OwnedItemID:     ownedItemID,
+		CharacterID:     characterID,
+		GameID:          gameID,
 	}, nil
 }
 

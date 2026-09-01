@@ -89,9 +89,13 @@ const (
 // reads the container back under the new revision, exactly as it does after
 // SetOwnedItemQuantity and RemoveOwnedItem, whose echoed tokens are stale for
 // the same reason.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type AddItemToInventoryResult struct {
-	SaveSessionID    string `json:"saveSessionID"`
-	SaveRevision     string `json:"saveRevision"`
+	MutationReceipt
 	CharacterID      int    `json:"characterID"`
 	GameID           uint32 `json:"gameID"`
 	Added            uint32 `json:"added"`
@@ -196,8 +200,7 @@ func (engine *Engine) AddItemToInventory(
 	}
 
 	return AddItemToInventoryResult{
-		SaveSessionID:    saveSessionID,
-		SaveRevision:     committed.SaveRevision,
+		MutationReceipt:  committed,
 		CharacterID:      characterID,
 		GameID:           gameID,
 		Added:            quantity,

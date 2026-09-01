@@ -126,8 +126,11 @@ mutation.
 
 ```json
 {
+  "operationID": "op-3f9c...",
+  "operationKind": "add_item_to_storage",
   "saveSessionID": "6bd5...",
   "saveRevision": "1",
+  "changedScopes": ["save.session", "storage", "diagnostics.report"],
   "characterID": 0,
   "gameID": 1073743524,
   "added": 3,
@@ -137,6 +140,26 @@ mutation.
   "physicalIndex": 0
 }
 ```
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `add_item_to_storage`.
+- `changedScopes` are exactly `save.session`, `storage`, `diagnostics.report`,
+  in that canonical order.
 
 `added` is the requested delta. `quantity` is the resulting record quantity.
 `createdRecord` distinguishes a new row from a top-up.

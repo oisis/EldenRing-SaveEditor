@@ -92,8 +92,11 @@ revision.
 
 ```json
 {
+  "operationID": "op-3f9c...",
+  "operationKind": "move_owned_item_to_inventory",
   "saveSessionID": "session-id",
   "saveRevision": "8",
+  "changedScopes": ["save.session", "inventory", "storage", "diagnostics.report"],
   "ownedItemID": "stale-source-token",
   "characterID": 0,
   "gameID": 268895456,
@@ -104,6 +107,26 @@ revision.
   "acquisitionIndex": 435
 }
 ```
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `move_owned_item_to_inventory`.
+- `changedScopes` are exactly `save.session`, `inventory`, `storage`,
+  `diagnostics.report`, in that canonical order.
 
 The echoed `ownedItemID` is already stale. Read Inventory under the returned
 revision to obtain the destination record's new identity. `physicalIndex` is

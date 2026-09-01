@@ -8,9 +8,13 @@ const (
 )
 
 // SetInventoryOrderResult reports one committed supported Inventory order.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetInventoryOrderResult struct {
-	SaveSessionID      string   `json:"saveSessionID"`
-	SaveRevision       string   `json:"saveRevision"`
+	MutationReceipt
 	CharacterID        int      `json:"characterID"`
 	GameIDs            []uint32 `json:"gameIDs"`
 	AcquisitionIndices []uint32 `json:"acquisitionIndices"`
@@ -188,8 +192,7 @@ func (engine *Engine) SetInventoryOrder(
 	}
 
 	return SetInventoryOrderResult{
-		SaveSessionID:      saveSessionID,
-		SaveRevision:       committed.SaveRevision,
+		MutationReceipt:    committed,
 		CharacterID:        characterID,
 		GameIDs:            gameIDs,
 		AcquisitionIndices: acquisitionIndices,
