@@ -32,7 +32,8 @@ var SetSaveAccountIDDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetSaveAccountIDResult is owned by SaveEngine; the endpoint does not reshape
-// it. It reports the session and its new revision only, never the identifier.
+// it. It reports the receipt of the committed mutation only, never the
+// identifier.
 type SetSaveAccountIDResult = saveengine.SetSaveAccountIDResult
 
 // SetSaveAccountID sets the owner identifier of one save session. SaveEngine

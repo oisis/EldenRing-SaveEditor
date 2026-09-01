@@ -55,12 +55,15 @@ const (
 // a slot is never walked from a guessed position.
 var worldBlockLimits = [...]int64{0x10000, 0x10000, 0x100000, 0x100000, 0x100000}
 
-// SetSaveAccountIDResult reports one committed account-identifier change. It
-// carries no identifier: the value is private account data and never leaves the
-// package, not in a result, an error or a log.
+// SetSaveAccountIDResult reports one committed account-identifier change as the
+// receipt the commit path produced. It carries no identifier: the value is
+// private account data and never leaves the package, not in a result, an error
+// or a log.
+//
+// The receipt is embedded anonymously, so saveSessionID and saveRevision keep
+// their previous JSON names and the three new members join them flat.
 type SetSaveAccountIDResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
+	MutationReceipt
 }
 
 // SetSaveAccountID writes accountID into the global UserData10 copy and into the
@@ -142,7 +145,7 @@ func (engine *Engine) SetSaveAccountID(
 	if err != nil {
 		return SetSaveAccountIDResult{}, err
 	}
-	return SetSaveAccountIDResult{SaveSessionID: saveSessionID, SaveRevision: committed.SaveRevision}, nil
+	return SetSaveAccountIDResult{MutationReceipt: committed}, nil
 }
 
 // pcAccountIDFieldAt resolves the account identifier of one active PC slot by

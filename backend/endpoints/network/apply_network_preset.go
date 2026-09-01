@@ -32,11 +32,13 @@ var ApplyNetworkPresetDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Applies a backend preset through the same domain operation as SetNetworkSettings.",
 })
 
-// ApplyNetworkPresetResult reports the selected preset and the committed save
-// revision. NetworkSettings is the complete set passed to SaveEngine.
+// ApplyNetworkPresetResult embeds the receipt of the committed mutation and
+// adds the selected preset. The receipt is the one the shared SaveEngine writer
+// produced, so operationKind is apply_network_preset and never
+// set_network_settings. NetworkSettings is the complete set passed to
+// SaveEngine.
 type ApplyNetworkPresetResult struct {
-	SaveSessionID   string                         `json:"saveSessionID"`
-	SaveRevision    string                         `json:"saveRevision"`
+	saveengine.MutationReceipt
 	PresetID        string                         `json:"presetID"`
 	NetworkSettings gamecatalog.NetworkParamValues `json:"networkSettings"`
 }
@@ -69,8 +71,7 @@ func ApplyNetworkPreset(
 		return ApplyNetworkPresetResult{}, err
 	}
 	return ApplyNetworkPresetResult{
-		SaveSessionID:   committed.SaveSessionID,
-		SaveRevision:    committed.SaveRevision,
+		MutationReceipt: committed.MutationReceipt,
 		PresetID:        preset.ID,
 		NetworkSettings: committed.NetworkSettings,
 	}, nil

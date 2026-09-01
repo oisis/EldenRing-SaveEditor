@@ -8,10 +8,11 @@ import (
 	"path/filepath"
 )
 
-// WriteSaveResult reports a successfully persisted session revision.
+// WriteSaveResult reports a successfully persisted session revision as the
+// receipt the commit path produced. The receipt is embedded anonymously, so the
+// JSON result stays flat and carries no nested receipt object.
 type WriteSaveResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
+	MutationReceipt
 }
 
 // WriteSave serializes and reload-validates the current session snapshot before
@@ -86,10 +87,7 @@ func (engine *Engine) WriteSave(
 		nil,
 		newRevision,
 	)
-	return WriteSaveResult{
-		SaveSessionID: receipt.SaveSessionID,
-		SaveRevision:  receipt.SaveRevision,
-	}, nil
+	return WriteSaveResult{MutationReceipt: receipt}, nil
 }
 
 // serializeContainer prepares an independent candidate for a future WriteSave.

@@ -779,6 +779,8 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 	if writeResult.SaveSessionID != session.SaveSessionID || writeResult.SaveRevision != "1" {
 		t.Fatalf("WriteSave result = %+v, want the session at revision 1", writeResult)
 	}
+	assertRouteReceipt(t, writeResult.MutationReceipt, session.SaveSessionID,
+		savesession.WriteSaveEndpointID, "1")
 	if _, err := saveengine.New().LoadSave(writtenTarget, "pc", "local"); err != nil {
 		t.Fatalf("reload WriteSave target: %v", err)
 	}
@@ -1371,6 +1373,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"AppearancePresetSummary",
 		"GetAppearancePresetsResult",
 		"LoadSaveRequest",
+		"MutationReceipt",
 		"WriteSaveRequest",
 		"WriteSaveResult",
 		"CloseSaveResult",
@@ -2231,6 +2234,8 @@ func TestSetSaveAccountIDRoute(t *testing.T) {
 	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" {
 		t.Errorf("result = %+v, want the session at revision 1", got)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		savesession.SetSaveAccountIDEndpointID, "1")
 	// The identifier is private account data and must not travel back.
 	if strings.Contains(recorder.Body.String(), "1311768467463790320") {
 		t.Errorf("the response repeats the identifier: %q", recorder.Body.String())
@@ -3805,9 +3810,16 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	}
 	updated := doSave(t, saveEngine, http.MethodPut, target, string(body))
 	assertOK(t, updated, target)
+	var setResult network.SetNetworkSettingsResult
+	if err := json.Unmarshal(updated.Body.Bytes(), &setResult); err != nil {
+		t.Fatalf("decode set network settings body %q: %v", updated.Body.String(), err)
+	}
+	assertRouteReceipt(t, setResult.MutationReceipt, session.SaveSessionID,
+		network.SetNetworkSettingsEndpointID, "1")
+	// The receipt is pinned from the response because operationID names one
+	// execution and cannot be predicted; every other member stays exact.
 	wantSet := network.SetNetworkSettingsResult{
-		SaveSessionID:   session.SaveSessionID,
-		SaveRevision:    "1",
+		MutationReceipt: setResult.MutationReceipt,
 		NetworkSettings: settings,
 	}
 	if !reflect.DeepEqual(decode(t, updated.Body.Bytes()), marshalled(t, wantSet)) {
@@ -3839,14 +3851,27 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	applied := doSave(t, saveEngine, http.MethodPut, presetTarget, string(presetBody))
 	assertOK(t, applied, presetTarget)
 	preset := presets.Presets[0]
+	var appliedResult network.ApplyNetworkPresetResult
+	if err := json.Unmarshal(applied.Body.Bytes(), &appliedResult); err != nil {
+		t.Fatalf("decode apply network preset body %q: %v", applied.Body.String(), err)
+	}
+	assertRouteReceipt(t, appliedResult.MutationReceipt, session.SaveSessionID,
+		network.ApplyNetworkPresetEndpointID, "2")
 	wantApplied := network.ApplyNetworkPresetResult{
-		SaveSessionID:   session.SaveSessionID,
-		SaveRevision:    "2",
+		MutationReceipt: appliedResult.MutationReceipt,
 		PresetID:        preset.ID,
 		NetworkSettings: preset.Parameters,
 	}
 	if !reflect.DeepEqual(decode(t, applied.Body.Bytes()), marshalled(t, wantApplied)) {
 		t.Fatalf("apply network preset body %q differs from the expected result", applied.Body.String())
+	}
+	// One shared writer, two kinds: the preset route must never report the plain
+	// settings kind.
+	if appliedResult.OperationKind == setResult.OperationKind {
+		t.Fatalf("both network routes reported operationKind %q", appliedResult.OperationKind)
+	}
+	if appliedResult.OperationID == setResult.OperationID {
+		t.Fatalf("two executions shared operationID %q", setResult.OperationID)
 	}
 
 	stored = doSave(t, saveEngine, http.MethodGet, target, "")

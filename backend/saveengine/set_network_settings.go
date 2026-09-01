@@ -18,10 +18,11 @@ import (
 const networkZSTDBlockSize = 64 * 1024
 
 // SetNetworkSettingsResult reports one committed complete network-parameter
-// assignment.
+// assignment. The embedded receipt is the one the shared writer produced, so it
+// names the public entry point that was called; the settings are the values
+// that entry point committed.
 type SetNetworkSettingsResult struct {
-	SaveSessionID   string                         `json:"saveSessionID"`
-	SaveRevision    string                         `json:"saveRevision"`
+	MutationReceipt
 	NetworkSettings gamecatalog.NetworkParamValues `json:"networkSettings"`
 }
 
@@ -107,8 +108,7 @@ func (engine *Engine) setNetworkSettings(
 	}
 
 	return SetNetworkSettingsResult{
-		SaveSessionID:   saveSessionID,
-		SaveRevision:    committed.SaveRevision,
+		MutationReceipt: committed,
 		NetworkSettings: networkSettings,
 	}, nil
 }

@@ -152,10 +152,7 @@ func TestSetSaveAccountIDWritesTheGlobalAndEveryActiveSlotCopy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetSaveAccountID: %v", err)
 	}
-	want := SetSaveAccountIDResult{SaveSessionID: loaded.SaveSessionID, SaveRevision: "1"}
-	if result != want {
-		t.Errorf("result = %+v, want %+v", result, want)
-	}
+	assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID, kindSetSaveAccountID, "1")
 
 	expected := uint64(0x123456789ABCDEF0)
 	snapshot := snapshotOf(t, engine, loaded.SaveSessionID)
@@ -262,7 +259,7 @@ func TestSetSaveAccountIDRejectsANonCanonicalIdentifier(t *testing.T) {
 			t.Errorf("accountID %q was accepted", accountID)
 			continue
 		}
-		if result != (SetSaveAccountIDResult{}) {
+		if !isZeroReceipt(result.MutationReceipt) {
 			t.Errorf("accountID %q returned %+v, want the zero value", accountID, result)
 		}
 		if accountID != "" && strings.Contains(err.Error(), accountID) {

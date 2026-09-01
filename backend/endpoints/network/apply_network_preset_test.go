@@ -1,6 +1,7 @@
 package network
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
@@ -51,9 +52,13 @@ func TestApplyNetworkPresetRejectsUnknownAndLegacyIDsWithoutMutation(t *testing.
 				t.Fatalf("LoadSave: %v", err)
 			}
 
-			if result, err := ApplyNetworkPreset(
-				engine, gameCatalog, loaded.SaveSessionID, test.presetID, "0"); err == nil {
+			result, err := ApplyNetworkPreset(
+				engine, gameCatalog, loaded.SaveSessionID, test.presetID, "0")
+			if err == nil {
 				t.Fatalf("ApplyNetworkPreset succeeded: %+v", result)
+			}
+			if !reflect.DeepEqual(result, ApplyNetworkPresetResult{}) {
+				t.Errorf("rejected result = %+v, want the complete zero result", result)
 			}
 			info, err := engine.GetSessionInfo(loaded.SaveSessionID)
 			if err != nil {
@@ -78,9 +83,13 @@ func TestApplyNetworkPresetDelegatesRevisionValidation(t *testing.T) {
 		t.Fatalf("LoadSave: %v", err)
 	}
 
-	if result, err := ApplyNetworkPreset(
-		engine, newCatalog(t), loaded.SaveSessionID, "vanilla", "1"); err == nil {
-		t.Fatalf("ApplyNetworkPreset accepted a stale revision: %+v", result)
+	rejected, err := ApplyNetworkPreset(
+		engine, newCatalog(t), loaded.SaveSessionID, "vanilla", "1")
+	if err == nil {
+		t.Fatalf("ApplyNetworkPreset accepted a stale revision: %+v", rejected)
+	}
+	if !reflect.DeepEqual(rejected, ApplyNetworkPresetResult{}) {
+		t.Errorf("rejected result = %+v, want the complete zero result", rejected)
 	}
 	info, err := engine.GetSessionInfo(loaded.SaveSessionID)
 	if err != nil {

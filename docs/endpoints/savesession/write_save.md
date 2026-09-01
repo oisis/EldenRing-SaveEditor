@@ -73,14 +73,54 @@ preflight.
 type WriteSaveResult = saveengine.WriteSaveResult
 
 type WriteSaveResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
+	saveengine.MutationReceipt
+}
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
 }
 ```
+
+The receipt is embedded anonymously, so the JSON result is flat and carries the
+five receipt members at its top level. There is no nested `receipt` object and
+no domain field of its own:
+
+```json
+{
+  "operationID": "op-0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "operationKind": "write_save",
+  "saveSessionID": "save-session-1",
+  "saveRevision": "1",
+  "changedScopes": ["save.session", "diagnostics.report"]
+}
+```
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside stage 3b.1. A rejected call returns the zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `write_save`.
+- `changedScopes` are exactly `save.session` and `diagnostics.report`,
+  in that canonical order.
 
 `saveRevision` is the new revision after the write. Every successful
 `WriteSave`, including a write with no prior in-memory mutation, advances it by
 exactly one. The result carries no target path and no save bytes.
+
+The write persists the snapshot and changes no domain value, so it invalidates
+the session scope and the validation report pinned to the previous revision,
+and nothing else.
 
 ## Processing flow
 

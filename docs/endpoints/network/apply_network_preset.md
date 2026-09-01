@@ -67,15 +67,58 @@ applies only the fields that differ.
 
 ```go
 type ApplyNetworkPresetResult struct {
-	SaveSessionID   string                         `json:"saveSessionID"`
-	SaveRevision    string                         `json:"saveRevision"`
+	saveengine.MutationReceipt
 	PresetID        string                         `json:"presetID"`
 	NetworkSettings gamecatalog.NetworkParamValues `json:"networkSettings"`
 }
+
+type MutationReceipt struct {
+	OperationID   string   `json:"operationID"`
+	OperationKind string   `json:"operationKind"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes"`
+}
 ```
 
-The receipt identifies the selected preset, echoes the complete committed
-parameter set and returns the new revision required by the next mutation.
+The receipt is embedded anonymously, so the JSON result is flat: the five
+receipt members, `presetID` and `networkSettings` all sit at the top level, and
+there is no nested `receipt` object.
+
+```json
+{
+  "operationID": "op-0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+  "operationKind": "apply_network_preset",
+  "saveSessionID": "save-session-1",
+  "saveRevision": "2",
+  "changedScopes": ["save.session", "network", "diagnostics.report"],
+  "presetID": "faster-reds",
+  "networkSettings": { "...": "the complete committed set of 22 values" }
+}
+```
+
+The embedded `saveengine.MutationReceipt` is exactly the receipt the central
+SaveEngine commit path produced for this execution. Nothing here is
+reassembled from the EndpointID, the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside stage 3b.1. A rejected call returns the zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `apply_network_preset`.
+- `changedScopes` are exactly `save.session`, `network` and `diagnostics.report`,
+  in that canonical order.
+
+`presetID` identifies the selected preset and `networkSettings` echoes the
+complete committed parameter set.
+
+This endpoint and `SetNetworkSettings` share one SaveEngine writer, and the
+writer receives its operation kind from the public entry point. A preset
+therefore always reports `apply_network_preset` and never
+`set_network_settings`.
 
 ## Errors and atomicity
 

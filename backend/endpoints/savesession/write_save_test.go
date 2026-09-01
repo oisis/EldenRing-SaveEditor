@@ -21,10 +21,7 @@ func TestWriteSaveDelegatesToSaveEngine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("WriteSave: %v", err)
 	}
-	want := WriteSaveResult{SaveSessionID: session.SaveSessionID, SaveRevision: "1"}
-	if !reflect.DeepEqual(result, want) {
-		t.Errorf("WriteSave result = %+v, want %+v", result, want)
-	}
+	assertMutationReceipt(t, result.MutationReceipt, session.SaveSessionID, WriteSaveEndpointID, "1")
 	if _, err := saveengine.New().LoadSave(target, "pc", "local"); err != nil {
 		t.Fatalf("reload written target: %v", err)
 	}
@@ -32,7 +29,7 @@ func TestWriteSaveDelegatesToSaveEngine(t *testing.T) {
 
 func TestWriteSaveRejectsMissingEngineAndForwardsErrors(t *testing.T) {
 	if result, err := WriteSave(nil, "session", "0", "target"); err == nil ||
-		err.Error() != "save engine is not available" || result != (WriteSaveResult{}) {
+		err.Error() != "save engine is not available" || !isZeroReceipt(result.MutationReceipt) {
 		t.Fatalf("nil-engine result = %+v, error = %v", result, err)
 	}
 
@@ -41,7 +38,7 @@ func TestWriteSaveRejectsMissingEngineAndForwardsErrors(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "canonical decimal saveRevision") {
 		t.Fatalf("forwarded error = %v", err)
 	}
-	if result != (WriteSaveResult{}) {
+	if !isZeroReceipt(result.MutationReceipt) {
 		t.Errorf("rejected result = %+v, want zero value", result)
 	}
 }

@@ -19,15 +19,13 @@ func TestSetSaveAccountIDDelegatesToSaveEngine(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetSaveAccountID: %v", err)
 	}
-	want := SetSaveAccountIDResult{SaveSessionID: session.SaveSessionID, SaveRevision: "1"}
-	if result != want {
-		t.Errorf("result = %+v, want %+v", result, want)
-	}
+	assertMutationReceipt(t, result.MutationReceipt, session.SaveSessionID,
+		SetSaveAccountIDEndpointID, "1")
 }
 
 func TestSetSaveAccountIDRejectsMissingEngineAndForwardsErrors(t *testing.T) {
 	if result, err := SetSaveAccountID(nil, "session", "1", "0"); err == nil ||
-		err.Error() != "save engine is not available" || result != (SetSaveAccountIDResult{}) {
+		err.Error() != "save engine is not available" || !isZeroReceipt(result.MutationReceipt) {
 		t.Fatalf("nil-engine result = %+v, error = %v", result, err)
 	}
 
@@ -40,7 +38,7 @@ func TestSetSaveAccountIDRejectsMissingEngineAndForwardsErrors(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "PC saves only") {
 		t.Fatalf("forwarded PS4 error = %v", err)
 	}
-	if result != (SetSaveAccountIDResult{}) {
+	if !isZeroReceipt(result.MutationReceipt) {
 		t.Errorf("rejected result = %+v, want zero value", result)
 	}
 }

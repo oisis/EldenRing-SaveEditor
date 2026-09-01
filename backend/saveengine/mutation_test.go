@@ -639,3 +639,37 @@ func isZeroReceipt(receipt MutationReceipt) bool {
 		receipt.SaveSessionID == "" && receipt.SaveRevision == "" &&
 		receipt.ChangedScopes == nil
 }
+
+// assertCommittedReceipt fails unless receipt is the complete receipt of one
+// execution of operationKind, committed for saveSessionID at saveRevision. It
+// exists so a result type that embeds MutationReceipt is checked against the
+// whole contract instead of the two fields it used to carry.
+func assertCommittedReceipt(
+	t *testing.T,
+	receipt MutationReceipt,
+	saveSessionID string,
+	operationKind string,
+	saveRevision string,
+) {
+	t.Helper()
+
+	if receipt.OperationID == "" {
+		t.Errorf("receipt = %+v, want a minted operationID", receipt)
+	}
+	if receipt.OperationKind != operationKind {
+		t.Errorf("operationKind = %q, want %q", receipt.OperationKind, operationKind)
+	}
+	if receipt.SaveSessionID != saveSessionID {
+		t.Errorf("saveSessionID = %q, want %q", receipt.SaveSessionID, saveSessionID)
+	}
+	if receipt.SaveRevision != saveRevision {
+		t.Errorf("saveRevision = %q, want %q", receipt.SaveRevision, saveRevision)
+	}
+	wantScopes, err := ChangedScopesForMutationKind(operationKind)
+	if err != nil {
+		t.Fatalf("ChangedScopesForMutationKind(%q): %v", operationKind, err)
+	}
+	if strings.Join(receipt.ChangedScopes, ",") != strings.Join(wantScopes, ",") {
+		t.Errorf("changedScopes = %v, want %v", receipt.ChangedScopes, wantScopes)
+	}
+}

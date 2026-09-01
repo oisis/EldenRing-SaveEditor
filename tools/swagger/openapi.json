@@ -5593,10 +5593,20 @@
         },
         "required": ["expectedRevision", "target"]
       },
-      "WriteSaveResult": {
+      "MutationReceipt": {
         "type": "object",
-        "description": "The session revision committed by a successful WriteSave.",
+        "description": "Shared receipt of one committed save-session mutation. Its five members are flat members of every migrated mutation result; there is no nested receipt object.",
         "properties": {
+          "operationID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque identifier of one concrete execution, never derived from the kind, the revision, an index or a clock. Identifiers do not repeat among the receipts issued by one running SaveEngine instance; that guarantee does not currently cover application restarts, because uniqueness across restarts requires a persistent operation journal and stays outside stage 3b.1. A rejected mutation returns none."
+          },
+          "operationKind": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable kind of the mutation: exactly the EndpointID of the endpoint that initiated the change."
+          },
           "saveSessionID": {
             "type": "string",
             "minLength": 1
@@ -5604,10 +5614,29 @@
           "saveRevision": {
             "type": "string",
             "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal saveRevision the mutation committed."
+          },
+          "changedScopes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Backend read scopes this mutation invalidated, in the one canonical order.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         },
-        "required": ["saveSessionID", "saveRevision"]
+        "required": ["operationID", "operationKind", "saveSessionID", "saveRevision", "changedScopes"]
+      },
+      "WriteSaveResult": {
+        "description": "Receipt of a successful WriteSave. It carries the shared mutation receipt and no domain field of its own.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
+          }
+        ]
       },
       "SetSaveAccountIDRequest": {
         "type": "object",
@@ -5630,20 +5659,12 @@
         "required": ["accountID", "expectedRevision"]
       },
       "SetSaveAccountIDResult": {
-        "type": "object",
-        "description": "The session revision committed by a successful SetSaveAccountID. It never carries the identifier.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string",
-            "minLength": 1
-          },
-          "saveRevision": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "^(0|[1-9][0-9]*)$"
+        "description": "Receipt of a successful SetSaveAccountID. It carries the shared mutation receipt and never the identifier.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           }
-        },
-        "required": ["saveSessionID", "saveRevision"]
+        ]
       },
       "CloseSaveResult": {
         "type": "object",
@@ -11000,19 +11021,21 @@
         "required": ["networkSettings", "expectedRevision"]
       },
       "SetNetworkSettingsResult": {
-        "type": "object",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt of one committed complete network-parameter assignment, with the committed values.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "networkSettings": {
-            "$ref": "#/components/schemas/NetworkParamValues"
+          {
+            "type": "object",
+            "properties": {
+              "networkSettings": {
+                "$ref": "#/components/schemas/NetworkParamValues"
+              }
+            },
+            "required": ["networkSettings"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "networkSettings"]
+        ]
       },
       "ApplyNetworkPresetRequest": {
         "type": "object",
@@ -11030,22 +11053,24 @@
         "required": ["presetID", "expectedRevision"]
       },
       "ApplyNetworkPresetResult": {
-        "type": "object",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "Receipt of one committed network preset. operationKind is apply_network_preset and never set_network_settings, although both endpoints share one SaveEngine writer.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "presetID": {
-            "type": "string"
-          },
-          "networkSettings": {
-            "$ref": "#/components/schemas/NetworkParamValues"
+          {
+            "type": "object",
+            "properties": {
+              "presetID": {
+                "type": "string"
+              },
+              "networkSettings": {
+                "$ref": "#/components/schemas/NetworkParamValues"
+              }
+            },
+            "required": ["presetID", "networkSettings"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "presetID", "networkSettings"]
+        ]
       },
       "AppearancePresetSummary": {
         "type": "object",

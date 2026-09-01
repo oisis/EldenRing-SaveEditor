@@ -393,10 +393,7 @@ func TestWriteSavePersistsBothPlatformsAndAdvancesACleanRevision(t *testing.T) {
 			if err != nil {
 				t.Fatalf("WriteSave: %v", err)
 			}
-			if result != (WriteSaveResult{SaveSessionID: info.SaveSessionID, SaveRevision: "1"}) {
-				t.Errorf("WriteSave result = %+v, want session %q at revision 1",
-					result, info.SaveSessionID)
-			}
+			assertCommittedReceipt(t, result.MutationReceipt, info.SaveSessionID, kindWriteSave, "1")
 
 			written, err := os.ReadFile(target)
 			if err != nil {
@@ -526,7 +523,7 @@ func TestWriteSaveRejectionsLeaveSessionAndTargetUntouched(t *testing.T) {
 			if err == nil || !strings.Contains(err.Error(), testCase.message) {
 				t.Fatalf("WriteSave error = %v, want it to contain %q", err, testCase.message)
 			}
-			if result != (WriteSaveResult{}) {
+			if !isZeroReceipt(result.MutationReceipt) {
 				t.Errorf("rejected WriteSave result = %+v, want zero value", result)
 			}
 
