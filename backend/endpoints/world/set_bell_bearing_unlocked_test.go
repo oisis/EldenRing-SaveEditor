@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -19,10 +20,11 @@ func TestSetBellBearingUnlockedCommitsCatalogResource(t *testing.T) {
 		t.Fatalf("SetBellBearingUnlocked: %v", err)
 	}
 	want := SetBellBearingUnlockedResult{
-		SaveSessionID: sessionID, SaveRevision: "1", CharacterID: getCookbooksSlot,
+		MutationReceipt: wantWorldReceipt(t, result.MutationReceipt, SetBellBearingUnlockedEndpointID, sessionID, "1"),
+		CharacterID:     getCookbooksSlot,
 		BellBearingKind: schema.ResourceKindItem, BellBearingKey: key, Unlocked: true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

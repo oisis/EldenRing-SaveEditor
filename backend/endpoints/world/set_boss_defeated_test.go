@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -20,14 +21,14 @@ func TestSetBossDefeatedSetsAndClearsTheFlag(t *testing.T) {
 		t.Fatalf("SetBossDefeated: %v", err)
 	}
 	want := SetBossDefeatedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		BossKind:      schema.ResourceKindBoss,
-		BossKey:       getBossesClearKey,
-		Defeated:      true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetBossDefeatedEndpointID, sessionID, "1"),
+		CharacterID: getCookbooksSlot,
+		BossKind:    schema.ResourceKindBoss,
+		BossKey:     getBossesClearKey,
+		Defeated:    true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

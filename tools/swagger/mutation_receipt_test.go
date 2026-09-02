@@ -14,15 +14,17 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
 // receiptMigratedResults are the mutation result schemas that carry the shared
 // MutationReceipt today. Stage 3b.1 migrated the SaveSession and Network batch,
 // stage 3b.2 added the Character, Appearance, Templates and Favorites batch,
-// stage 3b.3a added the twelve Inventory mutations and stage 3b.3b added the
-// seven Equipment mutations. World and Diagnostics still return their old
-// shape, and this list must grow only together with their migration.
+// stage 3b.3a added the twelve Inventory mutations, stage 3b.3b added the seven
+// Equipment mutations and stage 3b.3c added the fifteen World mutations.
+// Diagnostics still returns its old shape, and this list must grow only together
+// with its migration.
 var receiptMigratedResults = []string{
 	// Stage 3b.1: SaveSession and Network.
 	"WriteSaveResult",
@@ -66,6 +68,22 @@ var receiptMigratedResults = []string{
 	"SetPhysickMixtureResult",
 	"SetPouchItemsResult",
 	"SetQuickItemsResult",
+	// Stage 3b.3c: World.
+	"LockAllSpectralSteedAttiresResult",
+	"SetBellBearingUnlockedResult",
+	"SetBossDefeatedResult",
+	"SetColosseumUnlockedResult",
+	"SetCookbookUnlockedResult",
+	"SetFogOfWarRemovedResult",
+	"SetGestureUnlockedResult",
+	"SetGraceVisitedResult",
+	"SetMapRegionRevealedResult",
+	"SetQuestStepResult",
+	"SetRegionUnlockedResult",
+	"SetSpectralSteedAttireResult",
+	"SetSummoningPoolActivatedResult",
+	"SetTutorialUnlockedResult",
+	"SetWhetbladeUnlockedResult",
 }
 
 // receiptProperties are the five members every migrated result exposes flat.
@@ -220,6 +238,25 @@ func TestMigratedMutationKindsAreTheirOwnEndpointIDs(t *testing.T) {
 		"set_physick_mixture":    equipment.SetPhysickMixtureEndpointID,
 		"set_pouch_items":        equipment.SetPouchItemsEndpointID,
 		"set_quick_items":        equipment.SetQuickItemsEndpointID,
+
+		// The fifteen World mutations. set_spectral_steed_attire and
+		// lock_all_spectral_steed_attires share one SaveEngine result type, yet
+		// each keeps its own operationKind and its own changedScopes.
+		"lock_all_spectral_steed_attires": world.LockAllSpectralSteedAttiresEndpointID,
+		"set_bell_bearing_unlocked":       world.SetBellBearingUnlockedEndpointID,
+		"set_boss_defeated":               world.SetBossDefeatedEndpointID,
+		"set_colosseum_unlocked":          world.SetColosseumUnlockedEndpointID,
+		"set_cookbook_unlocked":           world.SetCookbookUnlockedEndpointID,
+		"set_fog_of_war_removed":          world.SetFogOfWarRemovedEndpointID,
+		"set_gesture_unlocked":            world.SetGestureUnlockedEndpointID,
+		"set_grace_visited":               world.SetGraceVisitedEndpointID,
+		"set_map_region_revealed":         world.SetMapRegionRevealedEndpointID,
+		"set_quest_step":                  world.SetQuestStepEndpointID,
+		"set_region_unlocked":             world.SetRegionUnlockedEndpointID,
+		"set_spectral_steed_attire":       world.SetSpectralSteedAttireEndpointID,
+		"set_summoning_pool_activated":    world.SetSummoningPoolActivatedEndpointID,
+		"set_tutorial_unlocked":           world.SetTutorialUnlockedEndpointID,
+		"set_whetblade_unlocked":          world.SetWhetbladeUnlockedEndpointID,
 	}
 	registered := make(map[string]bool)
 	for _, kind := range saveengine.MutationKinds() {

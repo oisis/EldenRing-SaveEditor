@@ -37,14 +37,16 @@ var SetQuestStepDefinition = contract.MustDefine(contract.Definition{
 // SetQuestStepResult reports the committed state in public catalog terms.
 // SaveEngine supplies the session state; this endpoint adds the catalog identity
 // it resolved without exposing private event flags or offsets.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetQuestStepResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	QuestKind     schema.ResourceKind `json:"questKind"`
-	QuestKey      string              `json:"questKey"`
-	StepKind      string              `json:"stepKind"`
-	StepKey       string              `json:"stepKey"`
+	saveengine.MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	QuestKind   schema.ResourceKind `json:"questKind"`
+	QuestKey    string              `json:"questKey"`
+	StepKind    string              `json:"stepKind"`
+	StepKey     string              `json:"stepKey"`
 }
 
 const questStepKind = "quest_step"
@@ -116,12 +118,11 @@ func SetQuestStep(
 	}
 
 	return SetQuestStepResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		QuestKind:     schema.ResourceKindQuest,
-		QuestKey:      questKey,
-		StepKind:      questStepKind,
-		StepKey:       stepKey,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		QuestKind:       schema.ResourceKindQuest,
+		QuestKey:        questKey,
+		StepKind:        questStepKind,
+		StepKey:         stepKey,
 	}, nil
 }

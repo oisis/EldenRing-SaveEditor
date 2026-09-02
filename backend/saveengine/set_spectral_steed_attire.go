@@ -22,10 +22,14 @@ type SpectralSteedAttire struct {
 //
 // SaveRevision is the revision the change committed under, which is the previous
 // one plus exactly 1.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SpectralSteedAttireMutation struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
+	MutationReceipt
+	CharacterID int `json:"characterID"`
 }
 
 // SetSpectralSteedAttire activates exactly one Torrent appearance in one
@@ -93,9 +97,8 @@ func (engine *Engine) SetSpectralSteedAttire(
 		return SpectralSteedAttireMutation{}, err
 	}
 	return SpectralSteedAttireMutation{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
 	}, nil
 }
 
@@ -157,9 +160,8 @@ func (engine *Engine) LockAllSpectralSteedAttires(
 		return SpectralSteedAttireMutation{}, err
 	}
 	return SpectralSteedAttireMutation{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
 	}, nil
 }
 

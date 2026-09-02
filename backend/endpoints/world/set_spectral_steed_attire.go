@@ -37,11 +37,13 @@ var SetSpectralSteedAttireDefinition = contract.MustDefine(contract.Definition{
 
 // SetSpectralSteedAttireResult reports the committed appearance in public terms
 // without exposing the event flag behind it.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetSpectralSteedAttireResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	AttireKey     string `json:"attireKey"`
+	saveengine.MutationReceipt
+	CharacterID int    `json:"characterID"`
+	AttireKey   string `json:"attireKey"`
 }
 
 // SetSpectralSteedAttire activates exactly one appearance of the shared table.
@@ -92,10 +94,9 @@ func SetSpectralSteedAttire(
 		return SetSpectralSteedAttireResult{}, err
 	}
 	return SetSpectralSteedAttireResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		AttireKey:     selected.entry.AttireKey,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		AttireKey:       selected.entry.AttireKey,
 	}, nil
 }
 

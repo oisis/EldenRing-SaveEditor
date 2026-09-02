@@ -11,11 +11,15 @@ import (
 // one plus exactly 1. SaveSessionID and CharacterID match the request. Unlocked
 // is the new unlock state stored in the save event flags. Catalog identity does
 // not belong to SaveEngine and is therefore added by the endpoint receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetCookbookUnlockedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Unlocked      bool   `json:"unlocked"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Unlocked    bool `json:"unlocked"`
 }
 
 // SetCookbookUnlocked sets or clears the event flag bit associated with a
@@ -121,9 +125,8 @@ func (engine *Engine) SetCookbookUnlocked(
 	}
 
 	return SetCookbookUnlockedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Unlocked:      unlocked,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Unlocked:        unlocked,
 	}, nil
 }

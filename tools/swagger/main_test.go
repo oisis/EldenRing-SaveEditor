@@ -5264,8 +5264,13 @@ func TestSetGestureUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetGestureUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetGestureUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -5560,8 +5565,13 @@ func TestSetBellBearingUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetBellBearingUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetBellBearingUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -5688,11 +5698,14 @@ func TestSetSpectralSteedAttireRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		world.SetSpectralSteedAttireEndpointID, "1")
 	want := world.SetSpectralSteedAttireResult{
-		SaveSessionID: session.SaveSessionID, SaveRevision: "1", CharacterID: 0,
-		AttireKey: spectralSteedRouteTreeAttireKey,
+		MutationReceipt: got.MutationReceipt,
+		CharacterID:     0,
+		AttireKey:       spectralSteedRouteTreeAttireKey,
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("result = %+v, want %+v", got, want)
 	}
 
@@ -5741,11 +5754,14 @@ func TestLockAllSpectralSteedAttiresRoute(t *testing.T) {
 	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, session.SaveSessionID,
+		world.LockAllSpectralSteedAttiresEndpointID, "1")
 	want := world.LockAllSpectralSteedAttiresResult{
-		SaveSessionID: session.SaveSessionID, SaveRevision: "1", CharacterID: 0,
-		AttireKey: "default",
+		MutationReceipt: got.MutationReceipt,
+		CharacterID:     0,
+		AttireKey:       "default",
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("result = %+v, want %+v", got, want)
 	}
 
@@ -6140,8 +6156,13 @@ func TestSetWhetbladeUnlockedRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("world.SetWhetbladeUnlocked: %v", err)
 	}
+	assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetWhetbladeUnlockedEndpointID, "1")
+	// The two results come from two sessions and two executions, so the
+	// session and the execution identifier are pinned; everything else,
+	// including operationKind, saveRevision and changedScopes, is compared.
 	want.SaveSessionID = got.SaveSessionID
-	if got != want {
+	want.OperationID = got.OperationID
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 	}
 
@@ -6226,8 +6247,13 @@ func TestSetCookbookUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetCookbookUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetCookbookUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6341,8 +6367,13 @@ func TestSetBossDefeatedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetBossDefeated: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetBossDefeatedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6437,8 +6468,13 @@ func TestSetGraceVisitedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetGraceVisited: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetGraceVisitedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6533,8 +6569,13 @@ func TestSetColosseumUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetColosseumUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetColosseumUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6622,8 +6663,13 @@ func TestSetMapRegionRevealedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetMapRegionRevealed: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetMapRegionRevealedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6694,8 +6740,13 @@ func TestSetFogOfWarRemovedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetFogOfWarRemoved: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetFogOfWarRemovedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6776,8 +6827,13 @@ func TestSetSummoningPoolActivatedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetSummoningPoolActivated: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetSummoningPoolActivatedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -6964,8 +7020,13 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetRegionUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetRegionUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -7060,8 +7121,13 @@ func TestSetTutorialUnlockedRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetTutorialUnlocked: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetTutorialUnlockedEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})
@@ -7191,8 +7257,13 @@ func TestSetQuestStepRoute(t *testing.T) {
 		if err != nil {
 			t.Fatalf("world.SetQuestStep: %v", err)
 		}
+		assertRouteReceipt(t, got.MutationReceipt, got.SaveSessionID, world.SetQuestStepEndpointID, "1")
+		// The two results come from two sessions and two executions, so the
+		// session and the execution identifier are pinned; everything else,
+		// including operationKind, saveRevision and changedScopes, is compared.
 		want.SaveSessionID = got.SaveSessionID
-		if got != want {
+		want.OperationID = got.OperationID
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
 		}
 	})

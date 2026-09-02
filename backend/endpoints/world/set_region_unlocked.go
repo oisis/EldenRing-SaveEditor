@@ -35,13 +35,15 @@ var SetRegionUnlockedDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetRegionUnlockedResult reports the committed state in public catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetRegionUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	RegionKind    schema.ResourceKind `json:"regionKind"`
-	RegionKey     string              `json:"regionKey"`
-	Unlocked      bool                `json:"unlocked"`
+	saveengine.MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	RegionKind  schema.ResourceKind `json:"regionKind"`
+	RegionKey   string              `json:"regionKey"`
+	Unlocked    bool                `json:"unlocked"`
 }
 
 // SetRegionUnlocked unlocks or locks one curated region in a character slot of
@@ -96,11 +98,10 @@ func SetRegionUnlocked(
 		return SetRegionUnlockedResult{}, err
 	}
 	return SetRegionUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		RegionKind:    matched.entry.Kind,
-		RegionKey:     matched.entry.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		RegionKind:      matched.entry.Kind,
+		RegionKey:       matched.entry.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }

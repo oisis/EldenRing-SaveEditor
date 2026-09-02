@@ -27,6 +27,30 @@ The JSON body contains:
 The result contains `saveSessionID`, the committed `saveRevision`, `characterID`
 and the selected `attireKey`.
 
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_spectral_steed_attire`.
+- `changedScopes` are exactly `save.session`, `world.flags`, `diagnostics.report`, in that canonical order.
+  This mutation reads the Inventory to prove the selected appearance item is held and then writes appearance event flags only. It creates and removes no record, so Inventory is data it depends on, never data it changes, and it is not invalidated.
+
+A committed request identical to the current state still advances `saveRevision`
+and still returns a complete receipt with a fresh `operationID`: the central
+commit path runs even when no byte changes.
+
 ## Accepted appearances
 
 `attireKey` accepts only `default`, `tree_sentinel`, `silver_of_caria` and

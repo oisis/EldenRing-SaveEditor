@@ -36,9 +36,11 @@ var SetWhetbladeUnlockedDefinition = contract.MustDefine(contract.Definition{
 
 // SetWhetbladeUnlockedResult reports the committed state in public catalog
 // terms without exposing game IDs or event flags.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetWhetbladeUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID   int                 `json:"characterID"`
 	WhetbladeKind schema.ResourceKind `json:"whetbladeKind"`
 	WhetbladeKey  string              `json:"whetbladeKey"`
@@ -130,12 +132,11 @@ func SetWhetbladeUnlocked(
 		return SetWhetbladeUnlockedResult{}, err
 	}
 	return SetWhetbladeUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		WhetbladeKind: target.entry.Kind,
-		WhetbladeKey:  target.entry.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		WhetbladeKind:   target.entry.Kind,
+		WhetbladeKey:    target.entry.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }
 

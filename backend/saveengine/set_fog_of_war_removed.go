@@ -24,11 +24,15 @@ const (
 //
 // SaveRevision is the revision the change committed under, which is the previous
 // one plus exactly 1.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetFogOfWarRemovedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Removed       bool   `json:"removed"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Removed     bool `json:"removed"`
 }
 
 // SetFogOfWarRemoved fills the global Fog of War bitfield of one character slot
@@ -112,9 +116,8 @@ func (engine *Engine) SetFogOfWarRemoved(
 	}
 
 	return SetFogOfWarRemovedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Removed:       true,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Removed:         true,
 	}, nil
 }

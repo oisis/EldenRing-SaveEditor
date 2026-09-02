@@ -37,13 +37,15 @@ var SetGraceVisitedDefinition = contract.MustDefine(contract.Definition{
 // SetGraceVisitedResult reports the committed state in public catalog terms.
 // SaveEngine supplies the session state; this endpoint adds the catalog identity
 // it resolved without exposing the internal visit or door flags.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetGraceVisitedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	GraceKind     schema.ResourceKind `json:"graceKind"`
-	GraceKey      string              `json:"graceKey"`
-	Visited       bool                `json:"visited"`
+	saveengine.MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	GraceKind   schema.ResourceKind `json:"graceKind"`
+	GraceKey    string              `json:"graceKey"`
+	Visited     bool                `json:"visited"`
 }
 
 // SetGraceVisited sets or clears the visit state of one catalog grace in a
@@ -105,11 +107,10 @@ func SetGraceVisited(
 		return SetGraceVisitedResult{}, err
 	}
 	return SetGraceVisitedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		GraceKind:     matched.entry.Kind,
-		GraceKey:      matched.entry.Key,
-		Visited:       mutation.Visited,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		GraceKind:       matched.entry.Kind,
+		GraceKey:        matched.entry.Key,
+		Visited:         mutation.Visited,
 	}, nil
 }

@@ -37,9 +37,11 @@ var SetSummoningPoolActivatedDefinition = contract.MustDefine(contract.Definitio
 // SetSummoningPoolActivatedResult reports the committed state in public catalog
 // terms. SaveEngine supplies the session state; this endpoint adds the catalog
 // identity it resolved without exposing the internal activation event flag.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetSummoningPoolActivatedResult struct {
-	SaveSessionID     string              `json:"saveSessionID"`
-	SaveRevision      string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID       int                 `json:"characterID"`
 	SummoningPoolKind schema.ResourceKind `json:"summoningPoolKind"`
 	SummoningPoolKey  string              `json:"summoningPoolKey"`
@@ -102,8 +104,7 @@ func SetSummoningPoolActivated(
 		return SetSummoningPoolActivatedResult{}, err
 	}
 	return SetSummoningPoolActivatedResult{
-		SaveSessionID:     mutation.SaveSessionID,
-		SaveRevision:      mutation.SaveRevision,
+		MutationReceipt:   mutation.MutationReceipt,
 		CharacterID:       mutation.CharacterID,
 		SummoningPoolKind: matched.entry.Kind,
 		SummoningPoolKey:  matched.entry.Key,

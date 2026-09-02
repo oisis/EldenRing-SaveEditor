@@ -13,11 +13,15 @@ type WhetbladeState struct {
 }
 
 // SetWhetbladeUnlockedResult reports one committed Whetblade state change.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetWhetbladeUnlockedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Unlocked      bool   `json:"unlocked"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Unlocked    bool `json:"unlocked"`
 }
 
 // SetWhetbladeUnlocked synchronises one Whetblade's main and related event
@@ -154,10 +158,9 @@ func (engine *Engine) SetWhetbladeUnlocked(
 		return SetWhetbladeUnlockedResult{}, err
 	}
 	return SetWhetbladeUnlockedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Unlocked:      unlocked,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Unlocked:        unlocked,
 	}, nil
 }
 

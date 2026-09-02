@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -13,12 +14,12 @@ func TestSetFogOfWarRemovedCommitsTheGlobalField(t *testing.T) {
 		t.Fatalf("SetFogOfWarRemoved: %v", err)
 	}
 	want := SetFogOfWarRemovedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		Removed:       true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetFogOfWarRemovedEndpointID, sessionID, "1"),
+		CharacterID: getCookbooksSlot,
+		Removed:     true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

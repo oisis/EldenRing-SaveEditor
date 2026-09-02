@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -59,14 +60,14 @@ func TestSetGestureUnlockedAssignsCatalogGestureState(t *testing.T) {
 		t.Fatalf("SetGestureUnlocked: %v", err)
 	}
 	want := SetGestureUnlockedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getGesturesSlot,
-		GestureKind:   schema.ResourceKindItem,
-		GestureKey:    key,
-		Unlocked:      true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetGestureUnlockedEndpointID, sessionID, "1"),
+		CharacterID: getGesturesSlot,
+		GestureKind: schema.ResourceKindItem,
+		GestureKey:  key,
+		Unlocked:    true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

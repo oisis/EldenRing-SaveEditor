@@ -30,6 +30,30 @@ The JSON body contains:
 The result contains `saveSessionID`, the committed `saveRevision`,
 `characterID`, the resolved Whetblade kind and key, and `unlocked`.
 
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_whetblade_unlocked`.
+- `changedScopes` are exactly `save.session`, `inventory`, `world.flags`, `diagnostics.report`, in that canonical order.
+  This mutation keeps the Whetblade goods record in step with its flags, so Inventory is invalidated beside the World flags. Storage is never touched, and the shared removal planner refuses a referenced record, so the loadout never changes.
+
+A committed request identical to the current state still advances `saveRevision`
+and still returns a complete receipt with a fresh `operationID`: the central
+commit path runs even when no byte changes.
+
 ## Catalog validation
 
 Before SaveEngine touches the slot, the endpoint validates the complete set of

@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -19,10 +20,11 @@ func TestSetWhetbladeUnlockedCommitsCatalogResource(t *testing.T) {
 		t.Fatalf("SetWhetbladeUnlocked: %v", err)
 	}
 	want := SetWhetbladeUnlockedResult{
-		SaveSessionID: sessionID, SaveRevision: "1", CharacterID: getCookbooksSlot,
-		WhetbladeKind: schema.ResourceKindItem, WhetbladeKey: key, Unlocked: true,
+		MutationReceipt: wantWorldReceipt(t, result.MutationReceipt, SetWhetbladeUnlockedEndpointID, sessionID, "1"),
+		CharacterID:     getCookbooksSlot,
+		WhetbladeKind:   schema.ResourceKindItem, WhetbladeKey: key, Unlocked: true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

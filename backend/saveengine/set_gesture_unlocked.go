@@ -20,11 +20,15 @@ const (
 )
 
 // SetGestureUnlockedResult reports one committed gesture state change.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetGestureUnlockedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Unlocked      bool   `json:"unlocked"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Unlocked    bool `json:"unlocked"`
 }
 
 // SetGestureUnlocked assigns the unlock state of one canonical gesture slot in
@@ -124,10 +128,9 @@ func (engine *Engine) SetGestureUnlocked(
 	}
 
 	return SetGestureUnlockedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Unlocked:      unlocked,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Unlocked:        unlocked,
 	}, nil
 }
 

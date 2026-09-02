@@ -37,13 +37,15 @@ var SetBossDefeatedDefinition = contract.MustDefine(contract.Definition{
 // SetBossDefeatedResult reports the committed state in public catalog terms.
 // SaveEngine supplies the session state; this endpoint adds the catalog identity
 // it resolved without exposing the internal defeat event flag.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetBossDefeatedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	BossKind      schema.ResourceKind `json:"bossKind"`
-	BossKey       string              `json:"bossKey"`
-	Defeated      bool                `json:"defeated"`
+	saveengine.MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	BossKind    schema.ResourceKind `json:"bossKind"`
+	BossKey     string              `json:"bossKey"`
+	Defeated    bool                `json:"defeated"`
 }
 
 // SetBossDefeated sets or clears the synchronized defeat state of one catalog
@@ -103,11 +105,10 @@ func SetBossDefeated(
 		return SetBossDefeatedResult{}, err
 	}
 	return SetBossDefeatedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		BossKind:      matched.entry.Kind,
-		BossKey:       matched.entry.Key,
-		Defeated:      mutation.Defeated,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		BossKind:        matched.entry.Kind,
+		BossKey:         matched.entry.Key,
+		Defeated:        mutation.Defeated,
 	}, nil
 }

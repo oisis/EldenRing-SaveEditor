@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -159,14 +160,14 @@ func TestSetRegionUnlockedSuccess(t *testing.T) {
 	}
 
 	want := SetRegionUnlockedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   0,
-		RegionKind:    schema.ResourceKindRegion,
-		RegionKey:     setRegionValidKey,
-		Unlocked:      true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetRegionUnlockedEndpointID, sessionID, "1"),
+		CharacterID: 0,
+		RegionKind:  schema.ResourceKindRegion,
+		RegionKey:   setRegionValidKey,
+		Unlocked:    true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Fatalf("result = %+v, want %+v", result, want)
 	}
 

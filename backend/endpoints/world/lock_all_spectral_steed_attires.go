@@ -35,11 +35,13 @@ var LockAllSpectralSteedAttiresDefinition = contract.MustDefine(contract.Definit
 // LockAllSpectralSteedAttiresResult reports the committed reset in public terms.
 // AttireKey is always the default appearance, which is the only state this
 // operation can leave behind.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type LockAllSpectralSteedAttiresResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	AttireKey     string `json:"attireKey"`
+	saveengine.MutationReceipt
+	CharacterID int    `json:"characterID"`
+	AttireKey   string `json:"attireKey"`
 }
 
 // LockAllSpectralSteedAttires removes the three attire items from Inventory and
@@ -74,9 +76,8 @@ func LockAllSpectralSteedAttires(
 		return LockAllSpectralSteedAttiresResult{}, err
 	}
 	return LockAllSpectralSteedAttiresResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		AttireKey:     SpectralSteedAttireKeyDefault,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		AttireKey:       SpectralSteedAttireKeyDefault,
 	}, nil
 }

@@ -12,11 +12,15 @@ import (
 // one plus exactly 1. SaveSessionID and CharacterID match the request. Visited is
 // the new state stored in the save event flags. Catalog identity does not belong
 // to SaveEngine and is therefore added by the endpoint receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetGraceVisitedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Visited       bool   `json:"visited"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Visited     bool `json:"visited"`
 }
 
 // graceFlagBlocks are the confirmed event-flag blocks the visit flag of a curated
@@ -180,9 +184,8 @@ func (engine *Engine) SetGraceVisited(
 	}
 
 	return SetGraceVisitedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Visited:       visited,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Visited:         visited,
 	}, nil
 }

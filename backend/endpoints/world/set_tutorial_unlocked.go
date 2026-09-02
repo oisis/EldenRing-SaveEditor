@@ -36,13 +36,15 @@ var SetTutorialUnlockedDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetTutorialUnlockedResult reports the committed state in public catalog terms.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetTutorialUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	TutorialKind  schema.ResourceKind `json:"tutorialKind"`
-	TutorialKey   string              `json:"tutorialKey"`
-	Unlocked      bool                `json:"unlocked"`
+	saveengine.MutationReceipt
+	CharacterID  int                 `json:"characterID"`
+	TutorialKind schema.ResourceKind `json:"tutorialKind"`
+	TutorialKey  string              `json:"tutorialKey"`
+	Unlocked     bool                `json:"unlocked"`
 }
 
 // SetTutorialUnlocked adds or removes one catalog-declared tutorial in the
@@ -96,11 +98,10 @@ func SetTutorialUnlocked(
 		return SetTutorialUnlockedResult{}, err
 	}
 	return SetTutorialUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		TutorialKind:  resource.Kind,
-		TutorialKey:   resource.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		TutorialKind:    resource.Kind,
+		TutorialKey:     resource.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }

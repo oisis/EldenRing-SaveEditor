@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -34,12 +35,12 @@ func TestSetSummoningPoolActivatedMutatesOneBitOnBothPlatforms(t *testing.T) {
 				t.Fatalf("SetSummoningPoolActivated: %v", err)
 			}
 			want := SetSummoningPoolActivatedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Activated:     true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetSummoningPoolActivated, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Activated:   true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

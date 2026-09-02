@@ -52,8 +52,7 @@ func SetBellBearingUnlocked(
 
 ```go
 type SetBellBearingUnlockedResult struct {
-	SaveSessionID   string              `json:"saveSessionID"`
-	SaveRevision    string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID     int                 `json:"characterID"`
 	BellBearingKind schema.ResourceKind `json:"bellBearingKind"`
 	BellBearingKey  string              `json:"bellBearingKey"`
@@ -64,6 +63,30 @@ type SetBellBearingUnlockedResult struct {
 The result reports the new revision and the public catalog identity. It does
 not expose how many physical records were consumed because those records are an
 internal save representation, not the identity of the Bell Bearing.
+
+The result embeds the shared `MutationReceipt` anonymously, so the JSON stays
+flat: `operationID`, `operationKind`, `saveSessionID`, `saveRevision` and
+`changedScopes` are top-level members beside the domain fields, and there is no
+nested `receipt` object.
+
+The embedded receipt is exactly the one the central SaveEngine commit path
+produced for this execution. Nothing here is reassembled from the EndpointID,
+the session, the revision or a scope lookup.
+
+- `operationID` names this one execution. It is opaque and unpredictable.
+  Identifiers do not repeat among the receipts issued by one running SaveEngine
+  instance. That guarantee does not currently cover application restarts:
+  uniqueness across restarts requires a persistent operation journal and stays
+  outside this stage. A rejected call returns the complete zero result and no
+  `operationID` at all.
+- `operationKind` is the stable kind of the mutation and is always exactly
+  `set_bell_bearing_unlocked`.
+- `changedScopes` are exactly `save.session`, `inventory`, `storage`, `world.flags`, `diagnostics.report`, in that canonical order.
+  Handing a Bell Bearing in consumes every matching record and searches Inventory as well as Storage, so both containers are invalidated beside the World flags. A referenced record is refused by the shared removal planner, so the loadout never changes.
+
+A committed request identical to the current state still advances `saveRevision`
+and still returns a complete receipt with a fresh `operationID`: the central
+commit path runs even when no byte changes.
 
 ## Catalog resolution
 

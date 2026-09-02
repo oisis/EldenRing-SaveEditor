@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -28,12 +29,12 @@ func TestSetCookbookUnlockedMutatesEventFlagBitAndAdvancesRevision(t *testing.T)
 			}
 
 			want := SetCookbookUnlockedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Unlocked:      true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetCookbookUnlocked, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Unlocked:    true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

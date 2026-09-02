@@ -227,23 +227,36 @@ var domainChangedScopes = map[string][]string{
 		ScopeInventory, ScopeStorage, ScopeEquipmentLoadout, ScopeWorldFlags,
 	},
 
-	// World event flags.
-	kindSetBellBearingUnlocked:    {ScopeWorldFlags},
+	// World mutations that write event flags, gesture records or the unlocked
+	// region list and nothing else. Every one of them is answered by a World
+	// getter, and none of them creates, removes or re-quantifies an owned record.
 	kindSetBossDefeated:           {ScopeWorldFlags},
 	kindSetColosseumUnlocked:      {ScopeWorldFlags},
 	kindSetCookbookUnlocked:       {ScopeWorldFlags},
 	kindSetFogOfWarRemoved:        {ScopeWorldFlags},
 	kindSetGestureUnlocked:        {ScopeWorldFlags},
 	kindSetGraceVisited:           {ScopeWorldFlags},
-	kindSetMapRegionRevealed:      {ScopeWorldFlags},
 	kindSetQuestStep:              {ScopeWorldFlags},
 	kindSetRegionUnlocked:         {ScopeWorldFlags},
 	kindSetSummoningPoolActivated: {ScopeWorldFlags},
 	kindSetTutorialUnlocked:       {ScopeWorldFlags},
-	kindSetWhetbladeUnlocked:      {ScopeWorldFlags},
-	// The Spectral Steed writers move owned records and event flags together.
-	kindSetSpectralSteedAttire:      {ScopeInventory, ScopeWorldFlags},
+	// Selecting one Spectral Steed appearance reads the Inventory to prove the
+	// item is held and then writes appearance event flags only. It never creates
+	// or removes a record, so Inventory is data it depends on, not data it
+	// changes, and a scope list is what the endpoint writes.
+	kindSetSpectralSteedAttire: {ScopeWorldFlags},
+
+	// World mutations that keep a companion item in step with their flags, so
+	// they write InventoryHeld records and the section counters beside the flag
+	// byte. None of them can empty a row an Equipment, Quick Item or Pouch slot
+	// references: the shared removal planner refuses a referenced record, so the
+	// loadout is never invalidated.
+	kindSetMapRegionRevealed:        {ScopeInventory, ScopeWorldFlags},
+	kindSetWhetbladeUnlocked:        {ScopeInventory, ScopeWorldFlags},
 	kindLockAllSpectralSteedAttires: {ScopeInventory, ScopeWorldFlags},
+	// Handing a Bell Bearing in consumes every matching record, and it searches
+	// Inventory as well as Storage, so both containers are invalidated.
+	kindSetBellBearingUnlocked: {ScopeInventory, ScopeStorage, ScopeWorldFlags},
 
 	// Session-wide surfaces stored outside a character slot.
 	kindSetNetworkSettings:   {ScopeNetwork},

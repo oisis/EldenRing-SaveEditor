@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -48,12 +49,12 @@ func TestSetMapRegionRevealedWritesFlagAndFragmentOnBothPlatforms(t *testing.T) 
 				t.Fatalf("SetMapRegionRevealed: %v", err)
 			}
 			want := SetMapRegionRevealedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Revealed:      true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetMapRegionRevealed, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Revealed:    true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 			assertMapRegionState(t, engine, loaded.SaveSessionID, content.slot, true)

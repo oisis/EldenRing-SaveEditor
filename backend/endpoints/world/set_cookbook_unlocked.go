@@ -37,13 +37,15 @@ var SetCookbookUnlockedDefinition = contract.MustDefine(contract.Definition{
 // SetCookbookUnlockedResult reports the committed mutation in public catalog
 // terms. SaveEngine supplies the session state; this endpoint adds the catalog
 // identity it resolved without exposing the internal event flag identifier.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetCookbookUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	CookbookKind  schema.ResourceKind `json:"cookbookKind"`
-	CookbookKey   string              `json:"cookbookKey"`
-	Unlocked      bool                `json:"unlocked"`
+	saveengine.MutationReceipt
+	CharacterID  int                 `json:"characterID"`
+	CookbookKind schema.ResourceKind `json:"cookbookKind"`
+	CookbookKey  string              `json:"cookbookKey"`
+	Unlocked     bool                `json:"unlocked"`
 }
 
 // SetCookbookUnlocked sets or clears the unlock state of a catalog cookbook
@@ -109,11 +111,10 @@ func SetCookbookUnlocked(
 		return SetCookbookUnlockedResult{}, err
 	}
 	return SetCookbookUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		CookbookKind:  matched.entry.Kind,
-		CookbookKey:   matched.entry.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		CookbookKind:    matched.entry.Kind,
+		CookbookKey:     matched.entry.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }

@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -20,14 +21,14 @@ func TestSetSummoningPoolActivatedActivatesAndDeactivates(t *testing.T) {
 		t.Fatalf("SetSummoningPoolActivated: %v", err)
 	}
 	want := SetSummoningPoolActivatedResult{
-		SaveSessionID:     sessionID,
-		SaveRevision:      "1",
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetSummoningPoolActivatedEndpointID, sessionID, "1"),
 		CharacterID:       getCookbooksSlot,
 		SummoningPoolKind: schema.ResourceKindSummoningPool,
 		SummoningPoolKey:  getSummoningPoolsClearKey,
 		Activated:         true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

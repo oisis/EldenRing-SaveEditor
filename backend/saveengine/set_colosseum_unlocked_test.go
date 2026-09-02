@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -37,12 +38,12 @@ func TestSetColosseumUnlockedWritesTheCompleteSetOnBothPlatforms(t *testing.T) {
 				t.Fatalf("SetColosseumUnlocked: %v", err)
 			}
 			want := SetColosseumUnlockedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Unlocked:      true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetColosseumUnlocked, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Unlocked:    true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

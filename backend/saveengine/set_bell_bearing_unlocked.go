@@ -6,11 +6,15 @@ const bellBearingEventFlagBlock = uint32(11109)
 
 // SetBellBearingUnlockedResult reports one committed handed-in state change.
 // Catalog identity remains the endpoint's responsibility.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetBellBearingUnlockedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Unlocked      bool   `json:"unlocked"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Unlocked    bool `json:"unlocked"`
 }
 
 // SetBellBearingUnlocked changes the acquisition flag of one Bell Bearing.
@@ -107,10 +111,9 @@ func (engine *Engine) SetBellBearingUnlocked(
 	}
 
 	return SetBellBearingUnlockedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Unlocked:      unlocked,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Unlocked:        unlocked,
 	}, nil
 }
 

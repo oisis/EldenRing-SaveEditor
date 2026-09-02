@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -19,14 +20,14 @@ func TestSetColosseumUnlockedSetsAndClearsTheState(t *testing.T) {
 		t.Fatalf("SetColosseumUnlocked: %v", err)
 	}
 	want := SetColosseumUnlockedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetColosseumUnlockedEndpointID, sessionID, "1"),
 		CharacterID:   getCookbooksSlot,
 		ColosseumKind: schema.ResourceKindColosseum,
 		ColosseumKey:  "limgrave_colosseum",
 		Unlocked:      true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

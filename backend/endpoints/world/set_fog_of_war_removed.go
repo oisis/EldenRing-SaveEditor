@@ -32,11 +32,13 @@ var SetFogOfWarRemovedDefinition = contract.MustDefine(contract.Definition{
 })
 
 // SetFogOfWarRemovedResult reports the committed state and session revision.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetFogOfWarRemovedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Removed       bool   `json:"removed"`
+	saveengine.MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Removed     bool `json:"removed"`
 }
 
 // SetFogOfWarRemoved removes the global Fog of War overlay of one character slot
@@ -68,9 +70,8 @@ func SetFogOfWarRemoved(
 		return SetFogOfWarRemovedResult{}, err
 	}
 	return SetFogOfWarRemovedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		Removed:       mutation.Removed,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		Removed:         mutation.Removed,
 	}, nil
 }

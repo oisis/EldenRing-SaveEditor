@@ -170,9 +170,37 @@ func TestRepresentativeMutationsReportTheirExactChangedScopes(t *testing.T) {
 			"save.session", "character.list", "character.profile", "character.stats",
 			"character.appearance", "inventory", "storage", "equipment.loadout", "world.flags",
 			"diagnostics.report"}},
+		// The ten World mutations that write only event flags, gesture records or
+		// the unlocked region list. They create, remove and re-quantify no owned
+		// record, so neither container is invalidated.
+		{kindSetBossDefeated, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetColosseumUnlocked, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetCookbookUnlocked, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetFogOfWarRemoved, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetGestureUnlocked, []string{"save.session", "world.flags", "diagnostics.report"}},
 		{kindSetGraceVisited, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetQuestStep, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetRegionUnlocked, []string{"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetSummoningPoolActivated, []string{
+			"save.session", "world.flags", "diagnostics.report"}},
+		{kindSetTutorialUnlocked, []string{"save.session", "world.flags", "diagnostics.report"}},
+		// Selecting an appearance reads the Inventory to prove the item is held and
+		// then writes appearance flags only, so Inventory is not invalidated.
 		{kindSetSpectralSteedAttire, []string{
+			"save.session", "world.flags", "diagnostics.report"}},
+		// These three keep a companion item in step with their flags, so they write
+		// InventoryHeld records. The shared removal planner refuses a record an
+		// Equipment, Quick Item or Pouch slot references, so the loadout is safe.
+		{kindSetMapRegionRevealed, []string{
 			"save.session", "inventory", "world.flags", "diagnostics.report"}},
+		{kindSetWhetbladeUnlocked, []string{
+			"save.session", "inventory", "world.flags", "diagnostics.report"}},
+		{kindLockAllSpectralSteedAttires, []string{
+			"save.session", "inventory", "world.flags", "diagnostics.report"}},
+		// Handing a Bell Bearing in consumes every matching record and searches
+		// Inventory as well as Storage.
+		{kindSetBellBearingUnlocked, []string{
+			"save.session", "inventory", "storage", "world.flags", "diagnostics.report"}},
 		{kindSetNetworkSettings, []string{"save.session", "network", "diagnostics.report"}},
 		{kindApplyNetworkPreset, []string{"save.session", "network", "diagnostics.report"}},
 		{kindSetFavoritePreset, []string{"save.session", "favorites", "diagnostics.report"}},
@@ -882,5 +910,43 @@ func TestSetEquippedArmamentsRefusesWhenTheOperationIDCannotBeMinted(t *testing.
 	}
 	if after != before {
 		t.Errorf("session = %+v, want the unchanged %+v", after, before)
+	}
+}
+
+// wantCommitReceipt is the receipt one committed mutation of operationKind must
+// carry. The opaque operationID cannot be predicted, so it is asserted non-empty
+// here and then carried into the returned value, which lets a domain test keep
+// comparing the complete result in one step instead of dropping the receipt from
+// its assertion.
+//
+// The scopes come from the resolver rather than from a literal, because the
+// literal contract of every kind is asserted once in
+// TestRepresentativeMutationsReportTheirExactChangedScopes; restating it in
+// every domain test would only duplicate that table.
+//
+// ponytail: a want-builder, not an assertion helper. The caller already owns an
+// exact comparison; it only lacks the one member it cannot know in advance.
+func wantCommitReceipt(
+	t *testing.T,
+	got MutationReceipt,
+	operationKind string,
+	saveSessionID string,
+	saveRevision string,
+) MutationReceipt {
+	t.Helper()
+
+	if got.OperationID == "" {
+		t.Errorf("receipt = %+v, want a minted operationID", got)
+	}
+	scopes, err := changedScopesForMutationKind(operationKind)
+	if err != nil {
+		t.Fatalf("changedScopesForMutationKind(%q): %v", operationKind, err)
+	}
+	return MutationReceipt{
+		OperationID:   got.OperationID,
+		OperationKind: operationKind,
+		SaveSessionID: saveSessionID,
+		SaveRevision:  saveRevision,
+		ChangedScopes: scopes,
 	}
 }

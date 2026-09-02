@@ -44,9 +44,11 @@ const mapFragmentUnlockKind = "map"
 // SetMapRegionRevealedResult reports the committed state in public catalog
 // terms. SaveEngine supplies the session state; this endpoint adds the catalog
 // identity it resolved without exposing any event flag or item game ID.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetMapRegionRevealedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID   int                 `json:"characterID"`
 	MapRegionKind schema.ResourceKind `json:"mapRegionKind"`
 	MapRegionKey  string              `json:"mapRegionKey"`
@@ -121,12 +123,11 @@ func SetMapRegionRevealed(
 		return SetMapRegionRevealedResult{}, err
 	}
 	return SetMapRegionRevealedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		MapRegionKind: matched.entry.Kind,
-		MapRegionKey:  matched.entry.Key,
-		Revealed:      mutation.Revealed,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		MapRegionKind:   matched.entry.Kind,
+		MapRegionKey:    matched.entry.Key,
+		Revealed:        mutation.Revealed,
 	}, nil
 }
 

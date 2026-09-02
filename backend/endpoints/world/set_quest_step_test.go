@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -29,15 +30,15 @@ func TestSetQuestStepAppliesTheStepPlan(t *testing.T) {
 	}
 
 	want := SetQuestStepResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		QuestKind:     schema.ResourceKindQuest,
-		QuestKey:      questKey,
-		StepKind:      "quest_step",
-		StepKey:       stepKey,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetQuestStepEndpointID, sessionID, "1"),
+		CharacterID: getCookbooksSlot,
+		QuestKind:   schema.ResourceKindQuest,
+		QuestKey:    questKey,
+		StepKind:    "quest_step",
+		StepKey:     stepKey,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

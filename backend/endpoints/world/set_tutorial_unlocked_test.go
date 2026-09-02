@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -17,14 +18,14 @@ func TestSetTutorialUnlockedCommitsBothDirections(t *testing.T) {
 		t.Fatalf("unlock: %v", err)
 	}
 	want := SetTutorialUnlockedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		TutorialKind:  schema.ResourceKindTutorial,
-		TutorialKey:   getTutorialsLockedKey,
-		Unlocked:      true,
+		MutationReceipt: wantWorldReceipt(
+			t, unlock.MutationReceipt, SetTutorialUnlockedEndpointID, sessionID, "1"),
+		CharacterID:  getCookbooksSlot,
+		TutorialKind: schema.ResourceKindTutorial,
+		TutorialKey:  getTutorialsLockedKey,
+		Unlocked:     true,
 	}
-	if unlock != want {
+	if !reflect.DeepEqual(unlock, want) {
 		t.Fatalf("unlock result = %+v, want %+v", unlock, want)
 	}
 

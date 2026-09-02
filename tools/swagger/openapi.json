@@ -7684,30 +7684,31 @@
         "required": ["bellBearingKind", "bellBearingKey", "unlocked", "expectedRevision"]
       },
       "SetBellBearingUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned after a successful Bell Bearing handed-in state mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned after a successful Bell Bearing handed-in state mutation. The shared mutation receipt is composed flat: operationKind is set_bell_bearing_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bellBearingKind": {
-            "type": "string"
-          },
-          "bellBearingKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "bellBearingKind": {
+                "type": "string"
+              },
+              "bellBearingKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "bellBearingKind", "bellBearingKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "bellBearingKind", "bellBearingKey", "unlocked"]
+        ]
       },
       "ColosseumEntry": {
         "type": "object",
@@ -8076,25 +8077,27 @@
         "required": ["mapRegionKind", "mapRegionKey", "revealed", "expectedRevision"]
       },
       "SetMapRegionRevealedResult": {
-        "type": "object",
-        "description": "The committed map region visibility state and new save revision.",
-        "properties": {
-          "saveSessionID": {"type": "string"},
-          "saveRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]*)$"
+        "description": "The committed map region visibility state and new save revision. The shared mutation receipt is composed flat: operationKind is set_map_region_revealed.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "mapRegionKind": {"type": "string", "enum": ["map_region"]},
-          "mapRegionKey": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-          "revealed": {"type": "boolean"}
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "mapRegionKind", "mapRegionKey", "revealed"]
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "mapRegionKind": {"type": "string", "enum": ["map_region"]},
+              "mapRegionKey": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+              "revealed": {"type": "boolean"}
+            },
+            "required": ["characterID", "mapRegionKind", "mapRegionKey", "revealed"]
+          }
+        ]
       },
       "SetFogOfWarRemovedRequest": {
         "type": "object",
@@ -8115,23 +8118,25 @@
         "required": ["removed", "expectedRevision"]
       },
       "SetFogOfWarRemovedResult": {
-        "type": "object",
-        "description": "The committed Fog of War state and new save revision.",
-        "properties": {
-          "saveSessionID": {"type": "string"},
-          "saveRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]*)$"
+        "description": "The committed Fog of War state and new save revision. The shared mutation receipt is composed flat: operationKind is set_fog_of_war_removed.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "characterID": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "removed": {"type": "boolean", "enum": [true]}
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "removed"]
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "removed": {"type": "boolean", "enum": [true]}
+            },
+            "required": ["characterID", "removed"]
+          }
+        ]
       },
       "TutorialEntry": {
         "type": "object",
@@ -8380,24 +8385,25 @@
         "required": ["attireKey", "expectedRevision"]
       },
       "SetSpectralSteedAttireResult": {
-        "type": "object",
-        "description": "The receipt returned after a successful Spectral Steed Attire selection.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned after a successful Spectral Steed Attire selection. The shared mutation receipt is composed flat: operationKind is set_spectral_steed_attire.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "attireKey": {
-            "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "attireKey": {
+                "type": "string"
+              }
+            },
+            "required": ["characterID", "attireKey"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "attireKey"]
+        ]
       },
       "LockAllSpectralSteedAttiresRequest": {
         "type": "object",
@@ -8413,25 +8419,26 @@
         "required": ["expectedRevision"]
       },
       "LockAllSpectralSteedAttiresResult": {
-        "type": "object",
-        "description": "The receipt returned after a successful Spectral Steed Attire reset. attireKey is always default, the only state this operation can leave behind.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned after a successful Spectral Steed Attire reset. attireKey is always default, the only state this operation can leave behind. The shared mutation receipt is composed flat: operationKind is lock_all_spectral_steed_attires.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "attireKey": {
-            "type": "string",
-            "enum": ["default"]
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "attireKey": {
+                "type": "string",
+                "enum": ["default"]
+              }
+            },
+            "required": ["characterID", "attireKey"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "attireKey"]
+        ]
       },
       "SetWhetbladeUnlockedRequest": {
         "type": "object",
@@ -8461,30 +8468,31 @@
         "required": ["whetbladeKind", "whetbladeKey", "unlocked", "expectedRevision"]
       },
       "SetWhetbladeUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned after a successful Whetblade state mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned after a successful Whetblade state mutation. The shared mutation receipt is composed flat: operationKind is set_whetblade_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "whetbladeKind": {
-            "type": "string"
-          },
-          "whetbladeKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "whetbladeKind": {
+                "type": "string"
+              },
+              "whetbladeKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "whetbladeKind", "whetbladeKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "whetbladeKind", "whetbladeKey", "unlocked"]
+        ]
       },
       "SetCookbookUnlockedRequest": {
         "type": "object",
@@ -8514,30 +8522,31 @@
         "required": ["cookbookKind", "cookbookKey", "unlocked", "expectedRevision"]
       },
       "SetCookbookUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful cookbook unlock mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful cookbook unlock mutation. The shared mutation receipt is composed flat: operationKind is set_cookbook_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cookbookKind": {
-            "type": "string"
-          },
-          "cookbookKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "cookbookKind": {
+                "type": "string"
+              },
+              "cookbookKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "cookbookKind", "cookbookKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "cookbookKind", "cookbookKey", "unlocked"]
+        ]
       },
       "SetSummoningPoolActivatedRequest": {
         "type": "object",
@@ -8567,30 +8576,31 @@
         "required": ["summoningPoolKind", "summoningPoolKey", "activated", "expectedRevision"]
       },
       "SetSummoningPoolActivatedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful Summoning Pool activation mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful Summoning Pool activation mutation. The shared mutation receipt is composed flat: operationKind is set_summoning_pool_activated.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "summoningPoolKind": {
-            "type": "string"
-          },
-          "summoningPoolKey": {
-            "type": "string"
-          },
-          "activated": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "summoningPoolKind": {
+                "type": "string"
+              },
+              "summoningPoolKey": {
+                "type": "string"
+              },
+              "activated": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "summoningPoolKind", "summoningPoolKey", "activated"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "summoningPoolKind", "summoningPoolKey", "activated"]
+        ]
       },
       "SetBossDefeatedRequest": {
         "type": "object",
@@ -8620,30 +8630,31 @@
         "required": ["bossKind", "bossKey", "defeated", "expectedRevision"]
       },
       "SetBossDefeatedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful boss defeat mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful boss defeat mutation. The shared mutation receipt is composed flat: operationKind is set_boss_defeated.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bossKind": {
-            "type": "string"
-          },
-          "bossKey": {
-            "type": "string"
-          },
-          "defeated": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "bossKind": {
+                "type": "string"
+              },
+              "bossKey": {
+                "type": "string"
+              },
+              "defeated": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "bossKind", "bossKey", "defeated"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "bossKind", "bossKey", "defeated"]
+        ]
       },
       "SetGraceVisitedRequest": {
         "type": "object",
@@ -8673,30 +8684,31 @@
         "required": ["graceKind", "graceKey", "visited", "expectedRevision"]
       },
       "SetGraceVisitedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful Site of Grace visit mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful Site of Grace visit mutation. The shared mutation receipt is composed flat: operationKind is set_grace_visited.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "graceKind": {
-            "type": "string"
-          },
-          "graceKey": {
-            "type": "string"
-          },
-          "visited": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "graceKind": {
+                "type": "string"
+              },
+              "graceKey": {
+                "type": "string"
+              },
+              "visited": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "graceKind", "graceKey", "visited"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "graceKind", "graceKey", "visited"]
+        ]
       },
       "SetColosseumUnlockedRequest": {
         "type": "object",
@@ -8726,30 +8738,31 @@
         "required": ["colosseumKind", "colosseumKey", "unlocked", "expectedRevision"]
       },
       "SetColosseumUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful colosseum unlock mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful colosseum unlock mutation. The shared mutation receipt is composed flat: operationKind is set_colosseum_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "colosseumKind": {
-            "type": "string"
-          },
-          "colosseumKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "colosseumKind": {
+                "type": "string"
+              },
+              "colosseumKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "colosseumKind", "colosseumKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "colosseumKind", "colosseumKey", "unlocked"]
+        ]
       },
       "SetRegionUnlockedRequest": {
         "type": "object",
@@ -8779,31 +8792,32 @@
         "required": ["regionKind", "regionKey", "unlocked", "expectedRevision"]
       },
       "SetRegionUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful region unlock mutation.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful region unlock mutation. The shared mutation receipt is composed flat: operationKind is set_region_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "regionKind": {
-            "type": "string",
-            "enum": ["region"]
-          },
-          "regionKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "regionKind": {
+                "type": "string",
+                "enum": ["region"]
+              },
+              "regionKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "regionKind", "regionKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "regionKind", "regionKey", "unlocked"]
+        ]
       },
       "SetTutorialUnlockedRequest": {
         "type": "object",
@@ -8833,31 +8847,32 @@
         "required": ["tutorialKind", "tutorialKey", "unlocked", "expectedRevision"]
       },
       "SetTutorialUnlockedResult": {
-        "type": "object",
-        "description": "The receipt returned upon successful tutorial unlock mutation. The private TutorialParam row ID is not exposed.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The receipt returned upon successful tutorial unlock mutation. The private TutorialParam row ID is not exposed. The shared mutation receipt is composed flat: operationKind is set_tutorial_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "tutorialKind": {
-            "type": "string",
-            "enum": ["tutorial"]
-          },
-          "tutorialKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "tutorialKind": {
+                "type": "string",
+                "enum": ["tutorial"]
+              },
+              "tutorialKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "tutorialKind", "tutorialKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "tutorialKind", "tutorialKey", "unlocked"]
+        ]
       },
       "GestureEntry": {
         "type": "object",
@@ -8948,30 +8963,31 @@
         "required": ["gestureKind", "gestureKey", "unlocked", "expectedRevision"]
       },
       "SetGestureUnlockedResult": {
-        "type": "object",
-        "description": "The committed logical gesture state and the new save revision. The physical slot ID remains internal.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The committed logical gesture state and the new save revision. The physical slot ID remains internal. The shared mutation receipt is composed flat: operationKind is set_gesture_unlocked.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "gestureKind": {
-            "type": "string"
-          },
-          "gestureKey": {
-            "type": "string"
-          },
-          "unlocked": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "gestureKind": {
+                "type": "string"
+              },
+              "gestureKey": {
+                "type": "string"
+              },
+              "unlocked": {
+                "type": "boolean"
+              }
+            },
+            "required": ["characterID", "gestureKind", "gestureKey", "unlocked"]
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "gestureKind", "gestureKey", "unlocked"]
+        ]
       },
       "StorageRecord": {
         "type": "object",
@@ -12647,40 +12663,40 @@
         ]
       },
       "SetQuestStepResult": {
-        "type": "object",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
+        "description": "The shared mutation receipt is composed flat: operationKind is set_quest_step.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MutationReceipt"
           },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9
-          },
-          "questKind": {
-            "type": "string"
-          },
-          "questKey": {
-            "type": "string"
-          },
-          "stepKind": {
-            "type": "string"
-          },
-          "stepKey": {
-            "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "characterID": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9
+              },
+              "questKind": {
+                "type": "string"
+              },
+              "questKey": {
+                "type": "string"
+              },
+              "stepKind": {
+                "type": "string"
+              },
+              "stepKey": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "characterID",
+              "questKind",
+              "questKey",
+              "stepKind",
+              "stepKey"
+            ]
           }
-        },
-        "required": [
-          "saveSessionID",
-          "saveRevision",
-          "characterID",
-          "questKind",
-          "questKey",
-          "stepKind",
-          "stepKey"
         ]
       },
       "FavoritePreset": {

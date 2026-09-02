@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -51,12 +52,12 @@ func TestSetFogOfWarRemovedFillsExactlyTheFieldOnBothPlatforms(t *testing.T) {
 				t.Fatalf("SetFogOfWarRemoved: %v", err)
 			}
 			want := SetFogOfWarRemovedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Removed:       true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetFogOfWarRemoved, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Removed:     true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 
@@ -219,7 +220,7 @@ func TestSetFogOfWarRemovedRejectsWithoutMutating(t *testing.T) {
 			if err == nil || err.Error() != testCase.wantError {
 				t.Fatalf("error = %v, want %q", err, testCase.wantError)
 			}
-			if result != (SetFogOfWarRemovedResult{}) {
+			if !reflect.DeepEqual(result, SetFogOfWarRemovedResult{}) {
 				t.Errorf("result = %+v, want zero value", result)
 			}
 			if changed := changedSnapshotBytes(before, snapshot.data); len(changed) != 0 {

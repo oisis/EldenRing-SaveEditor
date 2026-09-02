@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -28,14 +29,14 @@ func TestSetGraceVisitedSetsAndClearsTheFlag(t *testing.T) {
 		t.Fatalf("SetGraceVisited: %v", err)
 	}
 	want := SetGraceVisitedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		GraceKind:     schema.ResourceKindGrace,
-		GraceKey:      getGracesClearKey,
-		Visited:       true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetGraceVisitedEndpointID, sessionID, "1"),
+		CharacterID: getCookbooksSlot,
+		GraceKind:   schema.ResourceKindGrace,
+		GraceKey:    getGracesClearKey,
+		Visited:     true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

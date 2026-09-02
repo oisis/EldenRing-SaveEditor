@@ -36,13 +36,15 @@ var SetGestureUnlockedDefinition = contract.MustDefine(contract.Definition{
 
 // SetGestureUnlockedResult reports the committed mutation in public catalog
 // terms. The physical save slot ID remains internal.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetGestureUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
-	CharacterID   int                 `json:"characterID"`
-	GestureKind   schema.ResourceKind `json:"gestureKind"`
-	GestureKey    string              `json:"gestureKey"`
-	Unlocked      bool                `json:"unlocked"`
+	saveengine.MutationReceipt
+	CharacterID int                 `json:"characterID"`
+	GestureKind schema.ResourceKind `json:"gestureKind"`
+	GestureKey  string              `json:"gestureKey"`
+	Unlocked    bool                `json:"unlocked"`
 }
 
 // SetGestureUnlocked assigns the unlock state of one catalog gesture in an
@@ -84,12 +86,11 @@ func SetGestureUnlocked(
 		return SetGestureUnlockedResult{}, err
 	}
 	return SetGestureUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		GestureKind:   resource.Kind,
-		GestureKey:    resource.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		GestureKind:     resource.Kind,
+		GestureKey:      resource.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }
 

@@ -1,6 +1,7 @@
 package world
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -30,14 +31,14 @@ func TestSetMapRegionRevealedCommitsFlagAndFragment(t *testing.T) {
 		t.Fatalf("SetMapRegionRevealed: %v", err)
 	}
 	want := SetMapRegionRevealedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetMapRegionRevealedEndpointID, sessionID, "1"),
 		CharacterID:   getCookbooksSlot,
 		MapRegionKind: schema.ResourceKindMapRegion,
 		MapRegionKey:  setMapRegionFragmentKey,
 		Revealed:      true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

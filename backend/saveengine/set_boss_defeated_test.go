@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -34,12 +35,12 @@ func TestSetBossDefeatedMutatesOneBitOnBothPlatforms(t *testing.T) {
 				t.Fatalf("SetBossDefeated: %v", err)
 			}
 			want := SetBossDefeatedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Defeated:      true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetBossDefeated, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Defeated:    true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 

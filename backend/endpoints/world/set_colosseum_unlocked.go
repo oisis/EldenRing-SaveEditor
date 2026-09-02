@@ -37,9 +37,11 @@ var SetColosseumUnlockedDefinition = contract.MustDefine(contract.Definition{
 // SetColosseumUnlockedResult reports the committed state in public catalog
 // terms. SaveEngine supplies the session state; this endpoint adds the catalog
 // identity it resolved without exposing any internal event flag.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetColosseumUnlockedResult struct {
-	SaveSessionID string              `json:"saveSessionID"`
-	SaveRevision  string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID   int                 `json:"characterID"`
 	ColosseumKind schema.ResourceKind `json:"colosseumKind"`
 	ColosseumKey  string              `json:"colosseumKey"`
@@ -105,11 +107,10 @@ func SetColosseumUnlocked(
 		return SetColosseumUnlockedResult{}, err
 	}
 	return SetColosseumUnlockedResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		ColosseumKind: matched.entry.Kind,
-		ColosseumKey:  matched.entry.Key,
-		Unlocked:      mutation.Unlocked,
+		MutationReceipt: mutation.MutationReceipt,
+		CharacterID:     mutation.CharacterID,
+		ColosseumKind:   matched.entry.Kind,
+		ColosseumKey:    matched.entry.Key,
+		Unlocked:        mutation.Unlocked,
 	}, nil
 }

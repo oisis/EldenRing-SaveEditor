@@ -3,6 +3,7 @@ package world
 import (
 	"bytes"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -22,14 +23,14 @@ func TestSetCookbookUnlockedUnlocksALockedCookbook(t *testing.T) {
 	}
 
 	want := SetCookbookUnlockedResult{
-		SaveSessionID: sessionID,
-		SaveRevision:  "1",
-		CharacterID:   getCookbooksSlot,
-		CookbookKind:  schema.ResourceKindItem,
-		CookbookKey:   getCookbooksSecondKey,
-		Unlocked:      true,
+		MutationReceipt: wantWorldReceipt(
+			t, result.MutationReceipt, SetCookbookUnlockedEndpointID, sessionID, "1"),
+		CharacterID:  getCookbooksSlot,
+		CookbookKind: schema.ResourceKindItem,
+		CookbookKey:  getCookbooksSecondKey,
+		Unlocked:     true,
 	}
-	if result != want {
+	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
 	}
 

@@ -11,11 +11,15 @@ import (
 // one plus exactly 1. SaveSessionID and CharacterID match the request. Defeated
 // is the new state stored in the save event flags. Catalog identity does not
 // belong to SaveEngine and is therefore added by the endpoint receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetBossDefeatedResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Defeated      bool   `json:"defeated"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Defeated    bool `json:"defeated"`
 }
 
 // bossFlagBlock is the one confirmed event-flag block the synchronized defeat
@@ -127,9 +131,8 @@ func (engine *Engine) SetBossDefeated(
 	}
 
 	return SetBossDefeatedResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Defeated:      defeated,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Defeated:        defeated,
 	}, nil
 }

@@ -17,10 +17,14 @@ type QuestFlagTarget struct {
 // SaveRevision is the revision the change committed under, which is the previous
 // one plus exactly 1. SaveSessionID and CharacterID match the request. Catalog
 // identity does not belong to SaveEngine and is added by the endpoint receipt.
+//
+// The receipt the central commit path produced is embedded anonymously, so
+// saveSessionID and saveRevision keep their previous JSON names and the three
+// new members join them flat. Nothing here is reassembled from the kind, the
+// session, the revision or a scope lookup.
 type SetQuestStepResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
+	MutationReceipt
+	CharacterID int `json:"characterID"`
 }
 
 type questByteMask struct {
@@ -139,8 +143,7 @@ func (engine *Engine) SetQuestStep(
 	}
 
 	return SetQuestStepResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
 	}, nil
 }

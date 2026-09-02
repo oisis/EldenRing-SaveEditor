@@ -36,9 +36,11 @@ var SetBellBearingUnlockedDefinition = contract.MustDefine(contract.Definition{
 
 // SetBellBearingUnlockedResult reports the committed state in public catalog
 // terms without exposing the internal game ID, handle or event flag.
+//
+// The receipt is the one the SaveEngine commit path produced, embedded
+// anonymously so the JSON stays flat and carries no nested receipt object.
 type SetBellBearingUnlockedResult struct {
-	SaveSessionID   string              `json:"saveSessionID"`
-	SaveRevision    string              `json:"saveRevision"`
+	saveengine.MutationReceipt
 	CharacterID     int                 `json:"characterID"`
 	BellBearingKind schema.ResourceKind `json:"bellBearingKind"`
 	BellBearingKey  string              `json:"bellBearingKey"`
@@ -127,8 +129,7 @@ func SetBellBearingUnlocked(
 		return SetBellBearingUnlockedResult{}, err
 	}
 	return SetBellBearingUnlockedResult{
-		SaveSessionID:   mutation.SaveSessionID,
-		SaveRevision:    mutation.SaveRevision,
+		MutationReceipt: mutation.MutationReceipt,
 		CharacterID:     mutation.CharacterID,
 		BellBearingKind: matched.entry.Kind,
 		BellBearingKey:  matched.entry.Key,

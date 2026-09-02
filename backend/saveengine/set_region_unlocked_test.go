@@ -80,12 +80,12 @@ func TestSetRegionUnlockedPCAndPS4(t *testing.T) {
 				t.Fatalf("SetRegionUnlocked: %v", err)
 			}
 			want := SetRegionUnlockedResult{
-				SaveSessionID: info.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   tc.slot,
-				Unlocked:      tc.unlocked,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetRegionUnlocked, info.SaveSessionID, "1"),
+				CharacterID: tc.slot,
+				Unlocked:    tc.unlocked,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Fatalf("result = %+v, want %+v", result, want)
 			}
 

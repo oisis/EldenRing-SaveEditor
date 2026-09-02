@@ -2,6 +2,7 @@ package saveengine
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 )
 
@@ -52,12 +53,12 @@ func TestSetGraceVisitedMutatesOneBitOnBothPlatforms(t *testing.T) {
 				t.Fatalf("SetGraceVisited: %v", err)
 			}
 			want := SetGraceVisitedResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   content.slot,
-				Visited:       true,
+				MutationReceipt: wantCommitReceipt(
+					t, result.MutationReceipt, kindSetGraceVisited, loaded.SaveSessionID, "1"),
+				CharacterID: content.slot,
+				Visited:     true,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
 			}
 
