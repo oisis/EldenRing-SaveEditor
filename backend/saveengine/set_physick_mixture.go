@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const (
@@ -42,8 +44,7 @@ func (engine *Engine) SetPhysickMixture(
 	expectedRevision string,
 ) (SetPhysickMixtureResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetPhysickMixtureResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetPhysickMixtureResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	for index, tearID := range tears {
 		if tearID == PhysickEmptyTearID {
@@ -68,9 +69,7 @@ func (engine *Engine) SetPhysickMixture(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

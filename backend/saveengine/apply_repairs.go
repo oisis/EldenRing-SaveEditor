@@ -3,9 +3,11 @@ package saveengine
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"sort"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Repair operation names are shared with the diagnostics endpoint. They name
@@ -27,13 +29,41 @@ type RepairAction struct {
 }
 
 // ApplyRepairPlanResult is the SaveEngine receipt of one repair execution.
-// Applied is false only for a selection whose freshly derived plan has no
-// executable actions; that case is deliberately non-mutating.
+//
+// Applied is the discriminator of the two success variants:
+//
+//   - true is one committed, atomic transaction. The embedded receipt is the
+//     complete one the central commit path produced, so its operationKind is
+//     always apply_repairs and its changedScopes come from the one central map.
+//   - false is a verified selection whose freshly derived plan has no executable
+//     action. It commits nothing, so no operationID is minted, the revision, the
+//     snapshot, the unsaved-changes flag and the undo point stay as they were, no
+//     session event is published, and the three execution members of the receipt
+//     are absent.
 type ApplyRepairPlanResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Applied       bool   `json:"applied"`
+	MutationReceipt
+	CharacterID int  `json:"characterID"`
+	Applied     bool `json:"applied"`
+}
+
+// MarshalJSON isolates the no-action wire variant from the shared, strict
+// MutationReceipt used by every committed mutation.
+func (result ApplyRepairPlanResult) MarshalJSON() ([]byte, error) {
+	if result.Applied {
+		type appliedResult ApplyRepairPlanResult
+		return json.Marshal(appliedResult(result))
+	}
+	return json.Marshal(struct {
+		SaveSessionID string `json:"saveSessionID"`
+		SaveRevision  string `json:"saveRevision"`
+		CharacterID   int    `json:"characterID"`
+		Applied       bool   `json:"applied"`
+	}{
+		SaveSessionID: result.SaveSessionID,
+		SaveRevision:  result.SaveRevision,
+		CharacterID:   result.CharacterID,
+		Applied:       result.Applied,
+	})
 }
 
 // ApplyRepairPlan applies the already re-derived executable actions as one
@@ -48,8 +78,7 @@ func (engine *Engine) ApplyRepairPlan(
 	expectedRevision string,
 ) (ApplyRepairPlanResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return ApplyRepairPlanResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return ApplyRepairPlanResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return ApplyRepairPlanResult{}, fmt.Errorf("characterID %d is outside the range 0..%d",
@@ -65,8 +94,9 @@ func (engine *Engine) ApplyRepairPlan(
 		characterID,
 		func(loaded *loadedSave) error {
 			if expectedRevision != loaded.session.revisionString() {
-				return fmt.Errorf("expectedRevision %q does not match the current saveRevision %q",
+				return apperror.RevisionConflict(
 					expectedRevision, loaded.session.revisionString())
+
 			}
 			if err := requireActiveCharacter(loaded, characterID); err != nil {
 				return err
@@ -96,10 +126,9 @@ func (engine *Engine) ApplyRepairPlan(
 	}
 
 	return ApplyRepairPlanResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		CharacterID:   characterID,
-		Applied:       true,
+		MutationReceipt: committed,
+		CharacterID:     characterID,
+		Applied:         true,
 	}, nil
 }
 
@@ -109,26 +138,26 @@ func (engine *Engine) confirmNoRepairActions(
 	expectedRevision string,
 ) (ApplyRepairPlanResult, error) {
 	if saveSessionID == "" {
-		return ApplyRepairPlanResult{}, errors.New("saveSessionID is required")
+		return ApplyRepairPlanResult{}, apperror.MissingField("saveSessionID")
 	}
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return ApplyRepairPlanResult{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return ApplyRepairPlanResult{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if expectedRevision != loaded.session.revisionString() {
-		return ApplyRepairPlanResult{}, fmt.Errorf("expectedRevision %q does not match the current saveRevision %q",
+		return ApplyRepairPlanResult{}, apperror.RevisionConflict(
 			expectedRevision, loaded.session.revisionString())
+
 	}
 	if err := requireActiveCharacter(loaded, characterID); err != nil {
 		return ApplyRepairPlanResult{}, err
 	}
 	return ApplyRepairPlanResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  expectedRevision,
-		CharacterID:   characterID,
-		Applied:       false,
+		MutationReceipt: noCommitReceipt(saveSessionID, expectedRevision),
+		CharacterID:     characterID,
+		Applied:         false,
 	}, nil
 }
 

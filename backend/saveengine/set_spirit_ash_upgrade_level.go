@@ -3,6 +3,8 @@ package saveengine
 import (
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetSpiritAshUpgradeLevelResult reports one committed Spirit Ash upgrade.
@@ -50,8 +52,7 @@ func (engine *Engine) SetSpiritAshUpgradeLevel(
 		return SetSpiritAshUpgradeLevelResult{}, err
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return SetSpiritAshUpgradeLevelResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetSpiritAshUpgradeLevelResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	var container string
@@ -62,9 +63,7 @@ func (engine *Engine) SetSpiritAshUpgradeLevel(
 		}
 		currentRevision := loaded.session.revisionString()
 		if expectedRevision != currentRevision {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, currentRevision)
+			return apperror.RevisionConflict(expectedRevision, currentRevision)
 		}
 		flag, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

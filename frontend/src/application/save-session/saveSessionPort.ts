@@ -1,3 +1,5 @@
+import type { ChangedScope } from "../changedScopes";
+
 /**
  * The port the application layer needs in order to work with a save session.
  * Infrastructure implements it; feature modules depend on it through the hooks
@@ -30,6 +32,33 @@ export type SaveSession = {
   saveRevision: string;
   /** The backend's change state. The frontend never derives or overrides it. */
   unsavedChanges: boolean;
+  /**
+   * The backend's canonical decimal position of this session's `session.changed`
+   * stream, `"0"` for a session that has committed nothing. It is the baseline a
+   * listener resynchronises against and, like `saveRevision`, stays a string end
+   * to end: it is never parsed into a number, incremented or rounded.
+   */
+  eventSequence: string;
+};
+
+/**
+ * One committed backend mutation of a save session, exactly as the backend
+ * publishes it. It is a notification and never a source of state: a listener
+ * refreshes the getters named by `changedScopes` and reconstructs nothing from
+ * the event itself.
+ */
+export type SessionChangedEvent = {
+  /** Monotonic position in this session's event stream, canonical decimal. */
+  sequence: string;
+  /** The single execution that committed. */
+  operationID: string;
+  /** Stable kind of the mutation: the EndpointID that initiated it. */
+  operationKind: string;
+  saveSessionID: string;
+  /** The revision the mutation created, carried verbatim. */
+  saveRevision: string;
+  /** Exactly the scopes of the committing mutation's receipt. */
+  changedScopes: readonly ChangedScope[];
 };
 
 /**
@@ -67,4 +96,16 @@ export type SaveSessionPort = {
   ) => Promise<SaveSession>;
   getLoadedSave: (saveSessionID: string) => Promise<SaveSession>;
   closeSave: (saveSessionID: string) => Promise<void>;
+  /**
+   * Subscribes to committed backend mutations and returns the unsubscribe
+   * function. The port carries the typed event; the host mechanism behind it
+   * belongs to the infrastructure adapter alone.
+   *
+   * `null` is delivered for a payload the adapter could not validate against the
+   * contract. It is a signal and not an event: it says one notification arrived
+   * and could not be understood, so the listener resynchronises instead of
+   * acting on a fragment. A rejected payload is therefore never silently
+   * dropped.
+   */
+  subscribeSessionChanged: (listener: (event: SessionChangedEvent | null) => void) => () => void;
 };

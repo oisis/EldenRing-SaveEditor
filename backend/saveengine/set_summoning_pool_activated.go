@@ -3,6 +3,8 @@ package saveengine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetSummoningPoolActivatedResult reports one committed activation state change.
@@ -54,8 +56,7 @@ func (engine *Engine) SetSummoningPoolActivated(
 	expectedRevision string,
 ) (SetSummoningPoolActivatedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetSummoningPoolActivatedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetSummoningPoolActivatedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if block := eventFlagID / eventFlagsPerBlock; block != summoningPoolFlagBlock {
 		return SetSummoningPoolActivatedResult{}, fmt.Errorf(
@@ -76,9 +77,7 @@ func (engine *Engine) SetSummoningPoolActivated(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

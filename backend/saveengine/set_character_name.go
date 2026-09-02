@@ -8,6 +8,8 @@ import (
 	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const playerCharacterNameOffset = int64(-0x11B)
@@ -35,8 +37,7 @@ func (engine *Engine) SetCharacterName(
 	expectedRevision string,
 ) (SetCharacterNameResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCharacterNameResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCharacterNameResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	encoded, err := encodeCharacterName(name)
 	if err != nil {
@@ -51,9 +52,7 @@ func (engine *Engine) SetCharacterName(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Confirmed bounds of the global Fog of War bitfield, measured from the first
@@ -65,8 +67,7 @@ func (engine *Engine) SetFogOfWarRemoved(
 			"removed must be true; restoring Fog of War has no confirmed contract")
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return SetFogOfWarRemovedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetFogOfWarRemovedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetFogOfWarRemoved, characterID, func(loaded *loadedSave) error {
@@ -76,9 +77,7 @@ func (engine *Engine) SetFogOfWarRemoved(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 		active, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

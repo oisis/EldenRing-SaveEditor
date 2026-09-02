@@ -1,6 +1,7 @@
 VERSION := 2.0.0
 
 GO_PACKAGES := \
+	./backend/apperror \
 	./backend/gamecatalog/... \
 	./backend/saveengine/... \
 	./backend/buildtemplates/... \

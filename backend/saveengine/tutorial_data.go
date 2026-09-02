@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // TutorialData stores a uint32 count followed by TutorialParam row IDs inside
@@ -36,14 +37,14 @@ func (engine *Engine) GetTutorialIDs(
 	saveSessionID string, characterID int,
 ) (CharacterTutorialIDs, error) {
 	if saveSessionID == "" {
-		return CharacterTutorialIDs{}, errors.New("saveSessionID is required")
+		return CharacterTutorialIDs{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterTutorialIDs{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterTutorialIDs{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterTutorialIDs{}, fmt.Errorf(

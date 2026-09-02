@@ -10,6 +10,8 @@ import (
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const (
@@ -251,8 +253,7 @@ func (engine *Engine) SetCharacterStats(
 	expectedRevision string,
 ) (SetCharacterStatsResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCharacterStatsResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCharacterStatsResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if levelPolicy != LevelPolicyRecalculate {
 		return SetCharacterStatsResult{}, fmt.Errorf(
@@ -268,9 +269,7 @@ func (engine *Engine) SetCharacterStats(
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterStats, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		ctx, err := planCharacterStatsState(loaded, characterID, values, level)
@@ -424,7 +423,7 @@ func (engine *Engine) PlanCharacterStats(
 	attributes CharacterAttributes,
 ) (level uint32, soulMemory uint32, err error) {
 	if saveSessionID == "" {
-		return 0, 0, errors.New("saveSessionID is required")
+		return 0, 0, apperror.MissingField("saveSessionID")
 	}
 
 	values, lvl, err := prepareCharacterAttributes(attributes)
@@ -436,7 +435,7 @@ func (engine *Engine) PlanCharacterStats(
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return 0, 0, fmt.Errorf("unknown save session %q", saveSessionID)
+		return 0, 0, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	ctx, err := planCharacterStatsState(loaded, characterID, values, lvl)

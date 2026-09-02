@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"unicode/utf16"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // UserData10 layout shared by PC and PS4, counted from the start of the
@@ -81,14 +83,14 @@ type SaveCharacters struct {
 // the confirmed name and level of an active slot are decoded.
 func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, error) {
 	if saveSessionID == "" {
-		return SaveCharacters{}, errors.New("saveSessionID is required")
+		return SaveCharacters{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return SaveCharacters{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return SaveCharacters{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	base := userData10Base(loaded.session.platform)
@@ -174,14 +176,14 @@ type CharacterProfile struct {
 // result, not an error.
 func (engine *Engine) GetCharacterProfile(saveSessionID string, characterID int) (CharacterProfile, error) {
 	if saveSessionID == "" {
-		return CharacterProfile{}, errors.New("saveSessionID is required")
+		return CharacterProfile{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterProfile{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterProfile{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterProfile{}, fmt.Errorf("characterID %d is outside the range 0..%d",

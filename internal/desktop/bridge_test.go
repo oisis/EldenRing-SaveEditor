@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
@@ -65,12 +66,41 @@ func assertCallsMatch(t *testing.T, bridged endpointCall, direct endpointCall) {
 	if bridgedErr == nil {
 		return
 	}
-	if reflect.TypeOf(bridgedErr) != reflect.TypeOf(directErr) {
-		t.Fatalf("bridge error type = %T, want endpoint error type %T", bridgedErr, directErr)
+	// The bridge fails exactly when the endpoint does, but it never propagates
+	// the endpoint's error object or its wording: Wails carries only a string,
+	// so the failure crosses the boundary as the shared error model inside the
+	// envelope. Comparing the raw messages here would assert the very leak the
+	// boundary exists to prevent.
+	decodeBridgeFailure(t, bridgedErr)
+}
+
+// decodeBridgeFailure proves one bridge failure is a complete envelope and
+// returns the model it carries.
+func decodeBridgeFailure(t *testing.T, err error) *apperror.Error {
+	t.Helper()
+
+	if err == nil {
+		t.Fatal("no error, want a bridge failure")
 	}
-	if bridgedErr.Error() != directErr.Error() {
-		t.Fatalf("bridge error = %q, want endpoint error %q", bridgedErr, directErr)
+	public, decoded := desktop.DecodeBridgeError(err.Error())
+	if !decoded {
+		t.Fatalf("bridge error %q is not a structured envelope", err.Error())
 	}
+	if public.Code == "" || public.DiagnosticID == "" {
+		t.Fatalf("incomplete envelope: %q", err.Error())
+	}
+	return public
+}
+
+// assertBridgeFailure additionally pins the stable code of the failure.
+func assertBridgeFailure(t *testing.T, err error, wantCode string) *apperror.Error {
+	t.Helper()
+
+	public := decodeBridgeFailure(t, err)
+	if public.Code != wantCode {
+		t.Fatalf("code = %q, want %q", public.Code, wantCode)
+	}
+	return public
 }
 
 func TestGetApplicationInfoPassesTheWiredVersionToTheEndpoint(t *testing.T) {
@@ -135,9 +165,7 @@ func TestGetApplicationInfoPropagatesTheEmptyVersionWiringError(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetApplicationInfo with an empty wired version = nil error, want a rejection")
 	}
-	if err.Error() != "application version is required" {
-		t.Fatalf("error = %q, want %q", err.Error(), "application version is required")
-	}
+	assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 	if !reflect.DeepEqual(result, application.GetApplicationInfoResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
@@ -364,9 +392,7 @@ func TestItemMethodsPropagateTheNilCatalogErrorWithoutFallback(t *testing.T) {
 			if err == nil {
 				t.Fatal("call with a nil catalog = nil error, want the endpoint rejection")
 			}
-			if err.Error() != "game catalog is not available" {
-				t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
-			}
+			assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 			if !reflect.ValueOf(result).IsZero() {
 				t.Fatalf("result = %#v, want the empty result", result)
 			}
@@ -522,9 +548,7 @@ func TestGetResourcesPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetResources with a nil catalog = nil error, want the endpoint rejection")
 	}
-	if err.Error() != "game catalog is not loaded" {
-		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
-	}
+	assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 	if !reflect.DeepEqual(result, catalog.GetResourcesResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
@@ -662,9 +686,7 @@ func TestGetResourcePropagatesTheNilCatalogErrorWithoutFallback(t *testing.T) {
 	if err == nil {
 		t.Fatal("GetResource with a nil catalog = nil error, want the endpoint rejection")
 	}
-	if err.Error() != "game catalog is not loaded" {
-		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
-	}
+	assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 	if !reflect.DeepEqual(result, catalog.GetResourceResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
@@ -772,9 +794,7 @@ func TestGetItemVariantsPropagatesTheNilCatalogErrorWithoutFallback(t *testing.T
 	if err == nil {
 		t.Fatal("GetItemVariants with a nil catalog = nil error, want the endpoint rejection")
 	}
-	if err.Error() != "game catalog is not loaded" {
-		t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not loaded")
-	}
+	assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 	if !reflect.DeepEqual(result, catalog.GetItemVariantsResult{}) {
 		t.Fatalf("result = %#v, want the empty result", result)
 	}
@@ -928,9 +948,7 @@ func TestEquipmentGettersPropagateTheNilEngineErrorWithoutFallback(t *testing.T)
 			if err == nil {
 				t.Fatal("call with a nil engine = nil error, want the endpoint rejection")
 			}
-			if err.Error() != "save engine is not available" {
-				t.Fatalf("error = %q, want %q", err.Error(), "save engine is not available")
-			}
+			assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 			if !reflect.ValueOf(result).IsZero() {
 				t.Fatalf("result = %#v, want the empty result", result)
 			}
@@ -977,9 +995,7 @@ func TestResolvedEquipmentGettersPropagateTheNilCatalogErrorWithoutFallback(t *t
 			if err == nil {
 				t.Fatal("call with a nil catalog = nil error, want the endpoint rejection")
 			}
-			if err.Error() != "game catalog is not available" {
-				t.Fatalf("error = %q, want %q", err.Error(), "game catalog is not available")
-			}
+			assertBridgeFailure(t, err, apperror.CodeOperationFailed)
 			if !reflect.ValueOf(result).IsZero() {
 				t.Fatalf("result = %#v, want the empty result", result)
 			}

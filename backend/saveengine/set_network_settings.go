@@ -13,6 +13,8 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const networkZSTDBlockSize = 64 * 1024
@@ -60,8 +62,7 @@ func (engine *Engine) setNetworkSettings(
 	operationKind string,
 ) (SetNetworkSettingsResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetNetworkSettingsResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetNetworkSettingsResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if err := validateNetworkSettings(networkSettings); err != nil {
 		return SetNetworkSettingsResult{}, err
@@ -70,9 +71,7 @@ func (engine *Engine) setNetworkSettings(
 	committed, err := engine.commitRevision(saveSessionID, operationKind, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		userDataAt, blobAt, err := networkUserData11Layout(loaded)

@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetCharacterStartingClassResult reports one committed starting-class mutation.
@@ -64,8 +66,7 @@ func (engine *Engine) SetCharacterStartingClass(
 				"and the level to the base values of the target class")
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCharacterStartingClassResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCharacterStartingClassResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	definition, err := startingClass(startingClassID)
@@ -82,9 +83,7 @@ func (engine *Engine) SetCharacterStartingClass(
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetCharacterStartingClass, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		if characterID < 0 || characterID >= characterSlotCount {

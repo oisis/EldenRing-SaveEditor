@@ -3,6 +3,8 @@ package saveengine
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // DeleteCharacterResult identifies the physical slot removed by one committed
@@ -25,8 +27,7 @@ func (engine *Engine) DeleteCharacter(
 	expectedRevision string,
 ) (DeleteCharacterResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return DeleteCharacterResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return DeleteCharacterResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindDeleteCharacter, characterID, func(loaded *loadedSave) error {
@@ -36,9 +37,7 @@ func (engine *Engine) DeleteCharacter(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		slotAt := slotDataBase(loaded.session.platform, characterID)

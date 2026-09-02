@@ -54,6 +54,7 @@ type SessionInfo struct {
 	SourceKind     string `json:"sourceKind"`
 	SaveRevision   string `json:"saveRevision"`
 	UnsavedChanges bool   `json:"unsavedChanges"`
+	EventSequence  string `json:"eventSequence"`
 }
 ```
 
@@ -66,6 +67,7 @@ type SessionInfo struct {
 | `sourceKind` | `string` | `local` or `temporary`, as stated at load time. |
 | `saveRevision` | `string` | The session's current canonical decimal revision: `"0"` after `LoadSave`, and the value the last accepted mutation returned afterwards. A refused mutation does not advance it. |
 | `unsavedChanges` | `bool` | Whether the session's private snapshot carries a committed mutation. `false` after `LoadSave` and after a successful `WriteSave`. |
+| `eventSequence` | `string` | The session's canonical decimal position in its `session.changed` stream: `"0"` after `LoadSave`, advanced by exactly one per committed mutation. A subscriber reads it to establish or re-establish its baseline after a start, a lost event or a reconnect. A refused mutation, a rollback and a success that commits nothing do not advance it. |
 
 The result is the same metadata model `LoadSave` returns, reused rather than
 duplicated. It is an independent value: changing it does not change the metadata

@@ -2,9 +2,10 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"sort"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed event-flag bitfield, shared by PC and PS4.
@@ -155,14 +156,14 @@ func (engine *Engine) GetEventFlags(
 	saveSessionID string, characterID int, eventFlagIDs []uint32,
 ) (CharacterEventFlags, error) {
 	if saveSessionID == "" {
-		return CharacterEventFlags{}, errors.New("saveSessionID is required")
+		return CharacterEventFlags{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterEventFlags{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterEventFlags{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterEventFlags{}, fmt.Errorf("characterID %d is outside the range 0..%d",

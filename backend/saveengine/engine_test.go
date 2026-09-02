@@ -408,6 +408,11 @@ var sessionInfoFields = []struct {
 	{"SourceKind", reflect.String},
 	{"SaveRevision", reflect.String},
 	{"UnsavedChanges", reflect.Bool},
+	// The session's position in its own session.changed stream. It is derived
+	// metadata about the session's committed mutations, not save data: it is a
+	// counter, it carries no snapshot byte, handle or offset, and it exists so a
+	// subscriber can resynchronise against a value the backend confirmed.
+	{"EventSequence", reflect.String},
 }
 
 // TestSessionInfoExposesOnlyTheApprovedMetadata pins the public session shape.

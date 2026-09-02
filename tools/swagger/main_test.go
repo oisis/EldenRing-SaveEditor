@@ -23,6 +23,7 @@ import (
 	"testing"
 	"unicode/utf16"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
@@ -117,25 +118,58 @@ func assertJSONContentType(t *testing.T, recorder *httptest.ResponseRecorder) {
 	}
 }
 
-func assertErrorMessage(t *testing.T, recorder *httptest.ResponseRecorder, status int, want error) {
+// decodeError reads the one structured error body every route answers with.
+func decodeError(t *testing.T, recorder *httptest.ResponseRecorder) *apperror.Error {
 	t.Helper()
 
-	if recorder.Code != status {
-		t.Fatalf("status = %d, want %d (body %q)", recorder.Code, status, recorder.Body.String())
-	}
 	assertJSONContentType(t, recorder)
-
 	var payload struct {
-		Error string `json:"error"`
+		Error *apperror.Error `json:"error"`
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &payload); err != nil {
 		t.Fatalf("decode error body %q: %v", recorder.Body.String(), err)
 	}
+	if payload.Error == nil {
+		t.Fatalf("the response carries no error model: %q", recorder.Body.String())
+	}
+	if payload.Error.Code == "" || payload.Error.Message == "" ||
+		payload.Error.DiagnosticID == "" {
+		t.Fatalf("incomplete error model: %q", recorder.Body.String())
+	}
+	return payload.Error
+}
+
+// assertErrorMessage checks that a route reports the same failure the getter
+// produced, in the shared error model.
+//
+// A classified failure keeps its stable code and its safe message, so both are
+// compared exactly. An unclassified one is normalized to operation_failed and
+// its wording stays in the backend log, so the assertion is inverted for it:
+// the getter's own text must be absent from the response.
+func assertErrorMessage(t *testing.T, recorder *httptest.ResponseRecorder, status int, want error) {
+	t.Helper()
+
 	if want == nil {
 		t.Fatal("the getter must fail for this input, otherwise the route is not comparable")
 	}
-	if payload.Error != want.Error() {
-		t.Fatalf("error = %q, want the getter message %q", payload.Error, want.Error())
+	if recorder.Code != status {
+		t.Fatalf("status = %d, want %d (body %q)", recorder.Code, status, recorder.Body.String())
+	}
+	reported := decodeError(t, recorder)
+
+	if expected, classified := apperror.As(want); classified {
+		if reported.Code != expected.Code || reported.Message != expected.Message {
+			t.Fatalf("error = %+v, want the getter's classification %+v", reported, expected)
+		}
+		return
+	}
+	if reported.Code != apperror.CodeOperationFailed {
+		t.Fatalf("code = %q, want %q for an unclassified getter failure",
+			reported.Code, apperror.CodeOperationFailed)
+	}
+	if strings.Contains(recorder.Body.String(), want.Error()) {
+		t.Fatalf("the response leaks the raw getter message %q: %q",
+			want.Error(), recorder.Body.String())
 	}
 }
 
@@ -799,11 +833,13 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 		t.Fatalf("the source save is gone after closing the session: %v", err)
 	}
 
+	// A closed session is a missing resource, so the classified failure decides
+	// the status: unknown_save_session answers 404 on every route.
 	_, wantUnknown := savesession.GetLoadedSave(saveEngine, session.SaveSessionID)
 	assertErrorMessage(
 		t,
 		doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID, ""),
-		http.StatusBadRequest,
+		http.StatusNotFound,
 		wantUnknown,
 	)
 }
@@ -847,13 +883,7 @@ func TestBodiedPostRoutesRequireJSONContentType(t *testing.T) {
 			t.Fatalf("LoadSave with Content-Type %q: status = %d, want 400 (body %q)",
 				contentType, rejected.Code, rejected.Body.String())
 		}
-		var envelope map[string]string
-		if err := json.Unmarshal(rejected.Body.Bytes(), &envelope); err != nil {
-			t.Fatalf("decode rejection body %q: %v", rejected.Body.String(), err)
-		}
-		if envelope["error"] == "" {
-			t.Fatalf("the rejection carries no error message: %q", rejected.Body.String())
-		}
+		decodeError(t, rejected)
 	}
 
 	created := doSaveTyped(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", loadBody,
@@ -2106,8 +2136,16 @@ func TestCharacterUndoRoutes(t *testing.T) {
 		t.Fatalf("absent undo point: status = %d, body = %q",
 			delegated.Code, delegated.Body.String())
 	}
-	if !strings.Contains(delegated.Body.String(), "no undo point is available") {
-		t.Fatalf("absent undo point: body = %q, want the SaveEngine rejection",
+	// The SaveEngine rejection has no confirmed finer classification yet, so it
+	// travels as the stable generic code and its wording stays in the backend
+	// log rather than in the response.
+	reported := decodeError(t, delegated)
+	if reported.Code != apperror.CodeOperationFailed {
+		t.Fatalf("absent undo point: code = %q, want %q",
+			reported.Code, apperror.CodeOperationFailed)
+	}
+	if strings.Contains(delegated.Body.String(), "no undo point is available") {
+		t.Fatalf("absent undo point: the response leaks the backend wording: %q",
 			delegated.Body.String())
 	}
 }
@@ -2440,9 +2478,18 @@ func TestSetCharacterAppearanceRoute(t *testing.T) {
 		t.Fatalf("marshal invalid request: %v", err)
 	}
 	rejected := doSave(t, saveEngine, http.MethodPut, target, string(body))
-	if rejected.Code != http.StatusBadRequest ||
-		!strings.Contains(rejected.Body.String(), "appearance.modelIDs has 7 values, want exactly 8") {
+	if rejected.Code != http.StatusBadRequest {
 		t.Fatalf("invalid array: status = %d, body = %q", rejected.Code, rejected.Body.String())
+	}
+	// The endpoint's own wording has no confirmed classification yet, so the
+	// response carries the stable generic code and the wording stays in the log.
+	if reported := decodeError(t, rejected); reported.Code != apperror.CodeOperationFailed {
+		t.Fatalf("invalid array: code = %q, want %q",
+			reported.Code, apperror.CodeOperationFailed)
+	}
+	if strings.Contains(rejected.Body.String(), "appearance.modelIDs") {
+		t.Fatalf("invalid array: the response leaks the backend wording: %q",
+			rejected.Body.String())
 	}
 	readBack, err := character.GetCharacterAppearance(saveEngine, session.SaveSessionID, 0)
 	if err != nil {
@@ -4231,16 +4278,21 @@ func TestRemoveOwnedItemRoute(t *testing.T) {
 	for _, rejected := range []struct {
 		target string
 		body   string
+		status int
 	}{
-		{target, `{"expectedRevision":"0","unknown":true}`},
-		{target, `{"expectedRevision":"7"}`},
+		{target, `{"expectedRevision":"0","unknown":true}`, http.StatusBadRequest},
+		// A stale revision is a conflict, and the classification decides the
+		// status on every route.
+		{target, `{"expectedRevision":"7"}`, http.StatusConflict},
 		{"/api/v1/save-sessions/" + session.SaveSessionID +
-			"/characters/one/owned-items/" + url.PathEscape(ownedItemID), `{"expectedRevision":"0"}`},
+			"/characters/one/owned-items/" + url.PathEscape(ownedItemID),
+			`{"expectedRevision":"0"}`, http.StatusBadRequest},
 	} {
 		recorder := doSave(t, saveEngine, http.MethodDelete, rejected.target, rejected.body)
-		if recorder.Code != http.StatusBadRequest {
-			t.Fatalf("%s %q: status = %d, want 400 (body %q)",
-				rejected.target, rejected.body, recorder.Code, recorder.Body.String())
+		if recorder.Code != rejected.status {
+			t.Fatalf("%s %q: status = %d, want %d (body %q)",
+				rejected.target, rejected.body, recorder.Code, rejected.status,
+				recorder.Body.String())
 		}
 	}
 	info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
@@ -4667,10 +4719,15 @@ func TestSetWeaponAshOfWarRoute(t *testing.T) {
 
 	rejected := doSave(t, saveEngine, http.MethodPatch, target,
 		`{"ashOfWarKind":"item","expectedRevision":"0"}`)
-	if rejected.Code != http.StatusBadRequest ||
-		!strings.Contains(rejected.Body.String(), "ashOfWarKey is required") {
+	if rejected.Code != http.StatusBadRequest {
 		t.Fatalf("missing key: status = %d, body = %q",
 			rejected.Code, rejected.Body.String())
+	}
+	// The endpoint owns this rule, and its wording has no confirmed
+	// classification yet, so the response carries the stable generic code only.
+	if reported := decodeError(t, rejected); reported.Code != apperror.CodeOperationFailed {
+		t.Fatalf("missing key: code = %q, want %q",
+			reported.Code, apperror.CodeOperationFailed)
 	}
 	recorder := doSave(t, saveEngine, http.MethodPatch, target,
 		`{"ashOfWarKind":"item","ashOfWarKey":"8000EA60","expectedRevision":"0"}`)
@@ -4831,8 +4888,9 @@ func TestAddItemToInventoryRoute(t *testing.T) {
 	// instead of adding a second record.
 	repeated := serve(http.MethodPost, target,
 		`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0"}`)
-	if repeated.Code != http.StatusBadRequest {
-		t.Fatalf("repeated add: status = %d, want 400 (body %q)",
+	// A stale revision is a conflict; the classification decides the status.
+	if repeated.Code != http.StatusConflict {
+		t.Fatalf("repeated add: status = %d, want 409 (body %q)",
 			repeated.Code, repeated.Body.String())
 	}
 }

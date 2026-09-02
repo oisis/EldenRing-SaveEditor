@@ -1,8 +1,9 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file resolves one opaque OwnedItemID back to the single physical record
@@ -66,14 +67,14 @@ func (engine *Engine) GetOwnedItem(
 	ownedItemID string,
 ) (OwnedItem, error) {
 	if saveSessionID == "" {
-		return OwnedItem{}, errors.New("saveSessionID is required")
+		return OwnedItem{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return OwnedItem{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return OwnedItem{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return OwnedItem{}, fmt.Errorf("characterID %d is outside the range 0..%d",

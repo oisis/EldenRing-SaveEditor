@@ -362,6 +362,40 @@ type MutationReceipt struct {
 	ChangedScopes []string `json:"changedScopes"`
 }
 
+// ConditionalMutationReceipt is the wire representation used only by a public
+// result with an explicit no-commit success variant. The committed branch is
+// populated from MutationReceipt; the no-commit branch carries the session and
+// unchanged revision while omitting fields that would describe an execution.
+// Keeping this as a separate type prevents optional tags from weakening the
+// shared MutationReceipt contract.
+type ConditionalMutationReceipt struct {
+	OperationID   string   `json:"operationID,omitempty"`
+	OperationKind string   `json:"operationKind,omitempty"`
+	SaveSessionID string   `json:"saveSessionID"`
+	SaveRevision  string   `json:"saveRevision"`
+	ChangedScopes []string `json:"changedScopes,omitempty"`
+}
+
+// ConditionalReceipt projects a strict committed receipt into the explicitly
+// conditional representation of a result that can also succeed without commit.
+func ConditionalReceipt(receipt MutationReceipt) ConditionalMutationReceipt {
+	return ConditionalMutationReceipt{
+		OperationID:   receipt.OperationID,
+		OperationKind: receipt.OperationKind,
+		SaveSessionID: receipt.SaveSessionID,
+		SaveRevision:  receipt.SaveRevision,
+		ChangedScopes: receipt.ChangedScopes,
+	}
+}
+
+// noCommitReceipt is an internal carrier used by the two result types with a
+// no-commit success variant. Their local serializers or conditional result
+// projection omit the three execution members; MutationReceipt itself remains
+// the strict public contract of a committed mutation everywhere else.
+func noCommitReceipt(saveSessionID string, saveRevision string) MutationReceipt {
+	return MutationReceipt{SaveSessionID: saveSessionID, SaveRevision: saveRevision}
+}
+
 // operationIDPrefix marks an identifier minted for one mutation execution. It
 // exists so such an identifier can never be mistaken for a saveSessionID, an
 // OwnedItemID or an undo token.

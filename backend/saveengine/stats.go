@@ -1,8 +1,9 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed character statistics, shared by PC and PS4.
@@ -116,14 +117,14 @@ type CharacterStats struct {
 // result, not an error, and its slot data is never read.
 func (engine *Engine) GetCharacterStats(saveSessionID string, characterID int) (CharacterStats, error) {
 	if saveSessionID == "" {
-		return CharacterStats{}, errors.New("saveSessionID is required")
+		return CharacterStats{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterStats{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterStats{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterStats{}, fmt.Errorf("characterID %d is outside the range 0..%d",

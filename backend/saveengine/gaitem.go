@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // The GaItem table is the private save-side lookup from an InventoryHeld or
@@ -59,14 +61,14 @@ func (engine *Engine) ResolveGaItemIDs(
 	handles []uint32,
 ) ([]uint32, error) {
 	if saveSessionID == "" {
-		return nil, errors.New("saveSessionID is required")
+		return nil, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return nil, fmt.Errorf("unknown save session %q", saveSessionID)
+		return nil, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return nil, fmt.Errorf("characterID %d is outside the range 0..%d",

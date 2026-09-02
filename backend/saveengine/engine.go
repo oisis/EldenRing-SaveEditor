@@ -4,10 +4,11 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // magicLength is the number of leading bytes needed to recognise a container.
@@ -31,6 +32,21 @@ type Engine struct {
 	// is what makes the identifiers of one running engine literally unique instead
 	// of merely improbable to repeat.
 	reservedOperationIDs map[string]bool
+
+	// eventMutex guards the session.changed outbox and its sink. It is a separate
+	// lock from mutex on purpose: the outbox is drained after mutex is released,
+	// so the sink never runs under the session lock. It is never held while the
+	// sink runs and never taken while waiting for mutex, so the two locks cannot
+	// deadlock against each other.
+	eventMutex sync.Mutex
+	// eventQueue holds the committed events not yet delivered. It is appended to
+	// under mutex, which makes its order exactly the commit order.
+	eventQueue []SessionChangedEvent
+	// sessionChangedSink is the single subscriber installed by the host.
+	sessionChangedSink SessionChangedSink
+	// eventDrainMutex admits one drainer at a time, so queued events reach the
+	// sink in order even when several mutations finish concurrently.
+	eventDrainMutex sync.Mutex
 }
 
 // loadedSave is the private state of one session: its metadata model and mutable
@@ -161,14 +177,14 @@ func (engine *Engine) LoadSave(
 // session. The call reads the session map and changes nothing.
 func (engine *Engine) GetSessionInfo(saveSessionID string) (SessionInfo, error) {
 	if saveSessionID == "" {
-		return SessionInfo{}, errors.New("saveSessionID is required")
+		return SessionInfo{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return SessionInfo{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return SessionInfo{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	// Info returns a value, so the caller receives an independent copy of the
 	// metadata and cannot reach the session behind it.
@@ -191,13 +207,13 @@ func (engine *Engine) GetSessionInfo(saveSessionID string) (SessionInfo, error) 
 // collection and gives no timing guarantee.
 func (engine *Engine) CloseSession(saveSessionID string) error {
 	if saveSessionID == "" {
-		return errors.New("saveSessionID is required")
+		return apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	if _, exists := engine.sessions[saveSessionID]; !exists {
-		return fmt.Errorf("unknown save session %q", saveSessionID)
+		return apperror.UnknownSaveSession(saveSessionID)
 	}
 	delete(engine.sessions, saveSessionID)
 	return nil

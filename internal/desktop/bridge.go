@@ -42,6 +42,11 @@ type Bridge struct {
 	// bridge holds no dialog implementation of its own.
 	chooseSaveFile SaveFileChooser
 
+	// emitEvent delivers a backend event to the frontend. A nil value selects the
+	// Wails runtime; only a test replaces it, so the bridge stays exercisable
+	// without a real window.
+	emitEvent eventEmitter
+
 	// mutex guards hostContext only. It is not the session lock: SaveEngine owns
 	// that, and no save state lives here.
 	mutex sync.Mutex
@@ -62,12 +67,19 @@ func NewBridge(
 	gameCatalog *gamecatalog.Catalog,
 	chooseSaveFile SaveFileChooser,
 ) *Bridge {
-	return &Bridge{
+	bridge := &Bridge{
 		applicationVersion: applicationVersion,
 		saveEngine:         saveEngine,
 		gameCatalog:        gameCatalog,
 		chooseSaveFile:     chooseSaveFile,
 	}
+	// The bridge is the only host-aware layer, so it is the one that subscribes
+	// to SaveEngine's committed mutations and turns them into Wails events. The
+	// engine never learns what a window is.
+	if saveEngine != nil {
+		saveEngine.SetSessionChangedSink(bridge.publishSessionChanged)
+	}
+	return bridge
 }
 
 // Startup receives the Wails context from the application lifecycle. It is
@@ -96,18 +108,18 @@ func (b *Bridge) hostContextOrNil() context.Context {
 // the application exactly as it was.
 func (b *Bridge) SelectSaveFile() (string, error) {
 	if b.chooseSaveFile == nil {
-		return "", errors.New("the native file dialog is not available")
+		return "", bridgeError(errors.New("the native file dialog is not available"))
 	}
 	ctx := b.hostContextOrNil()
 	if ctx == nil {
-		return "", errors.New("the desktop host is not started yet")
+		return "", bridgeError(errors.New("the desktop host is not started yet"))
 	}
 	path, err := b.chooseSaveFile(ctx)
 	if err != nil {
 		// Fail closed: a failed dialog yields no path at all, so a caller can
 		// never load whatever partial value the host reported alongside its
-		// error. The error itself is propagated unchanged.
-		return "", err
+		// error. The failure itself is reported in the shared error model.
+		return "", bridgeError(err)
 	}
 	return path, nil
 }
@@ -116,7 +128,7 @@ func (b *Bridge) SelectSaveFile() (string, error) {
 // its result and error unchanged. It declares no capability, no schema version
 // and no fallback version of its own.
 func (b *Bridge) GetApplicationInfo() (application.GetApplicationInfoResult, error) {
-	return application.GetApplicationInfo(b.applicationVersion)
+	return bridged(application.GetApplicationInfo(b.applicationVersion))
 }
 
 // LoadSave delegates to the LoadSave endpoint and returns its result and error
@@ -129,19 +141,19 @@ func (b *Bridge) LoadSave(
 	expectedPlatform string,
 	sourceKind string,
 ) (savesession.LoadSaveResult, error) {
-	return savesession.LoadSave(b.saveEngine, source, expectedPlatform, sourceKind)
+	return bridged(savesession.LoadSave(b.saveEngine, source, expectedPlatform, sourceKind))
 }
 
 // GetLoadedSave delegates to the GetLoadedSave endpoint and returns its result
 // and error unchanged.
 func (b *Bridge) GetLoadedSave(saveSessionID string) (savesession.GetLoadedSaveResult, error) {
-	return savesession.GetLoadedSave(b.saveEngine, saveSessionID)
+	return bridged(savesession.GetLoadedSave(b.saveEngine, saveSessionID))
 }
 
 // CloseSave delegates to the CloseSave endpoint and returns its error
 // unchanged.
 func (b *Bridge) CloseSave(saveSessionID string) error {
-	return savesession.CloseSave(b.saveEngine, saveSessionID)
+	return bridgeError(savesession.CloseSave(b.saveEngine, saveSessionID))
 }
 
 // GetSaveValidationReport delegates to the GetSaveValidationReport endpoint and
@@ -154,14 +166,14 @@ func (b *Bridge) GetSaveValidationReport(
 	characterID int,
 	scope string,
 ) (diagnostics.GetSaveValidationReportResult, error) {
-	return diagnostics.GetSaveValidationReport(
-		b.saveEngine, b.gameCatalog, saveSessionID, characterID, scope)
+	return bridged(diagnostics.GetSaveValidationReport(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, scope))
 }
 
 // GetSaveCharacters delegates to the GetSaveCharacters endpoint and returns
 // its result and error unchanged.
 func (b *Bridge) GetSaveCharacters(saveSessionID string) (character.GetSaveCharactersResult, error) {
-	return character.GetSaveCharacters(b.saveEngine, saveSessionID)
+	return bridged(character.GetSaveCharacters(b.saveEngine, saveSessionID))
 }
 
 // GetCharacterProfile delegates to the GetCharacterProfile endpoint and
@@ -170,7 +182,7 @@ func (b *Bridge) GetCharacterProfile(
 	saveSessionID string,
 	characterID int,
 ) (character.GetCharacterProfileResult, error) {
-	return character.GetCharacterProfile(b.saveEngine, saveSessionID, characterID)
+	return bridged(character.GetCharacterProfile(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetCharacterStats delegates to the GetCharacterStats endpoint and returns
@@ -179,7 +191,7 @@ func (b *Bridge) GetCharacterStats(
 	saveSessionID string,
 	characterID int,
 ) (character.GetCharacterStatsResult, error) {
-	return character.GetCharacterStats(b.saveEngine, saveSessionID, characterID)
+	return bridged(character.GetCharacterStats(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetInventory delegates to the GetInventory endpoint and returns its result
@@ -192,8 +204,8 @@ func (b *Bridge) GetInventory(
 	page int,
 	pageSize int,
 ) (inventory.GetInventoryResult, error) {
-	return inventory.GetInventory(
-		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize)
+	return bridged(inventory.GetInventory(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize))
 }
 
 // GetStorage delegates to the GetStorage endpoint and returns its result and
@@ -206,8 +218,8 @@ func (b *Bridge) GetStorage(
 	page int,
 	pageSize int,
 ) (inventory.GetStorageResult, error) {
-	return inventory.GetStorage(
-		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize)
+	return bridged(inventory.GetStorage(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, containerSection, page, pageSize))
 }
 
 // GetResources delegates to the GetResources endpoint and returns its result
@@ -224,8 +236,8 @@ func (b *Bridge) GetResources(
 	page int,
 	pageSize int,
 ) (catalog.GetResourcesResult, error) {
-	return catalog.GetResources(
-		b.gameCatalog, resourceType, family, capability, endpointID, search, page, pageSize)
+	return bridged(catalog.GetResources(
+		b.gameCatalog, resourceType, family, capability, endpointID, search, page, pageSize))
 }
 
 // GetResourcePresentationSummaries delegates to the matching batch endpoint.
@@ -234,7 +246,7 @@ func (b *Bridge) GetResources(
 func (b *Bridge) GetResourcePresentationSummaries(
 	identities []catalog.ResourcePresentationIdentity,
 ) (catalog.GetResourcePresentationSummariesResult, error) {
-	return catalog.GetResourcePresentationSummaries(b.gameCatalog, identities)
+	return bridged(catalog.GetResourcePresentationSummaries(b.gameCatalog, identities))
 }
 
 // GetResource delegates to the GetResource endpoint and returns its result and
@@ -243,7 +255,7 @@ func (b *Bridge) GetResourcePresentationSummaries(
 // another kind, and which of the four identity failures applies are the
 // endpoint's contract, and the bridge must not restate any of it.
 func (b *Bridge) GetResource(kind string, key string) (catalog.GetResourceResult, error) {
-	return catalog.GetResource(b.gameCatalog, kind, key)
+	return bridged(catalog.GetResource(b.gameCatalog, kind, key))
 }
 
 // GetItemVariants delegates to the GetItemVariants endpoint and returns its
@@ -253,7 +265,7 @@ func (b *Bridge) GetResource(kind string, key string) (catalog.GetResourceResult
 // empty result and which identity failure applies are the endpoint's contract,
 // and the bridge must not restate any of it.
 func (b *Bridge) GetItemVariants(kind string, key string) (catalog.GetItemVariantsResult, error) {
-	return catalog.GetItemVariants(b.gameCatalog, kind, key)
+	return bridged(catalog.GetItemVariants(b.gameCatalog, kind, key))
 }
 
 // GetEquipment delegates to the GetEquipment endpoint and returns its result
@@ -266,7 +278,7 @@ func (b *Bridge) GetEquipment(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetEquipmentResult, error) {
-	return equipment.GetEquipment(b.saveEngine, saveSessionID, characterID)
+	return bridged(equipment.GetEquipment(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetCharacterLoadout delegates to the coherent, catalog-resolved loadout
@@ -277,8 +289,8 @@ func (b *Bridge) GetCharacterLoadout(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetCharacterLoadoutResult, error) {
-	return equipment.GetCharacterLoadout(
-		b.saveEngine, b.gameCatalog, saveSessionID, characterID)
+	return bridged(equipment.GetCharacterLoadout(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID))
 }
 
 // GetQuickItems delegates to the GetQuickItems endpoint and returns its result
@@ -288,7 +300,7 @@ func (b *Bridge) GetQuickItems(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetQuickItemsResult, error) {
-	return equipment.GetQuickItems(b.saveEngine, saveSessionID, characterID)
+	return bridged(equipment.GetQuickItems(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetPouchItems delegates to the GetPouchItems endpoint and returns its result
@@ -298,7 +310,7 @@ func (b *Bridge) GetPouchItems(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetPouchItemsResult, error) {
-	return equipment.GetPouchItems(b.saveEngine, saveSessionID, characterID)
+	return bridged(equipment.GetPouchItems(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetPhysickMixture delegates to the GetPhysickMixture endpoint and returns its
@@ -308,7 +320,7 @@ func (b *Bridge) GetPhysickMixture(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetPhysickMixtureResult, error) {
-	return equipment.GetPhysickMixture(b.saveEngine, saveSessionID, characterID)
+	return bridged(equipment.GetPhysickMixture(b.saveEngine, saveSessionID, characterID))
 }
 
 // GetEquippedSpells delegates to the GetEquippedSpells endpoint and returns its
@@ -319,5 +331,5 @@ func (b *Bridge) GetEquippedSpells(
 	saveSessionID string,
 	characterID int,
 ) (equipment.GetEquippedSpellsResult, error) {
-	return equipment.GetEquippedSpells(b.saveEngine, b.gameCatalog, saveSessionID, characterID)
+	return bridged(equipment.GetEquippedSpells(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
 }

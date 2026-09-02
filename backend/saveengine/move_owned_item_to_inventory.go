@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sort"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // MoveOwnedItemToInventoryResult reports one committed Storage-to-Inventory move.
@@ -49,8 +51,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 		return MoveOwnedItemToInventoryResult{}, fmt.Errorf("maxInventory must be at least 1")
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return MoveOwnedItemToInventoryResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return MoveOwnedItemToInventoryResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	var moved movedInventoryRecord
@@ -61,9 +62,7 @@ func (engine *Engine) MoveOwnedItemToInventory(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		locator, err := loaded.session.resolveOwnedItemID(characterID, ownedItemID)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetGraceVisitedResult reports one committed visit state change.
@@ -91,8 +93,7 @@ func (engine *Engine) SetGraceVisited(
 	expectedRevision string,
 ) (SetGraceVisitedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetGraceVisitedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetGraceVisitedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if block := visitEventFlagID / eventFlagsPerBlock; !slices.Contains(graceFlagBlocks, block) {
 		return SetGraceVisitedResult{}, fmt.Errorf(
@@ -147,9 +148,7 @@ func (engine *Engine) SetGraceVisited(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

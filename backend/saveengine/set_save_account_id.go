@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // PC layout of the account identifier. A PC save stores the same Steam identity
@@ -88,8 +90,7 @@ func (engine *Engine) SetSaveAccountID(
 	expectedRevision string,
 ) (SetSaveAccountIDResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetSaveAccountIDResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetSaveAccountIDResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	account, err := strconv.ParseUint(accountID, 10, 64)
 	if err != nil || strconv.FormatUint(account, 10) != accountID {
@@ -106,9 +107,7 @@ func (engine *Engine) SetSaveAccountID(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		userDataBase := userData10Base(PlatformPC)

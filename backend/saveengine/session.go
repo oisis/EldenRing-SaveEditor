@@ -71,6 +71,11 @@ type Session struct {
 	journal []DiagnosticRecord
 	// journalSeq numbers the diagnostic records appended to this session.
 	journalSeq uint64
+	// eventSeq numbers the session.changed events published for this session. It
+	// starts at 0 and only a committed mutation advances it, so it counts
+	// committed mutations and never rejections, rollbacks or successes that
+	// committed nothing.
+	eventSeq uint64
 }
 
 // SessionInfo is the safe, public metadata of a session. It is the only session
@@ -101,6 +106,12 @@ type SessionInfo struct {
 	// while every mutation is rejected or rolled back. A successful WriteSave
 	// clears it after persisting the validated snapshot.
 	UnsavedChanges bool `json:"unsavedChanges"`
+	// EventSequence is the canonical decimal rendering of the session's
+	// session.changed counter, "0" for a session that has committed nothing. It
+	// exists so a subscriber that starts late, misses events or reconnects can
+	// read the current position of the stream instead of guessing it, and it is a
+	// string for the same reason SaveRevision is one.
+	EventSequence string `json:"eventSequence"`
 }
 
 // newSession creates a session with a fresh, non-empty identifier. sourcePath
@@ -149,5 +160,6 @@ func (session *Session) Info() SessionInfo {
 		SourceKind:     string(session.sourceKind),
 		SaveRevision:   session.revisionString(),
 		UnsavedChanges: session.dirty,
+		EventSequence:  session.eventSequenceString(),
 	}
 }

@@ -18,6 +18,8 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // ApplyBuildTemplateEndpointID is the stable backend identifier of ApplyBuildTemplate.
@@ -63,8 +65,7 @@ func ApplyBuildTemplate(
 	req ApplyBuildTemplateRequest,
 ) (ApplyBuildTemplateResult, error) {
 	if !saveengine.IsCanonicalRevision(req.ExpectedRevision) {
-		return ApplyBuildTemplateResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", req.ExpectedRevision)
+		return ApplyBuildTemplateResult{}, apperror.InvalidRevision(req.ExpectedRevision)
 	}
 
 	resolved, err := planBuildTemplate(
@@ -89,11 +90,9 @@ func ApplyBuildTemplate(
 	}
 
 	if req.ExpectedRevision != resolved.previewResult.SaveRevision {
-		return ApplyBuildTemplateResult{}, fmt.Errorf(
-			"expectedRevision %q does not match the current saveRevision %q",
+		return ApplyBuildTemplateResult{}, apperror.RevisionConflict(
 			req.ExpectedRevision,
-			resolved.previewResult.SaveRevision,
-		)
+			resolved.previewResult.SaveRevision)
 	}
 
 	enginePlan := saveengine.ApplyCharacterTemplatePlan{

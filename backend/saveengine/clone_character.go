@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // CloneCharacterResult identifies both physical slots and the unique name
@@ -28,8 +30,7 @@ func (engine *Engine) CloneCharacter(
 	expectedRevision string,
 ) (CloneCharacterResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return CloneCharacterResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return CloneCharacterResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	// Both slot indices are checked before the commit, because the undo point of
@@ -51,9 +52,7 @@ func (engine *Engine) CloneCharacter(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		sourceSlotAt := slotDataBase(loaded.session.platform, sourceCharacterID)

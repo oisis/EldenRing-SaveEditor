@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file owns the single undo point of a save session.
@@ -139,14 +141,14 @@ type CharacterUndoState struct {
 // otherwise the token and the operation kind stay empty.
 func (engine *Engine) GetUndoState(saveSessionID string, characterID int) (CharacterUndoState, error) {
 	if saveSessionID == "" {
-		return CharacterUndoState{}, errors.New("saveSessionID is required")
+		return CharacterUndoState{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterUndoState{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterUndoState{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterUndoState{}, fmt.Errorf("characterID %d is outside the range 0..%d",
@@ -202,21 +204,23 @@ func (engine *Engine) UndoCharacterChanges(
 	expectedRevision string,
 ) (UndoCharacterChangesResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return UndoCharacterChangesResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return UndoCharacterChangesResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if saveSessionID == "" {
-		return UndoCharacterChangesResult{}, errors.New("saveSessionID is required")
+		return UndoCharacterChangesResult{}, apperror.MissingField("saveSessionID")
 	}
 	if undoToken == "" {
 		return UndoCharacterChangesResult{}, errors.New("undoToken is required")
 	}
 
+	// Registered before the session lock so it runs after the unlock: the sink is
+	// the host's, and no external callback may run under Engine.mutex.
+	defer engine.publishSessionChanged()
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return UndoCharacterChangesResult{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return UndoCharacterChangesResult{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return UndoCharacterChangesResult{}, fmt.Errorf("characterID %d is outside the range 0..%d",
@@ -226,8 +230,7 @@ func (engine *Engine) UndoCharacterChanges(
 	session := loaded.session
 	current := session.revisionString()
 	if expectedRevision != current {
-		return UndoCharacterChangesResult{}, fmt.Errorf(
-			"expectedRevision %q does not match the current saveRevision %q",
+		return UndoCharacterChangesResult{}, apperror.RevisionConflict(
 			expectedRevision, current)
 	}
 
@@ -298,6 +301,7 @@ func (engine *Engine) UndoCharacterChanges(
 	session.undo = nil
 	session.dirty = point.dirtyBefore
 	receipt := pending.receipt(saveSessionID, session.advanceRevision())
+	engine.enqueueCommitted(session, receipt)
 	return UndoCharacterChangesResult{
 		MutationReceipt:     receipt,
 		CharacterID:         characterID,

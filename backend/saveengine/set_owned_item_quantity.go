@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file holds the first mutation of SaveForge 2.0: it sets the quantity of
@@ -112,8 +114,7 @@ func (engine *Engine) SetOwnedItemQuantity(
 			"quantity %d exceeds the limit of %d per record", quantity, maxPerRecord)
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return SetOwnedItemQuantityResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetOwnedItemQuantityResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindSetOwnedItemQuantity, characterID, func(loaded *loadedSave) error {
@@ -123,9 +124,7 @@ func (engine *Engine) SetOwnedItemQuantity(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		locator, err := loaded.session.resolveOwnedItemID(characterID, ownedItemID)

@@ -1,6 +1,10 @@
 package saveengine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+)
 
 const bellBearingEventFlagBlock = uint32(11109)
 
@@ -36,8 +40,7 @@ func (engine *Engine) SetBellBearingUnlocked(
 	expectedRevision string,
 ) (SetBellBearingUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetBellBearingUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetBellBearingUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	block := eventFlagID / eventFlagsPerBlock
 	if block != bellBearingEventFlagBlock {
@@ -65,9 +68,7 @@ func (engine *Engine) SetBellBearingUnlocked(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

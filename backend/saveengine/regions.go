@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed unlocked-regions section. The section has no
@@ -68,14 +69,14 @@ type CharacterRegions struct {
 // no fallback position, no partial result and nothing is guessed.
 func (engine *Engine) GetRegions(saveSessionID string, characterID int) (CharacterRegions, error) {
 	if saveSessionID == "" {
-		return CharacterRegions{}, errors.New("saveSessionID is required")
+		return CharacterRegions{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterRegions{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterRegions{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterRegions{}, fmt.Errorf("characterID %d is outside the range 0..%d",

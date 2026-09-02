@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const (
@@ -55,7 +57,7 @@ func (engine *Engine) GetItemCapacity(
 	maxContainerTotal uint32,
 ) (ItemCapacity, error) {
 	if saveSessionID == "" {
-		return ItemCapacity{}, errors.New("saveSessionID is required")
+		return ItemCapacity{}, apperror.MissingField("saveSessionID")
 	}
 	switch destination {
 	case ItemCapacityDestinationInventory, ItemCapacityDestinationStorage:
@@ -79,7 +81,7 @@ func (engine *Engine) GetItemCapacity(
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return ItemCapacity{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return ItemCapacity{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return ItemCapacity{}, fmt.Errorf("characterID %d is outside the range 0..%d",

@@ -3,9 +3,11 @@ package desktop_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
@@ -86,8 +88,19 @@ func TestSelectSaveFilePropagatesTheDialogFailureUnchanged(t *testing.T) {
 	}, nil)
 
 	path, err := bridge.SelectSaveFile()
-	if !errors.Is(err, failure) {
-		t.Fatalf("SelectSaveFile error = %v, want the dialog failure %v", err, failure)
+	// The failure crosses the bridge as the shared error model: Wails carries
+	// only a string, so the dialog error itself stays in the backend log and the
+	// caller receives a classified, safe envelope instead.
+	if err == nil {
+		t.Fatal("SelectSaveFile = nil error, want the dialog failure")
+	}
+	public, decoded := desktop.DecodeBridgeError(err.Error())
+	if !decoded || public.Code != apperror.CodeOperationFailed {
+		t.Fatalf("SelectSaveFile error = %v, want an operation_failed envelope for %v",
+			err, failure)
+	}
+	if strings.Contains(err.Error(), failure.Error()) {
+		t.Errorf("the envelope leaks the raw dialog failure: %v", err)
 	}
 	if path != "" {
 		t.Errorf("a failed dialog returned the path %q, want an empty path", path)

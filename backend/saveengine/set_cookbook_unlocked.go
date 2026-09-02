@@ -3,6 +3,8 @@ package saveengine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetCookbookUnlockedResult reports one committed cookbook unlock state change.
@@ -47,8 +49,7 @@ func (engine *Engine) SetCookbookUnlocked(
 	expectedRevision string,
 ) (SetCookbookUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCookbookUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCookbookUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	block := eventFlagID / eventFlagsPerBlock
 	if block != 67 && block != 68 {
@@ -70,9 +71,7 @@ func (engine *Engine) SetCookbookUnlocked(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

@@ -66,6 +66,48 @@ Transport status:
 | `not exposed` | The endpoint is callable only as a Go function. No Wails binding, HTTP route, or CLI command reaches it. |
 | `transport-exposed` | The endpoint is reachable through at least one transport (Wails, HTTP, or CLI), named in the document. |
 
+## Shared error contract
+
+Every failure of every endpoint is reported in one public model, owned by
+`backend/apperror`. An endpoint document describes only the failures specific to
+its own rules and never repeats this section.
+
+The model carries:
+
+| Member | Meaning |
+|---|---|
+| `code` | Stable classification. A consumer branches on this and never on the wording of `message`. |
+| `message` | Safe English fallback. The frontend owns the final localized text and falls back to this only for a code it does not know. |
+| `params` | Safe parameters of the message, keyed by name. |
+| `severity` | `error` or `warning`. |
+| `stage` | `request`, `session`, `mutation` or `internal`. |
+| `retryable` | Whether repeating the identical call can succeed. |
+| `fieldErrors` | Rejected request fields, each with its own field name, stable code and safe fallback. |
+| `currentRevision` | Present only on `revision_conflict`: the session's current `saveRevision`. |
+| `diagnosticID` | Unpredictable identifier correlating the response with the backend log entry holding the private cause. |
+
+The implemented codes are `invalid_request`, `invalid_revision`,
+`revision_conflict`, `unknown_save_session`, `operation_failed` and
+`internal_error`. A domain failure with no confirmed finer classification is
+reported as `operation_failed`: the taxonomy is extended by adding a code, never
+by inspecting error text.
+
+A raw Go error, a stack trace, a private path and an unredacted parameter never
+reach a response. `operation_failed` and `internal_error` therefore report a
+fixed safe sentence, and the original cause is written to the backend log beside
+the same `diagnosticID`.
+
+Transports carry the same model:
+
+- the local HTTP explorer answers with `{"error": <model>}` and derives the
+  status from the code — `400` for `invalid_request` and `invalid_revision`,
+  `404` for `unknown_save_session`, `409` for `revision_conflict` and `500` for
+  `internal_error`;
+- the Wails bridge carries the model as JSON behind the `saveforge-error:`
+  marker, because Wails 2 transports only the string of a returned error. The
+  frontend validates that envelope strictly and reduces anything else to its own
+  `bridge_call_failed` code.
+
 ## Documented endpoints
 
 | Name | EndpointID | Kind | Domain | Implementation status | Transport status | Document |

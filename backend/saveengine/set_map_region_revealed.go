@@ -1,6 +1,10 @@
 package saveengine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+)
 
 // mapRegionVisibilityBlock is the single event flag block the confirmed map
 // region visibility table occupies.
@@ -60,8 +64,7 @@ func (engine *Engine) SetMapRegionRevealed(
 	expectedRevision string,
 ) (SetMapRegionRevealedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetMapRegionRevealedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetMapRegionRevealedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if block := visibleEventFlagID / eventFlagsPerBlock; block != mapRegionVisibilityBlock {
 		return SetMapRegionRevealedResult{}, fmt.Errorf(
@@ -87,9 +90,7 @@ func (engine *Engine) SetMapRegionRevealed(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 		active, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetColosseumUnlockedResult reports one committed colosseum unlock change.
@@ -80,8 +82,7 @@ func (engine *Engine) SetColosseumUnlocked(
 	expectedRevision string,
 ) (SetColosseumUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetColosseumUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetColosseumUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	flagSet, confirmed := colosseumFlagSets[unlockEventFlagID]
 	if !confirmed {
@@ -119,9 +120,7 @@ func (engine *Engine) SetColosseumUnlocked(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

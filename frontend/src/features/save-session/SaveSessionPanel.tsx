@@ -1,5 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
+import { type AppError, appErrorCodes } from "../../application/errors/appError";
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
@@ -57,7 +58,7 @@ export function SaveSessionContent({
   const { t } = useLingui();
   const [reportVisible, setReportVisible] = useState(false);
 
-  const { state, session, validation, selection, failure, unclosedSessionID } = flow;
+  const { state, session, validation, selection, failure, appError, unclosedSessionID } = flow;
   // Every surface that acts on a session is tied to holding one, not to the
   // verdict on it. A session whose validation or character list failed is still
   // open in the backend, so it keeps its metadata and its Close action: hiding
@@ -119,11 +120,9 @@ export function SaveSessionContent({
           )}
 
           {failure === "load_failed" && (
-            // The transport error never reaches the interface: the adapter
-            // reduces every failure to one code, so one safe message is shown.
-            // It says the call failed and nothing about the file: telling a
-            // damaged container from an unsupported one needs the structured
-            // backend error contract, which does not exist yet.
+            // The operation-level message says only that opening failed. The
+            // structured error is presented separately below, without deriving
+            // a verdict about the file from its fallback sentence.
             //
             // It also claims nothing about the backend's own state. LoadSave may
             // have created a session before failing to report it, so "no session
@@ -165,6 +164,8 @@ export function SaveSessionContent({
               </Trans>
             </p>
           )}
+
+          {appError !== undefined && <AppErrorDetails error={appError} />}
 
           {unclosedSessionID !== undefined && (
             <div role="alert" className={alertPanel}>
@@ -309,5 +310,52 @@ export function SaveSessionContent({
         {showCharacterSidebar && hasSession && <CharacterSidebar model={selection} />}
       </div>
     </Card>
+  );
+}
+
+/**
+ * Renders only text the frontend owns for codes it understands. A future
+ * backend code falls back to the backend's already-safe message and always
+ * carries its diagnostic identifier, so support can correlate it with the
+ * internal log without exposing the raw transport failure.
+ */
+function AppErrorDetails({ error }: { error: AppError }) {
+  let summary: ReactNode;
+  switch (error.code) {
+    case appErrorCodes.invalidRequest:
+      summary = <Trans>The request was rejected because some input was invalid.</Trans>;
+      break;
+    case appErrorCodes.invalidRevision:
+      summary = <Trans>The save revision supplied by the request was invalid.</Trans>;
+      break;
+    case appErrorCodes.revisionConflict:
+      summary = <Trans>The save changed before the operation could be applied.</Trans>;
+      break;
+    case appErrorCodes.unknownSaveSession:
+      summary = <Trans>The save session is no longer available.</Trans>;
+      break;
+    case appErrorCodes.operationFailed:
+      summary = <Trans>The requested operation could not be completed.</Trans>;
+      break;
+    case appErrorCodes.internalError:
+      summary = <Trans>The application backend encountered an internal error.</Trans>;
+      break;
+    case appErrorCodes.bridgeCallFailed:
+      summary = <Trans>The application backend could not be reached.</Trans>;
+      break;
+    default:
+      summary = error.message;
+  }
+
+  return (
+    <p className={message} data-testid="app-error-details">
+      <span>{summary}</span>
+      {error.diagnosticID !== "" && (
+        <>
+          {" "}
+          <Trans>Diagnostic ID:</Trans> <code>{error.diagnosticID}</code>
+        </>
+      )}
+    </p>
   );
 }

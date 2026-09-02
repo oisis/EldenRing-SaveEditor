@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { queryKeys } from "../../application/queryKeys";
+import type { SessionChangedEvent } from "../../application/save-session/saveSessionPort";
 import {
   createTestQueryClient,
   makeCharacterPort,
@@ -46,6 +47,63 @@ describe("useSaveSessionFlow", () => {
     // The natively chosen file is a durable local one, and the host path is
     // forwarded without any normalisation of its own.
     expect(loadSave).toHaveBeenCalledExactlyOnceWith(stubSaveSession.sourcePath, "", "local");
+  });
+
+  it("moves the active session and revision-keyed queries to the state confirmed after an event", async () => {
+    let listener: ((event: SessionChangedEvent | null) => void) | undefined;
+    let currentRevision = "0";
+    const refreshed = {
+      ...stubSaveSession,
+      saveRevision: "1",
+      unsavedChanges: true,
+      eventSequence: "1",
+    };
+    const getSaveCharacters = vi.fn((saveSessionID: string) =>
+      Promise.resolve({ ...stubSaveCharacters, saveSessionID, saveRevision: currentRevision }),
+    );
+    const { wrapper, queryClient } = setup({
+      saveSessionPort: makeSaveSessionPort({
+        getLoadedSave: () => Promise.resolve(currentRevision === "0" ? stubSaveSession : refreshed),
+        subscribeSessionChanged: (next) => {
+          listener = next;
+          return () => {};
+        },
+      }),
+      characterPort: makeCharacterPort({ getSaveCharacters }),
+      diagnosticsPort: makeDiagnosticsPort({
+        getSaveValidationReport: ({ saveSessionID, characterID }) =>
+          Promise.resolve({
+            ...stubCleanValidationReport,
+            saveSessionID,
+            characterID,
+            saveRevision: currentRevision,
+          }),
+      }),
+    });
+
+    const { result } = renderHook(() => useSaveSessionFlow(), { wrapper });
+    act(() => result.current.openSave());
+    await waitFor(() => expect(result.current.state).toBe("clean"));
+    await waitFor(() => expect(listener).toBeDefined());
+
+    currentRevision = "1";
+    act(() => {
+      listener?.({
+        sequence: "1",
+        operationID: "op-1",
+        operationKind: "set_character_name",
+        saveSessionID: stubSaveSession.saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["character.list", "diagnostics.report", "save.session"],
+      });
+    });
+
+    await waitFor(() => expect(result.current.session).toEqual(refreshed));
+    await waitFor(() =>
+      expect(queryClient.getQueryState(queryKeys.saveCharacters("session-1", "1"))).toBeDefined(),
+    );
+    expect(result.current.session?.unsavedChanges).toBe(true);
+    expect(result.current.session?.eventSequence).toBe("1");
   });
 
   it("passes the dialog path to the backend without normalising it", async () => {

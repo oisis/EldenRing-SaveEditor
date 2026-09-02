@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // CharacterLoadoutOwnedItem is one validated Quick Items or Pouch reference.
@@ -64,14 +65,14 @@ func (engine *Engine) GetCharacterLoadoutSnapshot(
 	characterID int,
 ) (CharacterLoadoutSnapshot, error) {
 	if saveSessionID == "" {
-		return CharacterLoadoutSnapshot{}, errors.New("saveSessionID is required")
+		return CharacterLoadoutSnapshot{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterLoadoutSnapshot{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterLoadoutSnapshot{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterLoadoutSnapshot{}, fmt.Errorf(

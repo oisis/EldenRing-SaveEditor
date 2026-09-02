@@ -3,6 +3,8 @@ package saveengine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SpectralSteedAttire is the save-side identity of one Torrent appearance: the
@@ -52,8 +54,7 @@ func (engine *Engine) SetSpectralSteedAttire(
 	expectedRevision string,
 ) (SpectralSteedAttireMutation, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SpectralSteedAttireMutation{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SpectralSteedAttireMutation{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if err := validateSpectralSteedAttires(attires); err != nil {
 		return SpectralSteedAttireMutation{}, err
@@ -118,8 +119,7 @@ func (engine *Engine) LockAllSpectralSteedAttires(
 	expectedRevision string,
 ) (SpectralSteedAttireMutation, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SpectralSteedAttireMutation{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SpectralSteedAttireMutation{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if err := validateSpectralSteedAttires(attires); err != nil {
 		return SpectralSteedAttireMutation{}, err
@@ -228,8 +228,7 @@ func checkSpectralSteedSlot(loaded *loadedSave, characterID int, expectedRevisio
 	}
 	current := loaded.session.revisionString()
 	if expectedRevision != current {
-		return fmt.Errorf("expectedRevision %q does not match the current saveRevision %q",
-			expectedRevision, current)
+		return apperror.RevisionConflict(expectedRevision, current)
 	}
 	active, err := loaded.snapshot.readAt(
 		userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

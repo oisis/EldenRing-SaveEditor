@@ -13,8 +13,8 @@ package diagnostics
 
 import (
 	"errors"
-	"fmt"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
@@ -36,13 +36,19 @@ var ApplyRepairsDefinition = contract.MustDefine(contract.Definition{
 // ApplyRepairsResult is the receipt of applying the executable actions selected
 // by issueIDs. Rejected is echoed from the freshly derived plan so a caller can
 // never mistake an unrepairable finding for a successful mutation.
+//
+// ConditionalMutationReceipt is a projection of the shared receipt dedicated
+// to this two-variant result, so the public JSON stays flat without weakening
+// MutationReceipt for ordinary mutations. Applied discriminates the variants:
+// a committed transaction carries all five receipt members, while a verified
+// selection without an executable action carries only the session and unchanged
+// revision.
 type ApplyRepairsResult struct {
-	SaveSessionID string            `json:"saveSessionID"`
-	SaveRevision  string            `json:"saveRevision"`
-	CharacterID   int               `json:"characterID"`
-	Applied       bool              `json:"applied"`
-	Actions       []RepairAction    `json:"actions"`
-	Rejected      []RepairRejection `json:"rejected"`
+	saveengine.ConditionalMutationReceipt
+	CharacterID int               `json:"characterID"`
+	Applied     bool              `json:"applied"`
+	Actions     []RepairAction    `json:"actions"`
+	Rejected    []RepairRejection `json:"rejected"`
 }
 
 // ApplyRepairs re-derives the selected repair plan at expectedRevision and
@@ -64,8 +70,7 @@ func ApplyRepairs(
 		return ApplyRepairsResult{}, errors.New("game catalog is not available")
 	}
 	if !saveengine.IsCanonicalRevision(expectedRevision) {
-		return ApplyRepairsResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return ApplyRepairsResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	plan, err := GetRepairPlan(
@@ -91,11 +96,10 @@ func ApplyRepairs(
 		return ApplyRepairsResult{}, err
 	}
 	return ApplyRepairsResult{
-		SaveSessionID: mutation.SaveSessionID,
-		SaveRevision:  mutation.SaveRevision,
-		CharacterID:   mutation.CharacterID,
-		Applied:       mutation.Applied,
-		Actions:       plan.Actions,
-		Rejected:      plan.Rejected,
+		ConditionalMutationReceipt: saveengine.ConditionalReceipt(mutation.MutationReceipt),
+		CharacterID:                mutation.CharacterID,
+		Applied:                    mutation.Applied,
+		Actions:                    plan.Actions,
+		Rejected:                   plan.Rejected,
 	}, nil
 }

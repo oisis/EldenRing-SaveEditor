@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -57,13 +58,17 @@ func TestSetCharacterActiveChangesOnlyTheFlagOnBothPlatforms(t *testing.T) {
 			if err != nil {
 				t.Fatalf("SetCharacterActive(false): %v", err)
 			}
+			assertCommittedReceipt(t, result.MutationReceipt, loaded.SaveSessionID,
+				kindSetCharacterActive, "1")
+			// The receipt is pinned from the result because operationID names one
+			// execution and cannot be predicted; every other member is asserted above.
 			want := SetCharacterActiveResult{
-				SaveSessionID: loaded.SaveSessionID,
-				SaveRevision:  "1",
-				CharacterID:   setActiveTestSlot,
-				Active:        false,
+				MutationReceipt: result.MutationReceipt,
+				Changed:         true,
+				CharacterID:     setActiveTestSlot,
+				Active:          false,
 			}
-			if result != want {
+			if !reflect.DeepEqual(result, want) {
 				t.Errorf("deactivation result = %+v, want %+v", result, want)
 			}
 

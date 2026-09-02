@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed EquipItemData section, shared by PC and PS4.
@@ -120,14 +121,14 @@ type CharacterQuickItems struct {
 // guessed.
 func (engine *Engine) GetQuickItems(saveSessionID string, characterID int) (CharacterQuickItems, error) {
 	if saveSessionID == "" {
-		return CharacterQuickItems{}, errors.New("saveSessionID is required")
+		return CharacterQuickItems{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterQuickItems{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterQuickItems{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterQuickItems{}, fmt.Errorf("characterID %d is outside the range 0..%d",

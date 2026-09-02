@@ -53,13 +53,49 @@ advances the revision once and creates at most one `apply_repairs` undo point.
 
 ## Result
 
-The receipt returns `saveSessionID`, `saveRevision`, `characterID`, `applied`,
-and the freshly derived `actions` and `rejected`. `applied` is false only for a
-rejected-only selection.
+```go
+type ApplyRepairsResult struct {
+	saveengine.MutationReceipt
+	CharacterID int               `json:"characterID"`
+	Applied     bool              `json:"applied"`
+	Actions     []RepairAction    `json:"actions"`
+	Rejected    []RepairRejection `json:"rejected"`
+}
+```
+
+The shared receipt is embedded anonymously, so the JSON stays flat and
+`saveSessionID` and `saveRevision` appear exactly once. `applied` discriminates
+the two success variants:
+
+| `applied` | Meaning | Receipt members present |
+|---|---|---|
+| `true` | At least one executable action committed, as one atomic mutation. | `operationID`, `operationKind` (always `apply_repairs`), `saveSessionID`, `saveRevision` (the new revision), `changedScopes` |
+| `false` | The verified selection has no executable action. | `saveSessionID` and `saveRevision` (the unchanged revision) only |
+
+The freshly derived `actions` and `rejected` are returned in both variants.
+
+An `applied: true` receipt comes exclusively from SaveEngine's central commit
+path: this endpoint and the transport never reassemble one, never mint an
+`operationID` and never resolve scopes of their own. `operationKind` is always
+`apply_repairs`, and `changedScopes` come from the one central
+`operationKind → changedScopes` map, which lists `save.session`,
+`character.list`, `character.profile`, `character.stats`, `inventory`,
+`storage`, `equipment.loadout` and `diagnostics.report`.
+
+An `applied: false` result is a domain success and not an error. It commits
+nothing, so no `operationID` is minted, no `session.changed` event is published,
+the session's event sequence does not advance, and `operationID`,
+`operationKind` and `changedScopes` are absent from the payload rather than
+present and empty. A rejected or rolled back execution returns the complete zero
+result and never exposes the `operationID` it had prepared.
 
 ## Errors
 
 The endpoint rejects a missing engine or catalog, malformed or stale revision,
 an inactive slot, invalid selected identifiers, a mismatched token, an unknown
 session, or a physical target that no longer matches the regenerated plan. It
-never falls back to a different record, target value or repair policy.
+never falls back to a different record, target value or repair policy. Failures
+are reported in the shared error model described in
+[docs/endpoints/README.md](../README.md): a malformed revision is
+`invalid_revision`, a stale one `revision_conflict` carrying `currentRevision`,
+and an unknown session `unknown_save_session`.

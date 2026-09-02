@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file holds the third mutation of SaveForge 2.0: it adds one item to the
@@ -173,8 +175,7 @@ func (engine *Engine) AddItemToInventory(
 			"quantity %d exceeds the limit of %d per record", quantity, maxPerRecord)
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return AddItemToInventoryResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	var outcome addedInventoryRecord
@@ -185,9 +186,7 @@ func (engine *Engine) AddItemToInventory(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		var err error

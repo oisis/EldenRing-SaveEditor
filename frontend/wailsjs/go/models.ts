@@ -1021,6 +1021,7 @@ export namespace saveengine {
 	    sourceKind: string;
 	    saveRevision: string;
 	    unsavedChanges: boolean;
+	    eventSequence: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new SessionInfo(source);
@@ -1035,6 +1036,7 @@ export namespace saveengine {
 	        this.sourceKind = source["sourceKind"];
 	        this.saveRevision = source["saveRevision"];
 	        this.unsavedChanges = source["unsavedChanges"];
+	        this.eventSequence = source["eventSequence"];
 	    }
 	}
 

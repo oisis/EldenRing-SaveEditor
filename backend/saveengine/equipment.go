@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed equipped-armaments block, shared by PC and
@@ -124,14 +125,14 @@ type CharacterEquipment struct {
 // There is no fallback position, no partial result and nothing is guessed.
 func (engine *Engine) GetEquipment(saveSessionID string, characterID int) (CharacterEquipment, error) {
 	if saveSessionID == "" {
-		return CharacterEquipment{}, errors.New("saveSessionID is required")
+		return CharacterEquipment{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterEquipment{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterEquipment{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterEquipment{}, fmt.Errorf("characterID %d is outside the range 0..%d",

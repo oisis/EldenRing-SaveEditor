@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed appearance block, shared by PC and PS4. The
@@ -116,14 +117,14 @@ type CharacterAppearance struct {
 // is tried, no partial result is returned and nothing is guessed.
 func (engine *Engine) GetCharacterAppearance(saveSessionID string, characterID int) (CharacterAppearance, error) {
 	if saveSessionID == "" {
-		return CharacterAppearance{}, errors.New("saveSessionID is required")
+		return CharacterAppearance{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterAppearance{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterAppearance{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterAppearance{}, fmt.Errorf("characterID %d is outside the range 0..%d",

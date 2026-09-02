@@ -1,8 +1,9 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // UserData10 layout of the 15 Mirror Favorites preset slots, shared by PC and
@@ -42,7 +43,7 @@ func (engine *Engine) GetFavoritePresets(
 	favoriteSlotID *int,
 ) (FavoritePresetsState, error) {
 	if saveSessionID == "" {
-		return FavoritePresetsState{}, errors.New("saveSessionID is required")
+		return FavoritePresetsState{}, apperror.MissingField("saveSessionID")
 	}
 	if favoriteSlotID != nil && (*favoriteSlotID < 0 || *favoriteSlotID >= favoriteSlotCount) {
 		return FavoritePresetsState{}, fmt.Errorf(
@@ -53,7 +54,7 @@ func (engine *Engine) GetFavoritePresets(
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return FavoritePresetsState{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return FavoritePresetsState{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	base := userData10Base(loaded.session.platform)

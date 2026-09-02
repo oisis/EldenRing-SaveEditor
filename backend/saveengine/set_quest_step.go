@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // QuestFlagTarget represents one target event flag state in a quest step plan.
@@ -58,8 +60,7 @@ func (engine *Engine) SetQuestStep(
 	expectedRevision string,
 ) (SetQuestStepResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetQuestStepResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetQuestStepResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if len(flags) == 0 {
 		return SetQuestStepResult{}, fmt.Errorf("quest step requires at least one target flag")
@@ -105,9 +106,7 @@ func (engine *Engine) SetQuestStep(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

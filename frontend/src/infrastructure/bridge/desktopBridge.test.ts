@@ -23,7 +23,12 @@ import {
   SelectSaveFile,
 } from "../../../wailsjs/go/desktop/Bridge";
 import { application, catalog, equipment, inventory, saveengine } from "../../../wailsjs/go/models";
+import { toAppError } from "../../application/errors/appError";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
+
+vi.mock("../../../wailsjs/runtime/runtime", () => ({
+  EventsOn: vi.fn(),
+}));
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   CloseSave: vi.fn(),
@@ -139,9 +144,16 @@ describe("wails application info adapter", () => {
       ),
     );
 
-    await expect(wailsDesktopBridge.getApplicationInfo()).rejects.toThrow(
-      new Error(bridgeFailureCode),
-    );
+    const failure = await wailsDesktopBridge
+      .getApplicationInfo()
+      .catch((reason: unknown) => reason);
+
+    // The thrown value carries the structured failure, and its message stays the
+    // stable code so nothing is ever tempted to parse a sentence.
+    expect((failure as Error).message).toBe(bridgeFailureCode);
+    expect(toAppError(failure).code).toBe(bridgeFailureCode);
+    expect(JSON.stringify(toAppError(failure))).not.toContain("/Users/private");
+    expect(JSON.stringify(toAppError(failure))).not.toContain("goroutine");
   });
 });
 
@@ -154,6 +166,7 @@ const session = saveengine.SessionInfo.createFrom({
   sourceKind: "temporary",
   saveRevision: "17",
   unsavedChanges: true,
+  eventSequence: "5",
 });
 
 describe("wails save session adapter", () => {
@@ -192,8 +205,9 @@ describe("wails save session adapter", () => {
   it("maps every reported session field without normalising or defaulting it", async () => {
     getLoadedSave.mockResolvedValue(session);
 
-    // Exactly the seven fields the backend reports; nothing is added, and the
-    // path, the kind and the revision are carried byte for byte.
+    // Exactly the eight fields the backend reports; nothing is added, and the
+    // path, the kind, the revision and the event sequence are carried byte for
+    // byte.
     await expect(wailsDesktopBridge.getLoadedSave("session-1")).resolves.toEqual({
       saveSessionID: "session-1",
       platform: "pc",
@@ -202,6 +216,7 @@ describe("wails save session adapter", () => {
       sourceKind: "temporary",
       saveRevision: "17",
       unsavedChanges: true,
+      eventSequence: "5",
     });
   });
 
@@ -215,6 +230,7 @@ describe("wails save session adapter", () => {
         sourceKind: "future_kind",
         saveRevision: "0",
         unsavedChanges: false,
+        eventSequence: "0",
       }),
     );
 
@@ -228,6 +244,7 @@ describe("wails save session adapter", () => {
       sourceKind: "future_kind",
       saveRevision: "0",
       unsavedChanges: false,
+      eventSequence: "0",
     });
   });
 
@@ -1698,8 +1715,14 @@ describe("wails equipment adapter", () => {
   it("replaces a transport failure with the stable code", async () => {
     getEquipment.mockRejectedValue(new Error("goroutine 1 [running]: /Users/private/app.go:42"));
 
-    await expect(wailsDesktopBridge.getEquipment(equipmentRequest)).rejects.toThrow(
-      new Error(bridgeFailureCode),
-    );
+    const failure = await wailsDesktopBridge
+      .getEquipment(equipmentRequest)
+      .catch((reason: unknown) => reason);
+
+    // The thrown value carries the structured failure, and its message stays the
+    // stable code so nothing is ever tempted to parse a sentence.
+    expect((failure as Error).message).toBe(bridgeFailureCode);
+    expect(toAppError(failure).code).toBe(bridgeFailureCode);
+    expect(JSON.stringify(toAppError(failure))).not.toContain("goroutine");
   });
 });

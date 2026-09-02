@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { AppErrorException } from "../../application/errors/appError";
 import {
   makeCharacterPort,
   makeDiagnosticsPort,
@@ -102,6 +103,34 @@ describe("SaveSessionPanel", () => {
     expect(alert).not.toHaveTextContent(/no session/i);
     expect(screen.queryByRole("complementary", { name: "Characters" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Close Save" })).toBeNull();
+  });
+
+  it("shows the safe fallback and diagnostic ID for an unknown backend code", async () => {
+    await renderApp(<SaveSessionPanel />, {
+      saveSessionPort: makeSaveSessionPort({
+        loadSave: () =>
+          Promise.reject(
+            new AppErrorException({
+              code: "future_failure",
+              message: "The backend could not complete this future operation.",
+              params: {},
+              severity: "error",
+              stage: "mutation",
+              retryable: false,
+              fieldErrors: [],
+              currentRevision: null,
+              diagnosticID: "diag-future-1",
+            }),
+          ),
+      }),
+    });
+
+    await openSave();
+
+    const details = await screen.findByTestId("app-error-details");
+    expect(details).toHaveTextContent("The backend could not complete this future operation.");
+    expect(details).toHaveTextContent("diag-future-1");
+    expect(details).not.toHaveTextContent("future_failure");
   });
 
   it("keeps the open session usable when the file dialog fails", async () => {

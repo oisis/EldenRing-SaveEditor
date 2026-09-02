@@ -3,6 +3,8 @@ package saveengine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetBossDefeatedResult reports one committed defeat state change.
@@ -54,8 +56,7 @@ func (engine *Engine) SetBossDefeated(
 	expectedRevision string,
 ) (SetBossDefeatedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetBossDefeatedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetBossDefeatedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if block := eventFlagID / eventFlagsPerBlock; block != bossFlagBlock {
 		return SetBossDefeatedResult{}, fmt.Errorf(
@@ -76,9 +77,7 @@ func (engine *Engine) SetBossDefeated(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

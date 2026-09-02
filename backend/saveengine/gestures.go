@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed GestureGameData section, shared by its
@@ -143,14 +144,14 @@ type CharacterGestures struct {
 // guessed.
 func (engine *Engine) GetGestures(saveSessionID string, characterID int) (CharacterGestures, error) {
 	if saveSessionID == "" {
-		return CharacterGestures{}, errors.New("saveSessionID is required")
+		return CharacterGestures{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterGestures{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterGestures{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterGestures{}, fmt.Errorf("characterID %d is outside the range 0..%d",

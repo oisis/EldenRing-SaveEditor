@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
@@ -261,7 +262,7 @@ func newHandlerWithTemplatesStore(
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		result, err := catalog.GetResourcePresentationSummaries(gameCatalog, body.Identities)
@@ -906,7 +907,7 @@ func registerSaveSessionRoutes(
 ) {
 	mux.HandleFunc("POST /api/v1/save-sessions", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body loadSaveRequest
@@ -914,7 +915,7 @@ func registerSaveSessionRoutes(
 		// An unknown field is a client mistake, not something to ignore silently.
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		result, err := savesession.LoadSave(saveEngine, body.Source, body.ExpectedPlatform, body.SourceKind)
@@ -936,14 +937,14 @@ func registerSaveSessionRoutes(
 
 	mux.HandleFunc("POST /api/v1/save-sessions/{saveSessionID}/write", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body writeSaveRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		result, err := savesession.WriteSave(
@@ -970,7 +971,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := savesession.SetSaveAccountID(
@@ -1039,11 +1040,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.TargetSlotID == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("targetSlotID is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("targetSlotID"))
 				return
 			}
 			result, err := character.CloneCharacter(
@@ -1077,7 +1078,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := character.DeleteCharacter(
@@ -1110,11 +1111,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Active == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("active is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("active"))
 				return
 			}
 			result, err := character.SetCharacterActive(
@@ -1148,7 +1149,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := character.SetCharacterName(
@@ -1182,11 +1183,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Gender == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("gender is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("gender"))
 				return
 			}
 			result, err := character.SetCharacterGender(
@@ -1221,11 +1222,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Runes == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("runes is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("runes"))
 				return
 			}
 			result, err := character.SetCharacterRunes(
@@ -1259,11 +1260,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Attributes == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("attributes is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("attributes"))
 				return
 			}
 			attributes, err := body.Attributes.values()
@@ -1303,15 +1304,15 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.StartingClassID == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("startingClassID is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("startingClassID"))
 				return
 			}
 			if body.ConfirmReset == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("confirmReset is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("confirmReset"))
 				return
 			}
 			result, err := character.SetCharacterStartingClass(
@@ -1380,7 +1381,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := character.UndoCharacterChanges(
@@ -1431,11 +1432,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Appearance == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("appearance is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("appearance"))
 				return
 			}
 			values, err := body.Appearance.values()
@@ -1474,7 +1475,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := appearance.ApplyAppearancePreset(
@@ -1509,11 +1510,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.FavoriteSlotID == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("favoriteSlotID is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("favoriteSlotID"))
 				return
 			}
 			result, err := favorites.ApplyFavoritePreset(
@@ -1582,7 +1583,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetEquippedArmaments(
@@ -1617,7 +1618,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetEquippedArmor(
@@ -1669,7 +1670,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetQuickItems(
@@ -1721,7 +1722,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetPouchItems(
@@ -1773,7 +1774,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetPhysickMixture(
@@ -1831,7 +1832,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := diagnostics.GetRepairPlan(
@@ -1866,7 +1867,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := diagnostics.ApplyRepairs(
@@ -1945,7 +1946,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := equipment.SetEquippedSpells(
@@ -1980,11 +1981,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.OrderedOwnedItemIDs == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("orderedOwnedItemIDs is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("orderedOwnedItemIDs"))
 				return
 			}
 			result, err := equipment.SetEquippedTalismans(
@@ -2096,11 +2097,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.OrderedOwnedItemIDs == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("orderedOwnedItemIDs is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("orderedOwnedItemIDs"))
 				return
 			}
 			result, err := inventory.SetInventoryOrder(
@@ -2141,7 +2142,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := inventory.AddItemToInventory(
@@ -2219,7 +2220,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := inventory.AddItemToStorage(
@@ -2257,11 +2258,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.OrderedOwnedItemIDs == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("orderedOwnedItemIDs is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("orderedOwnedItemIDs"))
 				return
 			}
 			result, err := inventory.SetStorageOrder(
@@ -2323,7 +2324,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := inventory.RemoveOwnedItem(
@@ -2356,7 +2357,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := inventory.SetOwnedItemQuantity(
@@ -2388,11 +2389,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.TargetPosition == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("targetPosition is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("targetPosition"))
 				return
 			}
 			result, err := inventory.MoveOwnedItemToInventory(
@@ -2424,11 +2425,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.TargetPosition == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("targetPosition is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("targetPosition"))
 				return
 			}
 			result, err := inventory.MoveOwnedItemToStorage(
@@ -2460,11 +2461,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.UpgradeLevel == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("upgradeLevel is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("upgradeLevel"))
 				return
 			}
 			result, err := inventory.SetWeaponUpgradeLevel(
@@ -2496,11 +2497,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.UpgradeLevel == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("upgradeLevel is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("upgradeLevel"))
 				return
 			}
 			result, err := inventory.SetSpiritAshUpgradeLevel(
@@ -2532,11 +2533,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Affinity == "" {
-				writeError(writer, http.StatusBadRequest, errors.New("affinity is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("affinity"))
 				return
 			}
 			result, err := inventory.SetWeaponInfusion(
@@ -2568,7 +2569,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			ashOfWarKind, err := requiredNullableString(body.AshOfWarKind, "ashOfWarKind")
@@ -2642,11 +2643,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetGestureUnlocked(
@@ -2733,11 +2734,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetBellBearingUnlocked(
@@ -2863,11 +2864,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetRegionUnlocked(
@@ -2992,11 +2993,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Revealed == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("revealed is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("revealed"))
 				return
 			}
 			result, err := world.SetMapRegionRevealed(
@@ -3033,11 +3034,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Removed == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("removed is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("removed"))
 				return
 			}
 			result, err := world.SetFogOfWarRemoved(
@@ -3096,7 +3097,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := world.SetQuestStep(
@@ -3157,11 +3158,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetTutorialUnlocked(
@@ -3198,11 +3199,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetWhetbladeUnlocked(
@@ -3239,7 +3240,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := world.SetSpectralSteedAttire(
@@ -3274,7 +3275,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := world.LockAllSpectralSteedAttires(
@@ -3308,11 +3309,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetCookbookUnlocked(
@@ -3349,11 +3350,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Activated == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("activated is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("activated"))
 				return
 			}
 			result, err := world.SetSummoningPoolActivated(
@@ -3390,11 +3391,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Defeated == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("defeated is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("defeated"))
 				return
 			}
 			result, err := world.SetBossDefeated(
@@ -3431,11 +3432,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Visited == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("visited is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("visited"))
 				return
 			}
 			result, err := world.SetGraceVisited(
@@ -3472,11 +3473,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.Unlocked == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("unlocked"))
 				return
 			}
 			result, err := world.SetColosseumUnlocked(
@@ -3523,7 +3524,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := network.SetNetworkSettings(
@@ -3551,7 +3552,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := network.ApplyNetworkPreset(
@@ -3610,7 +3611,7 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			result, err := favorites.DeleteFavoritePreset(
@@ -3643,11 +3644,11 @@ func registerSaveSessionRoutes(
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
-				writeError(writer, http.StatusBadRequest, err)
+				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
 			if body.SourceCharacterID == nil {
-				writeError(writer, http.StatusBadRequest, errors.New("sourceCharacterID is required"))
+				writeError(writer, http.StatusBadRequest, apperror.MissingField("sourceCharacterID"))
 				return
 			}
 			result, err := favorites.SetFavoritePreset(
@@ -3750,7 +3751,7 @@ func parseRequiredUint32(raw string, name string) (uint32, error) {
 func serveAsset(writer http.ResponseWriter, name string, contentType string) {
 	content, err := assets.ReadFile(name)
 	if err != nil {
-		writeError(writer, http.StatusInternalServerError, err)
+		writeError(writer, http.StatusInternalServerError, apperror.Internal(err))
 		return
 	}
 	writer.Header().Set("Content-Type", contentType)
@@ -3769,12 +3770,56 @@ func writeJSON(writer http.ResponseWriter, status int, payload any) {
 	}
 }
 
-// writeError keeps the message the getter returned, because the getter owns the
-// wording of its own validation rules.
-// ponytail: no shared EndpointError type yet; endpoints.md defers that model
-// until several endpoint contracts exist.
+// requestBodyError classifies a transport-level request-body failure: a wrong
+// Content-Type, a malformed document or a field the strict decoder does not
+// know. The wording comes from this host and from encoding/json, so it names the
+// JSON structure the caller sent and never save data or a backend internal.
+func requestBodyError(err error) error {
+	return apperror.InvalidRequest(err.Error())
+}
+
+// errorResponse is the one error body of this host. Its single member is the
+// shared public error model, so every failure of every route has the same
+// shape and a consumer never has to read a sentence to classify one.
+type errorResponse struct {
+	Error *apperror.Error `json:"error"`
+}
+
+// writeError reports one failure in the shared public model.
+//
+// The status comes from the classification whenever the failure carries one, so
+// a revision conflict is a 409 and an unknown session a 404 on every route
+// without the route restating that rule. status stays the fallback for a
+// failure the backend has not classified yet.
+//
+// The private cause never reaches the response. It is logged here beside the
+// same diagnosticID the caller receives, which is what makes an opaque response
+// diagnosable without leaking a raw Go error, a stack trace or a private path.
 func writeError(writer http.ResponseWriter, status int, err error) {
-	writeJSON(writer, status, map[string]string{"error": err.Error()})
+	public := apperror.From(err)
+	if cause := public.Cause(); cause != nil {
+		log.Printf("%s %s: %v", public.DiagnosticID, public.Code, cause)
+	} else {
+		log.Printf("%s %s", public.DiagnosticID, public.Code)
+	}
+	writeJSON(writer, errorStatus(public, status), errorResponse{Error: public})
+}
+
+// errorStatus maps a classified failure onto its HTTP status. An unclassified
+// one keeps the status the route asked for.
+func errorStatus(public *apperror.Error, fallback int) int {
+	switch public.Code {
+	case apperror.CodeInvalidRequest, apperror.CodeInvalidRevision:
+		return http.StatusBadRequest
+	case apperror.CodeUnknownSaveSession:
+		return http.StatusNotFound
+	case apperror.CodeRevisionConflict:
+		return http.StatusConflict
+	case apperror.CodeInternalError:
+		return http.StatusInternalServerError
+	default:
+		return fallback
+	}
 }
 
 // deleteBuildTemplateRequest is the JSON body of DELETE
@@ -3850,14 +3895,14 @@ func registerTemplatesRoutes(
 	})
 	mux.HandleFunc("POST /api/v1/build-templates", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body createBuildTemplateRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
@@ -3865,7 +3910,7 @@ func registerTemplatesRoutes(
 			return
 		}
 		if body.SourceCharacterID == nil {
-			writeError(writer, http.StatusBadRequest, errors.New("sourceCharacterID is required"))
+			writeError(writer, http.StatusBadRequest, apperror.MissingField("sourceCharacterID"))
 			return
 		}
 		result, err := templates.CreateBuildTemplate(
@@ -3884,8 +3929,6 @@ func registerTemplatesRoutes(
 		)
 		if err != nil {
 			switch {
-			case strings.Contains(err.Error(), "unknown save session"):
-				writeError(writer, http.StatusNotFound, err)
 			case errors.Is(err, templates.ErrSaveRevisionConflict):
 				writeError(writer, http.StatusConflict, err)
 			default:
@@ -3910,14 +3953,14 @@ func registerTemplatesRoutes(
 	})
 	mux.HandleFunc("DELETE /api/v1/build-templates/{templateID}", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body deleteBuildTemplateRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
@@ -3944,14 +3987,14 @@ func registerTemplatesRoutes(
 	})
 	mux.HandleFunc("PUT /api/v1/build-templates/{templateID}", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body updateBuildTemplateRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
@@ -3982,14 +4025,14 @@ func registerTemplatesRoutes(
 	})
 	mux.HandleFunc("POST /api/v1/build-templates/{templateID}/preview", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body getBuildTemplatePreviewRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
@@ -3997,7 +4040,7 @@ func registerTemplatesRoutes(
 			return
 		}
 		if body.CharacterID == nil {
-			writeError(writer, http.StatusBadRequest, errors.New("characterID is required"))
+			writeError(writer, http.StatusBadRequest, apperror.MissingField("characterID"))
 			return
 		}
 		result, err := templates.GetBuildTemplatePreview(
@@ -4014,7 +4057,7 @@ func registerTemplatesRoutes(
 		)
 		if err != nil {
 			switch {
-			case errors.Is(err, buildtemplates.ErrNotFound) || strings.Contains(err.Error(), "unknown save session"):
+			case errors.Is(err, buildtemplates.ErrNotFound):
 				writeError(writer, http.StatusNotFound, err)
 			case errors.Is(err, templates.ErrSaveRevisionConflict):
 				writeError(writer, http.StatusConflict, err)
@@ -4027,14 +4070,14 @@ func registerTemplatesRoutes(
 	})
 	mux.HandleFunc("POST /api/v1/build-templates/{templateID}/apply", func(writer http.ResponseWriter, request *http.Request) {
 		if err := requireJSONBody(request); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		var body applyBuildTemplateRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&body); err != nil {
-			writeError(writer, http.StatusBadRequest, err)
+			writeError(writer, http.StatusBadRequest, requestBodyError(err))
 			return
 		}
 		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
@@ -4042,15 +4085,15 @@ func registerTemplatesRoutes(
 			return
 		}
 		if body.SaveSessionID == "" {
-			writeError(writer, http.StatusBadRequest, errors.New("saveSessionID is required"))
+			writeError(writer, http.StatusBadRequest, apperror.MissingField("saveSessionID"))
 			return
 		}
 		if body.CharacterID == nil {
-			writeError(writer, http.StatusBadRequest, errors.New("characterID is required"))
+			writeError(writer, http.StatusBadRequest, apperror.MissingField("characterID"))
 			return
 		}
 		if body.ExpectedRevision == "" {
-			writeError(writer, http.StatusBadRequest, errors.New("expectedRevision is required"))
+			writeError(writer, http.StatusBadRequest, apperror.MissingField("expectedRevision"))
 			return
 		}
 		result, err := templates.ApplyBuildTemplate(
@@ -4068,10 +4111,9 @@ func registerTemplatesRoutes(
 		)
 		if err != nil {
 			switch {
-			case errors.Is(err, buildtemplates.ErrNotFound) || strings.Contains(err.Error(), "unknown save session"):
+			case errors.Is(err, buildtemplates.ErrNotFound):
 				writeError(writer, http.StatusNotFound, err)
-			case errors.Is(err, templates.ErrSaveRevisionConflict) ||
-				strings.Contains(err.Error(), "does not match the current saveRevision"):
+			case errors.Is(err, templates.ErrSaveRevisionConflict):
 				writeError(writer, http.StatusConflict, err)
 			default:
 				writeError(writer, http.StatusBadRequest, err)

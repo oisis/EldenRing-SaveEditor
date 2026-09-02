@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed Storage Box section, shared by PC and PS4.
@@ -218,14 +219,14 @@ func (engine *Engine) GetStorage(
 	pageSize int,
 ) (CharacterStorage, error) {
 	if saveSessionID == "" {
-		return CharacterStorage{}, errors.New("saveSessionID is required")
+		return CharacterStorage{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterStorage{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterStorage{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterStorage{}, fmt.Errorf("characterID %d is outside the range 0..%d",

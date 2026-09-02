@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file holds the second mutation of SaveForge 2.0: it removes the one
@@ -150,8 +152,7 @@ func (engine *Engine) RemoveOwnedItem(
 	expectedRevision string,
 ) (RemoveOwnedItemResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return RemoveOwnedItemResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return RemoveOwnedItemResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	var gameID uint32
@@ -162,9 +163,7 @@ func (engine *Engine) RemoveOwnedItem(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		locator, err := loaded.session.resolveOwnedItemID(characterID, ownedItemID)

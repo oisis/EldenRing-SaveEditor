@@ -5299,17 +5299,47 @@
         }
       },
       "ApplyRepairsResult": {
+        "description": "The result of a fresh, token-verified repair execution. The boolean 'applied' discriminates the two success variants: an executed transaction carries the complete MutationReceipt, and a verified selection without an executable action carries only the session and the unchanged revision. Rejected findings are included for visibility in both variants and never mutate the save.",
+        "oneOf": [
+          { "$ref": "#/components/schemas/ApplyRepairsApplied" },
+          { "$ref": "#/components/schemas/ApplyRepairsNoAction" }
+        ]
+      },
+      "ApplyRepairsApplied": {
+        "description": "At least one executable action committed, as one atomic mutation of kind apply_repairs.",
+        "allOf": [
+          { "$ref": "#/components/schemas/MutationReceipt" },
+          {
+            "type": "object",
+            "required": ["characterID", "applied", "actions", "rejected"],
+            "properties": {
+              "characterID": { "type": "integer", "format": "int32" },
+              "applied": { "type": "boolean", "enum": [true] },
+              "actions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/RepairAction" }
+              },
+              "rejected": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/RepairRejection" }
+              }
+            }
+          }
+        ]
+      },
+      "ApplyRepairsNoAction": {
         "type": "object",
-        "description": "The receipt of a fresh, token-verified repair execution. Rejected findings are included for visibility but never mutate the save.",
+        "description": "The freshly derived plan of the selected findings carries no executable action. Nothing was committed, so there is no operationID, no operationKind and no changedScopes, and the revision is the one the request matched.",
         "required": ["saveSessionID", "saveRevision", "characterID", "applied", "actions", "rejected"],
         "properties": {
-          "saveSessionID": { "type": "string" },
-          "saveRevision": { "type": "string" },
-          "characterID": { "type": "integer", "format": "int32" },
-          "applied": {
-            "type": "boolean",
-            "description": "True when one or more executable actions committed. False for a selected set made only of rejected findings, which leaves the session unchanged."
+          "saveSessionID": { "type": "string", "minLength": 1 },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
           },
+          "characterID": { "type": "integer", "format": "int32" },
+          "applied": { "type": "boolean", "enum": [false] },
           "actions": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/RepairAction" }
@@ -5709,9 +5739,14 @@
           "unsavedChanges": {
             "type": "boolean",
             "description": "True after a committed in-memory mutation and false after LoadSave or a successful WriteSave."
+          },
+          "eventSequence": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal position of this session's session.changed stream, \"0\" for a session that has committed nothing. A subscriber reads it to establish or re-establish its baseline after a start, a lost event or a reconnect. A string for the same reason saveRevision is one."
           }
         },
-        "required": ["saveSessionID", "platform", "format", "sourcePath", "sourceKind", "saveRevision", "unsavedChanges"]
+        "required": ["saveSessionID", "platform", "format", "sourcePath", "sourceKind", "saveRevision", "unsavedChanges", "eventSequence"]
       },
       "CharacterSummary": {
         "type": "object",
@@ -5905,24 +5940,42 @@
         "required": ["active", "expectedRevision"]
       },
       "SetCharacterActiveResult": {
-        "type": "object",
-        "description": "Receipt for one accepted character activity assignment.",
-        "properties": {
-          "saveSessionID": {
-            "type": "string"
-          },
-          "saveRevision": {
-            "type": "string"
-          },
-          "characterID": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "active": {
-            "type": "boolean"
+        "description": "Result of one accepted character activity assignment. The boolean 'changed' discriminates the two success variants: a committed mutation carries the complete MutationReceipt, and an idempotent request carries only the session and the unchanged revision.",
+        "oneOf": [
+          { "$ref": "#/components/schemas/SetCharacterActiveCommitted" },
+          { "$ref": "#/components/schemas/SetCharacterActiveUnchanged" }
+        ]
+      },
+      "SetCharacterActiveCommitted": {
+        "description": "The activity flag changed, so a revision was committed and the complete receipt is present.",
+        "allOf": [
+          { "$ref": "#/components/schemas/MutationReceipt" },
+          {
+            "type": "object",
+            "required": ["changed", "characterID", "active"],
+            "properties": {
+              "changed": { "type": "boolean", "enum": [true] },
+              "characterID": { "type": "integer", "format": "int32" },
+              "active": { "type": "boolean" }
+            }
           }
-        },
-        "required": ["saveSessionID", "saveRevision", "characterID", "active"]
+        ]
+      },
+      "SetCharacterActiveUnchanged": {
+        "type": "object",
+        "description": "The slot was already in the requested state. Nothing was committed, so there is no operationID, no operationKind and no changedScopes, and the revision is the one the request matched. It is a domain success and not an error.",
+        "required": ["changed", "saveSessionID", "saveRevision", "characterID", "active"],
+        "properties": {
+          "changed": { "type": "boolean", "enum": [false] },
+          "saveSessionID": { "type": "string", "minLength": 1 },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": { "type": "integer", "format": "int32" },
+          "active": { "type": "boolean" }
+        }
       },
       "SetCharacterNameRequest": {
         "type": "object",
@@ -10141,12 +10194,82 @@
           }
         ]
       },
+      "FieldError": {
+        "type": "object",
+        "description": "One rejected request field. It carries the field, a stable code and a safe English fallback, and nothing else.",
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["field", "code", "message"]
+      },
+      "AppError": {
+        "type": "object",
+        "description": "The shared public error model. A consumer classifies a failure by code and never by the wording of message; message is a safe English fallback for a code the client does not know. A raw Go error, a stack trace, a private path and an unredacted parameter are never part of it: the cause stays in the backend log beside the same diagnosticID.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": ["invalid_request", "invalid_revision", "revision_conflict", "unknown_save_session", "operation_failed", "internal_error"],
+            "description": "Stable classification of the failure."
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Safe English fallback. The final user-facing text belongs to the frontend."
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Safe parameters of the message, keyed by name."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning"]
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["request", "session", "mutation", "internal"],
+            "description": "Where the failure happened: the request itself, the addressed session, the refused mutation, or the backend."
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "fieldErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          },
+          "currentRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The session's current saveRevision. Present only on revision_conflict, which mutates nothing and is never retried automatically."
+          },
+          "diagnosticID": {
+            "type": "string",
+            "description": "Unpredictable identifier correlating this response with the backend log entry that holds the private cause."
+          }
+        },
+        "required": ["code", "message", "severity", "stage", "retryable", "diagnosticID"]
+      },
       "Error": {
         "type": "object",
-        "description": "Error envelope carrying the message returned by the endpoint.",
+        "description": "Error envelope of every route. Its single member is the shared public error model.",
         "properties": {
           "error": {
-            "type": "string"
+            "$ref": "#/components/schemas/AppError"
           }
         },
         "required": ["error"]

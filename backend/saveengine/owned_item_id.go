@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // This file owns the two private primitives of the owned-item identity: the
@@ -234,6 +236,12 @@ func (engine *Engine) commit(
 	return engine.commitWithHook(saveSessionID, operationKind, characterScoped, characterID, commit, nil)
 }
 
+// commitWithHook commits under Engine.mutex and then publishes the
+// session.changed event of the revision it created. The publication is
+// deliberately outside the critical section: the sink belongs to the host, and
+// no external callback may run while the session lock is held. Order is still
+// the commit order, because commitLocked queues the event under the lock and
+// the drain delivers the queue in sequence.
 func (engine *Engine) commitWithHook(
 	saveSessionID string,
 	operationKind string,
@@ -242,15 +250,36 @@ func (engine *Engine) commitWithHook(
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
 ) (MutationReceipt, error) {
+	receipt, err := engine.commitLocked(
+		saveSessionID, operationKind, characterScoped, characterID, commit, afterCommit)
+	if err != nil {
+		// A rejected or rolled back mutation queued nothing, so there is nothing
+		// of its own to publish here. The drain still runs: an earlier committed
+		// event may be waiting, and it must not be delayed by a later failure.
+		engine.publishSessionChanged()
+		return MutationReceipt{}, err
+	}
+	engine.publishSessionChanged()
+	return receipt, nil
+}
+
+func (engine *Engine) commitLocked(
+	saveSessionID string,
+	operationKind string,
+	characterScoped bool,
+	characterID int,
+	commit func(*loadedSave) error,
+	afterCommit func(*loadedSave, string),
+) (MutationReceipt, error) {
 	if saveSessionID == "" {
-		return MutationReceipt{}, errors.New("saveSessionID is required")
+		return MutationReceipt{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return MutationReceipt{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return MutationReceipt{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	// Fail closed: an unknown operation kind and a failing identifier generator
@@ -293,5 +322,9 @@ func (engine *Engine) commitWithHook(
 	if afterCommit != nil {
 		afterCommit(loaded, revision)
 	}
-	return pending.receipt(saveSessionID, revision), nil
+	receipt := pending.receipt(saveSessionID, revision)
+	// The event is queued under the same lock that created the revision, so the
+	// queue order is the commit order.
+	engine.enqueueCommitted(session, receipt)
+	return receipt, nil
 }

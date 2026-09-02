@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // WriteSaveResult reports a successfully persisted session revision as the
@@ -30,24 +32,24 @@ func (engine *Engine) WriteSave(
 	target string,
 ) (WriteSaveResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return WriteSaveResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return WriteSaveResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if saveSessionID == "" {
-		return WriteSaveResult{}, errors.New("saveSessionID is required")
+		return WriteSaveResult{}, apperror.MissingField("saveSessionID")
 	}
 
+	// Registered before the session lock so it runs after the unlock: the sink is
+	// the host's, and no external callback may run under Engine.mutex.
+	defer engine.publishSessionChanged()
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return WriteSaveResult{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return WriteSaveResult{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	current := loaded.session.revisionString()
 	if expectedRevision != current {
-		return WriteSaveResult{}, fmt.Errorf(
-			"expectedRevision %q does not match the current saveRevision %q",
-			expectedRevision, current)
+		return WriteSaveResult{}, apperror.RevisionConflict(expectedRevision, current)
 	}
 
 	// WriteSave produces its receipt through the same shared path as every other
@@ -87,6 +89,7 @@ func (engine *Engine) WriteSave(
 		nil,
 		newRevision,
 	)
+	engine.enqueueCommitted(loaded.session, receipt)
 	return WriteSaveResult{MutationReceipt: receipt}, nil
 }
 

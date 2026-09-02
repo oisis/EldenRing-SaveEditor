@@ -3,6 +3,8 @@ package saveengine
 import (
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetTutorialUnlockedResult reports one committed TutorialData membership
@@ -50,8 +52,7 @@ func (engine *Engine) SetTutorialUnlocked(
 	expectedRevision string,
 ) (SetTutorialUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetTutorialUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetTutorialUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if tutorialID == 0 {
 		return SetTutorialUnlockedResult{}, fmt.Errorf("tutorial ID must be non-zero")
@@ -65,9 +66,7 @@ func (engine *Engine) SetTutorialUnlocked(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

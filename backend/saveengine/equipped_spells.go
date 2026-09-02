@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed EquippedSpells section and of the two
@@ -185,14 +187,14 @@ type CharacterEquippedSpellsMutation struct {
 // guessed.
 func (engine *Engine) GetEquippedSpells(saveSessionID string, characterID int) (CharacterEquippedSpells, error) {
 	if saveSessionID == "" {
-		return CharacterEquippedSpells{}, errors.New("saveSessionID is required")
+		return CharacterEquippedSpells{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterEquippedSpells{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterEquippedSpells{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterEquippedSpells{}, fmt.Errorf("characterID %d is outside the range 0..%d",
@@ -297,8 +299,7 @@ func (engine *Engine) SetEquippedSpells(
 	expectedRevision string,
 ) (CharacterEquippedSpellsMutation, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return CharacterEquippedSpellsMutation{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return CharacterEquippedSpellsMutation{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if len(rawSpellIDs) > spellMaxMemorySlots {
 		return CharacterEquippedSpellsMutation{}, fmt.Errorf(
@@ -327,9 +328,7 @@ func (engine *Engine) SetEquippedSpells(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

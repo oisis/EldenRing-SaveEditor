@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // CharacterSpellsPlan describes the target equipped spell loadout for ApplyCharacterTemplate.
@@ -45,8 +47,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 	expectedRevision string,
 ) (ApplyCharacterTemplateResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return ApplyCharacterTemplateResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return ApplyCharacterTemplateResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return ApplyCharacterTemplateResult{}, fmt.Errorf(
@@ -101,9 +102,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindApplyBuildTemplate, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		base := userData10Base(loaded.session.platform)

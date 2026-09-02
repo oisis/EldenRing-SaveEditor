@@ -1,6 +1,10 @@
 package saveengine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+)
 
 const (
 	itemOrderReservedIndexMax uint32 = 432
@@ -37,8 +41,7 @@ func (engine *Engine) SetInventoryOrder(
 	classifyGameID func(uint32) (bool, error),
 ) (SetInventoryOrderResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetInventoryOrderResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetInventoryOrderResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if len(orderedOwnedItemIDs) == 0 {
 		return SetInventoryOrderResult{}, fmt.Errorf("orderedOwnedItemIDs must not be empty")
@@ -59,9 +62,9 @@ func (engine *Engine) SetInventoryOrder(
 				characterID, characterSlotCount-1)
 		}
 		if expectedRevision != loaded.session.revisionString() {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
+			return apperror.RevisionConflict(
 				expectedRevision, loaded.session.revisionString())
+
 		}
 
 		flag, err := loaded.snapshot.readAt(

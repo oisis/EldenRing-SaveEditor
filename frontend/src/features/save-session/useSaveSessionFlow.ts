@@ -8,10 +8,15 @@ import {
   saveValidationReportQuery,
   useSaveValidationReports,
 } from "../../application/diagnostics/useSaveValidationReports";
+import { type AppError, toAppError } from "../../application/errors/appError";
 import { useSaveSessionPort } from "../../application/save-session/saveSessionClient";
 import type { SaveSession } from "../../application/save-session/saveSessionPort";
 import { useCloseSave } from "../../application/save-session/useCloseSave";
 import { useLoadSave } from "../../application/save-session/useLoadSave";
+import {
+  type SessionChangedSync,
+  useSessionChangedSync,
+} from "../../application/save-session/useSessionChangedSync";
 import { type CharacterSelection, useCharacterSelection } from "../character/useCharacterSelection";
 
 /**
@@ -41,11 +46,10 @@ export type SaveSessionFlowState =
  * There is exactly one value, and it is the only refusal this build can
  * establish: the backend reported a character list with no active slot. Any
  * finer reason — a damaged container, an unrecognised format, an unsupported
- * version — would have to be inferred from a failed call, and a failed call
- * carries no reason at all: the desktop adapter reduces every transport and
- * backend failure to one opaque code, and the message text is never parsed.
- * Distinguishing those cases needs the structured backend error contract
- * (`tmp/sf-2.0/frontend-backend.md`, section 13), which does not exist yet.
+ * version — would have to be inferred from a failure code that does not
+ * currently establish one of those facts. The structured error remains
+ * available separately for presentation and diagnostics; this flow never
+ * derives a save verdict from its message.
  */
 export type SaveSessionBlockedReason = "no_active_character";
 
@@ -55,7 +59,8 @@ export type SaveSessionBlockedReason = "no_active_character";
  *
  *   - `dialog_failed`       — the host's file dialog itself failed;
  *   - `load_failed`         — LoadSave, or the character list of the candidate
- *                             it created, failed. Nothing is claimed about why;
+ *                             it created, failed. The structured cause is
+ *                             carried separately and no save verdict is inferred;
  *   - `validation_failed`   — a validation report of the candidate could not be
  *                             obtained, or the one that arrived answered about
  *                             another save state. Nothing is claimed about the
@@ -77,6 +82,8 @@ export type SaveSessionFlow = {
   blockedReason: SaveSessionBlockedReason | undefined;
   /** The outcome of the last open or close attempt, or undefined. */
   failure: SaveSessionFailure | undefined;
+  /** Structured cause of the last failed backend call, when one was available. */
+  appError: AppError | undefined;
   /**
    * A backend session whose CloseSave failed. It stays reachable so the user can
    * retry: a session dropped from the interface while still open in the backend
@@ -95,7 +102,16 @@ export type SaveSessionFlow = {
   /** Asks the backend again to close the session whose CloseSave failed. */
   retryClose: () => void;
   isBusy: boolean;
+  /**
+   * The subscription to the backend's committed mutations for the open session.
+   * A mutation caller declares the refresh it already performed from its own
+   * receipt through it, so the matching `session.changed` event does not repeat
+   * that work.
+   */
+  sessionSync: SessionChangedSync;
 };
+
+const staleValidationReport = Symbol("stale validation report");
 
 /**
  * The controller of the one save session the application holds.
@@ -132,8 +148,18 @@ export function useSaveSessionFlow(): SaveSessionFlow {
   const close = useCloseSave();
 
   const [session, setSession] = useState<SaveSession | undefined>(undefined);
+  const acceptSessionRefresh = useCallback((refreshed: SaveSession) => {
+    setSession((current) =>
+      current?.saveSessionID === refreshed.saveSessionID ? refreshed : current,
+    );
+  }, []);
+  // The single subscription to committed backend mutations, scoped to the one
+  // active session. It is started here and nowhere else, so no component keeps
+  // an invalidation map or a listener of its own.
+  const sessionSync = useSessionChangedSync(session?.saveSessionID, acceptSessionRefresh);
   const [cancelled, setCancelled] = useState(false);
   const [failure, setFailure] = useState<SaveSessionFailure | undefined>(undefined);
+  const [appError, setAppError] = useState<AppError | undefined>(undefined);
   const [unclosedSessionID, setUnclosedSessionID] = useState<string | undefined>(undefined);
   const [opening, setOpening] = useState(false);
 
@@ -160,11 +186,12 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     async (saveSessionID: string): Promise<boolean> => {
       try {
         await closeSave(saveSessionID);
-      } catch {
+      } catch (reason) {
         // The first unconfirmed close keeps the slot. A later failure may not
         // take its place: overwriting it would leave the earlier session open
         // in the backend with nothing left able to name it.
         setUnclosedSessionID((pending) => pending ?? saveSessionID);
+        setAppError(toAppError(reason));
         return false;
       }
       setUnclosedSessionID((pending) => (pending === saveSessionID ? undefined : pending));
@@ -188,6 +215,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     // work, so the flow refuses instead of choosing one for the user. It never
     // discards anything by itself.
     if (session?.unsavedChanges === true) {
+      setAppError(undefined);
       setFailure("unsaved_changes");
       return;
     }
@@ -195,6 +223,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     const replaced = session?.saveSessionID;
     setCancelled(false);
     setFailure(undefined);
+    setAppError(undefined);
     setOpening(true);
 
     void (async () => {
@@ -202,10 +231,11 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         let source: string;
         try {
           source = await port.selectSaveFile();
-        } catch {
+        } catch (reason) {
           // The dialog failed, so nothing was chosen and nothing was called.
           // The open session is untouched and stays fully usable.
           setFailure("dialog_failed");
+          setAppError(toAppError(reason));
           return;
         }
 
@@ -223,10 +253,11 @@ export function useSaveSessionFlow(): SaveSessionFlow {
             // a natively chosen file is a durable local one.
             { source, expectedPlatform: "", sourceKind: "local" },
           );
-        } catch {
+        } catch (reason) {
           // The call failed and says nothing more than that. No session was
           // created, and the previous one is neither closed nor hidden.
           setFailure("load_failed");
+          setAppError(toAppError(reason));
           return;
         }
 
@@ -240,9 +271,10 @@ export function useSaveSessionFlow(): SaveSessionFlow {
             saveCharactersQuery(characterPort, candidate.saveSessionID, candidate.saveRevision),
           );
           activeCharacters = characters.characters.filter((character) => character.active);
-        } catch {
+        } catch (reason) {
           await retire(candidate.saveSessionID);
           setFailure("load_failed");
+          setAppError(toAppError(reason));
           return;
         }
 
@@ -281,11 +313,12 @@ export function useSaveSessionFlow(): SaveSessionFlow {
           // the candidate is refused exactly as it is for a report that never
           // arrived. What is left is `clean` or `warnings`, and both open.
           if (aggregate.stale) {
-            throw new Error("stale_validation_report");
+            throw staleValidationReport;
           }
-        } catch {
+        } catch (reason) {
           await retire(candidate.saveSessionID);
           setFailure("validation_failed");
+          setAppError(reason === staleValidationReport ? undefined : toAppError(reason));
           return;
         }
 
@@ -328,6 +361,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
       return;
     }
     setFailure(undefined);
+    setAppError(undefined);
     void retire(session.saveSessionID);
   }, [session, isBusy, unclosedSessionID, retire]);
 
@@ -335,6 +369,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     if (unclosedSessionID === undefined || isBusy) {
       return;
     }
+    setAppError(undefined);
     void retire(unclosedSessionID);
   }, [unclosedSessionID, isBusy, retire]);
 
@@ -366,6 +401,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     state,
     blockedReason,
     failure,
+    appError,
     unclosedSessionID,
     session,
     validation,
@@ -374,5 +410,10 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     closeSave: closeSaveSession,
     retryClose,
     isBusy,
+    // The flow owns the active session, so it is where the backend's committed
+    // mutations are subscribed to. Handing the notifier out lets a mutation
+    // caller declare the refresh it already did from its own receipt, so the
+    // matching event never repeats it.
+    sessionSync,
   };
 }

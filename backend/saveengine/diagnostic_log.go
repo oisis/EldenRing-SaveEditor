@@ -1,10 +1,11 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Allowed diagnostic severity levels.
@@ -105,7 +106,7 @@ func (engine *Engine) GetDiagnosticLog(
 	scope string,
 ) (DiagnosticLogResult, error) {
 	if saveSessionID == "" {
-		return DiagnosticLogResult{}, errors.New("saveSessionID is required")
+		return DiagnosticLogResult{}, apperror.MissingField("saveSessionID")
 	}
 
 	if limit == 0 {
@@ -151,7 +152,7 @@ func (engine *Engine) GetDiagnosticLog(
 
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return DiagnosticLogResult{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return DiagnosticLogResult{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	session := loaded.session

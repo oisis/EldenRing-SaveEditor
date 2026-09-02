@@ -100,6 +100,7 @@ type SessionInfo struct {
 	SourceKind     string `json:"sourceKind"`
 	SaveRevision   string `json:"saveRevision"`
 	UnsavedChanges bool   `json:"unsavedChanges"`
+	EventSequence  string `json:"eventSequence"`
 }
 ```
 
@@ -112,6 +113,7 @@ type SessionInfo struct {
 | `sourceKind` | `string` | The `sourceKind` the caller stated, echoed back unchanged. |
 | `saveRevision` | `string` | The canonical decimal revision of the session, always `"0"` for a newly loaded one. A string and not a number, so no consumer can round, increment, or reorder it. |
 | `unsavedChanges` | `bool` | Always `false` for a newly loaded session. Later mutations may set it, and a successful `WriteSave` clears it. |
+| `eventSequence` | `string` | Always `"0"` for a newly loaded session. Each committed mutation advances it by one and publishes the matching `session.changed` event. |
 
 On any error the result is the zero value: `saveSessionID` is empty and no
 session exists.

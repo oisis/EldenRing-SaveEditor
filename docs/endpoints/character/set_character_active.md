@@ -46,16 +46,27 @@ accepts only `application/json`.
 
 ```go
 type SetCharacterActiveResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Active        bool   `json:"active"`
+	saveengine.MutationReceipt
+	Changed     bool `json:"changed"`
+	CharacterID int  `json:"characterID"`
+	Active      bool `json:"active"`
 }
 ```
 
-When the activity flag changes, `SaveRevision` is the newly committed revision.
-When the stored flag already equals `active`, the operation is a successful
-no-op and returns the unchanged current revision.
+The receipt is embedded anonymously, so the JSON stays flat and `saveSessionID`
+and `saveRevision` appear exactly once. `changed` discriminates the two success
+variants:
+
+| `changed` | Meaning | Receipt members present |
+|---|---|---|
+| `true` | The activity flag changed and a revision was committed. | `operationID`, `operationKind` (`set_character_active`), `saveSessionID`, `saveRevision` (the new revision), `changedScopes` |
+| `false` | The stored flag already equalled `active`. | `saveSessionID` and `saveRevision` (the unchanged revision) only |
+
+A `changed: false` result is a domain success, not an error. It commits nothing,
+so no `operationID` is minted, no `session.changed` event is published, and
+`operationID`, `operationKind` and `changedScopes` are absent from the payload
+rather than present and empty. The receipt of a `changed: true` result comes
+from the central commit path and is never reassembled by this endpoint.
 
 ## Save mutation
 
@@ -76,8 +87,8 @@ Validation, mutation, verification, and rollback run under the SaveEngine
 mutex. A changed flag advances `saveRevision` by one and marks the session
 dirty. A validation or verification failure restores the prior byte and changes
 neither revision nor dirty state. An idempotent request performs no write,
-does not invalidate owned-item identities, and leaves the session clean when it
-was clean before the call.
+does not invalidate owned-item identities, does not advance the session's event
+sequence, and leaves the session clean when it was clean before the call.
 
 ## Legacy comparison
 
@@ -93,7 +104,10 @@ game-visible.
 The endpoint fails without mutation for a missing engine, empty or unknown
 session, malformed or stale revision, character index outside `0..9`, unknown
 activity-byte value, empty residual slot, missing slot anchor, truncated range,
-or write/verification failure.
+or write/verification failure. Failures are reported in the shared error model
+described in [docs/endpoints/README.md](../README.md): a malformed revision is
+`invalid_revision`, a stale one `revision_conflict` carrying `currentRevision`,
+and an unknown session `unknown_save_session`.
 
 ## Dependencies
 
@@ -106,5 +120,7 @@ or write/verification failure.
 Synthetic PC and PS4 coverage verifies exact one-byte mutation, preservation of
 residual data, safe reactivation, idempotence without a revision change,
 rejection of empty and malformed slots, rejection of unknown flag values,
+the committed and the no-commit variant of the result including the absence of
+the three execution members in the latter,
 persistence through `WriteSave` and reload, strict JSON transport,
 loopback-only route registration, and OpenAPI/Scalar conformance.

@@ -64,6 +64,7 @@ export const stubSaveSession: SaveSession = {
   sourceKind: "local",
   saveRevision: "0",
   unsavedChanges: false,
+  eventSequence: "0",
 };
 
 export const stubSaveCharacters: SaveCharacters = {
@@ -552,6 +553,9 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
     loadSave: () => Promise.resolve(stubSaveSession),
     getLoadedSave: () => Promise.resolve(stubSaveSession),
     closeSave: () => Promise.resolve(),
+    // No event ever arrives through the default stub, and unsubscribing is a
+    // no-op: a test that cares about events injects its own subscription.
+    subscribeSessionChanged: () => () => {},
     ...overrides,
   };
 }

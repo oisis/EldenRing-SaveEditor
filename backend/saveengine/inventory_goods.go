@@ -1,8 +1,9 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // InventoryGoodsPresence is one revision-coherent InventoryHeld membership
@@ -25,7 +26,7 @@ func (engine *Engine) GetInventoryGoodsPresence(
 	gameIDs []uint32,
 ) (InventoryGoodsPresence, error) {
 	if saveSessionID == "" {
-		return InventoryGoodsPresence{}, errors.New("saveSessionID is required")
+		return InventoryGoodsPresence{}, apperror.MissingField("saveSessionID")
 	}
 
 	byHandle := make(map[uint32]uint32, len(gameIDs)*2)
@@ -44,7 +45,7 @@ func (engine *Engine) GetInventoryGoodsPresence(
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return InventoryGoodsPresence{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return InventoryGoodsPresence{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return InventoryGoodsPresence{}, fmt.Errorf("characterID %d is outside the range 0..%d",

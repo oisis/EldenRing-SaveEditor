@@ -1,6 +1,10 @@
 package saveengine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+)
 
 // SetStorageOrderResult reports one committed supported Storage order.
 //
@@ -32,8 +36,7 @@ func (engine *Engine) SetStorageOrder(
 	classifyGameID func(uint32) (bool, error),
 ) (SetStorageOrderResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetStorageOrderResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetStorageOrderResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if len(orderedOwnedItemIDs) == 0 {
 		return SetStorageOrderResult{}, fmt.Errorf("orderedOwnedItemIDs must not be empty")
@@ -54,9 +57,9 @@ func (engine *Engine) SetStorageOrder(
 				characterID, characterSlotCount-1)
 		}
 		if expectedRevision != loaded.session.revisionString() {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
+			return apperror.RevisionConflict(
 				expectedRevision, loaded.session.revisionString())
+
 		}
 
 		flag, err := loaded.snapshot.readAt(

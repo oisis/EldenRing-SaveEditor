@@ -1,21 +1,56 @@
 package saveengine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const userData10InactiveFlagValue = 0
 
 var errCharacterActivityUnchanged = errors.New("character activity is unchanged")
 
-// SetCharacterActiveResult reports the accepted activity state. An idempotent
-// request returns the current revision; a changed flag returns the new one.
+// SetCharacterActiveResult reports the accepted activity state.
+//
+// Changed is the discriminator of the two success variants of this endpoint:
+//
+//   - true is a committed mutation. The embedded receipt is the complete one the
+//     central commit path produced, and SaveRevision is the new revision.
+//   - false is an idempotent request that found the slot already in the wanted
+//     state. It commits nothing, so no operationID is minted, the revision, the
+//     snapshot, the unsaved-changes flag, the undo point and the OwnedItemID
+//     registry all stay exactly as they were, no session event is published, and
+//     the three execution members of the receipt are absent. It is a domain
+//     success and not an error.
 type SetCharacterActiveResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	CharacterID   int    `json:"characterID"`
-	Active        bool   `json:"active"`
+	MutationReceipt
+	Changed     bool `json:"changed"`
+	CharacterID int  `json:"characterID"`
+	Active      bool `json:"active"`
+}
+
+// MarshalJSON keeps MutationReceipt strict for committed mutations while the
+// endpoint's idempotent success carries only the session and unchanged revision.
+func (result SetCharacterActiveResult) MarshalJSON() ([]byte, error) {
+	if result.Changed {
+		type committedResult SetCharacterActiveResult
+		return json.Marshal(committedResult(result))
+	}
+	return json.Marshal(struct {
+		SaveSessionID string `json:"saveSessionID"`
+		SaveRevision  string `json:"saveRevision"`
+		Changed       bool   `json:"changed"`
+		CharacterID   int    `json:"characterID"`
+		Active        bool   `json:"active"`
+	}{
+		SaveSessionID: result.SaveSessionID,
+		SaveRevision:  result.SaveRevision,
+		Changed:       result.Changed,
+		CharacterID:   result.CharacterID,
+		Active:        result.Active,
+	})
 }
 
 // SetCharacterActive changes only the confirmed UserData10 activity byte of
@@ -29,8 +64,7 @@ func (engine *Engine) SetCharacterActive(
 	expectedRevision string,
 ) (SetCharacterActiveResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCharacterActiveResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCharacterActiveResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	target := byte(userData10InactiveFlagValue)
@@ -46,9 +80,7 @@ func (engine *Engine) SetCharacterActive(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flagAt := userData10Base(loaded.session.platform) +
@@ -89,19 +121,21 @@ func (engine *Engine) SetCharacterActive(
 			characterID)
 	})
 	// An idempotent request commits nothing, so it keeps the revision it matched
-	// and carries the zero receipt of a mutation that never happened.
-	saveRevision := committed.SaveRevision
+	// and carries the no-commit receipt of a mutation that never happened.
+	receipt := committed
+	changed := true
 	if errors.Is(err, errCharacterActivityUnchanged) {
-		saveRevision = expectedRevision
+		receipt = noCommitReceipt(saveSessionID, expectedRevision)
+		changed = false
 	} else if err != nil {
 		return SetCharacterActiveResult{}, err
 	}
 
 	return SetCharacterActiveResult{
-		SaveSessionID: saveSessionID,
-		SaveRevision:  saveRevision,
-		CharacterID:   characterID,
-		Active:        active,
+		MutationReceipt: receipt,
+		Changed:         changed,
+		CharacterID:     characterID,
+		Active:          active,
 	}, nil
 }
 

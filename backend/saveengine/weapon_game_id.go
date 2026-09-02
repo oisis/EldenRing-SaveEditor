@@ -3,6 +3,8 @@ package saveengine
 import (
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // setOwnedWeaponGameID is the single binary mutation used by weapon upgrade
@@ -28,8 +30,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 			expectedGameID, targetGameID)
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return MutationReceipt{}, "", fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return MutationReceipt{}, "", apperror.InvalidRevision(expectedRevision)
 	}
 
 	var container string
@@ -40,9 +41,7 @@ func (engine *Engine) setOwnedWeaponGameID(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 		flag, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

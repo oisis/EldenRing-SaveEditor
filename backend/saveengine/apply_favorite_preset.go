@@ -3,6 +3,8 @@ package saveengine
 import (
 	"encoding/binary"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // ApplyFavoritePresetResult reports one committed Mirror Favorites application.
@@ -31,8 +33,7 @@ func (engine *Engine) ApplyFavoritePreset(
 	expectedRevision string,
 ) (ApplyFavoritePresetResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return ApplyFavoritePresetResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return ApplyFavoritePresetResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if favoriteSlotID < 0 || favoriteSlotID >= favoriteSlotCount {
 		return ApplyFavoritePresetResult{}, fmt.Errorf(
@@ -46,9 +47,7 @@ func (engine *Engine) ApplyFavoritePreset(
 	committed, err := engine.commitCharacterRevision(saveSessionID, kindApplyFavoritePreset, characterID, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

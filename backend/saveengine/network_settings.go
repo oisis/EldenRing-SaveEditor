@@ -14,6 +14,8 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Layout of the regulation archive stored in UserData11, shared by PC and PS4.
@@ -147,14 +149,14 @@ var regulationHeaderMarker = []byte{0x20, 0x47}
 // no partial or guessed parameter set is ever returned.
 func (engine *Engine) GetNetworkSettings(saveSessionID string) (NetworkSettingsSnapshot, error) {
 	if saveSessionID == "" {
-		return NetworkSettingsSnapshot{}, errors.New("saveSessionID is required")
+		return NetworkSettingsSnapshot{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return NetworkSettingsSnapshot{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return NetworkSettingsSnapshot{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 
 	var blob []byte

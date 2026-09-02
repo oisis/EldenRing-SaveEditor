@@ -84,6 +84,11 @@ var receiptMigratedResults = []string{
 	"SetSummoningPoolActivatedResult",
 	"SetTutorialUnlockedResult",
 	"SetWhetbladeUnlockedResult",
+	// Stage 3b.3d and the no-commit contract: the two endpoints with a success
+	// that commits nothing describe their committed variant as its own schema, so
+	// the complete receipt is required there and only there.
+	"ApplyRepairsApplied",
+	"SetCharacterActiveCommitted",
 }
 
 // receiptProperties are the five members every migrated result exposes flat.

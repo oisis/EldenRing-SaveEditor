@@ -22,6 +22,8 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // CreateBuildTemplateEndpointID is the stable backend identifier of CreateBuildTemplate.
@@ -76,7 +78,7 @@ func CreateBuildTemplate(
 		return CreateBuildTemplateResult{}, errors.New("game catalog is not available")
 	}
 	if req.SaveSessionID == "" {
-		return CreateBuildTemplateResult{}, errors.New("saveSessionID is required")
+		return CreateBuildTemplateResult{}, apperror.MissingField("saveSessionID")
 	}
 	if req.SourceCharacterID < 0 || req.SourceCharacterID >= 10 {
 		return CreateBuildTemplateResult{}, fmt.Errorf("sourceCharacterID %d is outside the range 0..9", req.SourceCharacterID)

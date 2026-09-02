@@ -2,6 +2,8 @@ package saveengine
 
 import (
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // DeleteFavoritePresetResult reports one committed Mirror Favorites deletion.
@@ -24,8 +26,7 @@ func (engine *Engine) DeleteFavoritePreset(
 	expectedRevision string,
 ) (DeleteFavoritePresetResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return DeleteFavoritePresetResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return DeleteFavoritePresetResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if favoriteSlotID < 0 || favoriteSlotID >= favoriteSlotCount {
 		return DeleteFavoritePresetResult{}, fmt.Errorf(
@@ -35,9 +36,7 @@ func (engine *Engine) DeleteFavoritePreset(
 	committed, err := engine.commitRevision(saveSessionID, kindDeleteFavoritePreset, func(loaded *loadedSave) error {
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		base := userData10Base(loaded.session.platform)

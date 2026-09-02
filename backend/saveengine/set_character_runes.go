@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const (
@@ -33,8 +35,7 @@ func (engine *Engine) SetCharacterRunes(
 	expectedRevision string,
 ) (SetCharacterRunesResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetCharacterRunesResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetCharacterRunesResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if runes > characterRunesLimit {
 		return SetCharacterRunesResult{}, fmt.Errorf(
@@ -49,9 +50,7 @@ func (engine *Engine) SetCharacterRunes(
 
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 
 		flag, err := loaded.snapshot.readAt(

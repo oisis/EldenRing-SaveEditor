@@ -1,6 +1,10 @@
 package saveengine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+)
 
 const (
 	noCustomAshOfWarHandle       uint32 = 0x00000000
@@ -45,8 +49,7 @@ func (engine *Engine) SetWeaponAshOfWar(
 			"Ash of War game ID must use prefix 8; got 0x%08X", targetAshOfWarGameID)
 	}
 	if !isCanonicalRevision(expectedRevision) {
-		return SetWeaponAshOfWarResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetWeaponAshOfWarResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	var container string
@@ -58,9 +61,7 @@ func (engine *Engine) SetWeaponAshOfWar(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 		flag, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

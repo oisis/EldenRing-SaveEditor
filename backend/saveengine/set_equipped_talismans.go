@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 const (
@@ -35,8 +37,7 @@ func (engine *Engine) SetEquippedTalismans(
 	validateGameID func(uint32) error,
 ) (SetEquippedTalismansResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetEquippedTalismansResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetEquippedTalismansResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if len(orderedOwnedItemIDs) > equippedTalismanSlotCount {
 		return SetEquippedTalismansResult{}, fmt.Errorf(
@@ -52,9 +53,9 @@ func (engine *Engine) SetEquippedTalismans(
 				characterID, characterSlotCount-1)
 		}
 		if expectedRevision != loaded.session.revisionString() {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
+			return apperror.RevisionConflict(
 				expectedRevision, loaded.session.revisionString())
+
 		}
 
 		flag, err := loaded.snapshot.readAt(

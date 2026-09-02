@@ -3,6 +3,8 @@ package saveengine
 import (
 	"fmt"
 	"slices"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // SetRegionUnlockedResult reports one committed region unlock membership change.
@@ -37,8 +39,7 @@ func (engine *Engine) SetRegionUnlocked(
 	expectedRevision string,
 ) (SetRegionUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetRegionUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetRegionUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 
 	committed, err := engine.commitCharacterRevision(
@@ -52,9 +53,7 @@ func (engine *Engine) SetRegionUnlocked(
 			}
 			current := loaded.session.revisionString()
 			if expectedRevision != current {
-				return fmt.Errorf(
-					"expectedRevision %q does not match the current saveRevision %q",
-					expectedRevision, current)
+				return apperror.RevisionConflict(expectedRevision, current)
 			}
 			active, err := loaded.snapshot.readAt(
 				userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

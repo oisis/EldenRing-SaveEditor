@@ -1,8 +1,9 @@
 package saveengine
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // The scopes one validation pass is divided into. Each of them is read and
@@ -123,14 +124,14 @@ type SaveValidationFacts struct {
 // decoding and applying the save-side rules belong here.
 func (engine *Engine) GetSaveValidationFacts(saveSessionID string, characterID int) (SaveValidationFacts, error) {
 	if saveSessionID == "" {
-		return SaveValidationFacts{}, errors.New("saveSessionID is required")
+		return SaveValidationFacts{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return SaveValidationFacts{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return SaveValidationFacts{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return SaveValidationFacts{}, fmt.Errorf("characterID %d is outside the range 0..%d",

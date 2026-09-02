@@ -3,6 +3,8 @@ package saveengine
 import (
 	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // WhetbladeState is the save-side identity of one catalog Whetblade. Catalog
@@ -39,8 +41,7 @@ func (engine *Engine) SetWhetbladeUnlocked(
 	expectedRevision string,
 ) (SetWhetbladeUnlockedResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetWhetbladeUnlockedResult{}, fmt.Errorf(
-			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+		return SetWhetbladeUnlockedResult{}, apperror.InvalidRevision(expectedRevision)
 	}
 	if err := validateWhetbladeState(target, "target Whetblade"); err != nil {
 		return SetWhetbladeUnlockedResult{}, err
@@ -102,9 +103,7 @@ func (engine *Engine) SetWhetbladeUnlocked(
 		}
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
-			return fmt.Errorf(
-				"expectedRevision %q does not match the current saveRevision %q",
-				expectedRevision, current)
+			return apperror.RevisionConflict(expectedRevision, current)
 		}
 		active, err := loaded.snapshot.readAt(
 			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)

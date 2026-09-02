@@ -26,6 +26,7 @@ import {
   SelectSaveFile,
 } from "../../../wailsjs/go/desktop/Bridge";
 import type { schema } from "../../../wailsjs/go/models";
+import { EventsOn } from "../../../wailsjs/runtime/runtime";
 import type {
   ApplicationInfo,
   ApplicationInfoPort,
@@ -69,27 +70,36 @@ import type {
   LoadoutSlotState,
   LoadoutSpellSlot,
 } from "../../application/equipment/equipmentPort";
+import { AppErrorException, bridgeFailureCode } from "../../application/errors/appError";
 import type { ItemPage, ItemsPort } from "../../application/items/itemsPort";
 import type { SaveSession, SaveSessionPort } from "../../application/save-session/saveSessionPort";
+import { parseBridgeError } from "./bridgeError";
+import { parseSessionChangedEvent, sessionChangedEventName } from "./sessionChangedEvent";
 
 /**
- * The stable code a failed bridge call is reported with. The transport error is
- * deliberately dropped here: a Wails rejection can carry a Go error string or a
- * runtime stack, and neither may reach the interface. The UI maps this code to
- * a localized message and never renders the code itself.
- *
- * The code says that the call failed and nothing more. Classifying a domain
- * failure would mean reading the rejection text, which is exactly what this
- * boundary refuses to do; a structured backend error contract is what a finer
- * distinction has to come from.
+ * Re-exported so consumers of this adapter keep one import for the boundary.
+ * The code itself is owned by the application error model.
  */
-export const bridgeFailureCode = "bridge_call_failed";
+export { bridgeFailureCode };
 
+/**
+ * The single choke point of every bridge call.
+ *
+ * A rejection is never propagated as it arrived: Wails hands back one string,
+ * which is either the backend's structured envelope or something the frontend
+ * cannot vouch for. `parseBridgeError` validates the envelope strictly and
+ * reduces everything else to `bridge_call_failed`, so no raw Go error, host
+ * stack or truncated payload ever leaves this function.
+ *
+ * The thrown value stays an `Error` whose message is the stable code, so a
+ * consumer that only knows the code keeps working and nothing is ever tempted
+ * to parse a sentence.
+ */
 async function callBridge<T>(call: () => Promise<T>): Promise<T> {
   try {
     return await call();
-  } catch {
-    throw new Error(bridgeFailureCode);
+  } catch (reason) {
+    throw new AppErrorException(parseBridgeError(reason));
   }
 }
 
@@ -108,6 +118,7 @@ function toSaveSession(result: Awaited<ReturnType<typeof GetLoadedSave>>): SaveS
     sourceKind: result.sourceKind,
     saveRevision: result.saveRevision,
     unsavedChanges: result.unsavedChanges,
+    eventSequence: result.eventSequence,
   };
 }
 
@@ -579,6 +590,23 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   closeSave: async (saveSessionID) => {
     await callBridge(() => CloseSave(saveSessionID));
   },
+
+  /**
+   * Subscribes to the backend's committed mutations.
+   *
+   * The Wails event bus hands the payload over as an untyped value, so it is
+   * validated here exactly like an error envelope: an event that does not carry
+   * the complete contract is dropped rather than delivered half-built. A
+   * dropped event is safe — the listener notices the sequence gap and
+   * resynchronises — while a half-built one would invalidate the wrong scopes.
+   */
+  // A payload that fails validation is reported as null rather than swallowed:
+  // the listener owns what to do about a notification it cannot read, and its
+  // answer is a resynchronisation, not silence.
+  subscribeSessionChanged: (listener) =>
+    EventsOn(sessionChangedEventName, (...data: unknown[]) => {
+      listener(parseSessionChangedEvent(data[0]));
+    }),
 
   // The scope reaches the bridge exactly as received, the empty string
   // included: which scopes exist and what an empty one means is the backend's

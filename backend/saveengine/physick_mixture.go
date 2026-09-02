@@ -2,8 +2,9 @@ package saveengine
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
 )
 
 // Slot-data layout of the confirmed EquipPhysicsData block, shared by PC and
@@ -118,14 +119,14 @@ type CharacterPhysickMixture struct {
 // and nothing is guessed.
 func (engine *Engine) GetPhysickMixture(saveSessionID string, characterID int) (CharacterPhysickMixture, error) {
 	if saveSessionID == "" {
-		return CharacterPhysickMixture{}, errors.New("saveSessionID is required")
+		return CharacterPhysickMixture{}, apperror.MissingField("saveSessionID")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return CharacterPhysickMixture{}, fmt.Errorf("unknown save session %q", saveSessionID)
+		return CharacterPhysickMixture{}, apperror.UnknownSaveSession(saveSessionID)
 	}
 	if characterID < 0 || characterID >= characterSlotCount {
 		return CharacterPhysickMixture{}, fmt.Errorf("characterID %d is outside the range 0..%d",

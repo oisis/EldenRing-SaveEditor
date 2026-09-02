@@ -139,6 +139,10 @@ func TestGetLoadedSaveResultCarriesOnlySessionMetadata(t *testing.T) {
 		"sourceKind":     "local",
 		"saveRevision":   "0",
 		"unsavedChanges": false,
+		// The session's position in its own session.changed stream, "0" for a
+		// session that has committed nothing. It is approved metadata about the
+		// session's committed mutations and carries no save data.
+		"eventSequence": "0",
 	}
 	if len(fields) != len(want) {
 		t.Errorf("result JSON has fields %v, want exactly %v", fields, want)
