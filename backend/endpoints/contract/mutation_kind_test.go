@@ -28,12 +28,20 @@ import (
 // not commit a save-session revision, with the surface it changes instead. A
 // receipt must never demand a saveSessionID from one of these.
 var notSaveSessionMutations = map[string]string{
-	"load_save":             "creates a session; there is no earlier revision to advance",
-	"close_save":            "removes a session from the engine registry",
-	"create_build_template": "writes the local build-template store",
-	"update_build_template": "writes the local build-template store",
-	"delete_build_template": "writes the local build-template store",
-	"set_diagnostic_mode":   "contract definition only; it has no runtime handler",
+	"load_save":                   "creates a session; there is no earlier revision to advance",
+	"close_save":                  "removes a session from the engine registry",
+	"validate_review_changes":     "authorizes one revision but does not commit save data",
+	"record_recent_file":          "writes the host-local Recent Files store",
+	"remove_recent_file":          "writes the host-local Recent Files store",
+	"clear_recent_files":          "writes the host-local Recent Files store",
+	"set_save_lifecycle_settings": "writes host-local lifecycle settings",
+	"restore_recovery_journal":    "creates a session from protected recovery state",
+	"discard_recovery_journal":    "removes protected recovery state",
+	"export_recovery_journal":     "copies protected recovery state",
+	"create_build_template":       "writes the local build-template store",
+	"update_build_template":       "writes the local build-template store",
+	"delete_build_template":       "writes the local build-template store",
+	"set_diagnostic_mode":         "contract definition only; it has no runtime handler",
 }
 
 var mutationKindPattern = regexp.MustCompile(`Kind:\s*contract\.Mutation\b`)

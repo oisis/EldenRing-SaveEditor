@@ -196,11 +196,8 @@ describe("SaveSessionPanel", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Close Save" }));
 
-    await waitFor(() =>
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        /Saving and discarding them are not available yet/i,
-      ),
-    );
+    // The shell owns the Save / Discard / Cancel decision. The panel must not
+    // bypass it by closing or replacing the dirty session.
     expect(closeSave).not.toHaveBeenCalled();
     expect(screen.getByText(stubSaveSession.sourcePath)).toBeVisible();
   });

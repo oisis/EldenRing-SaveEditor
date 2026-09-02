@@ -68,6 +68,98 @@ export type SessionChangedEvent = {
  */
 export type SaveSourceKind = "local" | "temporary";
 
+export type OperationRisk = "normal" | "warning" | "ban risk" | "critical";
+
+export type OperationRecord = {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  order: string;
+  characterID?: number;
+  area: string;
+  description: string;
+  relatedResource?: string;
+  beforeState: string;
+  afterState: string;
+  risk: OperationRisk;
+  riskReason: string;
+  changedByteCount: number;
+  changedScopes: readonly ChangedScope[];
+};
+
+export type OperationHistory = {
+  saveSessionID: string;
+  saveRevision: string;
+  operations: readonly OperationRecord[];
+  undoCount: number;
+  redoCount: number;
+};
+
+export type MutationReceipt = {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: readonly ChangedScope[];
+};
+
+export type HistoryMutationResult = MutationReceipt & {
+  affectedOperationID: string;
+  affectedOperationKind: string;
+};
+
+export type ReviewValidationIssue = {
+  code: string;
+  severity: OperationRisk;
+  message: string;
+  operationID?: string;
+};
+
+export type ReviewValidationResult = {
+  saveSessionID: string;
+  saveRevision: string;
+  validationToken?: string;
+  valid: boolean;
+  warningCount: number;
+  banRiskCount: number;
+  criticalCount: number;
+  stages: readonly { stage: string; percent: number }[];
+  issues: readonly ReviewValidationIssue[];
+};
+
+export type SaveLifecycleResult = MutationReceipt & {
+  target: string;
+  backupPath?: string;
+  warnings: readonly string[];
+  retentionNoticeRequired: boolean;
+};
+
+export type RecentFile = {
+  path: string;
+  platform: string;
+  format: string;
+  lastOpenedAt: string;
+};
+
+export type RecoveryJournal = {
+  journalID: string;
+  status: "compatible" | "incompatible" | "corrupt";
+  sourcePath?: string;
+  platform?: string;
+  format?: string;
+  saveRevision?: string;
+  updatedAt?: string;
+  operationCount: number;
+  operations: readonly OperationRecord[];
+  failureCode?: string;
+};
+
+export type SaveLifecycleSettings = {
+  backupRetention: number;
+  retentionNoticeShown: boolean;
+};
+
 export type SaveSessionPort = {
   /**
    * Opens the host's native file dialog and resolves with the chosen path.
@@ -83,6 +175,9 @@ export type SaveSessionPort = {
    * host port would be a second injection point for a single method.
    */
   selectSaveFile: () => Promise<string>;
+  selectSaveTarget: (suggestedName: string) => Promise<string>;
+  subscribeApplicationCloseRequested: (listener: () => void) => () => void;
+  quitApplication: () => Promise<void>;
   /**
    * Creates a session from a source the host layer supplied. All three
    * arguments are passed to the backend exactly as received: the backend owns
@@ -96,6 +191,54 @@ export type SaveSessionPort = {
   ) => Promise<SaveSession>;
   getLoadedSave: (saveSessionID: string) => Promise<SaveSession>;
   closeSave: (saveSessionID: string) => Promise<void>;
+  getOperationHistory: (saveSessionID: string) => Promise<OperationHistory>;
+  undoLastOperation: (
+    saveSessionID: string,
+    expectedRevision: string,
+  ) => Promise<HistoryMutationResult>;
+  redoLastOperation: (
+    saveSessionID: string,
+    expectedRevision: string,
+  ) => Promise<HistoryMutationResult>;
+  revertOperation: (
+    saveSessionID: string,
+    operationID: string,
+    expectedRevision: string,
+  ) => Promise<HistoryMutationResult>;
+  discardChanges: (
+    saveSessionID: string,
+    expectedRevision: string,
+  ) => Promise<MutationReceipt & { discardedOperations: number }>;
+  validateReviewChanges: (
+    saveSessionID: string,
+    expectedRevision: string,
+  ) => Promise<ReviewValidationResult>;
+  save: (
+    saveSessionID: string,
+    expectedRevision: string,
+    validationToken: string,
+    confirmWarnings: boolean,
+    confirmBanRisk: boolean,
+  ) => Promise<SaveLifecycleResult>;
+  saveAs: (
+    saveSessionID: string,
+    expectedRevision: string,
+    validationToken: string,
+    confirmWarnings: boolean,
+    confirmBanRisk: boolean,
+    target: string,
+  ) => Promise<SaveLifecycleResult>;
+  getRecentFiles: () => Promise<readonly RecentFile[]>;
+  recordRecentFile: (saveSessionID: string) => Promise<readonly RecentFile[]>;
+  removeRecentFile: (path: string) => Promise<readonly RecentFile[]>;
+  clearRecentFiles: () => Promise<void>;
+  getRecoveryJournals: () => Promise<readonly RecoveryJournal[]>;
+  getRecoveryJournal: (journalID: string) => Promise<RecoveryJournal>;
+  restoreRecoveryJournal: (journalID: string) => Promise<SaveSession>;
+  discardRecoveryJournal: (journalID: string) => Promise<void>;
+  exportRecoveryJournal: (journalID: string, target: string) => Promise<void>;
+  getSaveLifecycleSettings: () => Promise<SaveLifecycleSettings>;
+  setSaveLifecycleSettings: (backupRetention: number) => Promise<SaveLifecycleSettings>;
   /**
    * Subscribes to committed backend mutations and returns the unsubscribe
    * function. The port carries the typed event; the host mechanism behind it

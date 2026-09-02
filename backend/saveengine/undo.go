@@ -261,6 +261,7 @@ func (engine *Engine) UndoCharacterChanges(
 
 	// The pre-undo image of all three ranges is read before the first write, so
 	// a failure halfway through can be reverted completely.
+	snapshotBefore := append([]byte(nil), loaded.snapshot.data...)
 	slotNow, slotErr := loaded.snapshot.readAt(point.slotAt, len(point.slot))
 	summaryNow, summaryErr := loaded.snapshot.readAt(point.summaryAt, len(point.summary))
 	flagNow, flagErr := loaded.snapshot.readAt(point.flagAt, len(point.flag))
@@ -298,9 +299,29 @@ func (engine *Engine) UndoCharacterChanges(
 	}
 
 	undoneKind := point.operationKind
+	nextRevision := fmt.Sprintf("%d", session.revision+1)
+	receipt := pending.receipt(saveSessionID, nextRevision)
+	if len(loaded.operations) == 0 ||
+		loaded.operations[len(loaded.operations)-1].Record.OperationKind != undoneKind {
+		loaded.snapshot = &codec{data: snapshotBefore}
+		return UndoCharacterChangesResult{}, errors.New("undo point does not match operation history")
+	}
+	nextOperations := append([]operationEntry(nil), loaded.operations[:len(loaded.operations)-1]...)
+	if err := engine.persistRecoveryState(loaded, nextOperations, nextRevision); err != nil {
+		loaded.snapshot = &codec{data: snapshotBefore}
+		return UndoCharacterChangesResult{}, err
+	}
 	session.undo = nil
 	session.dirty = point.dirtyBefore
-	receipt := pending.receipt(saveSessionID, session.advanceRevision())
+	loaded.operations = nextOperations
+	loaded.redo = nil
+	session.reviewAuthorization = nil
+	if revision := session.advanceRevision(); revision != nextRevision {
+		return UndoCharacterChangesResult{}, errors.New("undo history revision changed unexpectedly")
+	}
+	if len(nextOperations) == 0 && !session.dirty {
+		loaded.baselineRevision = nextRevision
+	}
 	engine.enqueueCommitted(session, receipt)
 	return UndoCharacterChangesResult{
 		MutationReceipt:     receipt,

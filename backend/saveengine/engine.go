@@ -22,6 +22,12 @@ type Engine struct {
 	mutex    sync.Mutex
 	sessions map[string]*loadedSave
 	now      func() time.Time
+	// stateDirectory is the private application-data directory used by the
+	// desktop lifecycle for recovery journals, recent files and lifecycle
+	// settings. An empty value deliberately selects an in-memory engine; this
+	// keeps package users and tests from writing host state unless the composition
+	// root explicitly enables persistence.
+	stateDirectory string
 	// newOperationID mints the identifier of one mutation execution. A nil value
 	// selects the package generator; only a test replaces it, and only to prove
 	// that a generator failure or a repeated value rejects the mutation before
@@ -32,6 +38,12 @@ type Engine struct {
 	// is what makes the identifiers of one running engine literally unique instead
 	// of merely improbable to repeat.
 	reservedOperationIDs map[string]bool
+	// lifecycleSettings and recentFiles are host-local product state. They are
+	// guarded by mutex beside the sessions and loaded lazily from stateDirectory.
+	lifecycleSettings       SaveLifecycleSettings
+	lifecycleSettingsLoaded bool
+	recentFiles             []RecentFile
+	recentFilesLoaded       bool
 
 	// eventMutex guards the session.changed outbox and its sink. It is a separate
 	// lock from mutex on purpose: the outbox is drained after mutex is released,
@@ -55,14 +67,44 @@ type Engine struct {
 type loadedSave struct {
 	session  *Session
 	snapshot *codec
+	// baseline is the last successfully loaded or persisted container. Operation
+	// replay, Discard Changes and recovery are all derived from this one source of
+	// truth; no feature keeps a second interpretation of the save.
+	baseline *codec
+	// baselineRevision is the logical revision at which baseline became durable.
+	// Recovery journals cannot assume that every persisted baseline is revision
+	// zero because Save, Save As and Discard all advance the session revision.
+	baselineRevision string
+	// sourceFingerprint binds recovery and ordinary Save to the exact baseline
+	// bytes from which the session was created.
+	sourceFingerprint string
+	// operations are the logical mutations currently applied on top of baseline.
+	// redo contains entries removed by consecutive global Undo operations.
+	operations []operationEntry
+	redo       []operationEntry
+}
+
+// EngineOptions contains host-owned lifecycle dependencies. SaveEngine never
+// guesses a writable host directory: the desktop composition root supplies it,
+// while an empty value keeps persistence disabled.
+type EngineOptions struct {
+	StateDirectory string
 }
 
 // New returns an engine holding no session.
 func New() *Engine {
+	return NewWithOptions(EngineOptions{})
+}
+
+// NewWithOptions returns an engine configured by the host. Constructing it is
+// side-effect free; directories and files are touched only by the lifecycle
+// operation that needs them.
+func NewWithOptions(options EngineOptions) *Engine {
 	return &Engine{
 		sessions:             make(map[string]*loadedSave),
 		now:                  time.Now,
 		reservedOperationIDs: make(map[string]bool),
+		stateDirectory:       options.StateDirectory,
 	}
 }
 
@@ -159,7 +201,14 @@ func (engine *Engine) LoadSave(
 		nil,
 		"0",
 	)
-	engine.sessions[session.id] = &loadedSave{session: session, snapshot: source}
+	baseline := &codec{data: append([]byte(nil), source.data...)}
+	engine.sessions[session.id] = &loadedSave{
+		session:           session,
+		snapshot:          source,
+		baseline:          baseline,
+		baselineRevision:  "0",
+		sourceFingerprint: fingerprintBytes(baseline.data),
+	}
 
 	return session.Info(), nil
 }
@@ -191,20 +240,33 @@ func (engine *Engine) GetSessionInfo(saveSessionID string) (SessionInfo, error) 
 	return loaded.session.Info(), nil
 }
 
+// HasUnsavedChanges is the read-only host lifecycle check used before the
+// desktop window closes. It exposes no session identifier or save data.
+func (engine *Engine) HasUnsavedChanges() bool {
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	for _, loaded := range engine.sessions {
+		if loaded != nil && loaded.session != nil && loaded.session.dirty {
+			return true
+		}
+	}
+	return false
+}
+
 // CloseSession removes the session registered under saveSessionID. It is the
 // only way a session is released: the entry is deleted from the session map, so
 // the engine drops its references to the session model and to the private
-// snapshot the session was created from. Nothing else changes, no other session
-// is touched, no snapshot byte is read, and no file is opened, written or
-// deleted.
+// snapshot the session was created from. A clean session's stale recovery file
+// is removed before the in-memory state is released; a dirty session keeps its
+// recovery journal for the next startup. No save file is read or written.
 //
 // saveSessionID is matched exactly. It is never trimmed, normalised or guessed,
 // so an empty or unknown identifier is rejected instead of closing some other
 // session.
 //
-// Releasing the reference is all this call does. The snapshot memory becomes
-// eligible for the ordinary garbage collector; the engine never forces a
-// collection and gives no timing guarantee.
+// After any required recovery cleanup, the snapshot memory becomes eligible for
+// the ordinary garbage collector; the engine never forces a collection and
+// gives no timing guarantee.
 func (engine *Engine) CloseSession(saveSessionID string) error {
 	if saveSessionID == "" {
 		return apperror.MissingField("saveSessionID")
@@ -212,8 +274,14 @@ func (engine *Engine) CloseSession(saveSessionID string) error {
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
-	if _, exists := engine.sessions[saveSessionID]; !exists {
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
 		return apperror.UnknownSaveSession(saveSessionID)
+	}
+	if !loaded.session.dirty {
+		if err := engine.removeRecoveryJournal(saveSessionID); err != nil {
+			return err
+		}
 	}
 	delete(engine.sessions, saveSessionID)
 	return nil

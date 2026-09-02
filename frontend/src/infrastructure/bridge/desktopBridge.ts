@@ -3,7 +3,11 @@
 // on `window.go`.
 
 import {
+  ClearRecentFiles,
   CloseSave,
+  DiscardChanges,
+  DiscardRecoveryJournal,
+  ExportRecoveryJournal,
   GetApplicationInfo,
   GetCharacterLoadout,
   GetCharacterProfile,
@@ -13,17 +17,34 @@ import {
   GetInventory,
   GetItemVariants,
   GetLoadedSave,
+  GetOperationHistory,
   GetPhysickMixture,
   GetPouchItems,
   GetQuickItems,
+  GetRecentFiles,
+  GetRecoveryJournal,
+  GetRecoveryJournals,
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
   GetSaveCharacters,
+  GetSaveLifecycleSettings,
   GetSaveValidationReport,
   GetStorage,
   LoadSave,
+  QuitApplication,
+  RecordRecentFile,
+  RedoLastOperation,
+  RemoveRecentFile,
+  RestoreRecoveryJournal,
+  RevertOperation,
+  Save,
+  SaveAs,
   SelectSaveFile,
+  SelectSaveTarget,
+  SetSaveLifecycleSettings,
+  UndoLastOperation,
+  ValidateReviewChanges,
 } from "../../../wailsjs/go/desktop/Bridge";
 import type { schema } from "../../../wailsjs/go/models";
 import { EventsOn } from "../../../wailsjs/runtime/runtime";
@@ -47,6 +68,7 @@ import type {
   CatalogStackRules,
   CatalogUpgradeRules,
 } from "../../application/catalog/catalogPort";
+import { type ChangedScope, changedScopes } from "../../application/changedScopes";
 import type {
   CharacterPort,
   CharacterProfile,
@@ -70,9 +92,26 @@ import type {
   LoadoutSlotState,
   LoadoutSpellSlot,
 } from "../../application/equipment/equipmentPort";
-import { AppErrorException, bridgeFailureCode } from "../../application/errors/appError";
+import {
+  AppErrorException,
+  bridgeCallFailed,
+  bridgeFailureCode,
+} from "../../application/errors/appError";
 import type { ItemPage, ItemsPort } from "../../application/items/itemsPort";
-import type { SaveSession, SaveSessionPort } from "../../application/save-session/saveSessionPort";
+import type {
+  HistoryMutationResult,
+  MutationReceipt,
+  OperationHistory,
+  OperationRecord,
+  OperationRisk,
+  RecentFile,
+  RecoveryJournal,
+  ReviewValidationResult,
+  SaveLifecycleResult,
+  SaveLifecycleSettings,
+  SaveSession,
+  SaveSessionPort,
+} from "../../application/save-session/saveSessionPort";
 import { parseBridgeError } from "./bridgeError";
 import { parseSessionChangedEvent, sessionChangedEventName } from "./sessionChangedEvent";
 
@@ -119,6 +158,148 @@ function toSaveSession(result: Awaited<ReturnType<typeof GetLoadedSave>>): SaveS
     saveRevision: result.saveRevision,
     unsavedChanges: result.unsavedChanges,
     eventSequence: result.eventSequence,
+  };
+}
+
+const operationRisks = ["normal", "warning", "ban risk", "critical"] as const;
+
+function toChangedScopes(values: readonly string[]): readonly ChangedScope[] {
+  if (
+    !values.every((value): value is ChangedScope => changedScopes.includes(value as ChangedScope))
+  ) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return [...values];
+}
+
+function toOperationRisk(value: string): OperationRisk {
+  if (!operationRisks.includes(value as OperationRisk)) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return value as OperationRisk;
+}
+
+function toOperationRecord(
+  result: Awaited<ReturnType<typeof GetOperationHistory>>["operations"][number],
+): OperationRecord {
+  return {
+    operationID: result.operationID,
+    operationKind: result.operationKind,
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    order: result.order,
+    characterID: result.characterID,
+    area: result.area,
+    description: result.description,
+    relatedResource: result.relatedResource,
+    beforeState: result.beforeState,
+    afterState: result.afterState,
+    risk: toOperationRisk(result.risk),
+    riskReason: result.riskReason,
+    changedByteCount: result.changedByteCount,
+    changedScopes: toChangedScopes(result.changedScopes),
+  };
+}
+
+function toOperationHistory(
+  result: Awaited<ReturnType<typeof GetOperationHistory>>,
+): OperationHistory {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    operations: result.operations.map(toOperationRecord),
+    undoCount: result.undoCount,
+    redoCount: result.redoCount,
+  };
+}
+
+function toMutationReceipt(result: {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: string[];
+}): MutationReceipt {
+  return {
+    operationID: result.operationID,
+    operationKind: result.operationKind,
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    changedScopes: toChangedScopes(result.changedScopes),
+  };
+}
+
+function toHistoryMutationResult(
+  result: Awaited<ReturnType<typeof UndoLastOperation>>,
+): HistoryMutationResult {
+  return {
+    ...toMutationReceipt(result),
+    affectedOperationID: result.affectedOperationID,
+    affectedOperationKind: result.affectedOperationKind,
+  };
+}
+
+function toReviewValidationResult(
+  result: Awaited<ReturnType<typeof ValidateReviewChanges>>,
+): ReviewValidationResult {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    validationToken: result.validationToken,
+    valid: result.valid,
+    warningCount: result.warningCount,
+    banRiskCount: result.banRiskCount,
+    criticalCount: result.criticalCount,
+    stages: result.stages.map((stage) => ({ stage: stage.stage, percent: stage.percent })),
+    issues: result.issues.map((issue) => ({
+      code: issue.code,
+      severity: toOperationRisk(issue.severity),
+      message: issue.message,
+      operationID: issue.operationID,
+    })),
+  };
+}
+
+function toSaveLifecycleResult(result: Awaited<ReturnType<typeof Save>>): SaveLifecycleResult {
+  return {
+    ...toMutationReceipt(result),
+    target: result.target,
+    backupPath: result.backupPath,
+    warnings: [...result.warnings],
+    retentionNoticeRequired: result.retentionNoticeRequired,
+  };
+}
+
+function toRecentFile(result: Awaited<ReturnType<typeof GetRecentFiles>>[number]): RecentFile {
+  return { ...result };
+}
+
+function toRecoveryJournal(
+  result: Awaited<ReturnType<typeof GetRecoveryJournal>>,
+): RecoveryJournal {
+  if (!["compatible", "incompatible", "corrupt"].includes(result.status)) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return {
+    journalID: result.journalID,
+    status: result.status as RecoveryJournal["status"],
+    sourcePath: result.sourcePath,
+    platform: result.platform,
+    format: result.format,
+    saveRevision: result.saveRevision,
+    updatedAt: result.updatedAt,
+    operationCount: result.operationCount,
+    operations: result.operations.map(toOperationRecord),
+    failureCode: result.failureCode,
+  };
+}
+
+function toSaveLifecycleSettings(
+  result: Awaited<ReturnType<typeof GetSaveLifecycleSettings>>,
+): SaveLifecycleSettings {
+  return {
+    backupRetention: result.backupRetention,
+    retentionNoticeShown: result.retentionNoticeShown,
   };
 }
 
@@ -578,6 +759,15 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // failed rejects here.
   selectSaveFile: async () => callBridge(SelectSaveFile),
 
+  selectSaveTarget: async (suggestedName) => callBridge(() => SelectSaveTarget(suggestedName)),
+
+  subscribeApplicationCloseRequested: (listener) =>
+    EventsOn("application.close-requested", listener),
+
+  quitApplication: async () => {
+    await callBridge(QuitApplication);
+  },
+
   // All three values reach the bridge in the order the backend contract
   // defines and exactly as received. The adapter supplies no default source
   // kind: a session must never claim an origin nobody stated.
@@ -590,6 +780,96 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   closeSave: async (saveSessionID) => {
     await callBridge(() => CloseSave(saveSessionID));
   },
+
+  getOperationHistory: async (saveSessionID) =>
+    toOperationHistory(await callBridge(() => GetOperationHistory(saveSessionID))),
+
+  undoLastOperation: async (saveSessionID, expectedRevision) =>
+    toHistoryMutationResult(
+      await callBridge(() => UndoLastOperation(saveSessionID, expectedRevision)),
+    ),
+
+  redoLastOperation: async (saveSessionID, expectedRevision) =>
+    toHistoryMutationResult(
+      await callBridge(() => RedoLastOperation(saveSessionID, expectedRevision)),
+    ),
+
+  revertOperation: async (saveSessionID, operationID, expectedRevision) =>
+    toHistoryMutationResult(
+      await callBridge(() => RevertOperation(saveSessionID, operationID, expectedRevision)),
+    ),
+
+  discardChanges: async (saveSessionID, expectedRevision) => {
+    const result = await callBridge(() => DiscardChanges(saveSessionID, expectedRevision));
+    return { ...toMutationReceipt(result), discardedOperations: result.discardedOperations };
+  },
+
+  validateReviewChanges: async (saveSessionID, expectedRevision) =>
+    toReviewValidationResult(
+      await callBridge(() => ValidateReviewChanges(saveSessionID, expectedRevision)),
+    ),
+
+  save: async (saveSessionID, expectedRevision, validationToken, confirmWarnings, confirmBanRisk) =>
+    toSaveLifecycleResult(
+      await callBridge(() =>
+        Save(saveSessionID, expectedRevision, validationToken, confirmWarnings, confirmBanRisk),
+      ),
+    ),
+
+  saveAs: async (
+    saveSessionID,
+    expectedRevision,
+    validationToken,
+    confirmWarnings,
+    confirmBanRisk,
+    target,
+  ) =>
+    toSaveLifecycleResult(
+      await callBridge(() =>
+        SaveAs(
+          saveSessionID,
+          expectedRevision,
+          validationToken,
+          confirmWarnings,
+          confirmBanRisk,
+          target,
+        ),
+      ),
+    ),
+
+  getRecentFiles: async () => (await callBridge(GetRecentFiles)).map(toRecentFile),
+
+  recordRecentFile: async (saveSessionID) =>
+    (await callBridge(() => RecordRecentFile(saveSessionID))).map(toRecentFile),
+
+  removeRecentFile: async (path) =>
+    (await callBridge(() => RemoveRecentFile(path))).map(toRecentFile),
+
+  clearRecentFiles: async () => {
+    await callBridge(ClearRecentFiles);
+  },
+
+  getRecoveryJournals: async () => (await callBridge(GetRecoveryJournals)).map(toRecoveryJournal),
+
+  getRecoveryJournal: async (journalID) =>
+    toRecoveryJournal(await callBridge(() => GetRecoveryJournal(journalID))),
+
+  restoreRecoveryJournal: async (journalID) =>
+    toSaveSession(await callBridge(() => RestoreRecoveryJournal(journalID))),
+
+  discardRecoveryJournal: async (journalID) => {
+    await callBridge(() => DiscardRecoveryJournal(journalID));
+  },
+
+  exportRecoveryJournal: async (journalID, target) => {
+    await callBridge(() => ExportRecoveryJournal(journalID, target));
+  },
+
+  getSaveLifecycleSettings: async () =>
+    toSaveLifecycleSettings(await callBridge(GetSaveLifecycleSettings)),
+
+  setSaveLifecycleSettings: async (backupRetention) =>
+    toSaveLifecycleSettings(await callBridge(() => SetSaveLifecycleSettings(backupRetention))),
 
   /**
    * Subscribes to the backend's committed mutations.

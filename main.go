@@ -8,6 +8,8 @@ package main
 import (
 	"embed"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
@@ -30,7 +32,13 @@ var assets embed.FS
 var applicationVersion = "dev"
 
 func main() {
-	saveEngine := saveengine.New()
+	configDirectory, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatalf("locate application data directory: %v", err)
+	}
+	saveEngine := saveengine.NewWithOptions(saveengine.EngineOptions{
+		StateDirectory: filepath.Join(configDirectory, "SaveForge"),
+	})
 	// The single process-wide GameCatalog, built from the embedded catalog data
 	// the backend already ships. A failure here is a build or data defect, not a
 	// user condition: the application stops instead of starting with a partial
@@ -47,7 +55,12 @@ func main() {
 	// the host capability has one owner and the bridge stays testable without a
 	// real window.
 	bridge := desktop.NewBridge(
-		applicationVersion, saveEngine, gameCatalog, desktop.NewWailsSaveFileChooser())
+		applicationVersion,
+		saveEngine,
+		gameCatalog,
+		desktop.NewWailsSaveFileChooser(),
+		desktop.NewWailsSaveTargetChooser(),
+	)
 
 	err = wails.Run(&options.App{
 		Title:     "Elden Ring SaveForge",
@@ -61,8 +74,9 @@ func main() {
 		},
 		// The bridge receives the Wails context through the ordinary lifecycle;
 		// nothing in the application stores it in a package-level variable.
-		OnStartup: bridge.Startup,
-		Bind:      []any{bridge},
+		OnStartup:     bridge.Startup,
+		OnBeforeClose: bridge.BeforeClose,
+		Bind:          []any{bridge},
 	})
 	if err != nil {
 		log.Fatal(err)

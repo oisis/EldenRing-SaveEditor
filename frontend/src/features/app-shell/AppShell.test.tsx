@@ -1,8 +1,8 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
-import { renderApp, stubSaveSession } from "../../test/renderWithProviders";
+import { makeSaveSessionPort, renderApp, stubSaveSession } from "../../test/renderWithProviders";
 import { fileNameFromPath } from "./AppShell";
 
 describe("AppShell", () => {
@@ -35,6 +35,68 @@ describe("AppShell", () => {
     expect(screen.getByText(stubSaveSession.sourcePath)).toBeVisible();
     expect(screen.getByText("Saved")).toBeVisible();
     expect(screen.getAllByRole("complementary", { name: "Characters" })).toHaveLength(1);
+  });
+
+  it("opens Review Changes from the global operation toolbar", async () => {
+    await renderApp(<App />);
+    await userEvent.click(screen.getByRole("button", { name: "Open Save" }));
+    await screen.findByText(stubSaveSession.sourcePath);
+
+    const changes = screen.getByRole("button", { name: "Changes" });
+    expect(changes).toBeEnabled();
+    await userEvent.click(changes);
+
+    expect(await screen.findByRole("dialog", { name: "Review Changes" })).toBeVisible();
+    expect(screen.getByText("Validation passed.")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Save As" })).toBeEnabled();
+  });
+
+  it("requires Save As for a temporary session", async () => {
+    const temporary = { ...stubSaveSession, sourceKind: "temporary" as const };
+    await renderApp(<App />, {
+      saveSessionPort: makeSaveSessionPort({
+        loadSave: () => Promise.resolve(temporary),
+        getLoadedSave: () => Promise.resolve(temporary),
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Open Save" }));
+    await screen.findByText(stubSaveSession.sourcePath);
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Changes" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Review Changes" });
+    expect(within(dialog).getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "Save As" })).toBeEnabled();
+  });
+
+  it("requires an explicit decision before closing a dirty session", async () => {
+    const dirty = { ...stubSaveSession, unsavedChanges: true };
+    const closeSave = vi.fn(() => Promise.resolve());
+    await renderApp(<App />, {
+      saveSessionPort: makeSaveSessionPort({
+        closeSave,
+        loadSave: () => Promise.resolve(dirty),
+        getLoadedSave: () => Promise.resolve(dirty),
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Open Save" }));
+    await screen.findByText(stubSaveSession.sourcePath);
+
+    await userEvent.click(screen.getByRole("button", { name: "Close Save" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Unsaved changes" });
+    expect(within(dialog).getByRole("button", { name: "Save…" })).toBeVisible();
+    expect(within(dialog).getByRole("button", { name: "Discard" })).toBeVisible();
+    expect(closeSave).not.toHaveBeenCalled();
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Unsaved changes" })).toBeNull(),
+    );
+    expect(closeSave).not.toHaveBeenCalled();
+    expect(screen.getByText(stubSaveSession.sourcePath)).toBeVisible();
   });
 
   it("opens and closes the centred diagnostic console from the bottom bar", async () => {

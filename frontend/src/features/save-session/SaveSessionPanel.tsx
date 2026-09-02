@@ -29,10 +29,6 @@ import { type SaveSessionFlow, useSaveSessionFlow } from "./useSaveSessionFlow";
  * The minimal production screen of the save session: open a file, see what was
  * opened, see the character list, and see the backend's verdict on it.
  *
- * It is not the application shell. There is no navigation, no Home, no
- * Character, Items, Equipment, World or Tools screen, and no Save, Save As,
- * backup, recovery or recent-files behaviour: those belong to later steps.
- *
  * The screen renders backend answers and never forms its own. Every count, every
  * message and every state shown here was decided by the backend; nothing here
  * inspects a save.
@@ -83,10 +79,18 @@ export function SaveSessionContent({
             >
               <Trans>Open Save</Trans>
             </Button>
-            <Button disabled title={t`Save is not available yet`}>
+            <Button
+              onClick={flow.openReview}
+              disabled={!hasSession || flow.isBusy || session?.sourceKind !== "local"}
+              title={t`Review and save changes`}
+            >
               <Trans>Save</Trans>
             </Button>
-            <Button disabled title={t`Save As is not available yet`}>
+            <Button
+              onClick={flow.openReview}
+              disabled={!hasSession || flow.isBusy}
+              title={t`Review changes, then choose a new target`}
+            >
               <Trans>Save As</Trans>
             </Button>
           </div>
@@ -154,18 +158,26 @@ export function SaveSessionContent({
             </p>
           )}
 
-          {failure === "unsaved_changes" && (
-            // The temporary boundary of this stage: the session may not be
-            // closed or replaced, and nothing is ever discarded automatically.
-            <p role="alert" className={alertPanel}>
-              <Trans>
-                This save has unsaved changes. Saving and discarding them are not available yet, so
-                it cannot be closed or replaced.
-              </Trans>
+          {appError !== undefined && <AppErrorDetails error={appError} />}
+          {flow.lifecycleError !== undefined && <AppErrorDetails error={flow.lifecycleError} />}
+          {flow.lifecycleMessage !== undefined && (
+            <p role="status" className={message}>
+              {flow.lifecycleMessage}
             </p>
           )}
-
-          {appError !== undefined && <AppErrorDetails error={appError} />}
+          {flow.lastSaveResult !== undefined && (
+            <div role="status" className={message}>
+              <Trans>Saved to {flow.lastSaveResult.target}.</Trans>{" "}
+              {flow.lastSaveResult.backupPath !== undefined && (
+                <Trans>Backup: {flow.lastSaveResult.backupPath}.</Trans>
+              )}{" "}
+              {flow.lastSaveResult.retentionNoticeRequired && (
+                <Trans>
+                  The automatic backup limit was reached. Future saves remove the oldest backup.
+                </Trans>
+              )}
+            </div>
+          )}
 
           {unclosedSessionID !== undefined && (
             <div role="alert" className={alertPanel}>
@@ -301,6 +313,76 @@ export function SaveSessionContent({
                 <Trans>Close Save</Trans>
               </Button>
             </div>
+          )}
+
+          {flow.recentFiles.length > 0 && (
+            <section aria-label={t`Recent files`}>
+              <div className={actions}>
+                <h2>
+                  <Trans>Recent Files</Trans>
+                </h2>
+                <Button size="sm" disabled={flow.isBusy} onClick={flow.clearRecent}>
+                  <Trans>Clear</Trans>
+                </Button>
+              </div>
+              <ul className={reportList}>
+                {flow.recentFiles.map((recent) => (
+                  <li key={recent.path} className={reportItem}>
+                    <Button
+                      size="sm"
+                      disabled={flow.isBusy}
+                      onClick={() => flow.openRecent(recent.path)}
+                    >
+                      {recent.path}
+                    </Button>{" "}
+                    <Badge mono>{recent.platform}</Badge>{" "}
+                    <Button
+                      size="sm"
+                      disabled={flow.isBusy}
+                      onClick={() => flow.removeRecent(recent.path)}
+                    >
+                      <Trans>Remove</Trans>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {flow.recoveryJournals.length > 0 && (
+            <section aria-label={t`Recovery journals`}>
+              <h2>
+                <Trans>Recovery</Trans>
+              </h2>
+              <ul className={reportList}>
+                {flow.recoveryJournals.map((journal) => (
+                  <li key={journal.journalID} className={reportItem}>
+                    {journal.sourcePath || journal.journalID} <Badge mono>{journal.status}</Badge>{" "}
+                    <Button
+                      size="sm"
+                      disabled={flow.isBusy}
+                      onClick={() => flow.exportRecovery(journal.journalID)}
+                    >
+                      <Trans>Export</Trans>
+                    </Button>{" "}
+                    <Button
+                      size="sm"
+                      disabled={flow.isBusy}
+                      onClick={() => flow.discardRecovery(journal.journalID)}
+                    >
+                      <Trans>Discard</Trans>
+                    </Button>{" "}
+                    <Button
+                      size="sm"
+                      disabled={flow.isBusy || journal.status !== "compatible"}
+                      onClick={() => flow.restoreRecovery(journal.journalID)}
+                    >
+                      <Trans>Restore</Trans>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
 

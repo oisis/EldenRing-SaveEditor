@@ -977,7 +977,277 @@ export namespace saveengine {
 	        this.level = source["level"];
 	    }
 	}
+	export class DiscardChangesResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    discardedOperations: number;
 	
+	    static createFrom(source: any = {}) {
+	        return new DiscardChangesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.discardedOperations = source["discardedOperations"];
+	    }
+	}
+	export class HistoryMutationResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    affectedOperationID: string;
+	    affectedOperationKind: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HistoryMutationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.affectedOperationID = source["affectedOperationID"];
+	        this.affectedOperationKind = source["affectedOperationKind"];
+	    }
+	}
+	export class OperationRecord {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    order: string;
+	    characterID?: number;
+	    area: string;
+	    description: string;
+	    relatedResource?: string;
+	    beforeState: string;
+	    afterState: string;
+	    risk: string;
+	    riskReason: string;
+	    changedByteCount: number;
+	    changedScopes: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new OperationRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.order = source["order"];
+	        this.characterID = source["characterID"];
+	        this.area = source["area"];
+	        this.description = source["description"];
+	        this.relatedResource = source["relatedResource"];
+	        this.beforeState = source["beforeState"];
+	        this.afterState = source["afterState"];
+	        this.risk = source["risk"];
+	        this.riskReason = source["riskReason"];
+	        this.changedByteCount = source["changedByteCount"];
+	        this.changedScopes = source["changedScopes"];
+	    }
+	}
+	export class OperationHistory {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    operations: OperationRecord[];
+	    undoCount: number;
+	    redoCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OperationHistory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.operations = this.convertValues(source["operations"], OperationRecord);
+	        this.undoCount = source["undoCount"];
+	        this.redoCount = source["redoCount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	export class RecentFile {
+	    path: string;
+	    platform: string;
+	    format: string;
+	    lastOpenedAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecentFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.platform = source["platform"];
+	        this.format = source["format"];
+	        this.lastOpenedAt = source["lastOpenedAt"];
+	    }
+	}
+	export class RecoveryJournalSummary {
+	    journalID: string;
+	    status: string;
+	    sourcePath?: string;
+	    platform?: string;
+	    format?: string;
+	    saveRevision?: string;
+	    updatedAt?: string;
+	    operationCount: number;
+	    operations: OperationRecord[];
+	    failureCode?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecoveryJournalSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.journalID = source["journalID"];
+	        this.status = source["status"];
+	        this.sourcePath = source["sourcePath"];
+	        this.platform = source["platform"];
+	        this.format = source["format"];
+	        this.saveRevision = source["saveRevision"];
+	        this.updatedAt = source["updatedAt"];
+	        this.operationCount = source["operationCount"];
+	        this.operations = this.convertValues(source["operations"], OperationRecord);
+	        this.failureCode = source["failureCode"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReviewValidationIssue {
+	    code: string;
+	    severity: string;
+	    message: string;
+	    operationID?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewValidationIssue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.severity = source["severity"];
+	        this.message = source["message"];
+	        this.operationID = source["operationID"];
+	    }
+	}
+	export class ReviewValidationStage {
+	    stage: string;
+	    percent: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewValidationStage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.stage = source["stage"];
+	        this.percent = source["percent"];
+	    }
+	}
+	export class ReviewValidationResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    validationToken?: string;
+	    valid: boolean;
+	    warningCount: number;
+	    banRiskCount: number;
+	    criticalCount: number;
+	    stages: ReviewValidationStage[];
+	    issues: ReviewValidationIssue[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewValidationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.validationToken = source["validationToken"];
+	        this.valid = source["valid"];
+	        this.warningCount = source["warningCount"];
+	        this.banRiskCount = source["banRiskCount"];
+	        this.criticalCount = source["criticalCount"];
+	        this.stages = this.convertValues(source["stages"], ReviewValidationStage);
+	        this.issues = this.convertValues(source["issues"], ReviewValidationIssue);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class SaveCharacters {
 	    saveSessionID: string;
@@ -1012,6 +1282,48 @@ export namespace saveengine {
 		    }
 		    return a;
 		}
+	}
+	export class SaveLifecycleResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    target: string;
+	    backupPath?: string;
+	    warnings: string[];
+	    retentionNoticeRequired: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveLifecycleResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.target = source["target"];
+	        this.backupPath = source["backupPath"];
+	        this.warnings = source["warnings"];
+	        this.retentionNoticeRequired = source["retentionNoticeRequired"];
+	    }
+	}
+	export class SaveLifecycleSettings {
+	    backupRetention: number;
+	    retentionNoticeShown: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveLifecycleSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.backupRetention = source["backupRetention"];
+	        this.retentionNoticeShown = source["retentionNoticeShown"];
+	    }
 	}
 	export class SessionInfo {
 	    saveSessionID: string;

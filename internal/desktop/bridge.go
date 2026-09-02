@@ -20,7 +20,10 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+const applicationCloseRequestedEvent = "application.close-requested"
 
 // Bridge is the struct bound to Wails. Its exported methods are the desktop
 // bridge surface reachable from the frontend.
@@ -40,7 +43,8 @@ type Bridge struct {
 	// chooseSaveFile is the host's native file dialog, injected by the
 	// composition root so the bridge can be exercised without a real window. The
 	// bridge holds no dialog implementation of its own.
-	chooseSaveFile SaveFileChooser
+	chooseSaveFile   SaveFileChooser
+	chooseSaveTarget SaveTargetChooser
 
 	// emitEvent delivers a backend event to the frontend. A nil value selects the
 	// Wails runtime; only a test replaces it, so the bridge stays exercisable
@@ -66,12 +70,16 @@ func NewBridge(
 	saveEngine *saveengine.Engine,
 	gameCatalog *gamecatalog.Catalog,
 	chooseSaveFile SaveFileChooser,
+	chooseSaveTarget ...SaveTargetChooser,
 ) *Bridge {
 	bridge := &Bridge{
 		applicationVersion: applicationVersion,
 		saveEngine:         saveEngine,
 		gameCatalog:        gameCatalog,
 		chooseSaveFile:     chooseSaveFile,
+	}
+	if len(chooseSaveTarget) > 0 {
+		bridge.chooseSaveTarget = chooseSaveTarget[0]
 	}
 	// The bridge is the only host-aware layer, so it is the one that subscribes
 	// to SaveEngine's committed mutations and turns them into Wails events. The
@@ -82,6 +90,23 @@ func NewBridge(
 	return bridge
 }
 
+// SelectSaveTarget opens the native Save As dialog after Review Changes has
+// authorized the current revision. It returns the host path unchanged.
+func (b *Bridge) SelectSaveTarget(suggestedName string) (string, error) {
+	if b.chooseSaveTarget == nil {
+		return "", bridgeError(errors.New("the native Save As dialog is not available"))
+	}
+	ctx := b.hostContextOrNil()
+	if ctx == nil {
+		return "", bridgeError(errors.New("the desktop host is not started yet"))
+	}
+	path, err := b.chooseSaveTarget(ctx, suggestedName)
+	if err != nil {
+		return "", bridgeError(err)
+	}
+	return path, nil
+}
+
 // Startup receives the Wails context from the application lifecycle. It is
 // wired as OnStartup by the composition root and is the only way the host
 // context enters the bridge; nothing here reads a package-level context.
@@ -89,6 +114,33 @@ func (b *Bridge) Startup(ctx context.Context) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 	b.hostContext = ctx
+}
+
+// BeforeClose intercepts only a window close that would abandon unsaved work.
+// React owns the Save / Discard / Cancel decision and receives a notification;
+// a clean process is allowed to close immediately.
+func (b *Bridge) BeforeClose(ctx context.Context) bool {
+	if b.saveEngine == nil || !b.saveEngine.HasUnsavedChanges() {
+		return false
+	}
+	emit := b.emitEvent
+	if emit == nil {
+		emit = runtime.EventsEmit
+	}
+	emit(ctx, applicationCloseRequestedEvent)
+	return true
+}
+
+// QuitApplication completes a close request after the frontend has saved or
+// discarded the active changes. The host lifecycle check still runs and will
+// refuse the quit if another dirty session somehow remains.
+func (b *Bridge) QuitApplication() error {
+	ctx := b.hostContextOrNil()
+	if ctx == nil {
+		return bridgeError(errors.New("the desktop host is not started yet"))
+	}
+	runtime.Quit(ctx)
+	return nil
 }
 
 func (b *Bridge) hostContextOrNil() context.Context {
@@ -154,6 +206,94 @@ func (b *Bridge) GetLoadedSave(saveSessionID string) (savesession.GetLoadedSaveR
 // unchanged.
 func (b *Bridge) CloseSave(saveSessionID string) error {
 	return bridgeError(savesession.CloseSave(b.saveEngine, saveSessionID))
+}
+
+func (b *Bridge) GetOperationHistory(saveSessionID string) (savesession.GetOperationHistoryResult, error) {
+	return bridged(savesession.GetOperationHistory(b.saveEngine, saveSessionID))
+}
+
+func (b *Bridge) UndoLastOperation(saveSessionID, expectedRevision string) (savesession.UndoLastOperationResult, error) {
+	return bridged(savesession.UndoLastOperation(b.saveEngine, saveSessionID, expectedRevision))
+}
+
+func (b *Bridge) RedoLastOperation(saveSessionID, expectedRevision string) (savesession.RedoLastOperationResult, error) {
+	return bridged(savesession.RedoLastOperation(b.saveEngine, saveSessionID, expectedRevision))
+}
+
+func (b *Bridge) RevertOperation(saveSessionID, operationID, expectedRevision string) (savesession.RevertOperationResult, error) {
+	return bridged(savesession.RevertOperation(
+		b.saveEngine, saveSessionID, operationID, expectedRevision))
+}
+
+func (b *Bridge) DiscardChanges(saveSessionID, expectedRevision string) (savesession.DiscardChangesResult, error) {
+	return bridged(savesession.DiscardChanges(b.saveEngine, saveSessionID, expectedRevision))
+}
+
+func (b *Bridge) ValidateReviewChanges(saveSessionID, expectedRevision string) (savesession.ValidateReviewChangesResult, error) {
+	return bridged(savesession.ValidateReviewChanges(b.saveEngine, saveSessionID, expectedRevision))
+}
+
+func (b *Bridge) Save(
+	saveSessionID, expectedRevision, validationToken string,
+	confirmWarnings, confirmBanRisk bool,
+) (savesession.SaveResult, error) {
+	return bridged(savesession.Save(
+		b.saveEngine, saveSessionID, expectedRevision, validationToken,
+		confirmWarnings, confirmBanRisk))
+}
+
+func (b *Bridge) SaveAs(
+	saveSessionID, expectedRevision, validationToken string,
+	confirmWarnings, confirmBanRisk bool,
+	target string,
+) (savesession.SaveAsResult, error) {
+	return bridged(savesession.SaveAs(
+		b.saveEngine, saveSessionID, expectedRevision, validationToken,
+		confirmWarnings, confirmBanRisk, target))
+}
+
+func (b *Bridge) GetRecentFiles() (savesession.GetRecentFilesResult, error) {
+	return bridged(savesession.GetRecentFiles(b.saveEngine))
+}
+
+func (b *Bridge) RecordRecentFile(saveSessionID string) (savesession.RecordRecentFileResult, error) {
+	return bridged(savesession.RecordRecentFile(b.saveEngine, saveSessionID))
+}
+
+func (b *Bridge) RemoveRecentFile(path string) (savesession.RemoveRecentFileResult, error) {
+	return bridged(savesession.RemoveRecentFile(b.saveEngine, path))
+}
+
+func (b *Bridge) ClearRecentFiles() error {
+	return bridgeError(savesession.ClearRecentFiles(b.saveEngine))
+}
+
+func (b *Bridge) GetSaveLifecycleSettings() (savesession.GetSaveLifecycleSettingsResult, error) {
+	return bridged(savesession.GetSaveLifecycleSettings(b.saveEngine))
+}
+
+func (b *Bridge) SetSaveLifecycleSettings(backupRetention int) (savesession.SetSaveLifecycleSettingsResult, error) {
+	return bridged(savesession.SetSaveLifecycleSettings(b.saveEngine, backupRetention))
+}
+
+func (b *Bridge) GetRecoveryJournals() (savesession.GetRecoveryJournalsResult, error) {
+	return bridged(savesession.GetRecoveryJournals(b.saveEngine))
+}
+
+func (b *Bridge) GetRecoveryJournal(journalID string) (savesession.GetRecoveryJournalResult, error) {
+	return bridged(savesession.GetRecoveryJournal(b.saveEngine, journalID))
+}
+
+func (b *Bridge) RestoreRecoveryJournal(journalID string) (savesession.RestoreRecoveryJournalResult, error) {
+	return bridged(savesession.RestoreRecoveryJournal(b.saveEngine, journalID))
+}
+
+func (b *Bridge) DiscardRecoveryJournal(journalID string) error {
+	return bridgeError(savesession.DiscardRecoveryJournal(b.saveEngine, journalID))
+}
+
+func (b *Bridge) ExportRecoveryJournal(journalID, target string) error {
+	return bridgeError(savesession.ExportRecoveryJournal(b.saveEngine, journalID, target))
 }
 
 // GetSaveValidationReport delegates to the GetSaveValidationReport endpoint and

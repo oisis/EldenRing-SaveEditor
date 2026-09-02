@@ -301,12 +301,36 @@ func (engine *Engine) commitLocked(
 		}
 		point = captured
 	}
+	// The complete preimage is captured once at the central boundary. It is used
+	// to derive the replay delta after the domain writer succeeds and to restore
+	// the private snapshot if persisting the required recovery journal fails.
+	// Domain writers remain unaware of history and do not duplicate replay rules.
+	snapshotBefore := append([]byte(nil), loaded.snapshot.data...)
 
 	if err := commit(loaded); err != nil {
 		return MutationReceipt{}, err
 	}
 
 	session := loaded.session
+	nextRevision := strconv.FormatUint(session.revision+1, 10)
+	receipt := pending.receipt(saveSessionID, nextRevision)
+	entry, err := operationEntryForCommit(
+		receipt,
+		len(loaded.operations)+1,
+		characterScoped,
+		characterID,
+		snapshotBefore,
+		loaded.snapshot.data,
+	)
+	if err != nil {
+		loaded.snapshot = &codec{data: snapshotBefore}
+		return MutationReceipt{}, fmt.Errorf("cannot record operation history: %w", err)
+	}
+	nextOperations := append(append([]operationEntry(nil), loaded.operations...), entry)
+	if err := engine.persistRecoveryState(loaded, nextOperations, nextRevision); err != nil {
+		loaded.snapshot = &codec{data: snapshotBefore}
+		return MutationReceipt{}, err
+	}
 	// The previous point cannot survive this commit under any branch: its
 	// revision expires below.
 	session.undo = nil
@@ -316,13 +340,19 @@ func (engine *Engine) commitLocked(
 	}
 	session.dirty = true
 	revision := session.advanceRevision()
+	if revision != nextRevision {
+		loaded.snapshot = &codec{data: snapshotBefore}
+		return MutationReceipt{}, errors.New("operation history revision changed unexpectedly")
+	}
+	loaded.operations = nextOperations
+	loaded.redo = nil
+	session.reviewAuthorization = nil
 	if session.undo != nil {
 		session.undo.revision = session.revision
 	}
 	if afterCommit != nil {
 		afterCommit(loaded, revision)
 	}
-	receipt := pending.receipt(saveSessionID, revision)
 	// The event is queued under the same lock that created the revision, so the
 	// queue order is the commit order.
 	engine.enqueueCommitted(session, receipt)

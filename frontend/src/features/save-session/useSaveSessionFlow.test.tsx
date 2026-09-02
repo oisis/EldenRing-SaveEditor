@@ -2,7 +2,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { queryKeys } from "../../application/queryKeys";
-import type { SessionChangedEvent } from "../../application/save-session/saveSessionPort";
+import type {
+  RecentFile,
+  SessionChangedEvent,
+} from "../../application/save-session/saveSessionPort";
 import {
   createTestQueryClient,
   makeCharacterPort,
@@ -500,7 +503,7 @@ describe("useSaveSessionFlow", () => {
     );
   });
 
-  it("refuses to close or replace a session with unsaved changes", async () => {
+  it("requires an explicit dirty-session decision before close or replace", async () => {
     const dirty = { ...stubSaveSession, unsavedChanges: true };
     const closeSave = vi.fn(() => Promise.resolve());
     const loadSave = vi.fn(() => Promise.resolve(dirty));
@@ -514,11 +517,16 @@ describe("useSaveSessionFlow", () => {
     expect(loadSave).toHaveBeenCalledTimes(1);
 
     act(() => result.current.closeSave());
-    await waitFor(() => expect(result.current.failure).toBe("unsaved_changes"));
+    await waitFor(() => expect(result.current.pendingSessionAction).toEqual({ kind: "close" }));
     expect(closeSave).not.toHaveBeenCalled();
 
+    act(() => result.current.cancelPendingAction());
+    expect(result.current.pendingSessionAction).toBe(undefined);
+
     act(() => result.current.openSave());
-    await waitFor(() => expect(result.current.failure).toBe("unsaved_changes"));
+    await waitFor(() =>
+      expect(result.current.pendingSessionAction).toEqual({ kind: "open-dialog" }),
+    );
     // Nothing is discarded and nothing is replaced: no second load was even
     // attempted, and the dirty session is exactly as it was.
     expect(loadSave).toHaveBeenCalledTimes(1);
@@ -806,5 +814,138 @@ describe("useSaveSessionFlow", () => {
       { saveSessionID: "session-1", characterID: 0, scope: "" },
       { saveSessionID: "session-1", characterID: 2, scope: "" },
     ]);
+  });
+
+  it("validates the exact revision before Save and adopts the confirmed clean session", async () => {
+    const dirty = { ...stubSaveSession, saveRevision: "1", unsavedChanges: true };
+    const clean = { ...dirty, saveRevision: "2", unsavedChanges: false, eventSequence: "1" };
+    let current = dirty;
+    const validateReviewChanges = vi.fn(() =>
+      Promise.resolve({
+        saveSessionID: dirty.saveSessionID,
+        saveRevision: "1",
+        validationToken: "validation-1",
+        valid: true,
+        warningCount: 0,
+        banRiskCount: 0,
+        criticalCount: 0,
+        stages: [{ stage: "validation", percent: 100 }],
+        issues: [],
+      }),
+    );
+    const save = vi.fn(() => {
+      current = clean;
+      return Promise.resolve({
+        operationID: "operation-save",
+        operationKind: "save",
+        saveSessionID: dirty.saveSessionID,
+        saveRevision: "2",
+        changedScopes: ["save.session", "diagnostics.report"] as const,
+        target: dirty.sourcePath,
+        backupPath: `${dirty.sourcePath}.backup`,
+        warnings: [],
+        retentionNoticeRequired: false,
+      });
+    });
+    let recentFiles: RecentFile[] = [];
+    const recordRecentFile = vi.fn(() => {
+      recentFiles = [
+        {
+          path: clean.sourcePath,
+          platform: clean.platform,
+          format: clean.format,
+          lastOpenedAt: "2026-09-02T20:00:00Z",
+        },
+      ];
+      return Promise.resolve(recentFiles);
+    });
+    const { wrapper } = setup({
+      saveSessionPort: makeSaveSessionPort({
+        loadSave: () => Promise.resolve(dirty),
+        getLoadedSave: () => Promise.resolve(current),
+        validateReviewChanges,
+        save,
+        recordRecentFile,
+        getRecentFiles: () => Promise.resolve(recentFiles),
+      }),
+      characterPort: makeCharacterPort({
+        getSaveCharacters: (saveSessionID) =>
+          Promise.resolve({ ...stubSaveCharacters, saveSessionID, saveRevision: "1" }),
+      }),
+      diagnosticsPort: makeDiagnosticsPort({
+        getSaveValidationReport: ({ saveSessionID, characterID }) =>
+          Promise.resolve({
+            ...stubCleanValidationReport,
+            saveSessionID,
+            saveRevision: "1",
+            characterID,
+          }),
+      }),
+    });
+    const { result } = renderHook(() => useSaveSessionFlow(), { wrapper });
+    act(() => result.current.openSave());
+    await waitFor(() => expect(result.current.session).toEqual(dirty));
+
+    act(() => result.current.openReview());
+    await waitFor(() =>
+      expect(result.current.reviewValidation?.validationToken).toBe("validation-1"),
+    );
+    act(() => result.current.saveReviewed(false, false, false));
+
+    await waitFor(() => expect(result.current.session).toEqual(clean));
+    expect(validateReviewChanges).toHaveBeenCalledWith(dirty.saveSessionID, "1");
+    expect(save).toHaveBeenCalledWith(dirty.saveSessionID, "1", "validation-1", false, false);
+    expect(recordRecentFile).toHaveBeenCalledWith(dirty.saveSessionID);
+    expect(result.current.recentFiles[0]?.path).toBe(clean.sourcePath);
+    expect(result.current.history?.operations).toEqual([]);
+  });
+
+  it("discards through the backend before continuing a dirty close request", async () => {
+    const dirty = { ...stubSaveSession, saveRevision: "1", unsavedChanges: true };
+    const clean = { ...dirty, saveRevision: "2", unsavedChanges: false, eventSequence: "1" };
+    let current = dirty;
+    const closeSave = vi.fn(() => Promise.resolve());
+    const discardChanges = vi.fn(() => {
+      current = clean;
+      return Promise.resolve({
+        operationID: "operation-discard",
+        operationKind: "discard_changes",
+        saveSessionID: dirty.saveSessionID,
+        saveRevision: "2",
+        changedScopes: ["save.session", "diagnostics.report"] as const,
+        discardedOperations: 1,
+      });
+    });
+    const { wrapper } = setup({
+      saveSessionPort: makeSaveSessionPort({
+        loadSave: () => Promise.resolve(dirty),
+        getLoadedSave: () => Promise.resolve(current),
+        closeSave,
+        discardChanges,
+      }),
+      characterPort: makeCharacterPort({
+        getSaveCharacters: (saveSessionID) =>
+          Promise.resolve({ ...stubSaveCharacters, saveSessionID, saveRevision: "1" }),
+      }),
+      diagnosticsPort: makeDiagnosticsPort({
+        getSaveValidationReport: ({ saveSessionID, characterID }) =>
+          Promise.resolve({
+            ...stubCleanValidationReport,
+            saveSessionID,
+            saveRevision: "1",
+            characterID,
+          }),
+      }),
+    });
+    const { result } = renderHook(() => useSaveSessionFlow(), { wrapper });
+    act(() => result.current.openSave());
+    await waitFor(() => expect(result.current.session).toEqual(dirty));
+    act(() => result.current.closeSave());
+    await waitFor(() => expect(result.current.pendingSessionAction).toEqual({ kind: "close" }));
+    act(() => result.current.discardPendingChanges());
+
+    await waitFor(() => expect(result.current.session).toBe(undefined));
+    expect(discardChanges).toHaveBeenCalledWith(dirty.saveSessionID, "1");
+    expect(closeSave).toHaveBeenCalledWith(dirty.saveSessionID);
   });
 });

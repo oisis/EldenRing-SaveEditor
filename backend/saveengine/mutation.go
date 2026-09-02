@@ -43,10 +43,15 @@ const (
 	kindCloneCharacter              = "clone_character"
 	kindDeleteCharacter             = "delete_character"
 	kindDeleteFavoritePreset        = "delete_favorite_preset"
+	kindDiscardChanges              = "discard_changes"
 	kindLockAllSpectralSteedAttires = "lock_all_spectral_steed_attires"
 	kindMoveOwnedItemToInventory    = "move_owned_item_to_inventory"
 	kindMoveOwnedItemToStorage      = "move_owned_item_to_storage"
 	kindRemoveOwnedItem             = "remove_owned_item"
+	kindRedoLastOperation           = "redo_last_operation"
+	kindRevertOperation             = "revert_operation"
+	kindSave                        = "save"
+	kindSaveAs                      = "save_as"
 	kindSetBellBearingUnlocked      = "set_bell_bearing_unlocked"
 	kindSetBossDefeated             = "set_boss_defeated"
 	kindSetCharacterActive          = "set_character_active"
@@ -86,6 +91,7 @@ const (
 	kindSetWeaponUpgradeLevel       = "set_weapon_upgrade_level"
 	kindSetWhetbladeUnlocked        = "set_whetblade_unlocked"
 	kindUndoCharacterChanges        = "undo_character_changes"
+	kindUndoLastOperation           = "undo_last_operation"
 	kindWriteSave                   = "write_save"
 )
 
@@ -276,6 +282,13 @@ var domainChangedScopes = map[string][]string{
 	// WriteSave persists the snapshot and clears the unsaved-changes flag. It
 	// changes no domain value, so it invalidates the universal scopes only.
 	kindWriteSave: nil,
+	kindSave:      nil,
+	kindSaveAs:    nil,
+	// History controls resolve the concrete affected scopes at commit time.
+	kindDiscardChanges:    nil,
+	kindUndoLastOperation: nil,
+	kindRedoLastOperation: nil,
+	kindRevertOperation:   nil,
 	// Undo restores the ranges of one character mutation. Its concrete scopes are
 	// the scopes of the mutation it reverts, resolved at commit time on top of
 	// this baseline.

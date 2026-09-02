@@ -1,11 +1,12 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import appIconURL from "../../../../build/appicon.png";
 import type { Locale } from "../../i18n/i18n";
 import { locales } from "../../i18n/i18n";
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
+import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
 import { message } from "../../ui/patterns/panel.css";
 import type { ThemeName } from "../../ui/tokens/themes.css";
@@ -14,6 +15,8 @@ import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
 import { CharacterSidebar } from "../character/CharacterSidebar";
 import { InventoryAndStoragePanel } from "../items/inventory-storage/InventoryAndStoragePanel";
 import { ItemDatabasePanel } from "../items/item-database/ItemDatabasePanel";
+import { PendingChangesDialog, ReviewChangesDialog } from "../review-changes/ReviewChangesDialog";
+import { RecoveryJournalDialog } from "../save-session/RecoveryJournalDialog";
 import { SaveSessionContent } from "../save-session/SaveSessionPanel";
 import type { SaveSessionFlow } from "../save-session/useSaveSessionFlow";
 import {
@@ -85,6 +88,13 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   const [section, setSection] = useState<AppSection>("home");
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [itemsSection, setItemsSection] = useState<ItemsSection>("inventory");
+  const [retentionDraft, setRetentionDraft] = useState("10");
+
+  useEffect(() => {
+    if (flow.lifecycleSettings !== undefined) {
+      setRetentionDraft(String(flow.lifecycleSettings.backupRetention));
+    }
+  }, [flow.lifecycleSettings]);
 
   const labels: Record<AppSection, string> = {
     home: t`Home`,
@@ -149,7 +159,12 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
         )}
 
         <div className={operations} role="toolbar" aria-label={t`Session operations`}>
-          <Button size="sm" disabled title={t`Operation history is not available yet`}>
+          <Button
+            size="sm"
+            disabled={session === undefined || flow.isBusy || (flow.history?.undoCount ?? 0) === 0}
+            title={t`Undo the last operation`}
+            onClick={flow.undo}
+          >
             <span className={operationGlyph} aria-hidden="true">
               ↶
             </span>
@@ -157,7 +172,12 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               <Trans>Undo</Trans>
             </span>
           </Button>
-          <Button size="sm" disabled title={t`Operation history is not available yet`}>
+          <Button
+            size="sm"
+            disabled={session === undefined || flow.isBusy || (flow.history?.redoCount ?? 0) === 0}
+            title={t`Redo the last undone operation`}
+            onClick={flow.redo}
+          >
             <span className={operationGlyph} aria-hidden="true">
               ↷
             </span>
@@ -165,7 +185,12 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               <Trans>Redo</Trans>
             </span>
           </Button>
-          <Button size="sm" disabled title={t`Review Changes is not available yet`}>
+          <Button
+            size="sm"
+            disabled={session === undefined || flow.isBusy}
+            title={t`Review changes and validate before saving`}
+            onClick={flow.openReview}
+          >
             <span className={operationGlyph} aria-hidden="true">
               Δ
             </span>
@@ -298,6 +323,27 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
                   ))}
                 </Select>
               </label>
+              <label htmlFor="tools-backup-retention">
+                <Trans>Automatic backups kept</Trans>{" "}
+                <Input
+                  id="tools-backup-retention"
+                  type="number"
+                  min={1}
+                  max={1000}
+                  step={1}
+                  value={retentionDraft}
+                  onChange={(event) => setRetentionDraft(event.currentTarget.value)}
+                  onBlur={() => {
+                    const retention = Number(retentionDraft);
+                    if (Number.isInteger(retention) && retention >= 1 && retention <= 1000) {
+                      flow.setBackupRetention(retention);
+                    } else {
+                      setRetentionDraft(String(flow.lifecycleSettings?.backupRetention ?? 10));
+                    }
+                  }}
+                  disabled={flow.isBusy}
+                />
+              </label>
             </Card>
             <ApplicationInfoPanel />
           </section>
@@ -341,6 +387,10 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           </span>
         </button>
       </div>
+
+      <ReviewChangesDialog flow={flow} />
+      <PendingChangesDialog flow={flow} />
+      <RecoveryJournalDialog flow={flow} />
     </div>
   );
 }

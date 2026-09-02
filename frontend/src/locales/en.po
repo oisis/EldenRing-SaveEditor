@@ -47,6 +47,14 @@ msgstr "Advanced save features are not available yet."
 msgid "All families"
 msgstr "All families"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "All levels"
+msgstr "All levels"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "All operations"
+msgstr "All operations"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
@@ -64,6 +72,10 @@ msgstr "Application settings"
 msgid "Application settings and tools"
 msgstr "Application settings and tools"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Area"
+msgstr "Area"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Armor"
 msgstr "Armor"
@@ -72,10 +84,31 @@ msgstr "Armor"
 msgid "Ashes of War"
 msgstr "Ashes of War"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Automatic backups kept"
+msgstr "Automatic backups kept"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 #: src/i18n/i18n.test.tsx
 msgid "Backend"
 msgstr "Backend"
+
+#. placeholder {0}: flow.lastSaveResult.backupPath
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Backup: {0}."
+msgstr "Backup: {0}."
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "ban risk"
+msgstr "ban risk"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Ban risk"
+msgstr "Ban risk"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Cancel"
+msgstr "Cancel"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Capabilities"
@@ -96,6 +129,7 @@ msgid "Changes"
 msgstr "Changes"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Character"
 msgstr "Character"
 
@@ -107,9 +141,14 @@ msgstr "Character profile and appearance"
 msgid "Characters"
 msgstr "Characters"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Clear"
+msgstr "Clear"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Close"
 msgstr "Close"
 
@@ -129,6 +168,18 @@ msgstr "Container"
 msgid "Could not read application information from the backend."
 msgstr "Could not read application information from the backend."
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "critical"
+msgstr "critical"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Critical"
+msgstr "Critical"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Critical validation issues block saving."
+msgstr "Critical validation issues block saving."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Dark"
 msgstr "Dark"
@@ -141,6 +192,16 @@ msgstr "Details"
 #: src/features/app-shell/AppShell.tsx
 msgid "Diagnostic console"
 msgstr "Diagnostic console"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Diagnostic ID:"
+msgstr "Diagnostic ID:"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/save-session/RecoveryJournalDialog.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Discard"
+msgstr "Discard"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Elden Ring"
@@ -157,6 +218,11 @@ msgstr "Equipment"
 #: src/features/app-shell/AppShell.tsx
 msgid "Equipment and quick slots"
 msgstr "Equipment and quick slots"
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Export"
+msgstr "Export"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
@@ -183,9 +249,21 @@ msgstr "Goods"
 msgid "Grid"
 msgstr "Grid"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Group by"
+msgstr "Group by"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Home"
 msgstr "Home"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "I reviewed and accept the warnings."
+msgstr "I reviewed and accept the warnings."
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "I understand and accept the separate ban risk."
+msgstr "I understand and accept the separate ban risk."
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
@@ -264,6 +342,10 @@ msgstr "Items: {total}"
 #: src/features/app-shell/AppShell.tsx
 msgid "Language"
 msgstr "Language"
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+msgid "Later"
+msgstr "Later"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Light"
@@ -357,6 +439,10 @@ msgstr "No active character is available."
 msgid "No file was chosen."
 msgstr "No file was chosen."
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "No grouping"
+msgstr "No grouping"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No items match the current search."
 msgstr "No items match the current search."
@@ -364,6 +450,10 @@ msgstr "No items match the current search."
 #: src/features/app-shell/AppShell.tsx
 msgid "No live messages"
 msgstr "No live messages"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "No operations match this view."
+msgstr "No operations match this view."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No save is open."
@@ -385,6 +475,10 @@ msgstr "No unsaved changes"
 msgid "No variants are available."
 msgstr "No variants are available."
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Normal"
+msgstr "Normal"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
 msgstr "Open a save from Home to see its character slots."
@@ -397,9 +491,14 @@ msgstr "Open Save"
 msgid "Opening save…"
 msgstr "Opening save…"
 
-#: src/features/app-shell/AppShell.tsx
-msgid "Operation history is not available yet"
-msgstr "Operation history is not available yet"
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Operation history"
+msgstr "Operation history"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/save-session/RecoveryJournalDialog.tsx
+msgid "operation(s)"
+msgstr "operation(s)"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
@@ -442,9 +541,47 @@ msgstr "Read-only information from GameCatalog."
 msgid "Read-only information from the save and GameCatalog."
 msgstr "Read-only information from the save and GameCatalog."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Recent files"
+msgstr "Recent files"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Recent Files"
+msgstr "Recent Files"
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+msgid "Recover unsaved work"
+msgstr "Recover unsaved work"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Recovery"
+msgstr "Recovery"
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Recovery journals"
+msgstr "Recovery journals"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "redo"
+msgstr "redo"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Redo"
 msgstr "Redo"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Redo the last undone operation"
+msgstr "Redo the last undone operation"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Remove"
+msgstr "Remove"
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Restore"
+msgstr "Restore"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Results: {total}"
@@ -458,45 +595,88 @@ msgstr "Retry"
 msgid "Retry closing"
 msgstr "Retry closing"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Revert"
+msgstr "Revert"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Review and save changes"
+msgstr "Review and save changes"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Review Changes"
+msgstr "Review Changes"
+
 #: src/features/app-shell/AppShell.tsx
-msgid "Review Changes is not available yet"
-msgstr "Review Changes is not available yet"
+msgid "Review changes and validate before saving"
+msgstr "Review changes and validate before saving"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Review changes, then choose a new target"
+msgstr "Review changes, then choose a new target"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Review the ordered operation journal and validation before writing."
+msgstr "Review the ordered operation journal and validation before writing."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Revision"
 msgstr "Revision"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Risk"
+msgstr "Risk"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "RL {level}"
 msgstr "RL {level}"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save"
 msgstr "Save"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save As"
 msgstr "Save As"
 
-#: src/features/save-session/SaveSessionPanel.tsx
-msgid "Save As is not available yet"
-msgstr "Save As is not available yet"
-
-#: src/features/save-session/SaveSessionPanel.tsx
-msgid "Save is not available yet"
-msgstr "Save is not available yet"
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Save or discard the current changes before continuing."
+msgstr "Save or discard the current changes before continuing."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save session"
 msgstr "Save session"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Save validation"
+msgstr "Save validation"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Save…"
+msgstr "Save…"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Saved"
 msgstr "Saved"
 
+#. placeholder {0}: flow.lastSaveResult.target
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Saved to {0}."
+msgstr "Saved to {0}."
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+msgid "SaveForge found operation journals from an earlier session."
+msgstr "SaveForge found operation journals from an earlier session."
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Search items"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Session"
+msgstr "Session"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Session operations"
@@ -552,6 +732,18 @@ msgstr "Table"
 msgid "Talismans"
 msgstr "Talismans"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The application backend could not be reached."
+msgstr "The application backend could not be reached."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The application backend encountered an internal error."
+msgstr "The application backend encountered an internal error."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The automatic backup limit was reached. Future saves remove the oldest backup."
+msgstr "The automatic backup limit was reached. Future saves remove the oldest backup."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "The Character workspace will be implemented in a later frontend stage."
 msgstr "The Character workspace will be implemented in a later frontend stage."
@@ -569,6 +761,26 @@ msgid "The Inventory and the Storage Box were read at different save revisions. 
 msgstr "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
 
 #: src/features/save-session/SaveSessionPanel.tsx
+msgid "The request was rejected because some input was invalid."
+msgstr "The request was rejected because some input was invalid."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The requested operation could not be completed."
+msgstr "The requested operation could not be completed."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The save changed before the operation could be applied."
+msgstr "The save changed before the operation could be applied."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The save revision supplied by the request was invalid."
+msgstr "The save revision supplied by the request was invalid."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "The save session is no longer available."
+msgstr "The save session is no longer available."
+
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "The save was not opened for editing."
 msgstr "The save was not opened for editing."
 
@@ -576,6 +788,10 @@ msgstr "The save was not opened for editing."
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The selected resource has no item details."
 msgstr "The selected resource has no item details."
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "The session changed after validation. Validate the current revision again."
+msgstr "The session changed after validation. Validate the current revision again."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "The World workspace will be implemented in a later frontend stage."
@@ -588,6 +804,10 @@ msgstr "Theme"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "This Inventory card is empty."
 msgstr "This Inventory card is empty."
+
+#: src/features/save-session/RecoveryJournalDialog.tsx
+msgid "This journal cannot be replayed automatically. You can export or discard it."
+msgstr "This journal cannot be replayed automatically. You can export or discard it."
 
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
@@ -604,10 +824,6 @@ msgstr "This save could not be checked, so it was not opened for editing."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "This save has no active character, so it cannot be edited. It was not opened for editing."
 msgstr "This save has no active character, so it cannot be edited. It was not opened for editing."
-
-#: src/features/save-session/SaveSessionPanel.tsx
-msgid "This save has unsaved changes. Saving and discarding them are not available yet, so it cannot be closed or replaced."
-msgstr "This save has unsaved changes. Saving and discarding them are not available yet, so it cannot be closed or replaced."
 
 #. placeholder {0}: validation.errorCount
 #. placeholder {1}: validation.warningCount
@@ -652,13 +868,38 @@ msgstr "Unable to load the Storage Box."
 msgid "Unavailable"
 msgstr "Unavailable"
 
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "undo"
+msgstr "undo"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Undo"
 msgstr "Undo"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Undo the last operation"
+msgstr "Undo the last operation"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Validate again"
+msgstr "Validate again"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Validating…"
+msgstr "Validating…"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Validation"
+msgstr "Validation"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Validation passed."
+msgstr "Validation passed."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Validation report"
@@ -684,6 +925,14 @@ msgstr "View"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "View report"
 msgstr "View report"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "Warning"
+msgstr "Warning"
+
+#: src/features/review-changes/ReviewChangesDialog.tsx
+msgid "warning(s)"
+msgstr "warning(s)"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"

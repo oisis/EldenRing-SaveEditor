@@ -18,6 +18,11 @@ import (
 // the host has exactly one dialog to offer at this stage.
 type SaveFileChooser func(ctx context.Context) (string, error)
 
+// SaveTargetChooser asks the host for an explicit output path. Cancelling is an
+// empty path and nil error, exactly like opening; no file is created by the
+// dialog itself.
+type SaveTargetChooser func(ctx context.Context, suggestedName string) (string, error)
+
 // saveFileFilters are the extensions this build offers as a convenience only.
 // The "all files" entry stays available on purpose: a container is recognised
 // from its leading magic by SaveEngine, never from a file name, so an unusual
@@ -47,6 +52,16 @@ func NewWailsSaveFileChooser() SaveFileChooser {
 			// An alias must resolve to the file it points at, so the path handed
 			// to SaveEngine names a real container rather than a link to one.
 			ResolvesAliases: true,
+		})
+	}
+}
+
+func NewWailsSaveTargetChooser() SaveTargetChooser {
+	return func(ctx context.Context, suggestedName string) (string, error) {
+		return runtime.SaveFileDialog(ctx, runtime.SaveDialogOptions{
+			Title:           "Save As",
+			DefaultFilename: suggestedName,
+			Filters:         saveFileFilters,
 		})
 	}
 }

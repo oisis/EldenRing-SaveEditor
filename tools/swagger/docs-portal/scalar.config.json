@@ -97,6 +97,101 @@
                 "filepath": "../../../docs/endpoints/savesession/write_save.md",
                 "title": "WriteSave"
               },
+              "/get-operation-history": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_operation_history.md",
+                "title": "GetOperationHistory"
+              },
+              "/undo-last-operation": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/undo_last_operation.md",
+                "title": "UndoLastOperation"
+              },
+              "/redo-last-operation": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/redo_last_operation.md",
+                "title": "RedoLastOperation"
+              },
+              "/revert-operation": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/revert_operation.md",
+                "title": "RevertOperation"
+              },
+              "/discard-changes": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/discard_changes.md",
+                "title": "DiscardChanges"
+              },
+              "/validate-review-changes": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/validate_review_changes.md",
+                "title": "ValidateReviewChanges"
+              },
+              "/save": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/save.md",
+                "title": "Save"
+              },
+              "/save-as": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/save_as.md",
+                "title": "SaveAs"
+              },
+              "/get-save-lifecycle-settings": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_save_lifecycle_settings.md",
+                "title": "GetSaveLifecycleSettings"
+              },
+              "/set-save-lifecycle-settings": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/set_save_lifecycle_settings.md",
+                "title": "SetSaveLifecycleSettings"
+              },
+              "/get-recent-files": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_recent_files.md",
+                "title": "GetRecentFiles"
+              },
+              "/record-recent-file": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/record_recent_file.md",
+                "title": "RecordRecentFile"
+              },
+              "/remove-recent-file": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/remove_recent_file.md",
+                "title": "RemoveRecentFile"
+              },
+              "/clear-recent-files": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/clear_recent_files.md",
+                "title": "ClearRecentFiles"
+              },
+              "/get-recovery-journals": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_recovery_journals.md",
+                "title": "GetRecoveryJournals"
+              },
+              "/get-recovery-journal": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_recovery_journal.md",
+                "title": "GetRecoveryJournal"
+              },
+              "/restore-recovery-journal": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/restore_recovery_journal.md",
+                "title": "RestoreRecoveryJournal"
+              },
+              "/discard-recovery-journal": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/discard_recovery_journal.md",
+                "title": "DiscardRecoveryJournal"
+              },
+              "/export-recovery-journal": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/export_recovery_journal.md",
+                "title": "ExportRecoveryJournal"
+              },
               "/set-save-account-id": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/savesession/set_save_account_id.md",

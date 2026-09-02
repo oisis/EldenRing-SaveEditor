@@ -550,9 +550,79 @@ export function makeDiagnosticsPort(overrides: Partial<DiagnosticsPort> = {}): D
 export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): SaveSessionPort {
   return {
     selectSaveFile: () => Promise.resolve(stubSaveSession.sourcePath),
+    selectSaveTarget: () => Promise.resolve("/Users/Tarnished/Elden Ring/ER0000-copy.sl2"),
+    subscribeApplicationCloseRequested: () => () => {},
+    quitApplication: () => Promise.resolve(),
     loadSave: () => Promise.resolve(stubSaveSession),
     getLoadedSave: () => Promise.resolve(stubSaveSession),
     closeSave: () => Promise.resolve(),
+    getOperationHistory: (saveSessionID) =>
+      Promise.resolve({
+        saveSessionID,
+        saveRevision: stubSaveSession.saveRevision,
+        operations: [],
+        undoCount: 0,
+        redoCount: 0,
+      }),
+    undoLastOperation: () => Promise.reject(new Error("no operation to undo")),
+    redoLastOperation: () => Promise.reject(new Error("no operation to redo")),
+    revertOperation: () => Promise.reject(new Error("no operation to revert")),
+    discardChanges: (saveSessionID) =>
+      Promise.resolve({
+        operationID: "operation-discard",
+        operationKind: "discard_changes",
+        saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["save.session"],
+        discardedOperations: 0,
+      }),
+    validateReviewChanges: (saveSessionID, expectedRevision) =>
+      Promise.resolve({
+        saveSessionID,
+        saveRevision: expectedRevision,
+        validationToken: "validation-test",
+        valid: true,
+        warningCount: 0,
+        banRiskCount: 0,
+        criticalCount: 0,
+        stages: [{ stage: "validation", percent: 100 }],
+        issues: [],
+      }),
+    save: (saveSessionID) =>
+      Promise.resolve({
+        operationID: "operation-save",
+        operationKind: "save",
+        saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["save.session"],
+        target: stubSaveSession.sourcePath,
+        warnings: [],
+        retentionNoticeRequired: false,
+      }),
+    saveAs: (saveSessionID, _revision, _token, _warnings, _banRisk, target) =>
+      Promise.resolve({
+        operationID: "operation-save-as",
+        operationKind: "save_as",
+        saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["save.session"],
+        target,
+        warnings: [],
+        retentionNoticeRequired: false,
+      }),
+    getRecentFiles: () => Promise.resolve([]),
+    recordRecentFile: () => Promise.resolve([]),
+    removeRecentFile: () => Promise.resolve([]),
+    clearRecentFiles: () => Promise.resolve(),
+    getRecoveryJournals: () => Promise.resolve([]),
+    getRecoveryJournal: () => Promise.reject(new Error("no recovery journal")),
+    restoreRecoveryJournal: () => Promise.reject(new Error("no recovery journal")),
+    discardRecoveryJournal: () => Promise.resolve(),
+    exportRecoveryJournal: () => Promise.resolve(),
+    getSaveLifecycleSettings: () =>
+      Promise.resolve({ backupRetention: 10, retentionNoticeShown: false }),
+    setSaveLifecycleSettings: (backupRetention) =>
+      Promise.resolve({ backupRetention, retentionNoticeShown: false }),
     // No event ever arrives through the default stub, and unsubscribing is a
     // no-op: a test that cares about events injects its own subscription.
     subscribeSessionChanged: () => () => {},

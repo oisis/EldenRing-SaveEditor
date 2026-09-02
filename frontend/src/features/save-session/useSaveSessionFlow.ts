@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { matchesQueryKeyPattern, queryKeyPatternsForScopes } from "../../application/changedScopes";
 import { useCharacterPort } from "../../application/character/characterClient";
 import { saveCharactersQuery } from "../../application/character/useSaveCharacters";
 import { useDiagnosticsPort } from "../../application/diagnostics/diagnosticsClient";
@@ -9,8 +10,18 @@ import {
   useSaveValidationReports,
 } from "../../application/diagnostics/useSaveValidationReports";
 import { type AppError, toAppError } from "../../application/errors/appError";
+import { queryKeys } from "../../application/queryKeys";
 import { useSaveSessionPort } from "../../application/save-session/saveSessionClient";
-import type { SaveSession } from "../../application/save-session/saveSessionPort";
+import type {
+  MutationReceipt,
+  OperationHistory,
+  RecentFile,
+  RecoveryJournal,
+  ReviewValidationResult,
+  SaveLifecycleResult,
+  SaveLifecycleSettings,
+  SaveSession,
+} from "../../application/save-session/saveSessionPort";
 import { useCloseSave } from "../../application/save-session/useCloseSave";
 import { useLoadSave } from "../../application/save-session/useLoadSave";
 import {
@@ -19,18 +30,6 @@ import {
 } from "../../application/save-session/useSessionChangedSync";
 import { type CharacterSelection, useCharacterSelection } from "../character/useCharacterSelection";
 
-/**
- * What the session flow currently shows.
- *
- *   - `empty`     — no session; the screen offers Open Save;
- *   - `opening`   — the dialog, the load or the validation is still running;
- *   - `cancelled` — the user closed the dialog; nothing was loaded;
- *   - `clean`     — an editable session whose active slots validated clean;
- *   - `warnings`  — an editable session with a persistent banner and a report;
- *   - `blocked`   — the one established refusal: a save with no active slot,
- *                   and no session left behind for it;
- *   - `failed`    — a call failed, so nothing can be claimed about the save.
- */
 export type SaveSessionFlowState =
   | "empty"
   | "opening"
@@ -40,104 +39,68 @@ export type SaveSessionFlowState =
   | "blocked"
   | "failed";
 
-/**
- * Why the flow refused to open an editing session.
- *
- * There is exactly one value, and it is the only refusal this build can
- * establish: the backend reported a character list with no active slot. Any
- * finer reason — a damaged container, an unrecognised format, an unsupported
- * version — would have to be inferred from a failure code that does not
- * currently establish one of those facts. The structured error remains
- * available separately for presentation and diagnostics; this flow never
- * derives a save verdict from its message.
- */
 export type SaveSessionBlockedReason = "no_active_character";
-
-/**
- * What went wrong in the last open or close attempt. It is an outcome of the
- * operation, not a claim about the save file:
- *
- *   - `dialog_failed`       — the host's file dialog itself failed;
- *   - `load_failed`         — LoadSave, or the character list of the candidate
- *                             it created, failed. The structured cause is
- *                             carried separately and no save verdict is inferred;
- *   - `validation_failed`   — a validation report of the candidate could not be
- *                             obtained, or the one that arrived answered about
- *                             another save state. Nothing is claimed about the
- *                             contents of the save;
- *   - `no_active_character` — the backend reported no active slot;
- *   - `unsaved_changes`     — the session holds unsaved changes and Save and
- *                             Discard do not exist yet, so it may not be closed
- *                             or replaced.
- */
 export type SaveSessionFailure =
   | "dialog_failed"
   | "load_failed"
   | "validation_failed"
-  | "no_active_character"
-  | "unsaved_changes";
+  | "no_active_character";
+
+export type PendingSessionAction =
+  | { kind: "open-dialog" }
+  | { kind: "open-recent"; path: string }
+  | { kind: "restore-recovery"; journalID: string }
+  | { kind: "close" }
+  | { kind: "quit" };
 
 export type SaveSessionFlow = {
   state: SaveSessionFlowState;
   blockedReason: SaveSessionBlockedReason | undefined;
-  /** The outcome of the last open or close attempt, or undefined. */
   failure: SaveSessionFailure | undefined;
-  /** Structured cause of the last failed backend call, when one was available. */
   appError: AppError | undefined;
-  /**
-   * A backend session whose CloseSave failed. It stays reachable so the user can
-   * retry: a session dropped from the interface while still open in the backend
-   * would be unreachable for the rest of the run. While it is set, opening
-   * another save is refused and so is closing any *other* session, so a second
-   * failure can never take its place and strand it.
-   */
+  lifecycleError: AppError | undefined;
+  lifecycleMessage: string | undefined;
+  lastSaveResult: SaveLifecycleResult | undefined;
   unclosedSessionID: string | undefined;
-  /** The editable session, or undefined when none is open. */
   session: SaveSession | undefined;
   validation: ReturnType<typeof useSaveValidationReports>;
   selection: CharacterSelection;
-  /** Opens the dialog and, unless it was cancelled, loads what it returned. */
+  history: OperationHistory | undefined;
+  reviewOpen: boolean;
+  reviewValidation: ReviewValidationResult | undefined;
+  pendingSessionAction: PendingSessionAction | undefined;
+  recentFiles: readonly RecentFile[];
+  recoveryJournals: readonly RecoveryJournal[];
+  lifecycleSettings: SaveLifecycleSettings | undefined;
   openSave: () => void;
+  openRecent: (path: string) => void;
   closeSave: () => void;
-  /** Asks the backend again to close the session whose CloseSave failed. */
   retryClose: () => void;
+  openReview: () => void;
+  closeReview: () => void;
+  saveReviewed: (saveAs: boolean, confirmWarnings: boolean, confirmBanRisk: boolean) => void;
+  undo: () => void;
+  redo: () => void;
+  revertOperation: (operationID: string) => void;
+  discardPendingChanges: () => void;
+  savePendingChanges: () => void;
+  cancelPendingAction: () => void;
+  removeRecent: (path: string) => void;
+  clearRecent: () => void;
+  restoreRecovery: (journalID: string) => void;
+  discardRecovery: (journalID: string) => void;
+  exportRecovery: (journalID: string) => void;
+  setBackupRetention: (retention: number) => void;
   isBusy: boolean;
-  /**
-   * The subscription to the backend's committed mutations for the open session.
-   * A mutation caller declares the refresh it already performed from its own
-   * receipt through it, so the matching `session.changed` event does not repeat
-   * that work.
-   */
   sessionSync: SessionChangedSync;
 };
 
 const staleValidationReport = Symbol("stale validation report");
 
 /**
- * The controller of the one save session the application holds.
- *
- * It is a flow controller and nothing more. It performs no validation of its
- * own: it asks the backend to load, asks the backend which slots are active,
- * asks the backend for one report per active slot, and turns those answers into
- * a screen state. It reads no save data, judges no record and repairs nothing.
- *
- * Opening is transactional, and so is replacing. A candidate is loaded, its
- * character list is read, and every active slot is validated in full *before*
- * it becomes the session and before the session it replaces is closed. A failed
- * dialog, a failed load, a save with no active slot, an unobtainable report and
- * a report about another save state therefore all leave the previous session
- * exactly as it was — and, with no previous session, leave no editing session
- * behind at all. The rejected candidate is closed either way. Every step that
- * depends on the previous one is awaited rather than chained through mutation
- * callbacks, because the order is the contract here.
- *
- * A session is only ever forgotten after the backend confirms CloseSave. The
- * cache is dropped by `useCloseSave` on success alone, and an unconfirmed close
- * keeps the identifier reachable instead of leaking a session nothing can name.
- *
- * The character selection stays presentational and stays where it already
- * lives: the slot-0-or-first-active rule belongs to `useCharacterSelection` and
- * is not restated here, and no selection is ever sent to the backend.
+ * Owns the complete desktop session lifecycle. Save state, operation history,
+ * Review Changes, recent files and recovery all stay behind the same backend
+ * port; components only request actions and render authoritative results.
  */
 export function useSaveSessionFlow(): SaveSessionFlow {
   const port = useSaveSessionPort();
@@ -147,22 +110,30 @@ export function useSaveSessionFlow(): SaveSessionFlow {
   const load = useLoadSave();
   const close = useCloseSave();
 
-  const [session, setSession] = useState<SaveSession | undefined>(undefined);
+  const [session, setSession] = useState<SaveSession>();
+  const [cancelled, setCancelled] = useState(false);
+  const [failure, setFailure] = useState<SaveSessionFailure>();
+  const [appError, setAppError] = useState<AppError>();
+  const [lifecycleError, setLifecycleError] = useState<AppError>();
+  const [lifecycleMessage, setLifecycleMessage] = useState<string>();
+  const [lastSaveResult, setLastSaveResult] = useState<SaveLifecycleResult>();
+  const [unclosedSessionID, setUnclosedSessionID] = useState<string>();
+  const [opening, setOpening] = useState(false);
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
+  const [history, setHistory] = useState<OperationHistory>();
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewValidation, setReviewValidation] = useState<ReviewValidationResult>();
+  const [pendingSessionAction, setPendingSessionAction] = useState<PendingSessionAction>();
+  const [recentFiles, setRecentFiles] = useState<readonly RecentFile[]>([]);
+  const [recoveryJournals, setRecoveryJournals] = useState<readonly RecoveryJournal[]>([]);
+  const [lifecycleSettings, setLifecycleSettings] = useState<SaveLifecycleSettings>();
+
   const acceptSessionRefresh = useCallback((refreshed: SaveSession) => {
     setSession((current) =>
       current?.saveSessionID === refreshed.saveSessionID ? refreshed : current,
     );
   }, []);
-  // The single subscription to committed backend mutations, scoped to the one
-  // active session. It is started here and nowhere else, so no component keeps
-  // an invalidation map or a listener of its own.
   const sessionSync = useSessionChangedSync(session?.saveSessionID, acceptSessionRefresh);
-  const [cancelled, setCancelled] = useState(false);
-  const [failure, setFailure] = useState<SaveSessionFailure | undefined>(undefined);
-  const [appError, setAppError] = useState<AppError | undefined>(undefined);
-  const [unclosedSessionID, setUnclosedSessionID] = useState<string | undefined>(undefined);
-  const [opening, setOpening] = useState(false);
-
   const selection = useCharacterSelection(session?.saveSessionID, session?.saveRevision);
   const validation = useSaveValidationReports(
     session?.saveSessionID,
@@ -170,26 +141,54 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     selection.activeCharacters,
   );
 
-  // Stable across renders, so every callback below may depend on them honestly.
   const loadSave = load.mutateAsync;
   const closeSave = close.mutateAsync;
 
-  /**
-   * Asks the backend to close one session and reports whether it confirmed.
-   *
-   * Only a confirmed close retires anything: the cached views go with it
-   * through `useCloseSave`, and the flow forgets the session only when the
-   * closed one is the session it is showing. A refusal records the identifier
-   * instead, so the user sees the failure and can ask again.
-   */
+  const refreshHostState = useCallback(async () => {
+    const [recent, recovery, settings] = await Promise.allSettled([
+      port.getRecentFiles(),
+      port.getRecoveryJournals(),
+      port.getSaveLifecycleSettings(),
+    ]);
+    if (recent.status === "fulfilled") setRecentFiles(recent.value);
+    if (recovery.status === "fulfilled") setRecoveryJournals(recovery.value);
+    if (settings.status === "fulfilled") setLifecycleSettings(settings.value);
+    const failure = [recent, recovery, settings].find(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
+    if (failure !== undefined) setLifecycleError(toAppError(failure.reason));
+  }, [port]);
+
+  useEffect(() => {
+    void refreshHostState().catch((reason) => setLifecycleError(toAppError(reason)));
+  }, [refreshHostState]);
+
+  const historySessionID = session?.saveSessionID;
+  const historySaveRevision = session?.saveRevision;
+  useEffect(() => {
+    if (historySessionID === undefined || historySaveRevision === undefined) {
+      setHistory(undefined);
+      return;
+    }
+    let active = true;
+    void port
+      .getOperationHistory(historySessionID)
+      .then((result) => {
+        if (active && result.saveSessionID === historySessionID) setHistory(result);
+      })
+      .catch((reason) => {
+        if (active) setLifecycleError(toAppError(reason));
+      });
+    return () => {
+      active = false;
+    };
+  }, [historySaveRevision, historySessionID, port]);
+
   const retire = useCallback(
     async (saveSessionID: string): Promise<boolean> => {
       try {
         await closeSave(saveSessionID);
       } catch (reason) {
-        // The first unconfirmed close keeps the slot. A later failure may not
-        // take its place: overwriting it would leave the earlier session open
-        // in the backend with nothing left able to name it.
         setUnclosedSessionID((pending) => pending ?? saveSessionID);
         setAppError(toAppError(reason));
         return false;
@@ -201,181 +200,321 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     [closeSave],
   );
 
-  const isBusy = opening || close.isPending;
-  // Fail-closed: an unconfirmed close is unresolved state about a session that
-  // is still open in the backend, so no further session operation may run
-  // beside it. Only the retry of that exact session stays available.
-  const cleanupPending = unclosedSessionID !== undefined;
+  const validateCandidate = useCallback(
+    async (candidate: SaveSession): Promise<void> => {
+      const characters = await queryClient.fetchQuery(
+        saveCharactersQuery(characterPort, candidate.saveSessionID, candidate.saveRevision),
+      );
+      const activeCharacters = characters.characters.filter((character) => character.active);
+      if (activeCharacters.length === 0) throw new Error("no_active_character");
+      const reports = await Promise.all(
+        activeCharacters.map((character) =>
+          queryClient.fetchQuery(
+            saveValidationReportQuery(
+              diagnosticsPort,
+              candidate.saveSessionID,
+              candidate.saveRevision,
+              character.characterID,
+            ),
+          ),
+        ),
+      );
+      const aggregate = aggregateValidationReports(
+        reports,
+        candidate.saveSessionID,
+        candidate.saveRevision,
+        activeCharacters.map((character) => character.characterID),
+      );
+      if (aggregate.stale) throw staleValidationReport;
+    },
+    [characterPort, diagnosticsPort, queryClient],
+  );
 
-  const openSave = useCallback(() => {
-    if (isBusy || cleanupPending) {
-      return;
-    }
-    // Until Save and Discard exist there is no safe way to part with unsaved
-    // work, so the flow refuses instead of choosing one for the user. It never
-    // discards anything by itself.
-    if (session?.unsavedChanges === true) {
-      setAppError(undefined);
-      setFailure("unsaved_changes");
-      return;
-    }
-
-    const replaced = session?.saveSessionID;
-    setCancelled(false);
-    setFailure(undefined);
-    setAppError(undefined);
-    setOpening(true);
-
-    void (async () => {
+  const acceptCandidate = useCallback(
+    async (candidate: SaveSession, replaced: string | undefined) => {
       try {
+        await validateCandidate(candidate);
+      } catch (reason) {
+        await retire(candidate.saveSessionID);
+        if (reason instanceof Error && reason.message === "no_active_character") {
+          setFailure("no_active_character");
+        } else {
+          setFailure("validation_failed");
+          setAppError(reason === staleValidationReport ? undefined : toAppError(reason));
+        }
+        return;
+      }
+      setSession(candidate);
+      try {
+        setRecentFiles(await port.recordRecentFile(candidate.saveSessionID));
+      } catch (reason) {
+        setLifecycleError(toAppError(reason));
+      }
+      if (replaced !== undefined && replaced !== candidate.saveSessionID) await retire(replaced);
+    },
+    [port, retire, validateCandidate],
+  );
+
+  const openPath = useCallback(
+    async (source: string) => {
+      const replaced = session?.saveSessionID;
+      let candidate: SaveSession;
+      try {
+        candidate = await loadSave({ source, expectedPlatform: "", sourceKind: "local" });
+      } catch (reason) {
+        setFailure("load_failed");
+        setAppError(toAppError(reason));
+        return;
+      }
+      await acceptCandidate(candidate, replaced);
+    },
+    [acceptCandidate, loadSave, session?.saveSessionID],
+  );
+
+  const executeAction = useCallback(
+    async (action: PendingSessionAction) => {
+      setCancelled(false);
+      setFailure(undefined);
+      setAppError(undefined);
+      setLifecycleError(undefined);
+      setOpening(true);
+      try {
+        if (action.kind === "close") {
+          if (session !== undefined) await retire(session.saveSessionID);
+          return;
+        }
+        if (action.kind === "quit") {
+          await port.quitApplication();
+          return;
+        }
+        if (action.kind === "restore-recovery") {
+          const replaced = session?.saveSessionID;
+          let candidate: SaveSession;
+          try {
+            candidate = await port.restoreRecoveryJournal(action.journalID);
+          } catch (reason) {
+            setLifecycleError(toAppError(reason));
+            return;
+          }
+          await acceptCandidate(candidate, replaced);
+          await refreshHostState();
+          return;
+        }
+        if (action.kind === "open-recent") {
+          await openPath(action.path);
+          return;
+        }
         let source: string;
         try {
           source = await port.selectSaveFile();
         } catch (reason) {
-          // The dialog failed, so nothing was chosen and nothing was called.
-          // The open session is untouched and stays fully usable.
           setFailure("dialog_failed");
           setAppError(toAppError(reason));
           return;
         }
-
-        // Cancelling is an ordinary outcome: nothing is loaded for it, so the
-        // backend is never called and the open session stays exactly as it was.
         if (source === "") {
           setCancelled(true);
           return;
         }
-
-        let candidate: SaveSession;
-        try {
-          candidate = await loadSave(
-            // The path goes to the backend exactly as the host reported it, and
-            // a natively chosen file is a durable local one.
-            { source, expectedPlatform: "", sourceKind: "local" },
-          );
-        } catch (reason) {
-          // The call failed and says nothing more than that. No session was
-          // created, and the previous one is neither closed nor hidden.
-          setFailure("load_failed");
-          setAppError(toAppError(reason));
-          return;
-        }
-
-        // The character list decides which slots exist and which of them are
-        // active. A save with no active slot is critical in this build and must
-        // not leave an editing session open, and finding that out must not cost
-        // the session the user already had.
-        let activeCharacters: readonly { characterID: number }[] = [];
-        try {
-          const characters = await queryClient.fetchQuery(
-            saveCharactersQuery(characterPort, candidate.saveSessionID, candidate.saveRevision),
-          );
-          activeCharacters = characters.characters.filter((character) => character.active);
-        } catch (reason) {
-          await retire(candidate.saveSessionID);
-          setFailure("load_failed");
-          setAppError(toAppError(reason));
-          return;
-        }
-
-        if (activeCharacters.length === 0) {
-          await retire(candidate.saveSessionID);
-          setFailure("no_active_character");
-          return;
-        }
-
-        // The full validation is part of opening, not of showing what was
-        // opened: the candidate only becomes the session once every active slot
-        // has a report that belongs to this exact session, revision and slot,
-        // and the previous session is still the working one throughout. The
-        // same query, the same identity rule and the same aggregation the
-        // display uses are applied here; the flow restates none of them.
-        try {
-          const reports = await Promise.all(
-            activeCharacters.map((character) =>
-              queryClient.fetchQuery(
-                saveValidationReportQuery(
-                  diagnosticsPort,
-                  candidate.saveSessionID,
-                  candidate.saveRevision,
-                  character.characterID,
-                ),
-              ),
-            ),
-          );
-          const aggregate = aggregateValidationReports(
-            reports,
-            candidate.saveSessionID,
-            candidate.saveRevision,
-            activeCharacters.map((character) => character.characterID),
-          );
-          // A report about another save state is no verdict about this one, so
-          // the candidate is refused exactly as it is for a report that never
-          // arrived. What is left is `clean` or `warnings`, and both open.
-          if (aggregate.stale) {
-            throw staleValidationReport;
-          }
-        } catch (reason) {
-          await retire(candidate.saveSessionID);
-          setFailure("validation_failed");
-          setAppError(reason === staleValidationReport ? undefined : toAppError(reason));
-          return;
-        }
-
-        // Only now, with the candidate fully loaded and fully validated, does it
-        // become the session and the replaced one get closed. A refused close is
-        // recorded by `retire` and stays visible: the swap is not reported as
-        // complete just because the new session opened.
-        setSession(candidate);
-        if (replaced !== undefined && replaced !== candidate.saveSessionID) {
-          await retire(replaced);
-        }
+        await openPath(source);
       } finally {
         setOpening(false);
       }
-    })();
-  }, [
-    isBusy,
-    cleanupPending,
-    session,
-    port,
-    loadSave,
-    queryClient,
-    characterPort,
-    diagnosticsPort,
-    retire,
-  ]);
+    },
+    [acceptCandidate, openPath, port, refreshHostState, retire, session],
+  );
 
-  const closeSaveSession = useCallback(() => {
-    if (session === undefined || isBusy) {
-      return;
-    }
-    // An unconfirmed close of *another* session blocks this one: resolving that
-    // cleanup comes first. Closing the session that is itself unconfirmed is the
-    // retry, so it stays available.
-    if (unclosedSessionID !== undefined && unclosedSessionID !== session.saveSessionID) {
-      return;
-    }
-    if (session.unsavedChanges) {
-      setFailure("unsaved_changes");
-      return;
-    }
-    setFailure(undefined);
-    setAppError(undefined);
-    void retire(session.saveSessionID);
-  }, [session, isBusy, unclosedSessionID, retire]);
+  const cleanupPending = unclosedSessionID !== undefined;
+  const isBusy = opening || close.isPending || lifecycleBusy;
+
+  const requestAction = useCallback(
+    (action: PendingSessionAction) => {
+      if (isBusy) return;
+      if (cleanupPending) {
+        if (
+          action.kind === "close" &&
+          session !== undefined &&
+          unclosedSessionID === session.saveSessionID
+        ) {
+          void executeAction(action);
+        }
+        return;
+      }
+      if (session?.unsavedChanges) {
+        setPendingSessionAction(action);
+        return;
+      }
+      void executeAction(action);
+    },
+    [cleanupPending, executeAction, isBusy, session, unclosedSessionID],
+  );
+
+  useEffect(
+    () => port.subscribeApplicationCloseRequested(() => requestAction({ kind: "quit" })),
+    [port, requestAction],
+  );
+
+  const refreshAfterMutation = useCallback(
+    async (receipt: MutationReceipt): Promise<SaveSession> => {
+      sessionSync.noteAppliedMutation(receipt);
+      const patterns = queryKeyPatternsForScopes(receipt.saveSessionID, receipt.changedScopes);
+      if (patterns.length > 0) {
+        await queryClient.invalidateQueries({
+          predicate: (query) =>
+            patterns.some((pattern) => matchesQueryKeyPattern(query.queryKey, pattern)),
+        });
+      }
+      const refreshed = await port.getLoadedSave(receipt.saveSessionID);
+      queryClient.setQueryData(queryKeys.loadedSave(receipt.saveSessionID), refreshed);
+      setSession(refreshed);
+      setHistory(await port.getOperationHistory(receipt.saveSessionID));
+      setReviewValidation(undefined);
+      return refreshed;
+    },
+    [port, queryClient, sessionSync],
+  );
+
+  const runHistoryMutation = useCallback(
+    async (mutation: (saveSessionID: string, revision: string) => Promise<MutationReceipt>) => {
+      if (session === undefined || lifecycleBusy) return;
+      setLifecycleBusy(true);
+      setLifecycleError(undefined);
+      setLifecycleMessage(undefined);
+      setLastSaveResult(undefined);
+      try {
+        const refreshed = await refreshAfterMutation(
+          await mutation(session.saveSessionID, session.saveRevision),
+        );
+        if (reviewOpen) {
+          setReviewValidation(
+            await port.validateReviewChanges(refreshed.saveSessionID, refreshed.saveRevision),
+          );
+        }
+      } catch (reason) {
+        setLifecycleError(toAppError(reason));
+      } finally {
+        setLifecycleBusy(false);
+      }
+    },
+    [lifecycleBusy, port, refreshAfterMutation, reviewOpen, session],
+  );
+
+  const openReview = useCallback(() => {
+    if (session === undefined || lifecycleBusy) return;
+    setReviewOpen(true);
+    setReviewValidation(undefined);
+    setLifecycleError(undefined);
+    setLifecycleBusy(true);
+    void Promise.all([
+      port.getOperationHistory(session.saveSessionID),
+      port.validateReviewChanges(session.saveSessionID, session.saveRevision),
+    ])
+      .then(([nextHistory, result]) => {
+        setHistory(nextHistory);
+        setReviewValidation(result);
+      })
+      .catch((reason) => setLifecycleError(toAppError(reason)))
+      .finally(() => setLifecycleBusy(false));
+  }, [lifecycleBusy, port, session]);
+
+  const saveReviewed = useCallback(
+    (saveAs: boolean, confirmWarnings: boolean, confirmBanRisk: boolean) => {
+      if (
+        session === undefined ||
+        lifecycleBusy ||
+        reviewValidation?.valid !== true ||
+        reviewValidation.validationToken === undefined ||
+        reviewValidation.saveSessionID !== session.saveSessionID ||
+        reviewValidation.saveRevision !== session.saveRevision
+      )
+        return;
+      const validationToken = reviewValidation.validationToken;
+      setLifecycleBusy(true);
+      setLifecycleError(undefined);
+      setLifecycleMessage(undefined);
+      setLastSaveResult(undefined);
+      void (async () => {
+        try {
+          let result: SaveLifecycleResult;
+          if (saveAs) {
+            const target = await port.selectSaveTarget(fileNameFromPath(session.sourcePath));
+            if (target === "") return;
+            result = await port.saveAs(
+              session.saveSessionID,
+              session.saveRevision,
+              validationToken,
+              confirmWarnings,
+              confirmBanRisk,
+              target,
+            );
+          } else {
+            result = await port.save(
+              session.saveSessionID,
+              session.saveRevision,
+              validationToken,
+              confirmWarnings,
+              confirmBanRisk,
+            );
+          }
+          await refreshAfterMutation(result);
+          try {
+            setRecentFiles(await port.recordRecentFile(result.saveSessionID));
+          } catch (reason) {
+            setLifecycleError(toAppError(reason));
+          }
+          setReviewOpen(false);
+          setLastSaveResult(result);
+          setLifecycleMessage(result.warnings.length > 0 ? result.warnings.join(" ") : undefined);
+          const nextAction = pendingSessionAction;
+          setPendingSessionAction(undefined);
+          await refreshHostState();
+          if (nextAction !== undefined) await executeAction(nextAction);
+        } catch (reason) {
+          setLifecycleError(toAppError(reason));
+        } finally {
+          setLifecycleBusy(false);
+        }
+      })();
+    },
+    [
+      executeAction,
+      lifecycleBusy,
+      pendingSessionAction,
+      port,
+      refreshAfterMutation,
+      refreshHostState,
+      reviewValidation,
+      session,
+    ],
+  );
+
+  const discardPendingChanges = useCallback(() => {
+    if (session === undefined || pendingSessionAction === undefined || lifecycleBusy) return;
+    const action = pendingSessionAction;
+    setLifecycleBusy(true);
+    setLifecycleError(undefined);
+    void (async () => {
+      try {
+        const receipt = await port.discardChanges(session.saveSessionID, session.saveRevision);
+        await refreshAfterMutation(receipt);
+        setPendingSessionAction(undefined);
+        await executeAction(action);
+      } catch (reason) {
+        setLifecycleError(toAppError(reason));
+      } finally {
+        setLifecycleBusy(false);
+      }
+    })();
+  }, [executeAction, lifecycleBusy, pendingSessionAction, port, refreshAfterMutation, session]);
 
   const retryClose = useCallback(() => {
-    if (unclosedSessionID === undefined || isBusy) {
-      return;
-    }
+    if (unclosedSessionID === undefined || isBusy) return;
     setAppError(undefined);
     void retire(unclosedSessionID);
-  }, [unclosedSessionID, isBusy, retire]);
+  }, [isBusy, retire, unclosedSessionID]);
 
   const blockedReason: SaveSessionBlockedReason | undefined =
     session === undefined && failure === "no_active_character" ? "no_active_character" : undefined;
-
   const state: SaveSessionFlowState =
     session === undefined
       ? blockedReason !== undefined
@@ -402,18 +541,71 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     blockedReason,
     failure,
     appError,
+    lifecycleError,
+    lifecycleMessage,
+    lastSaveResult,
     unclosedSessionID,
     session,
     validation,
     selection,
-    openSave,
-    closeSave: closeSaveSession,
+    history,
+    reviewOpen,
+    reviewValidation,
+    pendingSessionAction,
+    recentFiles,
+    recoveryJournals,
+    lifecycleSettings,
+    openSave: () => requestAction({ kind: "open-dialog" }),
+    openRecent: (path) => requestAction({ kind: "open-recent", path }),
+    closeSave: () => requestAction({ kind: "close" }),
     retryClose,
+    openReview,
+    closeReview: () => setReviewOpen(false),
+    saveReviewed,
+    undo: () => void runHistoryMutation(port.undoLastOperation),
+    redo: () => void runHistoryMutation(port.redoLastOperation),
+    revertOperation: (operationID) =>
+      void runHistoryMutation((id, revision) => port.revertOperation(id, operationID, revision)),
+    discardPendingChanges,
+    savePendingChanges: openReview,
+    cancelPendingAction: () => setPendingSessionAction(undefined),
+    removeRecent: (path) =>
+      void port
+        .removeRecentFile(path)
+        .then(setRecentFiles)
+        .catch((reason) => setLifecycleError(toAppError(reason))),
+    clearRecent: () =>
+      void port
+        .clearRecentFiles()
+        .then(() => setRecentFiles([]))
+        .catch((reason) => setLifecycleError(toAppError(reason))),
+    restoreRecovery: (journalID) => requestAction({ kind: "restore-recovery", journalID }),
+    discardRecovery: (journalID) =>
+      void port
+        .discardRecoveryJournal(journalID)
+        .then(refreshHostState)
+        .catch((reason) => setLifecycleError(toAppError(reason))),
+    exportRecovery: (journalID) => {
+      void (async () => {
+        try {
+          const target = await port.selectSaveTarget(`${journalID}.saveforge-recovery.json`);
+          if (target !== "") await port.exportRecoveryJournal(journalID, target);
+        } catch (reason) {
+          setLifecycleError(toAppError(reason));
+        }
+      })();
+    },
+    setBackupRetention: (retention) =>
+      void port
+        .setSaveLifecycleSettings(retention)
+        .then(setLifecycleSettings)
+        .catch((reason) => setLifecycleError(toAppError(reason))),
     isBusy,
-    // The flow owns the active session, so it is where the backend's committed
-    // mutations are subscribed to. Handing the notifier out lets a mutation
-    // caller declare the refresh it already did from its own receipt, so the
-    // matching event never repeats it.
     sessionSync,
   };
+}
+
+function fileNameFromPath(path: string): string {
+  const parts = path.split(/[\\/]/);
+  return parts.at(-1) || "ER0000.sl2";
 }

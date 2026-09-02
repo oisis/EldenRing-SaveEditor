@@ -72,13 +72,23 @@ func (engine *Engine) WriteSave(
 		return WriteSaveResult{}, fmt.Errorf("cannot write save session %q: %w", saveSessionID, err)
 	}
 
-	loaded.snapshot = &codec{data: candidate}
+	loaded.snapshot = &codec{data: append([]byte(nil), candidate...)}
+	loaded.baseline = &codec{data: append([]byte(nil), candidate...)}
+	loaded.sourceFingerprint = fingerprintBytes(candidate)
+	loaded.operations = nil
+	loaded.redo = nil
 	loaded.session.dirty = false
 	// The persisted file is the new baseline, so the undo point of the last
 	// mutation is retired together with the revision it belonged to. A failed
 	// write returns above and leaves it untouched.
 	loaded.session.undo = nil
+	loaded.session.reviewAuthorization = nil
+	// WriteSave is retained as the low-level explicit-target endpoint. The full
+	// Save/Save As lifecycle reports recovery cleanup warnings, while this legacy
+	// result has no warning surface; cleanup is therefore best-effort here.
+	_ = engine.removeRecoveryJournal(saveSessionID)
 	receipt := pending.receipt(saveSessionID, loaded.session.advanceRevision())
+	loaded.baselineRevision = receipt.SaveRevision
 	newRevision := receipt.SaveRevision
 	loaded.session.appendDiagnosticRecord(
 		engine.nowUTC(),

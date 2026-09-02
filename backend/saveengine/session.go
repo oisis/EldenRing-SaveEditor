@@ -67,6 +67,9 @@ type Session struct {
 	// undo.go. It starts nil, holds at most one character mutation, and is
 	// never serialized.
 	undo *undoPoint
+	// reviewAuthorization is the last successful Review Changes validation. It
+	// is bound to one exact revision and is invalidated by every later mutation.
+	reviewAuthorization *reviewAuthorization
 	// journal is the private ring buffer of diagnostic records for this session.
 	journal []DiagnosticRecord
 	// journalSeq numbers the diagnostic records appended to this session.
