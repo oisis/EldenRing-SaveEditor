@@ -8,8 +8,10 @@ import {world} from '../models';
 import {equipment} from '../models';
 import {schema} from '../models';
 import {catalog} from '../models';
+import {network} from '../models';
 import {diagnostics} from '../models';
 import {character} from '../models';
+import {gamecatalog} from '../models';
 
 export function AddItemsToContainers(arg1:string,arg2:number,arg3:Array<inventory.AddItemsRequestEntry>,arg4:boolean,arg5:string):Promise<saveengine.AddItemsToContainersResult>;
 
@@ -68,6 +70,10 @@ export function GetItemVariants(arg1:string,arg2:string):Promise<catalog.GetItem
 export function GetLoadedSave(arg1:string):Promise<saveengine.SessionInfo>;
 
 export function GetMapRegions(arg1:string,arg2:number):Promise<world.GetMapRegionsResult>;
+
+export function GetNetworkPresets(arg1:string):Promise<network.GetNetworkPresetsResult>;
+
+export function GetNetworkSettings(arg1:string):Promise<network.GetNetworkSettingsResult>;
 
 export function GetOperationHistory(arg1:string):Promise<saveengine.OperationHistory>;
 
@@ -182,6 +188,8 @@ export function SetGestureUnlocked(arg1:string,arg2:number,arg3:string,arg4:stri
 export function SetGraceVisited(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetGraceVisitedResult>;
 
 export function SetMapRegionRevealed(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetMapRegionRevealedResult>;
+
+export function SetNetworkSettings(arg1:string,arg2:gamecatalog.NetworkParamValues,arg3:string):Promise<saveengine.SetNetworkSettingsResult>;
 
 export function SetOwnedItemQuantity(arg1:string,arg2:number,arg3:string,arg4:number,arg5:string):Promise<saveengine.SetOwnedItemQuantityResult>;
 

@@ -118,6 +118,14 @@ export function GetMapRegions(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetMapRegions'](arg1, arg2);
 }
 
+export function GetNetworkPresets(arg1) {
+  return window['go']['desktop']['Bridge']['GetNetworkPresets'](arg1);
+}
+
+export function GetNetworkSettings(arg1) {
+  return window['go']['desktop']['Bridge']['GetNetworkSettings'](arg1);
+}
+
 export function GetOperationHistory(arg1) {
   return window['go']['desktop']['Bridge']['GetOperationHistory'](arg1);
 }
@@ -344,6 +352,10 @@ export function SetGraceVisited(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function SetMapRegionRevealed(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['desktop']['Bridge']['SetMapRegionRevealed'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetNetworkSettings(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['SetNetworkSettings'](arg1, arg2, arg3);
 }
 
 export function SetOwnedItemQuantity(arg1, arg2, arg3, arg4, arg5) {

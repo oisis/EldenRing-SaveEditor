@@ -15,6 +15,8 @@ import {
   GetInventory,
   GetItemVariants,
   GetLoadedSave,
+  GetNetworkPresets,
+  GetNetworkSettings,
   GetPhysickMixture,
   GetPouchItems,
   GetQuickItems,
@@ -34,6 +36,7 @@ import {
   SetCharacterStartingClass,
   SetCharacterStats,
   SetFavoritePreset,
+  SetNetworkSettings,
 } from "../../../wailsjs/go/desktop/Bridge";
 import {
   appearance,
@@ -42,6 +45,7 @@ import {
   character,
   equipment,
   inventory,
+  network,
   saveengine,
   world,
 } from "../../../wailsjs/go/models";
@@ -68,6 +72,8 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetInventory: vi.fn(),
   GetItemVariants: vi.fn(),
   GetLoadedSave: vi.fn(),
+  GetNetworkPresets: vi.fn(),
+  GetNetworkSettings: vi.fn(),
   GetPhysickMixture: vi.fn(),
   GetPouchItems: vi.fn(),
   GetQuickItems: vi.fn(),
@@ -87,10 +93,14 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   SetCharacterStartingClass: vi.fn(),
   SetCharacterStats: vi.fn(),
   SetFavoritePreset: vi.fn(),
+  SetNetworkSettings: vi.fn(),
 }));
 
 const getApplicationInfo = vi.mocked(GetApplicationInfo);
 const getLoadedSave = vi.mocked(GetLoadedSave);
+const getNetworkPresets = vi.mocked(GetNetworkPresets);
+const getNetworkSettings = vi.mocked(GetNetworkSettings);
+const setNetworkSettings = vi.mocked(SetNetworkSettings);
 const loadSave = vi.mocked(LoadSave);
 const closeSave = vi.mocked(CloseSave);
 const selectSaveFile = vi.mocked(SelectSaveFile);
@@ -2129,5 +2139,117 @@ describe("wails World adapter", () => {
     expect((failure as Error).message).toBe(bridgeFailureCode);
     expect(toAppError(failure).code).toBe(bridgeFailureCode);
     expect(JSON.stringify(toAppError(failure))).not.toContain("partially-resolved");
+  });
+
+  describe("Network desktop bridge", () => {
+    const validParams = {
+      maxBreakInTargetListCount: 5,
+      breakInRequestIntervalTimeSec: 30,
+      breakInRequestTimeOutSec: 20,
+      breakInRequestAreaCount: 5,
+      summonTimeoutTime: 45,
+      reloadSignIntervalTime2: 60,
+      reloadSignTotalCount: 20,
+      reloadSignCellCount: 10,
+      updateSignIntervalTime: 30,
+      singGetMax: 32,
+      signDownloadSpan: 30,
+      signUpdateSpan: 60,
+      reloadVisitListCoolTime: 20,
+      maxCoopBlueSummonCount: 2,
+      maxVisitListCount: 5,
+      reloadSearchCoopBlueMin: 30,
+      reloadSearchCoopBlueMax: 180,
+      allAreaSearchRateCoopBlue: 30,
+      allAreaSearchRateVsBlue: 30,
+      visitorListMax: 10,
+      visitorTimeOutTime: 60,
+      visitorDownloadSpan: 60,
+    };
+
+    it("fetches network settings and validates closed 22-field model", async () => {
+      getNetworkSettings.mockResolvedValue(
+        network.GetNetworkSettingsResult.createFrom({
+          saveSessionID: "session-1",
+          saveRevision: "3",
+          parameters: validParams,
+        }),
+      );
+
+      const result = await wailsDesktopBridge.getNetworkSettings("session-1");
+      expect(result).toEqual({
+        saveSessionID: "session-1",
+        saveRevision: "3",
+        parameters: validParams,
+      });
+      expect(getNetworkSettings).toHaveBeenCalledWith("session-1");
+    });
+
+    it("rejects incomplete or non-numeric network settings response", async () => {
+      const brokenParams = { ...validParams, singGetMax: "invalid" as unknown as number };
+      getNetworkSettings.mockResolvedValue(
+        network.GetNetworkSettingsResult.createFrom({
+          saveSessionID: "session-1",
+          saveRevision: "3",
+          parameters: brokenParams,
+        }),
+      );
+
+      const failure = await wailsDesktopBridge
+        .getNetworkSettings("session-1")
+        .catch((err) => err);
+      expect((failure as Error).message).toBe(bridgeFailureCode);
+
+      const infiniteParams = { ...validParams, singGetMax: Number.POSITIVE_INFINITY };
+      getNetworkSettings.mockResolvedValue(
+        network.GetNetworkSettingsResult.createFrom({
+          saveSessionID: "session-1",
+          saveRevision: "3",
+          parameters: infiniteParams,
+        }),
+      );
+
+      const infiniteFailure = await wailsDesktopBridge
+        .getNetworkSettings("session-1")
+        .catch((err) => err);
+      expect((infiniteFailure as Error).message).toBe(bridgeFailureCode);
+    });
+
+    it("fetches network presets with exact ID", async () => {
+      getNetworkPresets.mockResolvedValue(
+        network.GetNetworkPresetsResult.createFrom({
+          presets: [{ id: "vanilla", parameters: validParams }],
+        }),
+      );
+
+      const result = await wailsDesktopBridge.getNetworkPresets("");
+      expect(result.presets).toHaveLength(1);
+      expect(result.presets[0].id).toBe("vanilla");
+      expect(getNetworkPresets).toHaveBeenCalledWith("");
+    });
+
+    it("sets network settings and preserves receipt and settings", async () => {
+      setNetworkSettings.mockResolvedValue(
+        saveengine.SetNetworkSettingsResult.createFrom({
+          operationID: "op-1",
+          operationKind: "set_network_settings",
+          saveSessionID: "session-1",
+          saveRevision: "4",
+          changedScopes: ["network"],
+          networkSettings: validParams,
+        }),
+      );
+
+      const result = await wailsDesktopBridge.setNetworkSettings("session-1", validParams, "3");
+      expect(result).toEqual({
+        operationID: "op-1",
+        operationKind: "set_network_settings",
+        saveSessionID: "session-1",
+        saveRevision: "4",
+        changedScopes: ["network"],
+        networkSettings: validParams,
+      });
+      expect(setNetworkSettings).toHaveBeenCalledWith("session-1", validParams, "3");
+    });
   });
 });

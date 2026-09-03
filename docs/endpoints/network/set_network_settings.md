@@ -14,7 +14,7 @@ operation.
 | Kind | Mutation |
 | Domain | `network` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `PUT /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer, registered only without `-allow-external-bind` |
+| Transport status | transport-exposed — `PUT /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer, registered only without `-allow-external-bind`. Reached by the Wails bridge and the frontend Advanced workspace. |
 | Implementation source | [../../../backend/endpoints/network/set_network_settings.go](../../../backend/endpoints/network/set_network_settings.go) |
 | Test source | [../../../backend/endpoints/network/set_network_settings_test.go](../../../backend/endpoints/network/set_network_settings_test.go) |
 | GameCatalog access | none; `gamecatalog.NetworkParamValues` is only the shared typed model |
@@ -190,8 +190,8 @@ PUT /api/v1/save-sessions/{saveSessionID}/network-settings
 
 The route is available only in the explorer's local loopback mode. Success
 returns `200`; malformed JSON, validation failures, revision conflicts, unknown
-sessions and unsafe or malformed save layouts return `400`. The route has no
-Wails, frontend or CLI binding.
+sessions and unsafe or malformed save layouts return `400`. The endpoint is also
+exposed through the Wails desktop bridge for the frontend `Advanced` workspace.
 
 ## Local verification
 

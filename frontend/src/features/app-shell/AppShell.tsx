@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { type ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import appIconURL from "../../../../build/appicon.png";
 import { useItemPreferences } from "../../application/preferences/itemPreferences";
 import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
@@ -14,6 +14,7 @@ import { Select } from "../../ui/components/Select/Select";
 import { message } from "../../ui/patterns/panel.css";
 import type { ThemeName } from "../../ui/tokens/themes.css";
 import { themeNames } from "../../ui/tokens/themes.css";
+import { AdvancedPanel } from "../advanced/AdvancedPanel";
 import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
 import { CharacterPanel } from "../character/CharacterPanel";
 import { CharacterSidebar } from "../character/CharacterSidebar";
@@ -44,7 +45,6 @@ import {
   operationGlyph,
   operations,
   operationText,
-  placeholder,
   screen,
   shell,
   sidebar,
@@ -326,9 +326,14 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           </section>
         )}
         {section === "advanced" && (
-          <UnavailableScreen>
-            <Trans>Advanced save features are not available yet.</Trans>
-          </UnavailableScreen>
+          <section aria-label={t`Advanced`} className={screen}>
+            <AdvancedPanel
+              saveSessionID={session?.saveSessionID}
+              saveRevision={session?.saveRevision}
+              applyMutationReceipt={flow.applyMutationReceipt}
+              sessionBusy={flow.isBusy}
+            />
+          </section>
         )}
         {section === "tools" && (
           <section aria-label={t`Tools`} className={screen}>
@@ -465,14 +470,6 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
       <PendingChangesDialog flow={flow} />
       <RecoveryJournalDialog flow={flow} />
     </div>
-  );
-}
-
-function UnavailableScreen({ children }: { children: ReactNode }) {
-  return (
-    <Card className={placeholder}>
-      <p className={message}>{children}</p>
-    </Card>
   );
 }
 

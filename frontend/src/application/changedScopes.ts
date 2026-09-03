@@ -107,8 +107,7 @@ export const changedScopeQueryKeyPatterns: Record<
   // one pattern. The frontend cannot tell which of the thirteen views a given
   // flag belongs to, and guessing would leave a stale group on screen.
   "world.flags": (id) => [characterView(id, "world")],
-  // No Network getter is wired into the frontend yet.
-  network: () => [],
+  network: (id) => [["save-session", id, "network-settings"]],
   favorites: (id) => [["save-session", id, "favorite-presets"]],
   "diagnostics.report": (id) => [characterView(id, "validation-report")],
 };

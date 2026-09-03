@@ -64,6 +64,13 @@ import type {
 } from "../application/save-session/saveSessionPort";
 import { SettingsPortProvider } from "../application/settings/settingsClient";
 import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
+import { NetworkPortProvider } from "../application/network/networkClient";
+import type {
+  NetworkPort,
+  NetworkPresetsResult,
+  NetworkSettingsSnapshot,
+  SetNetworkSettingsResult,
+} from "../application/network/networkPort";
 import { WorldPortProvider } from "../application/world/worldClient";
 import type {
   WorldMutationReceipt,
@@ -1059,6 +1066,193 @@ export function makeFavoritesPort(overrides: Partial<FavoritesPort> = {}): Favor
   };
 }
 
+export const stubNetworkParamValues = {
+  maxBreakInTargetListCount: 5,
+  breakInRequestIntervalTimeSec: 30,
+  breakInRequestTimeOutSec: 20,
+  breakInRequestAreaCount: 5,
+  summonTimeoutTime: 45,
+  reloadSignIntervalTime2: 60,
+  reloadSignTotalCount: 20,
+  reloadSignCellCount: 10,
+  updateSignIntervalTime: 30,
+  singGetMax: 32,
+  signDownloadSpan: 30,
+  signUpdateSpan: 60,
+  reloadVisitListCoolTime: 20,
+  maxCoopBlueSummonCount: 2,
+  maxVisitListCount: 5,
+  reloadSearchCoopBlueMin: 30,
+  reloadSearchCoopBlueMax: 180,
+  allAreaSearchRateCoopBlue: 30,
+  allAreaSearchRateVsBlue: 30,
+  visitorListMax: 10,
+  visitorTimeOutTime: 60,
+  visitorDownloadSpan: 60,
+};
+
+export const stubNetworkSettingsSnapshot: NetworkSettingsSnapshot = {
+  saveSessionID: "session-1",
+  saveRevision: "3",
+  parameters: stubNetworkParamValues,
+};
+
+export const stubNetworkPresetsResult: NetworkPresetsResult = {
+  presets: [
+    { id: "vanilla", parameters: stubNetworkParamValues },
+    {
+      id: "faster-reds",
+      parameters: {
+        ...stubNetworkParamValues,
+        maxBreakInTargetListCount: 8,
+        breakInRequestIntervalTimeSec: 12,
+        breakInRequestTimeOutSec: 8,
+        breakInRequestAreaCount: 8,
+      },
+    },
+    {
+      id: "aggressive-reds",
+      parameters: {
+        ...stubNetworkParamValues,
+        maxBreakInTargetListCount: 12,
+        breakInRequestIntervalTimeSec: 10,
+        breakInRequestTimeOutSec: 7,
+        breakInRequestAreaCount: 12,
+      },
+    },
+    {
+      id: "faster-summons",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadSignIntervalTime2: 20,
+        reloadSignTotalCount: 40,
+        reloadSignCellCount: 20,
+        updateSignIntervalTime: 15,
+        singGetMax: 64,
+        signDownloadSpan: 15,
+        signUpdateSpan: 20,
+      },
+    },
+    {
+      id: "aggressive-summons",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadSignIntervalTime2: 10,
+        reloadSignTotalCount: 64,
+        reloadSignCellCount: 32,
+        updateSignIntervalTime: 10,
+        singGetMax: 96,
+        signDownloadSpan: 10,
+        signUpdateSpan: 10,
+      },
+    },
+    {
+      id: "faster-blue",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadVisitListCoolTime: 8,
+        maxVisitListCount: 10,
+        reloadSearchCoopBlueMin: 10,
+        reloadSearchCoopBlueMax: 40,
+        allAreaSearchRateCoopBlue: 60,
+      },
+    },
+    {
+      id: "aggressive-blue",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadVisitListCoolTime: 5,
+        maxVisitListCount: 15,
+        reloadSearchCoopBlueMin: 5,
+        reloadSearchCoopBlueMax: 20,
+        allAreaSearchRateCoopBlue: 100,
+      },
+    },
+    {
+      id: "faster-summon-host",
+      parameters: {
+        ...stubNetworkParamValues,
+        summonTimeoutTime: 10,
+        reloadSignIntervalTime2: 20,
+        reloadSignTotalCount: 24,
+        singGetMax: 40,
+        signDownloadSpan: 15,
+      },
+    },
+    {
+      id: "aggressive-summon-host",
+      parameters: {
+        ...stubNetworkParamValues,
+        summonTimeoutTime: 7,
+        reloadSignIntervalTime2: 12,
+        singGetMax: 48,
+        signDownloadSpan: 10,
+      },
+    },
+    {
+      id: "faster-summon-guest",
+      parameters: {
+        ...stubNetworkParamValues,
+        updateSignIntervalTime: 15,
+        signUpdateSpan: 20,
+      },
+    },
+    {
+      id: "aggressive-summon-guest",
+      parameters: {
+        ...stubNetworkParamValues,
+        updateSignIntervalTime: 10,
+        signUpdateSpan: 12,
+      },
+    },
+    {
+      id: "faster-hunter",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadVisitListCoolTime: 10,
+        maxVisitListCount: 8,
+        reloadSearchCoopBlueMin: 12,
+        reloadSearchCoopBlueMax: 72,
+      },
+    },
+    {
+      id: "aggressive-hunter",
+      parameters: {
+        ...stubNetworkParamValues,
+        reloadVisitListCoolTime: 6,
+        maxVisitListCount: 12,
+        reloadSearchCoopBlueMin: 8,
+        reloadSearchCoopBlueMax: 48,
+      },
+    },
+  ],
+};
+
+export const stubSetNetworkSettingsResult: SetNetworkSettingsResult = {
+  operationID: "op-network-1",
+  operationKind: "set_network_settings",
+  saveSessionID: "session-1",
+  saveRevision: "4",
+  changedScopes: ["network"],
+  networkSettings: stubNetworkParamValues,
+};
+
+export function makeNetworkPort(overrides: Partial<NetworkPort> = {}): NetworkPort {
+  return {
+    getNetworkSettings: (saveSessionID) =>
+      Promise.resolve({ ...stubNetworkSettingsSnapshot, saveSessionID }),
+    getNetworkPresets: () => Promise.resolve(stubNetworkPresetsResult),
+    setNetworkSettings: (saveSessionID, networkSettings, expectedRevision) =>
+      Promise.resolve({
+        ...stubSetNetworkSettingsResult,
+        saveSessionID,
+        saveRevision: String(Number(expectedRevision) + 1),
+        networkSettings,
+      }),
+    ...overrides,
+  };
+}
+
 export const failingPort: ApplicationInfoPort = {
   getApplicationInfo: () => Promise.reject(new Error("bridge_call_failed")),
 };
@@ -1083,6 +1277,7 @@ export function TestProviders({
   itemsPort,
   equipmentPort,
   worldPort,
+  networkPort,
   catalogPort,
   settingsPort,
   showItemID,
@@ -1098,6 +1293,7 @@ export function TestProviders({
   itemsPort?: ItemsPort;
   equipmentPort?: EquipmentPort;
   worldPort?: WorldPort;
+  networkPort?: NetworkPort;
   catalogPort?: CatalogPort;
   settingsPort?: SettingsPort;
   showItemID?: boolean;
@@ -1116,7 +1312,9 @@ export function TestProviders({
                         <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
                           <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
                             <WorldPortProvider port={worldPort ?? makeWorldPort()}>
-                              {children}
+                              <NetworkPortProvider port={networkPort ?? makeNetworkPort()}>
+                                {children}
+                              </NetworkPortProvider>
                             </WorldPortProvider>
                           </EquipmentPortProvider>
                         </ItemsPortProvider>
@@ -1145,6 +1343,7 @@ export async function renderApp(
     itemsPort?: ItemsPort;
     equipmentPort?: EquipmentPort;
     worldPort?: WorldPort;
+    networkPort?: NetworkPort;
     catalogPort?: CatalogPort;
     settingsPort?: SettingsPort;
     showItemID?: boolean;
@@ -1167,6 +1366,7 @@ export async function renderApp(
         itemsPort={options.itemsPort}
         equipmentPort={options.equipmentPort}
         worldPort={options.worldPort}
+        networkPort={options.networkPort}
         catalogPort={options.catalogPort}
         settingsPort={options.settingsPort}
         showItemID={options.showItemID}

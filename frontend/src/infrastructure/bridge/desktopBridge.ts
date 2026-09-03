@@ -32,6 +32,8 @@ import {
   GetItemVariants,
   GetLoadedSave,
   GetMapRegions,
+  GetNetworkPresets,
+  GetNetworkSettings,
   GetOperationHistory,
   GetOwnedItems,
   GetPhysickMixture,
@@ -93,6 +95,7 @@ import {
   SetGestureUnlocked,
   SetGraceVisited,
   SetMapRegionRevealed,
+  SetNetworkSettings,
   SetQuestStep,
   SetRegionUnlocked,
   SetSafetyProfile,
@@ -169,6 +172,13 @@ import type {
   ItemsPort,
   OwnedItemsPage,
 } from "../../application/items/itemsPort";
+import type {
+  NetworkParamValues,
+  NetworkPort,
+  NetworkPresetsResult,
+  NetworkSettingsSnapshot,
+  SetNetworkSettingsResult,
+} from "../../application/network/networkPort";
 import type {
   HistoryMutationResult,
   MutationReceipt,
@@ -1267,6 +1277,89 @@ function toWorldSpectralSteedAttires(
   };
 }
 
+const networkParamKeys: readonly (keyof NetworkParamValues)[] = [
+  "maxBreakInTargetListCount",
+  "breakInRequestIntervalTimeSec",
+  "breakInRequestTimeOutSec",
+  "breakInRequestAreaCount",
+  "summonTimeoutTime",
+  "reloadSignIntervalTime2",
+  "reloadSignTotalCount",
+  "reloadSignCellCount",
+  "updateSignIntervalTime",
+  "singGetMax",
+  "signDownloadSpan",
+  "signUpdateSpan",
+  "reloadVisitListCoolTime",
+  "maxCoopBlueSummonCount",
+  "maxVisitListCount",
+  "reloadSearchCoopBlueMin",
+  "reloadSearchCoopBlueMax",
+  "allAreaSearchRateCoopBlue",
+  "allAreaSearchRateVsBlue",
+  "visitorListMax",
+  "visitorTimeOutTime",
+  "visitorDownloadSpan",
+];
+
+function toNetworkParamValues(raw: unknown): NetworkParamValues {
+  if (typeof raw !== "object" || raw === null) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  const record = raw as Record<string, unknown>;
+  const values = {} as NetworkParamValues;
+  for (const key of networkParamKeys) {
+    const val = record[key];
+    if (typeof val !== "number" || !Number.isFinite(val)) {
+      throw new AppErrorException(bridgeCallFailed());
+    }
+    values[key] = val;
+  }
+  return values;
+}
+
+function toNetworkSettingsSnapshot(
+  result: Awaited<ReturnType<typeof GetNetworkSettings>>,
+): NetworkSettingsSnapshot {
+  if (typeof result.saveSessionID !== "string" || typeof result.saveRevision !== "string") {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    parameters: toNetworkParamValues(result.parameters),
+  };
+}
+
+function toNetworkPresetsResult(
+  result: Awaited<ReturnType<typeof GetNetworkPresets>>,
+): NetworkPresetsResult {
+  if (!Array.isArray(result?.presets)) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return {
+    presets: result.presets.map((preset) => {
+      if (typeof preset?.id !== "string" || preset.id === "") {
+        throw new AppErrorException(bridgeCallFailed());
+      }
+      return {
+        id: preset.id,
+        parameters: toNetworkParamValues(preset.parameters),
+      };
+    }),
+  };
+}
+
+function toSetNetworkSettingsResult(
+  result: Awaited<ReturnType<typeof SetNetworkSettings>>,
+): SetNetworkSettingsResult {
+  const receipt = toMutationReceipt(result);
+  return {
+    ...receipt,
+    networkSettings: toNetworkParamValues(result.networkSettings),
+  };
+}
+
 /** Projects the generated settings result onto the application port shape. */
 function toSafetyProfileSettings(
   result: Awaited<ReturnType<typeof GetSafetyProfile>>,
@@ -1292,6 +1385,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   ItemsPort &
   EquipmentPort &
   WorldPort &
+  NetworkPort &
   SettingsPort &
   CatalogPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
@@ -2106,4 +2200,17 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // a rejection, is the backend's contract and is never anticipated here.
   getItemVariants: async ({ kind, key }) =>
     toCatalogItemVariants(await callBridge(() => GetItemVariants(kind, key))),
+
+  getNetworkSettings: async (saveSessionID) =>
+    toNetworkSettingsSnapshot(await callBridge(() => GetNetworkSettings(saveSessionID))),
+
+  getNetworkPresets: async (presetID) =>
+    toNetworkPresetsResult(await callBridge(() => GetNetworkPresets(presetID ?? ""))),
+
+  setNetworkSettings: async (saveSessionID, networkSettings, expectedRevision) =>
+    toSetNetworkSettingsResult(
+      await callBridge(() =>
+        SetNetworkSettings(saveSessionID, networkSettings, expectedRevision),
+      ),
+    ),
 };

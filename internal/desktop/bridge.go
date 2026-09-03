@@ -19,6 +19,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -1280,4 +1281,24 @@ func (b *Bridge) LockAllSpectralSteedAttires(
 ) (world.LockAllSpectralSteedAttiresResult, error) {
 	return bridged(world.LockAllSpectralSteedAttires(
 		b.saveEngine, b.gameCatalog, saveSessionID, characterID, expectedRevision))
+}
+
+// GetNetworkSettings delegates to the GetNetworkSettings endpoint.
+func (b *Bridge) GetNetworkSettings(saveSessionID string) (network.GetNetworkSettingsResult, error) {
+	return bridged(network.GetNetworkSettings(b.saveEngine, saveSessionID))
+}
+
+// GetNetworkPresets delegates to the GetNetworkPresets endpoint.
+func (b *Bridge) GetNetworkPresets(presetID string) (network.GetNetworkPresetsResult, error) {
+	return bridged(network.GetNetworkPresets(b.gameCatalog, presetID))
+}
+
+// SetNetworkSettings delegates to the SetNetworkSettings endpoint.
+func (b *Bridge) SetNetworkSettings(
+	saveSessionID string,
+	networkSettings gamecatalog.NetworkParamValues,
+	expectedRevision string,
+) (network.SetNetworkSettingsResult, error) {
+	return bridged(network.SetNetworkSettings(
+		b.saveEngine, saveSessionID, networkSettings, expectedRevision))
 }

@@ -139,12 +139,19 @@ export const queryKeys = {
   appearancePresets: (search?: string, tags?: readonly string[]) =>
     ["catalog", "appearance-presets", search ?? "", tags?.slice() ?? []] as const,
   /**
+   * Network parameter presets are global: they belong to GameCatalog and no save session.
+   */
+  networkPresets: (presetID?: string) =>
+    ["catalog", "network-presets", presetID ?? ""] as const,
+  /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to
    * be keyed below it to be cleaned up with the session.
    */
   saveSession: (saveSessionID: string) => ["save-session", saveSessionID] as const,
   loadedSave: (saveSessionID: string) => ["save-session", saveSessionID, "loaded"] as const,
+  networkSettings: (saveSessionID: string, saveRevision: string) =>
+    ["save-session", saveSessionID, "network-settings", saveRevision] as const,
   saveCharacters: (saveSessionID: string, saveRevision: string) =>
     ["save-session", saveSessionID, "characters", saveRevision] as const,
   favoritePresets: (saveSessionID: string, saveRevision: string, favoriteSlotID?: number) =>

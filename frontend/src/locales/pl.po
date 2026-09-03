@@ -38,6 +38,10 @@ msgstr "{0}: krok zadania"
 msgid "{0}: select appearance"
 msgstr "{0}: wybierz wygląd"
 
+#: src/features/advanced/NetworkParamControl.tsx
+msgid "{labelText} numeric input"
+msgstr "Pole numeryczne: {labelText}"
+
 #. placeholder {0}: item.steps.length
 #: src/features/world/WorldPanel.tsx
 msgid "{matched} of {0} matched steps"
@@ -89,9 +93,21 @@ msgstr "Zaawansowane"
 msgid "Advanced save features"
 msgstr "Zaawansowane funkcje save"
 
-#: src/features/app-shell/AppShell.tsx
-msgid "Advanced save features are not available yet."
-msgstr "Zaawansowane funkcje save nie są jeszcze dostępne."
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Advanced subcategories"
+msgstr "Podkategorie zaawansowane"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Aggressive"
+msgstr "Agresywne"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "All Area Search Rate (Co-op)"
+msgstr "Wskaźnik wyszukiwania wszystkich obszarów (kooperacja)"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "All Area Search Rate (Vs Blue)"
+msgstr "Wskaźnik wyszukiwania wszystkich obszarów (vs błękitni)"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "All Body Types"
@@ -147,6 +163,14 @@ msgstr "Ustawienia i narzędzia aplikacji"
 #: src/features/world/WorldPanel.tsx
 msgid "Apply"
 msgstr "Zastosuj"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Apply changes"
+msgstr "Zastosuj zmiany"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Apply curated tuning profiles to specific matchmaking roles without affecting other parameters."
+msgstr "Zastosuj profile dostrajania do określonych ról matchmakingu bez modyfikowania pozostałych parametrów."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Apply to Character"
@@ -236,6 +260,10 @@ msgstr "Baza: {0}"
 msgid "Bell Bearings"
 msgstr "Bell Bearings"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Blue matchmaking"
+msgstr "Matchmaking błękitnych"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Body Type"
 msgstr "Typ sylwetki"
@@ -263,6 +291,10 @@ msgstr "Bossowie"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Cancel"
 msgstr "Anuluj"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Candidate list capacity for hunter matchmaking targets."
+msgstr "Pojemność listy kandydatów dla celów matchmakingu łowcy."
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Candidate pages"
@@ -396,6 +428,10 @@ msgstr "Kontener"
 msgid "Cookbooks"
 msgstr "Księgi kucharskie"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Cooldown between Blue Cipher Ring host search attempts."
+msgstr "Czas odnowienia między próbami wyszukiwania hosta przez Błękitny Pierścień Szyfru."
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
 msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
@@ -417,6 +453,10 @@ msgstr "Krytyczne problemy walidacji blokują zapis."
 msgid "Crystal Tear {0}"
 msgstr "Kryształowa Łza {0}"
 
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Custom network settings modify matchmaking timers and buffer limits stored in UserData11. Applying changes creates an operation that will be reviewed in Review Changes before writing to disk."
+msgstr "Własne ustawienia sieci modyfikują czasy matchmakingu i limity buforów zapisane w UserData11. Zastosowanie zmian utworzy operację, którą przed zapisem na dysk można sprawdzić w Review Changes."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Cut content"
@@ -429,6 +469,10 @@ msgstr "Ciemny"
 #: src/features/world/WorldPanel.tsx
 msgid "Defeated"
 msgstr "Pokonany"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Delay between matchmaking search retries."
+msgstr "Opóźnienie między kolejnymi próbami wyszukiwania w matchmakingu."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Delete"
@@ -461,6 +505,14 @@ msgstr "Odrzuć"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "DLC"
 msgstr "DLC"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Download span interval for sign requests."
+msgstr "Interwał pobierania dla zapytań o znaki przywołania."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Download span interval for visitor list updates."
+msgstr "Interwał pobierania aktualizacji listy gości."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Elden Ring"
@@ -510,6 +562,10 @@ msgstr "Eksploracja"
 msgid "Export"
 msgstr "Eksportuj"
 
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Failed to apply network settings."
+msgstr "Nie udało się zastosować ustawień sieciowych."
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Faith"
 msgstr "Wiara"
@@ -517,6 +573,10 @@ msgstr "Wiara"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
 msgstr "Rodzina"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Faster"
+msgstr "Szybsze"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -531,6 +591,10 @@ msgstr "Tylko ulubione"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "File"
 msgstr "Plik"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Fix invalid field values before applying changes."
+msgstr "Popraw nieprawidłowe wartości pól przed zastosowaniem zmian."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Fog of War"
@@ -562,6 +626,10 @@ msgstr "Siatka"
 msgid "Group by"
 msgstr "Grupuj według"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Hard cap on signs retrievable from the server."
+msgstr "Sztywny limit znaków pobieranych z serwera."
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Head"
 msgstr "Głowa"
@@ -570,9 +638,25 @@ msgstr "Głowa"
 msgid "Home"
 msgstr "Główna"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "How frequently the game refreshes the summon sign list."
+msgstr "Częstotliwość odświeżania listy znaków przywołania przez grę."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "How frequently your placed summon sign is re-uploaded to the server."
+msgstr "Częstotliwość ponownego wysyłania postawionego znaku przywołania na serwer."
+
 #: src/features/character/CharacterPanel.tsx
 msgid "HP"
 msgstr "HP"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Hunter"
+msgstr "Łowca"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Hunter / Blue matchmaking"
+msgstr "Łowca / Matchmaking błękitnych"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "I reviewed and accept the warnings."
@@ -613,6 +697,14 @@ msgstr "Informacje z save i GameCatalog."
 #: src/features/character/CharacterPanel.tsx
 msgid "Intelligence"
 msgstr "Inteligencja"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Invader"
+msgstr "Najeźdźca"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Invasion candidate list size polled per matchmaking cycle."
+msgstr "Rozmiar listy kandydatów inwazji odpytywany w jednym cyklu matchmakingu."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -764,6 +856,10 @@ msgstr "Wczytywanie pojemności wyposażenia…"
 msgid "Loading Mirror Favorites…"
 msgstr "Wczytywanie ulubionych Lustra…"
 
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Loading network settings…"
+msgstr "Ładowanie ustawień sieciowych…"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Loading progression…"
 msgstr "Wczytywanie postępu…"
@@ -809,6 +905,26 @@ msgstr "Regiony mapy"
 msgid "Matched"
 msgstr "Dopasowany"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Matchmaking intervals and search rates for Blue Cipher Ring hunters."
+msgstr "Interwały matchmakingu i wskaźniki wyszukiwania dla łowców Błękitnego Pierścienia Szyfru."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Matchmaking parameters for Bloody / Recusant Finger invasions."
+msgstr "Parametry matchmakingu dla inwazji Krwawego i Odstępczego Palca."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Max Blue Summons"
+msgstr "Maks. błękitnych przywołań"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Max Targets"
+msgstr "Maks. celów"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Maximum delay for co-op blue reload search."
+msgstr "Maksymalne opóźnienie ponownego wyszukiwania kooperacji błękitnych."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Maximum in Inventory"
@@ -818,6 +934,22 @@ msgstr "Maksimum w ekwipunku"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Maximum in Storage"
 msgstr "Maksimum w skrzyni"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Maximum number of blue cooperators allowed."
+msgstr "Maksymalna dozwolona liczba błękitnych współpracowników."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Maximum signs downloaded per world cell."
+msgstr "Maksymalna liczba znaków pobieranych na komórkę świata."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Maximum total signs downloaded per refresh cycle."
+msgstr "Maksymalna całkowita liczba znaków pobieranych w cyklu odświeżania."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Maximum visitor entries allowed in the list."
+msgstr "Maksymalna liczba wpisów gości na liście."
 
 #. placeholder {0}: model.usedMemorySlots
 #. placeholder {1}: model.availableMemorySlots
@@ -843,6 +975,10 @@ msgstr "Kamienie pamięci"
 #: src/features/character/CharacterPanel.tsx
 msgid "Mind"
 msgstr "Umysł"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Minimum delay for co-op blue reload search."
+msgstr "Minimalne opóźnienie ponownego wyszukiwania kooperacji błękitnych."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Mirror Favorites"
@@ -892,6 +1028,14 @@ msgstr "Nazwa"
 #: src/features/world/WorldPanel.tsx
 msgid "Name unavailable"
 msgstr "Nazwa niedostępna"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Network Tuning"
+msgstr "Dostrajanie sieci"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Network tuning notice"
+msgstr "Uwaga dotycząca ustawień sieciowych"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1013,6 +1157,10 @@ msgstr "Jeszcze nieodblokowane"
 msgid "Not visited"
 msgstr "Nieodwiedzone"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Number of break-in areas queried per invasion search cycle."
+msgstr "Liczba obszarów inwazji odpytywanych w jednym cyklu wyszukiwania."
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Only the items the backend accepts for this slot are offered here."
 msgstr "Pokazywane są wyłącznie przedmioty, które backend akceptuje dla tego slotu."
@@ -1028,6 +1176,10 @@ msgstr "Otwórz save i wybierz slot postaci, aby zobaczyć jej postęp w świeci
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
 msgstr "Otwórz save na ekranie Główna, aby zobaczyć jego sloty postaci."
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Open a save to view and edit network tuning parameters."
+msgstr "Otwórz plik zapisu, aby wyświetlić i edytować parametry sieciowe."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Open Save"
@@ -1075,6 +1227,14 @@ msgstr "Strona {0}"
 msgid "Page {servedPage}"
 msgstr "Strona {servedPage}"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Percentage rate for searching all areas for co-op blue summons."
+msgstr "Wskaźnik procentowy przeszukiwania wszystkich obszarów dla błękitnych przywołań kooperacyjnych."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Percentage rate for searching all areas vs blue summons."
+msgstr "Wskaźnik procentowy przeszukiwania wszystkich obszarów przeciwko błękitnym przywołaniom."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Platform"
 msgstr "Platforma"
@@ -1119,6 +1279,14 @@ msgstr "Przedsprzedaż"
 #: src/features/character/CharacterPanel.tsx
 msgid "Preset Catalog"
 msgstr "Katalog presetów"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Preset roles"
+msgstr "Role presetów"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Presets for this role are unavailable or incomplete."
+msgstr "Presety dla tej roli są niedostępne lub niekompletne."
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1220,9 +1388,21 @@ msgstr "Ponów"
 msgid "Redo the last undone operation"
 msgstr "Ponów ostatnio cofniętą operację"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Reds / Invader"
+msgstr "Czerwoni / Najeźdźca"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Regions"
 msgstr "Regiony"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Reload Search Max"
+msgstr "Maks. ponownego wyszukiwania"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Reload Search Min"
+msgstr "Min. ponownego wyszukiwania"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Remembrance"
@@ -1242,9 +1422,18 @@ msgstr "Usuń {name} z ulubionych"
 msgid "Remove Fog of War"
 msgstr "Usuń mgłę wojny"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Request Interval"
+msgstr "Interwał żądania"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Request Timeout"
+msgstr "Limit czasu żądania"
+
+#: src/features/advanced/AdvancedPanel.tsx
 #: src/features/character/CharacterPanel.tsx
 msgid "Reset"
-msgstr "Przywróć"
+msgstr "Resetuj"
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -1390,9 +1579,17 @@ msgstr "SaveForge znalazł dzienniki operacji z wcześniejszej sesji."
 msgid "Search"
 msgstr "Szukaj"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Search Areas"
+msgstr "Obszary wyszukiwania"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Search candidates"
 msgstr "Szukaj kandydatów"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Search Cooldown"
+msgstr "Czas odnowienia wyszukiwania"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1406,6 +1603,10 @@ msgstr "Szukaj presetów..."
 #: src/features/world/WorldPanel.tsx
 msgid "Search World entries"
 msgstr "Szukaj wpisów świata"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Seconds before a pending summon request expires."
+msgstr "Sekundy do wygaśnięcia oczekującego żądania przywołania."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1500,6 +1701,34 @@ msgstr "Ustaw odwiedzone"
 msgid "Show Item ID"
 msgstr "Pokaż ID przedmiotu"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Sign Download Span"
+msgstr "Okres pobierania znaków"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Sign Get Max"
+msgstr "Maks. pobieranych znaków"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Sign Refresh Interval"
+msgstr "Interwał odświeżania znaków"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Sign Update Span"
+msgstr "Okres aktualizacji znaku"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Sign Upload Interval"
+msgstr "Interwał wysyłania znaku"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Signs Per Cell"
+msgstr "Znaki na komórkę"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Signs Total Count"
+msgstr "Całkowita liczba znaków"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Sites of Grace"
 msgstr "Sites of Grace"
@@ -1555,6 +1784,10 @@ msgstr "SoulMemory oraz posiadane runy pozostaną bez zmian."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Source"
 msgstr "Źródło"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Span interval for sign broadcast updates."
+msgstr "Okres interwału dla rozgłaszania aktualizacji znaków."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Spectral Steed Attires"
@@ -1636,9 +1869,30 @@ msgstr "Siła"
 msgid "Subcategory"
 msgstr "Podkategoria"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Summon guest"
+msgstr "Gość przywołania"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Summon host"
+msgstr "Host przywołania"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Summon signs"
+msgstr "Znaki przywołania"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Summon Timeout"
+msgstr "Limit czasu przywołania"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Summoning Pools"
 msgstr "Summoning Pools"
+
+#: src/features/advanced/AdvancedPanel.tsx
+#: src/features/advanced/SuperMarchantPlaceholder.tsx
+msgid "Super marchant"
+msgstr "Super marchant"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
@@ -1758,6 +2012,10 @@ msgstr "Ten slot postaci jest pusty, więc nie ma wyposażenia do pokazania."
 msgid "This character slot is empty, so it has no World progress to show."
 msgstr "Ten slot postaci jest pusty, więc nie ma postępu w świecie do pokazania."
 
+#: src/features/advanced/SuperMarchantPlaceholder.tsx
+msgid "This feature will be added in a future update."
+msgstr "Ta funkcja zostanie dodana w przyszłej aktualizacji."
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
 msgstr "Tego dziennika nie można automatycznie odtworzyć. Możesz go wyeksportować albo usunąć."
@@ -1784,6 +2042,14 @@ msgstr "Ten save nie ma aktywnej postaci, więc nie można go edytować. Nie zos
 msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
 msgstr "Ten save otwarto z liczbą błędów {0} i ostrzeżeń {1} zgłoszonych przez backend."
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Timeout before a single matchmaking attempt is abandoned."
+msgstr "Limit czasu przed porzuceniem pojedynczej próby matchmakingu."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Timeout duration for visitor connections."
+msgstr "Czas trwania limitu czasu dla połączeń gości."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Tools"
 msgstr "Narzędzia"
@@ -1804,6 +2070,10 @@ msgstr "Nie udało się wczytać szczegółów przedmiotu."
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load item variants."
 msgstr "Nie udało się wczytać wariantów przedmiotu."
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Unable to load network settings from the save file."
+msgstr "Nie udało się załadować parametrów sieciowych z pliku zapisu."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Unable to load the appearance presets."
@@ -1897,6 +2167,10 @@ msgstr "Niezapisane zmiany"
 msgid "Upgradeable"
 msgstr "Można ulepszać"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Upload and broadcast intervals when placing a summon sign."
+msgstr "Interwały wysyłania i rozgłaszania podczas umieszczania znaku przywołania."
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Validate again"
 msgstr "Zwaliduj ponownie"
@@ -1916,6 +2190,10 @@ msgstr "Walidacja zakończona powodzeniem."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Validation report"
 msgstr "Raport walidacji"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "Vanilla"
+msgstr "Vanilla"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Variant details unavailable"
@@ -1942,9 +2220,37 @@ msgstr "Pokaż raport"
 msgid "Vigor"
 msgstr "Krzepa"
 
+#: src/features/advanced/networkMetadata.ts
+msgid "Visibility, refresh rate and timeouts when summoning cooperators."
+msgstr "Widoczność, częstotliwość odświeżania i limity czasu podczas przywoływania współpracowników."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visit List Size"
+msgstr "Rozmiar listy wizyt"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Visited"
 msgstr "Odwiedzone"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visitor / additional parameters"
+msgstr "Goście / parametry dodatkowe"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visitor Download Span"
+msgstr "Okres pobierania listy gości"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visitor list capacities, timeouts and download spans."
+msgstr "Pojemności list gości, limity czasu i okresy pobierania."
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visitor List Max"
+msgstr "Maks. listy gości"
+
+#: src/features/advanced/networkMetadata.ts
+msgid "Visitor Timeout"
+msgstr "Limit czasu gościa"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"
@@ -1983,3 +2289,7 @@ msgstr "Sekcje świata"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Yes"
 msgstr "Tak"
+
+#: src/features/advanced/AdvancedPanel.tsx
+msgid "You have unsaved changes in your draft."
+msgstr "Masz niezapisane zmiany w wersji roboczej."

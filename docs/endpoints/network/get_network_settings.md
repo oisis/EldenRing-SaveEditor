@@ -18,7 +18,7 @@ set have exactly the same 22 fields and JSON names.
 | Kind | Getter |
 | Domain | `network` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`. No Wails binding, no frontend view and no CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`. Reached by the Wails bridge and the frontend Advanced workspace. |
 | Implementation source | [../../../backend/endpoints/network/get_network_settings.go](../../../backend/endpoints/network/get_network_settings.go) |
 | Test source | [../../../backend/endpoints/network/get_network_settings_test.go](../../../backend/endpoints/network/get_network_settings_test.go) |
 | Data source | the `UserData11` regulation of the loaded save session, read by SaveEngine |
@@ -139,8 +139,8 @@ register it and answers `404`. The path segment is passed to
 `network.GetNetworkSettings` unchanged; a successful call returns `200` and every
 endpoint error returns `400`.
 
-There is no Wails binding, frontend view or CLI command for this endpoint. The
-separate `SetNetworkSettings` endpoint owns the write path.
+This endpoint is exposed through the Wails desktop bridge and consumed by the
+frontend `Advanced` workspace. The separate `SetNetworkSettings` endpoint owns the write path.
 
 ## Local verification
 

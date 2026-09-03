@@ -12,6 +12,7 @@ import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
 import { FavoritesPortProvider } from "./application/favorites/favoritesClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
 import { ItemPreferencesProvider } from "./application/preferences/itemPreferences";
+import { NetworkPortProvider } from "./application/network/networkClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { SettingsPortProvider } from "./application/settings/settingsClient";
 import { WorldPortProvider } from "./application/world/worldClient";
@@ -53,7 +54,9 @@ createRoot(container).render(
                           <ItemsPortProvider port={wailsDesktopBridge}>
                             <EquipmentPortProvider port={wailsDesktopBridge}>
                               <WorldPortProvider port={wailsDesktopBridge}>
-                                <App />
+                                <NetworkPortProvider port={wailsDesktopBridge}>
+                                  <App />
+                                </NetworkPortProvider>
                               </WorldPortProvider>
                             </EquipmentPortProvider>
                           </ItemsPortProvider>

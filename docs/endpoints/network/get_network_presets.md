@@ -23,7 +23,7 @@ during the 2.0 cutover. They remain available only through Git history and the
 | Kind | Getter |
 | Domain | `network` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/network/presets` of the local OpenAPI explorer (`tools/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/network/presets` of the local OpenAPI explorer (`tools/swagger`). Reached by the Wails bridge and the frontend Advanced workspace. |
 | Implementation source | [../../../backend/endpoints/network/get_network_presets.go](../../../backend/endpoints/network/get_network_presets.go) |
 | Test source | [../../../backend/endpoints/network/get_network_presets_test.go](../../../backend/endpoints/network/get_network_presets_test.go) |
 | Data source | [`backend/gamecatalog/data/regulation/network_params.json`](../../../backend/gamecatalog/data/regulation/network_params.json), loaded and validated by `GameCatalog` |
@@ -243,8 +243,8 @@ repository.
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails.
-- The only HTTP route is `GET /api/v1/network/presets` of the local OpenAPI
+- The endpoint is exposed through Wails and consumed by the frontend `Advanced` workspace.
+- An HTTP route is `GET /api/v1/network/presets` of the local OpenAPI
   explorer in `tools/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - The result carries identifiers and parameter values only. There is no display

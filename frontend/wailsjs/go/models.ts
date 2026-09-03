@@ -1248,6 +1248,97 @@ export namespace equipment {
 
 }
 
+export namespace gamecatalog {
+	
+	export class NetworkParamValues {
+	    maxBreakInTargetListCount: number;
+	    breakInRequestIntervalTimeSec: number;
+	    breakInRequestTimeOutSec: number;
+	    breakInRequestAreaCount: number;
+	    summonTimeoutTime: number;
+	    reloadSignIntervalTime2: number;
+	    reloadSignTotalCount: number;
+	    reloadSignCellCount: number;
+	    updateSignIntervalTime: number;
+	    singGetMax: number;
+	    signDownloadSpan: number;
+	    signUpdateSpan: number;
+	    reloadVisitListCoolTime: number;
+	    maxCoopBlueSummonCount: number;
+	    maxVisitListCount: number;
+	    reloadSearchCoopBlueMin: number;
+	    reloadSearchCoopBlueMax: number;
+	    allAreaSearchRateCoopBlue: number;
+	    allAreaSearchRateVsBlue: number;
+	    visitorListMax: number;
+	    visitorTimeOutTime: number;
+	    visitorDownloadSpan: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new NetworkParamValues(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.maxBreakInTargetListCount = source["maxBreakInTargetListCount"];
+	        this.breakInRequestIntervalTimeSec = source["breakInRequestIntervalTimeSec"];
+	        this.breakInRequestTimeOutSec = source["breakInRequestTimeOutSec"];
+	        this.breakInRequestAreaCount = source["breakInRequestAreaCount"];
+	        this.summonTimeoutTime = source["summonTimeoutTime"];
+	        this.reloadSignIntervalTime2 = source["reloadSignIntervalTime2"];
+	        this.reloadSignTotalCount = source["reloadSignTotalCount"];
+	        this.reloadSignCellCount = source["reloadSignCellCount"];
+	        this.updateSignIntervalTime = source["updateSignIntervalTime"];
+	        this.singGetMax = source["singGetMax"];
+	        this.signDownloadSpan = source["signDownloadSpan"];
+	        this.signUpdateSpan = source["signUpdateSpan"];
+	        this.reloadVisitListCoolTime = source["reloadVisitListCoolTime"];
+	        this.maxCoopBlueSummonCount = source["maxCoopBlueSummonCount"];
+	        this.maxVisitListCount = source["maxVisitListCount"];
+	        this.reloadSearchCoopBlueMin = source["reloadSearchCoopBlueMin"];
+	        this.reloadSearchCoopBlueMax = source["reloadSearchCoopBlueMax"];
+	        this.allAreaSearchRateCoopBlue = source["allAreaSearchRateCoopBlue"];
+	        this.allAreaSearchRateVsBlue = source["allAreaSearchRateVsBlue"];
+	        this.visitorListMax = source["visitorListMax"];
+	        this.visitorTimeOutTime = source["visitorTimeOutTime"];
+	        this.visitorDownloadSpan = source["visitorDownloadSpan"];
+	    }
+	}
+	export class NetworkPreset {
+	    id: string;
+	    parameters: NetworkParamValues;
+	
+	    static createFrom(source: any = {}) {
+	        return new NetworkPreset(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.parameters = this.convertValues(source["parameters"], NetworkParamValues);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace inventory {
 	
 	export class AddItemsRequestEntry {
@@ -1602,6 +1693,75 @@ export namespace inventory {
 	        this.characterID = source["characterID"];
 	        this.orderedResources = this.convertValues(source["orderedResources"], schema.ResourceRef);
 	        this.acquisitionIndices = source["acquisitionIndices"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace network {
+	
+	export class GetNetworkPresetsResult {
+	    presets: gamecatalog.NetworkPreset[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetNetworkPresetsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.presets = this.convertValues(source["presets"], gamecatalog.NetworkPreset);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetNetworkSettingsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    parameters: gamecatalog.NetworkParamValues;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetNetworkSettingsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.parameters = this.convertValues(source["parameters"], gamecatalog.NetworkParamValues);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2745,6 +2905,46 @@ export namespace saveengine {
 	        this.favoriteSlotID = source["favoriteSlotID"];
 	        this.sourceCharacterID = source["sourceCharacterID"];
 	    }
+	}
+	export class SetNetworkSettingsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    networkSettings: gamecatalog.NetworkParamValues;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetNetworkSettingsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.networkSettings = this.convertValues(source["networkSettings"], gamecatalog.NetworkParamValues);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class SetOwnedItemQuantityResult {
 	    operationID: string;

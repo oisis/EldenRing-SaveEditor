@@ -63,7 +63,7 @@ const expected: Record<ChangedScope, { invalidates: readonly (readonly unknown[]
     ],
   },
   "world.flags": { invalidates: [worldGraces, worldQuests] },
-  network: { invalidates: [] },
+  network: { invalidates: [queryKeys.networkSettings(session, "3")] },
   favorites: { invalidates: [favoritePresets] },
   "diagnostics.report": {
     invalidates: [queryKeys.saveValidationReport(session, 0, "3")],
@@ -73,6 +73,7 @@ const expected: Record<ChangedScope, { invalidates: readonly (readonly unknown[]
 /** Every save-dependent key of one session, used as the "must not match" set. */
 const everyKey: readonly (readonly unknown[])[] = [
   queryKeys.loadedSave(session),
+  queryKeys.networkSettings(session, "3"),
   queryKeys.saveCharacters(session, "3"),
   queryKeys.characterProfile(session, 0, "3"),
   queryKeys.characterStats(session, 0, "3"),
