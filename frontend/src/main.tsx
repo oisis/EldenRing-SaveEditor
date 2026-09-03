@@ -14,6 +14,7 @@ import { ItemsPortProvider } from "./application/items/itemsClient";
 import { ItemPreferencesProvider } from "./application/preferences/itemPreferences";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { SettingsPortProvider } from "./application/settings/settingsClient";
+import { WorldPortProvider } from "./application/world/worldClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
 import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
 import "./ui/tokens/global.css";
@@ -51,7 +52,9 @@ createRoot(container).render(
                         <DiagnosticsPortProvider port={wailsDesktopBridge}>
                           <ItemsPortProvider port={wailsDesktopBridge}>
                             <EquipmentPortProvider port={wailsDesktopBridge}>
-                              <App />
+                              <WorldPortProvider port={wailsDesktopBridge}>
+                                <App />
+                              </WorldPortProvider>
                             </EquipmentPortProvider>
                           </ItemsPortProvider>
                         </DiagnosticsPortProvider>

@@ -20,6 +20,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
@@ -929,4 +930,132 @@ func (b *Bridge) SetOwnedItemQuantity(
 	return bridged(inventory.SetOwnedItemQuantity(
 		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID, ownedItemID,
 		quantity, expectedRevision))
+}
+
+// The thirteen World getters below are the complete read-only World surface of
+// the desktop bridge. Each one delegates to its endpoint and returns the
+// endpoint result and error unchanged: the bridge validates nothing, reads
+// neither SaveEngine nor GameCatalog itself, and derives no state. No World
+// mutation is bound, so the frontend cannot write a flag through this surface.
+
+// GetRegions delegates to the GetRegions endpoint.
+func (b *Bridge) GetRegions(
+	saveSessionID string,
+	characterID int,
+) (world.GetRegionsResult, error) {
+	return bridged(world.GetRegions(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetMapRegions delegates to the GetMapRegions endpoint.
+func (b *Bridge) GetMapRegions(
+	saveSessionID string,
+	characterID int,
+) (world.GetMapRegionsResult, error) {
+	return bridged(world.GetMapRegions(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetGraces delegates to the GetGraces endpoint.
+func (b *Bridge) GetGraces(
+	saveSessionID string,
+	characterID int,
+) (world.GetGracesResult, error) {
+	return bridged(world.GetGraces(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetBosses delegates to the GetBosses endpoint.
+func (b *Bridge) GetBosses(
+	saveSessionID string,
+	characterID int,
+) (world.GetBossesResult, error) {
+	return bridged(world.GetBosses(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetQuests delegates to the GetQuests endpoint. questKind and questKey are
+// forwarded exactly as received, so which kind the endpoint accepts and which
+// key selects one questline stays the endpoint's contract.
+func (b *Bridge) GetQuests(
+	saveSessionID string,
+	characterID int,
+	questKind string,
+	questKey string,
+) (world.GetQuestsResult, error) {
+	return bridged(world.GetQuests(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, questKind, questKey))
+}
+
+// GetGestures delegates to the GetGestures endpoint. availabilityFilter is
+// forwarded exactly as received; which values it accepts is the endpoint's
+// contract.
+func (b *Bridge) GetGestures(
+	saveSessionID string,
+	characterID int,
+	availabilityFilter string,
+) (world.GetGesturesResult, error) {
+	return bridged(world.GetGestures(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, availabilityFilter))
+}
+
+// GetCookbooks delegates to the GetCookbooks endpoint.
+func (b *Bridge) GetCookbooks(
+	saveSessionID string,
+	characterID int,
+	availabilityFilter string,
+) (world.GetCookbooksResult, error) {
+	return bridged(world.GetCookbooks(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, availabilityFilter))
+}
+
+// GetBellBearings delegates to the GetBellBearings endpoint.
+func (b *Bridge) GetBellBearings(
+	saveSessionID string,
+	characterID int,
+	availabilityFilter string,
+) (world.GetBellBearingsResult, error) {
+	return bridged(world.GetBellBearings(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, availabilityFilter))
+}
+
+// GetWhetblades delegates to the GetWhetblades endpoint.
+func (b *Bridge) GetWhetblades(
+	saveSessionID string,
+	characterID int,
+	availabilityFilter string,
+) (world.GetWhetbladesResult, error) {
+	return bridged(world.GetWhetblades(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, availabilityFilter))
+}
+
+// GetTutorials delegates to the GetTutorials endpoint.
+func (b *Bridge) GetTutorials(
+	saveSessionID string,
+	characterID int,
+	availabilityFilter string,
+) (world.GetTutorialsResult, error) {
+	return bridged(world.GetTutorials(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, availabilityFilter))
+}
+
+// GetSummoningPools delegates to the GetSummoningPools endpoint.
+func (b *Bridge) GetSummoningPools(
+	saveSessionID string,
+	characterID int,
+) (world.GetSummoningPoolsResult, error) {
+	return bridged(world.GetSummoningPools(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetColosseums delegates to the GetColosseums endpoint.
+func (b *Bridge) GetColosseums(
+	saveSessionID string,
+	characterID int,
+) (world.GetColosseumsResult, error) {
+	return bridged(world.GetColosseums(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// GetSpectralSteedAttires delegates to the GetSpectralSteedAttires endpoint.
+func (b *Bridge) GetSpectralSteedAttires(
+	saveSessionID string,
+	characterID int,
+) (world.GetSpectralSteedAttiresResult, error) {
+	return bridged(world.GetSpectralSteedAttires(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID))
 }

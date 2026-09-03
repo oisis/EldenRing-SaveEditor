@@ -23,6 +23,11 @@ msgstr "Nie udało się rozpoznać rekordów: {0}."
 msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
 msgstr "Nie udało się sprawdzić zakresów: {0}, więc ten save nie jest potwierdzony jako poprawny."
 
+#. placeholder {0}: item.steps.length
+#: src/features/world/WorldPanel.tsx
+msgid "{matched} of {0} matched steps"
+msgstr "Dopasowane kroki: {matched} z {0}"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
 msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała; backend podaje, ile jest dostępnych."
@@ -31,7 +36,12 @@ msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
 
+#: src/features/world/WorldPanel.tsx
+msgid "Activated"
+msgstr "Aktywowany"
+
 #: src/features/character/CharacterPanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Active"
 msgstr "Aktywny"
 
@@ -206,6 +216,10 @@ msgstr "Zasoby bazowe"
 msgid "Base: {0}"
 msgstr "Baza: {0}"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Bell Bearings"
+msgstr "Bell Bearings"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Body Type"
 msgstr "Typ sylwetki"
@@ -218,6 +232,14 @@ msgstr "Filtr typu sylwetki"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Bolts {0}"
 msgstr "Bełty {0}"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Boss arena"
+msgstr "Arena bossa"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Bosses"
+msgstr "Bossowie"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -314,6 +336,14 @@ msgstr "Zamknij"
 msgid "Close Save"
 msgstr "Zamknij save"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Collapse all"
+msgstr "Zwiń wszystko"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Colosseums"
+msgstr "Koloseum"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Confirm Body Type Change"
 msgstr "Potwierdź zmianę typu sylwetki"
@@ -346,6 +376,10 @@ msgstr "Konsola"
 msgid "Container"
 msgstr "Kontener"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Cookbooks"
+msgstr "Księgi kucharskie"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Could not read application information from the backend."
 msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
@@ -375,6 +409,10 @@ msgstr "Wycięta zawartość"
 #: src/features/app-shell/AppShell.tsx
 msgid "Dark"
 msgstr "Ciemny"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Defeated"
+msgstr "Pokonany"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Delete"
@@ -439,9 +477,17 @@ msgstr "Wyposażenie i szybkie sloty"
 msgid "Error code: {0}"
 msgstr "Kod błędu: {0}"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Expand all"
+msgstr "Rozwiń wszystko"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Expanded Limits"
 msgstr "Rozszerzone limity"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Exploration"
+msgstr "Eksploracja"
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -479,6 +525,7 @@ msgid "FP"
 msgstr "FP"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Gestures"
 msgstr "Gesty"
 
@@ -714,6 +761,7 @@ msgid "Loading variants…"
 msgstr "Wczytywanie wariantów…"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Loading…"
 msgstr "Wczytywanie…"
 
@@ -721,9 +769,21 @@ msgstr "Wczytywanie…"
 msgid "Location"
 msgstr "Lokalizacja"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Locked"
+msgstr "Zablokowane"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Manual sort order"
 msgstr "Ręczna kolejność"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Map Regions"
+msgstr "Regiony mapy"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Matched"
+msgstr "Dopasowany"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -805,6 +865,7 @@ msgstr "Nazwa"
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Name unavailable"
 msgstr "Nazwa niedostępna"
 
@@ -835,6 +896,10 @@ msgstr "Brak dostępnej aktywnej postaci."
 #: src/features/character/CharacterPanel.tsx
 msgid "No appearance presets matched your search."
 msgstr "Żaden preset wyglądu nie pasuje do wyszukiwania."
+
+#: src/features/world/WorldPanel.tsx
+msgid "No entry matches the search."
+msgstr "Żaden wpis nie pasuje do wyszukiwania."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No file was chosen."
@@ -896,9 +961,33 @@ msgstr "Brak dostępnych wariantów."
 msgid "Normal"
 msgstr "Normalne"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Not activated"
+msgstr "Nieaktywowany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Not defeated"
+msgstr "Niepokonany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Not matched"
+msgstr "Niedopasowany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Not owned"
+msgstr "Nieposiadany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Not revealed"
+msgstr "Nieodkryty"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Not unlocked yet"
 msgstr "Jeszcze nieodblokowane"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Not visited"
+msgstr "Nieodwiedzone"
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Only the items the backend accepts for this slot are offered here."
@@ -907,6 +996,10 @@ msgstr "Pokazywane są wyłącznie przedmioty, które backend akceptuje dla tego
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Open a save and select a character slot to edit its equipment."
 msgstr "Otwórz save i wybierz slot postaci, aby edytować jej wyposażenie."
+
+#: src/features/world/WorldPanel.tsx
+msgid "Open a save and select a character slot to see its World progress."
+msgstr "Otwórz save i wybierz slot postaci, aby zobaczyć jej postęp w świecie."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
@@ -933,9 +1026,17 @@ msgstr "operacji"
 msgid "Order position"
 msgstr "Pozycja w kolejności"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Other"
+msgstr "Inne"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Overwrite"
 msgstr "Nadpisz"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Owned"
+msgstr "Posiadany"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Owned quantity"
@@ -1014,6 +1115,10 @@ msgstr "Poprzednia karta skrzyni"
 msgid "Profile"
 msgstr "Profil"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Progress"
+msgstr "Postęp"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Progression"
 msgstr "Postęp"
@@ -1031,6 +1136,10 @@ msgstr "Ilość: {0}"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Quantity: {0}"
 msgstr "Ilość: {0}"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Quests"
+msgstr "Questy"
 
 #. placeholder {0}: index + 1
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1087,6 +1196,14 @@ msgstr "Ponów"
 msgid "Redo the last undone operation"
 msgstr "Ponów ostatnio cofniętą operację"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Regions"
+msgstr "Regiony"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Remembrance"
+msgstr "Remembrance"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Remove"
@@ -1117,6 +1234,10 @@ msgstr "Ponów"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Retry closing"
 msgstr "Ponów zamykanie"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Revealed"
+msgstr "Odkryty"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Revert"
@@ -1248,6 +1369,10 @@ msgstr "Szukaj przedmiotów"
 msgid "Search presets..."
 msgstr "Szukaj presetów..."
 
+#: src/features/world/WorldPanel.tsx
+msgid "Search World entries"
+msgstr "Szukaj wpisów świata"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Select"
@@ -1295,6 +1420,10 @@ msgstr "Podsumowanie sesji i operacje na pliku"
 #: src/features/app-shell/AppShell.tsx
 msgid "Show Item ID"
 msgstr "Pokaż ID przedmiotu"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Sites of Grace"
+msgstr "Sites of Grace"
 
 #. placeholder {0}: slot.favoriteSlotID + 1
 #: src/features/character/CharacterPanel.tsx
@@ -1348,6 +1477,10 @@ msgstr "SoulMemory oraz posiadane runy pozostaną bez zmian."
 msgid "Source"
 msgstr "Źródło"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Spectral Steed Attires"
+msgstr "Stroje Spectral Steed"
+
 #. placeholder {0}: index + 1
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Spell {0}"
@@ -1390,6 +1523,18 @@ msgstr "Klasa początkowa"
 msgid "State how much of each item goes to Inventory and to Storage."
 msgstr "Podaj, ile każdego przedmiotu trafi do ekwipunku, a ile do skrzyni."
 
+#: src/features/world/WorldPanel.tsx
+msgid "Status: conflict"
+msgstr "Status: konflikt"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Status: legacy"
+msgstr "Status: legacy"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Status: resolved"
+msgstr "Status: rozstrzygnięty"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Storage"
@@ -1411,6 +1556,10 @@ msgstr "Siła"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Subcategory"
 msgstr "Podkategoria"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Summoning Pools"
+msgstr "Summoning Pools"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
@@ -1518,16 +1667,16 @@ msgid "The session changed after validation. Validate the current revision again
 msgstr "Sesja zmieniła się po walidacji. Ponownie zwaliduj bieżącą rewizję."
 
 #: src/features/app-shell/AppShell.tsx
-msgid "The World workspace will be implemented in a later frontend stage."
-msgstr "Workspace świata zostanie zaimplementowany na późniejszym etapie frontendu."
-
-#: src/features/app-shell/AppShell.tsx
 msgid "Theme"
 msgstr "Motyw"
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "This character slot is empty, so it has no equipment to show."
 msgstr "Ten slot postaci jest pusty, więc nie ma wyposażenia do pokazania."
+
+#: src/features/world/WorldPanel.tsx
+msgid "This character slot is empty, so it has no World progress to show."
+msgstr "Ten slot postaci jest pusty, więc nie ma postępu w świecie do pokazania."
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
@@ -1558,6 +1707,10 @@ msgstr "Ten save otwarto z liczbą błędów {0} i ostrzeżeń {1} zgłoszonych 
 #: src/features/app-shell/AppShell.tsx
 msgid "Tools"
 msgstr "Narzędzia"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Tutorials"
+msgstr "Samouczki"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
@@ -1620,6 +1773,10 @@ msgstr "Nie udało się wczytać postępu tego slotu postaci."
 msgid "Unable to load the Storage Box."
 msgstr "Nie udało się wczytać skrzyni."
 
+#: src/features/world/WorldPanel.tsx
+msgid "Unable to load this World section."
+msgstr "Nie można wczytać tej sekcji świata."
+
 #: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1641,6 +1798,14 @@ msgstr "Cofnij ostatnią operację"
 #: src/features/character/CharacterPanel.tsx
 msgid "Unknown"
 msgstr "Nieznany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Unlocked"
+msgstr "Odblokowane"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Unlocks"
+msgstr "Odblokowania"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -1697,6 +1862,10 @@ msgstr "Pokaż raport"
 msgid "Vigor"
 msgstr "Krzepa"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Visited"
+msgstr "Odwiedzone"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"
 msgstr "Ostrzeżenie"
@@ -1709,17 +1878,26 @@ msgstr "ostrzeżeń"
 msgid "Weapons"
 msgstr "Bronie"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Whetblades"
+msgstr "Whetblades"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Wondrous Physick"
 msgstr "Cudowny Eliksir"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "World"
 msgstr "Świat"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "World progress and unlocks"
 msgstr "Postęp świata i odblokowane elementy"
+
+#: src/features/world/WorldPanel.tsx
+msgid "World sections"
+msgstr "Sekcje świata"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx

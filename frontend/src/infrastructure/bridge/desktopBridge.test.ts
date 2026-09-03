@@ -23,6 +23,7 @@ import {
   GetResources,
   GetSaveCharacters,
   GetSaveValidationReport,
+  GetSpectralSteedAttires,
   GetStorage,
   LoadSave,
   SelectSaveFile,
@@ -40,6 +41,7 @@ import {
   equipment,
   inventory,
   saveengine,
+  world,
 } from "../../../wailsjs/go/models";
 import { toAppError } from "../../application/errors/appError";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
@@ -72,6 +74,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
   GetSaveValidationReport: vi.fn(),
+  GetSpectralSteedAttires: vi.fn(),
   GetStorage: vi.fn(),
   LoadSave: vi.fn(),
   SelectSaveFile: vi.fn(),
@@ -99,6 +102,7 @@ const getPhysickMixture = vi.mocked(GetPhysickMixture);
 const getEquippedSpells = vi.mocked(GetEquippedSpells);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
+const getSpectralSteedAttires = vi.mocked(GetSpectralSteedAttires);
 const getResources = vi.mocked(GetResources);
 const getResourcePresentationSummaries = vi.mocked(GetResourcePresentationSummaries);
 const getResource = vi.mocked(GetResource);
@@ -130,6 +134,7 @@ beforeEach(() => {
   getEquippedSpells.mockReset();
   getInventory.mockReset();
   getStorage.mockReset();
+  getSpectralSteedAttires.mockReset();
   getResources.mockReset();
   getResourcePresentationSummaries.mockReset();
   getResource.mockReset();
@@ -1974,5 +1979,30 @@ describe("wails equipment adapter", () => {
     });
     expect(deleteFavoritePreset).toHaveBeenCalledWith("session-1", 0, "1");
     expect(deleteFavReceipt.saveRevision).toBe("2");
+  });
+});
+
+describe("wails World adapter", () => {
+  it("rejects an unknown Spectral Steed status", async () => {
+    getSpectralSteedAttires.mockResolvedValue(
+      world.GetSpectralSteedAttiresResult.createFrom({
+        saveSessionID: "session-1",
+        saveRevision: "3",
+        characterID: 0,
+        active: true,
+        // Outside the closed backend contract: not a fourth state to present.
+        status: "partially-resolved",
+        activeAttireKey: "",
+        attires: [],
+      }),
+    );
+
+    const failure = await wailsDesktopBridge
+      .getSpectralSteedAttires({ saveSessionID: "session-1", characterID: 0 })
+      .catch((reason: unknown) => reason);
+
+    expect((failure as Error).message).toBe(bridgeFailureCode);
+    expect(toAppError(failure).code).toBe(bridgeFailureCode);
+    expect(JSON.stringify(toAppError(failure))).not.toContain("partially-resolved");
   });
 });

@@ -25,6 +25,14 @@ const equipmentCandidates = queryKeys.equipmentCandidates(session, 0, "3", {
 const favoritePresets = queryKeys.favoritePresets(session, "3");
 
 /**
+ * Two of the thirteen World views. They share the `world` branch and differ
+ * only in their view segment, so a pattern that reached one but not the other
+ * would leave a stale group on screen.
+ */
+const worldGraces = queryKeys.worldView(session, 0, "graces", "3");
+const worldQuests = queryKeys.worldView(session, 0, "quests", "3");
+
+/**
  * The expected mapping, written out by hand. Reading it back from the
  * implementation would prove only that the table was read; this is the reviewed
  * contract of every backend scope.
@@ -54,7 +62,7 @@ const expected: Record<ChangedScope, { invalidates: readonly (readonly unknown[]
       queryKeys.equippedSpells(session, 0, "3"),
     ],
   },
-  "world.flags": { invalidates: [] },
+  "world.flags": { invalidates: [worldGraces, worldQuests] },
   network: { invalidates: [] },
   favorites: { invalidates: [favoritePresets] },
   "diagnostics.report": {
@@ -79,6 +87,8 @@ const everyKey: readonly (readonly unknown[])[] = [
   queryKeys.equippedSpells(session, 0, "3"),
   favoritePresets,
   queryKeys.saveValidationReport(session, 0, "3"),
+  worldGraces,
+  worldQuests,
 ];
 
 /** Query keys are compared as their serialized form; they are fresh arrays. */

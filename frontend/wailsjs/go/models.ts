@@ -5751,3 +5751,816 @@ export namespace schema {
 
 }
 
+export namespace world {
+	
+	export class BellBearingEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    category: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new BellBearingEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class BossEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    regionLabel: string;
+	    encounterType: string;
+	    remembrance: boolean;
+	    defeated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new BossEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.regionLabel = source["regionLabel"];
+	        this.encounterType = source["encounterType"];
+	        this.remembrance = source["remembrance"];
+	        this.defeated = source["defeated"];
+	    }
+	}
+	export class ColosseumEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ColosseumEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class CookbookEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    category: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CookbookEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class GestureEntry {
+	    kind: string;
+	    key: string;
+	    slotID: number;
+	    name: string;
+	    category: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new GestureEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.slotID = source["slotID"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class GetBellBearingsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    bellBearings: BellBearingEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBellBearingsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.bellBearings = this.convertValues(source["bellBearings"], BellBearingEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetBossesResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    bosses: BossEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBossesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.bosses = this.convertValues(source["bosses"], BossEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetColosseumsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    colosseums: ColosseumEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetColosseumsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.colosseums = this.convertValues(source["colosseums"], ColosseumEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetCookbooksResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    cookbooks: CookbookEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetCookbooksResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.cookbooks = this.convertValues(source["cookbooks"], CookbookEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetGesturesResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    gestures: GestureEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetGesturesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.gestures = this.convertValues(source["gestures"], GestureEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GraceEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    regionLabel: string;
+	    bossArena: boolean;
+	    dungeonType: string;
+	    visited: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new GraceEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.regionLabel = source["regionLabel"];
+	        this.bossArena = source["bossArena"];
+	        this.dungeonType = source["dungeonType"];
+	        this.visited = source["visited"];
+	    }
+	}
+	export class GetGracesResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    graces: GraceEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetGracesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.graces = this.convertValues(source["graces"], GraceEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class MapRegionEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    areaLabel: string;
+	    visible: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new MapRegionEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.areaLabel = source["areaLabel"];
+	        this.visible = source["visible"];
+	    }
+	}
+	export class GetMapRegionsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    mapRegions: MapRegionEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetMapRegionsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.mapRegions = this.convertValues(source["mapRegions"], MapRegionEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class QuestStepEntry {
+	    stepKind: string;
+	    stepKey: string;
+	    description: string;
+	    location: string;
+	    matched: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new QuestStepEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.stepKind = source["stepKind"];
+	        this.stepKey = source["stepKey"];
+	        this.description = source["description"];
+	        this.location = source["location"];
+	        this.matched = source["matched"];
+	    }
+	}
+	export class QuestEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    steps: QuestStepEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new QuestEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.steps = this.convertValues(source["steps"], QuestStepEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetQuestsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    quests: QuestEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetQuestsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.quests = this.convertValues(source["quests"], QuestEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RegionEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    area: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RegionEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.area = source["area"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class GetRegionsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    regions: RegionEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetRegionsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.regions = this.convertValues(source["regions"], RegionEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SpectralSteedAttireEntry {
+	    attireKey: string;
+	    name: string;
+	    owned: boolean;
+	    requiredResourceKind: string;
+	    requiredResourceKey: string;
+	    iconPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpectralSteedAttireEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.attireKey = source["attireKey"];
+	        this.name = source["name"];
+	        this.owned = source["owned"];
+	        this.requiredResourceKind = source["requiredResourceKind"];
+	        this.requiredResourceKey = source["requiredResourceKey"];
+	        this.iconPath = source["iconPath"];
+	    }
+	}
+	export class GetSpectralSteedAttiresResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    status: string;
+	    activeAttireKey: string;
+	    attires: SpectralSteedAttireEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetSpectralSteedAttiresResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.status = source["status"];
+	        this.activeAttireKey = source["activeAttireKey"];
+	        this.attires = this.convertValues(source["attires"], SpectralSteedAttireEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SummoningPoolEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    regionLabel: string;
+	    activated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SummoningPoolEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.regionLabel = source["regionLabel"];
+	        this.activated = source["activated"];
+	    }
+	}
+	export class GetSummoningPoolsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    summoningPools: SummoningPoolEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetSummoningPoolsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.summoningPools = this.convertValues(source["summoningPools"], SummoningPoolEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TutorialEntry {
+	    kind: string;
+	    key: string;
+	    title: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new TutorialEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.title = source["title"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class GetTutorialsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    tutorials: TutorialEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetTutorialsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.tutorials = this.convertValues(source["tutorials"], TutorialEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class WhetbladeEntry {
+	    kind: string;
+	    key: string;
+	    name: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new WhetbladeEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class GetWhetbladesResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    whetblades: WhetbladeEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetWhetbladesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.whetblades = this.convertValues(source["whetblades"], WhetbladeEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+
+}
+

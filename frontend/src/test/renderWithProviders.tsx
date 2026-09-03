@@ -64,6 +64,8 @@ import type {
 } from "../application/save-session/saveSessionPort";
 import { SettingsPortProvider } from "../application/settings/settingsClient";
 import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
+import { WorldPortProvider } from "../application/world/worldClient";
+import type { WorldPort } from "../application/world/worldPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
 
 /**
@@ -794,6 +796,42 @@ export function makeEquipmentPort(overrides: Partial<EquipmentPort> = {}): Equip
   };
 }
 
+/**
+ * The World identity every stub answer carries. World is read-only, so the stub
+ * is a plain set of getters: there is no World mutation to fake.
+ */
+const stubWorldIdentity = {
+  saveSessionID: "session-1",
+  saveRevision: "3",
+  characterID: 0,
+  active: true,
+};
+
+export function makeWorldPort(overrides: Partial<WorldPort> = {}): WorldPort {
+  return {
+    getRegions: () => Promise.resolve({ ...stubWorldIdentity, regions: [] }),
+    getMapRegions: () => Promise.resolve({ ...stubWorldIdentity, mapRegions: [] }),
+    getGraces: () => Promise.resolve({ ...stubWorldIdentity, graces: [] }),
+    getBosses: () => Promise.resolve({ ...stubWorldIdentity, bosses: [] }),
+    getQuests: () => Promise.resolve({ ...stubWorldIdentity, quests: [] }),
+    getGestures: () => Promise.resolve({ ...stubWorldIdentity, gestures: [] }),
+    getCookbooks: () => Promise.resolve({ ...stubWorldIdentity, cookbooks: [] }),
+    getBellBearings: () => Promise.resolve({ ...stubWorldIdentity, bellBearings: [] }),
+    getWhetblades: () => Promise.resolve({ ...stubWorldIdentity, whetblades: [] }),
+    getTutorials: () => Promise.resolve({ ...stubWorldIdentity, tutorials: [] }),
+    getSummoningPools: () => Promise.resolve({ ...stubWorldIdentity, summoningPools: [] }),
+    getColosseums: () => Promise.resolve({ ...stubWorldIdentity, colosseums: [] }),
+    getSpectralSteedAttires: () =>
+      Promise.resolve({
+        ...stubWorldIdentity,
+        status: "legacy",
+        activeAttireKey: "",
+        attires: [],
+      }),
+    ...overrides,
+  };
+}
+
 export function makePort(overrides: Partial<ApplicationInfoPort> = {}): ApplicationInfoPort {
   return {
     getApplicationInfo: () => Promise.resolve(stubApplicationInfo),
@@ -1010,6 +1048,7 @@ export function TestProviders({
   diagnosticsPort,
   itemsPort,
   equipmentPort,
+  worldPort,
   catalogPort,
   settingsPort,
   showItemID,
@@ -1024,6 +1063,7 @@ export function TestProviders({
   diagnosticsPort?: DiagnosticsPort;
   itemsPort?: ItemsPort;
   equipmentPort?: EquipmentPort;
+  worldPort?: WorldPort;
   catalogPort?: CatalogPort;
   settingsPort?: SettingsPort;
   showItemID?: boolean;
@@ -1041,7 +1081,9 @@ export function TestProviders({
                       <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
                         <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
                           <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
-                            {children}
+                            <WorldPortProvider port={worldPort ?? makeWorldPort()}>
+                              {children}
+                            </WorldPortProvider>
                           </EquipmentPortProvider>
                         </ItemsPortProvider>
                       </DiagnosticsPortProvider>
@@ -1068,6 +1110,7 @@ export async function renderApp(
     diagnosticsPort?: DiagnosticsPort;
     itemsPort?: ItemsPort;
     equipmentPort?: EquipmentPort;
+    worldPort?: WorldPort;
     catalogPort?: CatalogPort;
     settingsPort?: SettingsPort;
     showItemID?: boolean;
@@ -1089,6 +1132,7 @@ export async function renderApp(
         diagnosticsPort={options.diagnosticsPort}
         itemsPort={options.itemsPort}
         equipmentPort={options.equipmentPort}
+        worldPort={options.worldPort}
         catalogPort={options.catalogPort}
         settingsPort={options.settingsPort}
         showItemID={options.showItemID}

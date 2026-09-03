@@ -4,6 +4,7 @@ import {inventory} from '../models';
 import {saveengine} from '../models';
 import {appearance} from '../models';
 import {application} from '../models';
+import {world} from '../models';
 import {equipment} from '../models';
 import {schema} from '../models';
 import {catalog} from '../models';
@@ -32,11 +33,19 @@ export function GetAppearancePresets(arg1:string,arg2:Array<string>):Promise<app
 
 export function GetApplicationInfo():Promise<application.GetApplicationInfoResult>;
 
+export function GetBellBearings(arg1:string,arg2:number,arg3:string):Promise<world.GetBellBearingsResult>;
+
+export function GetBosses(arg1:string,arg2:number):Promise<world.GetBossesResult>;
+
 export function GetCharacterLoadout(arg1:string,arg2:number):Promise<equipment.GetCharacterLoadoutResult>;
 
 export function GetCharacterProfile(arg1:string,arg2:number):Promise<saveengine.CharacterProfile>;
 
 export function GetCharacterStats(arg1:string,arg2:number):Promise<saveengine.CharacterStats>;
+
+export function GetColosseums(arg1:string,arg2:number):Promise<world.GetColosseumsResult>;
+
+export function GetCookbooks(arg1:string,arg2:number,arg3:string):Promise<world.GetCookbooksResult>;
 
 export function GetEquipment(arg1:string,arg2:number):Promise<saveengine.CharacterEquipment>;
 
@@ -46,6 +55,10 @@ export function GetEquippedSpells(arg1:string,arg2:number):Promise<equipment.Get
 
 export function GetFavoritePresets(arg1:string,arg2:any):Promise<saveengine.FavoritePresetsState>;
 
+export function GetGestures(arg1:string,arg2:number,arg3:string):Promise<world.GetGesturesResult>;
+
+export function GetGraces(arg1:string,arg2:number):Promise<world.GetGracesResult>;
+
 export function GetInventory(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetInventoryResult>;
 
 export function GetItemDatabase(arg1:string,arg2:string,arg3:string,arg4:boolean,arg5:Array<schema.ResourceRef>,arg6:string,arg7:number,arg8:number):Promise<catalog.GetItemDatabaseResult>;
@@ -53,6 +66,8 @@ export function GetItemDatabase(arg1:string,arg2:string,arg3:string,arg4:boolean
 export function GetItemVariants(arg1:string,arg2:string):Promise<catalog.GetItemVariantsResult>;
 
 export function GetLoadedSave(arg1:string):Promise<saveengine.SessionInfo>;
+
+export function GetMapRegions(arg1:string,arg2:number):Promise<world.GetMapRegionsResult>;
 
 export function GetOperationHistory(arg1:string):Promise<saveengine.OperationHistory>;
 
@@ -62,6 +77,8 @@ export function GetPhysickMixture(arg1:string,arg2:number):Promise<saveengine.Ch
 
 export function GetPouchItems(arg1:string,arg2:number):Promise<saveengine.CharacterPouchItems>;
 
+export function GetQuests(arg1:string,arg2:number,arg3:string,arg4:string):Promise<world.GetQuestsResult>;
+
 export function GetQuickItems(arg1:string,arg2:number):Promise<saveengine.CharacterQuickItems>;
 
 export function GetRecentFiles():Promise<Array<saveengine.RecentFile>>;
@@ -69,6 +86,8 @@ export function GetRecentFiles():Promise<Array<saveengine.RecentFile>>;
 export function GetRecoveryJournal(arg1:string):Promise<saveengine.RecoveryJournalSummary>;
 
 export function GetRecoveryJournals():Promise<Array<saveengine.RecoveryJournalSummary>>;
+
+export function GetRegions(arg1:string,arg2:number):Promise<world.GetRegionsResult>;
 
 export function GetResource(arg1:string,arg2:string):Promise<catalog.GetResourceResult>;
 
@@ -84,7 +103,15 @@ export function GetSaveLifecycleSettings():Promise<saveengine.SaveLifecycleSetti
 
 export function GetSaveValidationReport(arg1:string,arg2:number,arg3:string):Promise<diagnostics.GetSaveValidationReportResult>;
 
+export function GetSpectralSteedAttires(arg1:string,arg2:number):Promise<world.GetSpectralSteedAttiresResult>;
+
 export function GetStorage(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetStorageResult>;
+
+export function GetSummoningPools(arg1:string,arg2:number):Promise<world.GetSummoningPoolsResult>;
+
+export function GetTutorials(arg1:string,arg2:number,arg3:string):Promise<world.GetTutorialsResult>;
+
+export function GetWhetblades(arg1:string,arg2:number,arg3:string):Promise<world.GetWhetbladesResult>;
 
 export function LoadSave(arg1:string,arg2:string,arg3:string):Promise<saveengine.SessionInfo>;
 

@@ -13,26 +13,35 @@ import {
   DiscardRecoveryJournal,
   ExportRecoveryJournal,
   GetAppearancePresets,
+  GetBellBearings,
+  GetBosses,
   GetApplicationInfo,
   GetCharacterLoadout,
   GetCharacterProfile,
   GetCharacterStats,
+  GetColosseums,
+  GetCookbooks,
   GetEquipment,
   GetEquipmentCandidates,
   GetEquippedSpells,
   GetFavoritePresets,
+  GetGestures,
+  GetGraces,
   GetInventory,
   GetItemDatabase,
   GetItemVariants,
   GetLoadedSave,
+  GetMapRegions,
   GetOperationHistory,
   GetOwnedItems,
   GetPhysickMixture,
   GetPouchItems,
+  GetQuests,
   GetQuickItems,
   GetRecentFiles,
   GetRecoveryJournal,
   GetRecoveryJournals,
+  GetRegions,
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
@@ -40,7 +49,11 @@ import {
   GetSaveCharacters,
   GetSaveLifecycleSettings,
   GetSaveValidationReport,
+  GetSpectralSteedAttires,
   GetStorage,
+  GetSummoningPools,
+  GetTutorials,
+  GetWhetblades,
   LoadSave,
   MoveOwnedItemsToInventory,
   MoveOwnedItemsToStorage,
@@ -155,6 +168,23 @@ import type {
   SaveSessionPort,
 } from "../../application/save-session/saveSessionPort";
 import type { SafetyProfileSettings, SettingsPort } from "../../application/settings/settingsPort";
+import type {
+  SpectralSteedAttireStatus,
+  WorldBellBearings,
+  WorldBosses,
+  WorldColosseums,
+  WorldCookbooks,
+  WorldGestures,
+  WorldGraces,
+  WorldMapRegions,
+  WorldPort,
+  WorldQuests,
+  WorldRegions,
+  WorldSpectralSteedAttires,
+  WorldSummoningPools,
+  WorldTutorials,
+  WorldWhetblades,
+} from "../../application/world/worldPort";
 import { parseBridgeError } from "./bridgeError";
 import { parseSessionChangedEvent, sessionChangedEventName } from "./sessionChangedEvent";
 
@@ -213,6 +243,20 @@ function toChangedScopes(values: readonly string[]): readonly ChangedScope[] {
     throw new AppErrorException(bridgeCallFailed());
   }
   return [...values];
+}
+
+const spectralSteedAttireStatuses = ["resolved", "legacy", "conflict"] as const;
+
+/**
+ * The Spectral Steed status is a closed backend contract. An unknown value is
+ * an unknown contract, so it fails closed with the same stable code as any
+ * other bridge failure and never reaches the screen verbatim.
+ */
+function toSpectralSteedAttireStatus(value: string): SpectralSteedAttireStatus {
+  if (!spectralSteedAttireStatuses.includes(value as SpectralSteedAttireStatus)) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return value as SpectralSteedAttireStatus;
 }
 
 function toOperationRisk(value: string): OperationRisk {
@@ -935,6 +979,219 @@ function toEquipmentMutationReceipt(result: {
   };
 }
 
+/**
+ * The identity and slot state every World getter reports. It is copied field by
+ * field, so the generated transport object never becomes application state.
+ */
+function toWorldIdentity(result: {
+  saveSessionID: string;
+  saveRevision: string;
+  characterID: number;
+  active: boolean;
+}) {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    active: result.active,
+  };
+}
+
+/**
+ * The thirteen World projections below copy the arrays and the entries into
+ * objects this layer owns, in the backend's own order. No entry is filtered,
+ * re-sorted, grouped, renamed or completed with a locally derived fact: the
+ * resource kind stays the backend's own string, an empty label stays empty, and
+ * the Spectral Steed status is carried exactly as classified.
+ */
+function toWorldRegions(result: Awaited<ReturnType<typeof GetRegions>>): WorldRegions {
+  return {
+    ...toWorldIdentity(result),
+    regions: result.regions.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      area: entry.area,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldMapRegions(result: Awaited<ReturnType<typeof GetMapRegions>>): WorldMapRegions {
+  return {
+    ...toWorldIdentity(result),
+    mapRegions: result.mapRegions.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      areaLabel: entry.areaLabel,
+      visible: entry.visible,
+    })),
+  };
+}
+
+function toWorldGraces(result: Awaited<ReturnType<typeof GetGraces>>): WorldGraces {
+  return {
+    ...toWorldIdentity(result),
+    graces: result.graces.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      regionLabel: entry.regionLabel,
+      bossArena: entry.bossArena,
+      dungeonType: entry.dungeonType,
+      visited: entry.visited,
+    })),
+  };
+}
+
+function toWorldBosses(result: Awaited<ReturnType<typeof GetBosses>>): WorldBosses {
+  return {
+    ...toWorldIdentity(result),
+    bosses: result.bosses.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      regionLabel: entry.regionLabel,
+      encounterType: entry.encounterType,
+      remembrance: entry.remembrance,
+      defeated: entry.defeated,
+    })),
+  };
+}
+
+function toWorldQuests(result: Awaited<ReturnType<typeof GetQuests>>): WorldQuests {
+  return {
+    ...toWorldIdentity(result),
+    quests: result.quests.map((quest) => ({
+      kind: quest.kind,
+      key: quest.key,
+      name: quest.name,
+      steps: quest.steps.map((step) => ({
+        stepKind: step.stepKind,
+        stepKey: step.stepKey,
+        description: step.description,
+        location: step.location,
+        matched: step.matched,
+      })),
+    })),
+  };
+}
+
+function toWorldGestures(result: Awaited<ReturnType<typeof GetGestures>>): WorldGestures {
+  return {
+    ...toWorldIdentity(result),
+    gestures: result.gestures.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      slotID: entry.slotID,
+      name: entry.name,
+      category: entry.category,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldCookbooks(result: Awaited<ReturnType<typeof GetCookbooks>>): WorldCookbooks {
+  return {
+    ...toWorldIdentity(result),
+    cookbooks: result.cookbooks.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      category: entry.category,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldBellBearings(
+  result: Awaited<ReturnType<typeof GetBellBearings>>,
+): WorldBellBearings {
+  return {
+    ...toWorldIdentity(result),
+    bellBearings: result.bellBearings.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      category: entry.category,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldWhetblades(result: Awaited<ReturnType<typeof GetWhetblades>>): WorldWhetblades {
+  return {
+    ...toWorldIdentity(result),
+    whetblades: result.whetblades.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldTutorials(result: Awaited<ReturnType<typeof GetTutorials>>): WorldTutorials {
+  return {
+    ...toWorldIdentity(result),
+    tutorials: result.tutorials.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      title: entry.title,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldSummoningPools(
+  result: Awaited<ReturnType<typeof GetSummoningPools>>,
+): WorldSummoningPools {
+  return {
+    ...toWorldIdentity(result),
+    summoningPools: result.summoningPools.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      regionLabel: entry.regionLabel,
+      activated: entry.activated,
+    })),
+  };
+}
+
+function toWorldColosseums(result: Awaited<ReturnType<typeof GetColosseums>>): WorldColosseums {
+  return {
+    ...toWorldIdentity(result),
+    colosseums: result.colosseums.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      name: entry.name,
+      unlocked: entry.unlocked,
+    })),
+  };
+}
+
+function toWorldSpectralSteedAttires(
+  result: Awaited<ReturnType<typeof GetSpectralSteedAttires>>,
+): WorldSpectralSteedAttires {
+  return {
+    ...toWorldIdentity(result),
+    // `legacy` and `conflict` are answers, not failures: the status and the
+    // active key are carried as reported and never resolved into one attire.
+    // Only a value outside the closed contract is rejected.
+    status: toSpectralSteedAttireStatus(result.status),
+    activeAttireKey: result.activeAttireKey,
+    attires: result.attires.map((entry) => ({
+      attireKey: entry.attireKey,
+      name: entry.name,
+      owned: entry.owned,
+      requiredResourceKind: entry.requiredResourceKind,
+      requiredResourceKey: entry.requiredResourceKey,
+      iconPath: entry.iconPath,
+    })),
+  };
+}
+
 /** Projects the generated settings result onto the application port shape. */
 function toSafetyProfileSettings(
   result: Awaited<ReturnType<typeof GetSafetyProfile>>,
@@ -959,6 +1216,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   FavoritesPort &
   ItemsPort &
   EquipmentPort &
+  WorldPort &
   SettingsPort &
   CatalogPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
@@ -1430,6 +1688,59 @@ export const wailsDesktopBridge: ApplicationInfoPort &
     ),
 
   getSafetyProfile: async () => toSafetyProfileSettings(await callBridge(GetSafetyProfile)),
+
+  // The thirteen World getters are read-only. The pair reaches the bridge in
+  // the order the backend contract defines; nothing is trimmed or defaulted on
+  // the way, and no World mutation is exposed here — the operation risk level,
+  // the risk reason and the per-action capabilities a write needs are not part
+  // of the current contract, so stage 9A offers no writer at all.
+  getRegions: async ({ saveSessionID, characterID }) =>
+    toWorldRegions(await callBridge(() => GetRegions(saveSessionID, characterID))),
+
+  getMapRegions: async ({ saveSessionID, characterID }) =>
+    toWorldMapRegions(await callBridge(() => GetMapRegions(saveSessionID, characterID))),
+
+  getGraces: async ({ saveSessionID, characterID }) =>
+    toWorldGraces(await callBridge(() => GetGraces(saveSessionID, characterID))),
+
+  getBosses: async ({ saveSessionID, characterID }) =>
+    toWorldBosses(await callBridge(() => GetBosses(saveSessionID, characterID))),
+
+  // The questline selector is the endpoint's own input: the resource kind it
+  // accepts, and the empty key that asks for every declared questline. Neither
+  // value is a local interpretation of the answer.
+  getQuests: async ({ saveSessionID, characterID }) =>
+    toWorldQuests(await callBridge(() => GetQuests(saveSessionID, characterID, "quest", ""))),
+
+  // The empty availability filter is the endpoint's own "every entry" input.
+  // The workspace shows unlocked and locked entries together, so it never asks
+  // for a pre-filtered subset and never derives one locally.
+  getGestures: async ({ saveSessionID, characterID }) =>
+    toWorldGestures(await callBridge(() => GetGestures(saveSessionID, characterID, ""))),
+
+  getCookbooks: async ({ saveSessionID, characterID }) =>
+    toWorldCookbooks(await callBridge(() => GetCookbooks(saveSessionID, characterID, ""))),
+
+  getBellBearings: async ({ saveSessionID, characterID }) =>
+    toWorldBellBearings(await callBridge(() => GetBellBearings(saveSessionID, characterID, ""))),
+
+  getWhetblades: async ({ saveSessionID, characterID }) =>
+    toWorldWhetblades(await callBridge(() => GetWhetblades(saveSessionID, characterID, ""))),
+
+  getTutorials: async ({ saveSessionID, characterID }) =>
+    toWorldTutorials(await callBridge(() => GetTutorials(saveSessionID, characterID, ""))),
+
+  getSummoningPools: async ({ saveSessionID, characterID }) =>
+    toWorldSummoningPools(await callBridge(() => GetSummoningPools(saveSessionID, characterID))),
+
+  getColosseums: async ({ saveSessionID, characterID }) =>
+    toWorldColosseums(await callBridge(() => GetColosseums(saveSessionID, characterID))),
+
+  getSpectralSteedAttires: async ({ saveSessionID, characterID }) =>
+    toWorldSpectralSteedAttires(
+      await callBridge(() => GetSpectralSteedAttires(saveSessionID, characterID)),
+    ),
+
 
   // The value reaches the bridge exactly as received: which profiles exist and
   // how an unknown one is rejected are the backend's contract.

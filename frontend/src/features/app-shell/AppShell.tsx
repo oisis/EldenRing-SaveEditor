@@ -24,6 +24,7 @@ import { PendingChangesDialog, ReviewChangesDialog } from "../review-changes/Rev
 import { RecoveryJournalDialog } from "../save-session/RecoveryJournalDialog";
 import { SaveSessionContent } from "../save-session/SaveSessionPanel";
 import type { SaveSessionFlow } from "../save-session/useSaveSessionFlow";
+import { WorldPanel } from "../world/WorldPanel";
 import {
   brand,
   brandLogo,
@@ -314,9 +315,13 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           </section>
         )}
         {section === "world" && (
-          <UnavailableScreen>
-            <Trans>The World workspace will be implemented in a later frontend stage.</Trans>
-          </UnavailableScreen>
+          <section aria-label={t`World`} className={screen}>
+            <WorldPanel
+              saveSessionID={session?.saveSessionID}
+              saveRevision={session?.saveRevision}
+              characterID={selectedCharacterID}
+            />
+          </section>
         )}
         {section === "advanced" && (
           <UnavailableScreen>

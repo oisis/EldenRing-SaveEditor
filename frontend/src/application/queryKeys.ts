@@ -18,6 +18,25 @@ export const noCharacter = "none";
 type CharacterKey = number | typeof noCharacter;
 
 /**
+ * The thirteen World getters, named by the view each one answers. The union is
+ * closed on purpose: a key can only be built for a view the backend serves.
+ */
+export type WorldView =
+  | "regions"
+  | "map-regions"
+  | "graces"
+  | "bosses"
+  | "quests"
+  | "gestures"
+  | "cookbooks"
+  | "bell-bearings"
+  | "whetblades"
+  | "tutorials"
+  | "summoning-pools"
+  | "colosseums"
+  | "spectral-steed-attires";
+
+/**
  * The single source of truth for TanStack Query keys. Components and feature
  * modules never build a key inline: invalidation scopes are mapped onto these
  * keys in one place.
@@ -220,6 +239,24 @@ export const queryKeys = {
       request.pageSize,
       saveRevision,
     ] as const,
+  /**
+   * The thirteen World views share one `world` branch below the session and the
+   * slot, and each one is separated from the other twelve by its own view
+   * segment. The shared prefix is what lets `world.flags` invalidate every
+   * World view of a save and a character with a single pattern instead of
+   * naming thirteen independent keys, while a failure or a refetch of one view
+   * still leaves the other twelve alone.
+   *
+   * The revision takes part in the key, so an answer produced for an earlier
+   * revision can never be served for a later one.
+   */
+  worldView: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    view: WorldView,
+    saveRevision: string,
+  ) =>
+    ["save-session", saveSessionID, "character", characterID, "world", view, saveRevision] as const,
   /**
    * A container page is identified by its session, slot, container, section and
    * page window: two sections, two pages or two page sizes are different views

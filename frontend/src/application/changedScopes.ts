@@ -102,8 +102,11 @@ export const changedScopeQueryKeyPatterns: Record<
     characterView(id, "physick-mixture"),
     characterView(id, "equipped-spells"),
   ],
-  // No World getter is wired into the frontend yet.
-  "world.flags": () => [],
+  // The thirteen World getters share one `world` branch per character, so a
+  // flag mutation refreshes every World view of every slot of the session with
+  // one pattern. The frontend cannot tell which of the thirteen views a given
+  // flag belongs to, and guessing would leave a stale group on screen.
+  "world.flags": (id) => [characterView(id, "world")],
   // No Network getter is wired into the frontend yet.
   network: () => [],
   favorites: (id) => [["save-session", id, "favorite-presets"]],

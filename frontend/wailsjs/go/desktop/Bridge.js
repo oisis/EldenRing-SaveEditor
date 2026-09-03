@@ -46,6 +46,14 @@ export function GetApplicationInfo() {
   return window['go']['desktop']['Bridge']['GetApplicationInfo']();
 }
 
+export function GetBellBearings(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetBellBearings'](arg1, arg2, arg3);
+}
+
+export function GetBosses(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetBosses'](arg1, arg2);
+}
+
 export function GetCharacterLoadout(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetCharacterLoadout'](arg1, arg2);
 }
@@ -56,6 +64,14 @@ export function GetCharacterProfile(arg1, arg2) {
 
 export function GetCharacterStats(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetCharacterStats'](arg1, arg2);
+}
+
+export function GetColosseums(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetColosseums'](arg1, arg2);
+}
+
+export function GetCookbooks(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetCookbooks'](arg1, arg2, arg3);
 }
 
 export function GetEquipment(arg1, arg2) {
@@ -74,6 +90,14 @@ export function GetFavoritePresets(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetFavoritePresets'](arg1, arg2);
 }
 
+export function GetGestures(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetGestures'](arg1, arg2, arg3);
+}
+
+export function GetGraces(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetGraces'](arg1, arg2);
+}
+
 export function GetInventory(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['GetInventory'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -88,6 +112,10 @@ export function GetItemVariants(arg1, arg2) {
 
 export function GetLoadedSave(arg1) {
   return window['go']['desktop']['Bridge']['GetLoadedSave'](arg1);
+}
+
+export function GetMapRegions(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetMapRegions'](arg1, arg2);
 }
 
 export function GetOperationHistory(arg1) {
@@ -106,6 +134,10 @@ export function GetPouchItems(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetPouchItems'](arg1, arg2);
 }
 
+export function GetQuests(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['GetQuests'](arg1, arg2, arg3, arg4);
+}
+
 export function GetQuickItems(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetQuickItems'](arg1, arg2);
 }
@@ -120,6 +152,10 @@ export function GetRecoveryJournal(arg1) {
 
 export function GetRecoveryJournals() {
   return window['go']['desktop']['Bridge']['GetRecoveryJournals']();
+}
+
+export function GetRegions(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetRegions'](arg1, arg2);
 }
 
 export function GetResource(arg1, arg2) {
@@ -150,8 +186,24 @@ export function GetSaveValidationReport(arg1, arg2, arg3) {
   return window['go']['desktop']['Bridge']['GetSaveValidationReport'](arg1, arg2, arg3);
 }
 
+export function GetSpectralSteedAttires(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetSpectralSteedAttires'](arg1, arg2);
+}
+
 export function GetStorage(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['GetStorage'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function GetSummoningPools(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetSummoningPools'](arg1, arg2);
+}
+
+export function GetTutorials(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetTutorials'](arg1, arg2, arg3);
+}
+
+export function GetWhetblades(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetWhetblades'](arg1, arg2, arg3);
 }
 
 export function LoadSave(arg1, arg2, arg3) {
