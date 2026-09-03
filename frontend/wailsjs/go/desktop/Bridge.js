@@ -6,12 +6,24 @@ export function AddItemsToContainers(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['AddItemsToContainers'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function ApplyAppearancePreset(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['ApplyAppearancePreset'](arg1, arg2, arg3, arg4);
+}
+
+export function ApplyFavoritePreset(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['ApplyFavoritePreset'](arg1, arg2, arg3, arg4);
+}
+
 export function ClearRecentFiles() {
   return window['go']['desktop']['Bridge']['ClearRecentFiles']();
 }
 
 export function CloseSave(arg1) {
   return window['go']['desktop']['Bridge']['CloseSave'](arg1);
+}
+
+export function DeleteFavoritePreset(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['DeleteFavoritePreset'](arg1, arg2, arg3);
 }
 
 export function DiscardChanges(arg1, arg2) {
@@ -24,6 +36,10 @@ export function DiscardRecoveryJournal(arg1) {
 
 export function ExportRecoveryJournal(arg1, arg2) {
   return window['go']['desktop']['Bridge']['ExportRecoveryJournal'](arg1, arg2);
+}
+
+export function GetAppearancePresets(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetAppearancePresets'](arg1, arg2);
 }
 
 export function GetApplicationInfo() {
@@ -52,6 +68,10 @@ export function GetEquipmentCandidates(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function GetEquippedSpells(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetEquippedSpells'](arg1, arg2);
+}
+
+export function GetFavoritePresets(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['GetFavoritePresets'](arg1, arg2);
 }
 
 export function GetInventory(arg1, arg2, arg3, arg4, arg5) {
@@ -194,6 +214,22 @@ export function SelectSaveTarget(arg1) {
   return window['go']['desktop']['Bridge']['SelectSaveTarget'](arg1);
 }
 
+export function SetCharacterGender(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetCharacterGender'](arg1, arg2, arg3, arg4);
+}
+
+export function SetCharacterName(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetCharacterName'](arg1, arg2, arg3, arg4);
+}
+
+export function SetCharacterStartingClass(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['desktop']['Bridge']['SetCharacterStartingClass'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function SetCharacterStats(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['desktop']['Bridge']['SetCharacterStats'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function SetEquippedArmaments(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetEquippedArmaments'](arg1, arg2, arg3, arg4);
 }
@@ -208,6 +244,10 @@ export function SetEquippedSpells(arg1, arg2, arg3, arg4) {
 
 export function SetEquippedTalismans(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetEquippedTalismans'](arg1, arg2, arg3, arg4);
+}
+
+export function SetFavoritePreset(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetFavoritePreset'](arg1, arg2, arg3, arg4);
 }
 
 export function SetOwnedItemQuantity(arg1, arg2, arg3, arg4, arg5) {

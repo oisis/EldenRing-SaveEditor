@@ -3,11 +3,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { AppearancePortProvider } from "./application/appearance/appearanceClient";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
 import { CatalogPortProvider } from "./application/catalog/catalogClient";
 import { CharacterPortProvider } from "./application/character/characterClient";
 import { DiagnosticsPortProvider } from "./application/diagnostics/diagnosticsClient";
 import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
+import { FavoritesPortProvider } from "./application/favorites/favoritesClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
 import { ItemPreferencesProvider } from "./application/preferences/itemPreferences";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
@@ -42,17 +44,21 @@ createRoot(container).render(
           <SettingsPortProvider port={wailsDesktopBridge}>
             <ItemPreferencesProvider>
               <CatalogPortProvider port={wailsDesktopBridge}>
-                <SaveSessionPortProvider port={wailsDesktopBridge}>
-                  <CharacterPortProvider port={wailsDesktopBridge}>
-                    <DiagnosticsPortProvider port={wailsDesktopBridge}>
-                      <ItemsPortProvider port={wailsDesktopBridge}>
-                        <EquipmentPortProvider port={wailsDesktopBridge}>
-                          <App />
-                        </EquipmentPortProvider>
-                      </ItemsPortProvider>
-                    </DiagnosticsPortProvider>
-                  </CharacterPortProvider>
-                </SaveSessionPortProvider>
+                <AppearancePortProvider port={wailsDesktopBridge}>
+                  <FavoritesPortProvider port={wailsDesktopBridge}>
+                    <SaveSessionPortProvider port={wailsDesktopBridge}>
+                      <CharacterPortProvider port={wailsDesktopBridge}>
+                        <DiagnosticsPortProvider port={wailsDesktopBridge}>
+                          <ItemsPortProvider port={wailsDesktopBridge}>
+                            <EquipmentPortProvider port={wailsDesktopBridge}>
+                              <App />
+                            </EquipmentPortProvider>
+                          </ItemsPortProvider>
+                        </DiagnosticsPortProvider>
+                      </CharacterPortProvider>
+                    </SaveSessionPortProvider>
+                  </FavoritesPortProvider>
+                </AppearancePortProvider>
               </CatalogPortProvider>
             </ItemPreferencesProvider>
           </SettingsPortProvider>

@@ -4,11 +4,15 @@
 
 import {
   AddItemsToContainers,
+  ApplyAppearancePreset,
+  ApplyFavoritePreset,
   ClearRecentFiles,
   CloseSave,
+  DeleteFavoritePreset,
   DiscardChanges,
   DiscardRecoveryJournal,
   ExportRecoveryJournal,
+  GetAppearancePresets,
   GetApplicationInfo,
   GetCharacterLoadout,
   GetCharacterProfile,
@@ -16,6 +20,7 @@ import {
   GetEquipment,
   GetEquipmentCandidates,
   GetEquippedSpells,
+  GetFavoritePresets,
   GetInventory,
   GetItemDatabase,
   GetItemVariants,
@@ -51,10 +56,15 @@ import {
   SaveAs,
   SelectSaveFile,
   SelectSaveTarget,
+  SetCharacterGender,
+  SetCharacterName,
+  SetCharacterStartingClass,
+  SetCharacterStats,
   SetEquippedArmaments,
   SetEquippedArmor,
   SetEquippedSpells,
   SetEquippedTalismans,
+  SetFavoritePreset,
   SetOwnedItemQuantity,
   SetPhysickMixture,
   SetPouchItems,
@@ -64,8 +74,12 @@ import {
   UndoLastOperation,
   ValidateReviewChanges,
 } from "../../../wailsjs/go/desktop/Bridge";
-import type { schema } from "../../../wailsjs/go/models";
+import { saveengine, type schema } from "../../../wailsjs/go/models";
 import { EventsOn } from "../../../wailsjs/runtime/runtime";
+import type {
+  AppearancePort,
+  AppearancePresetSummary,
+} from "../../application/appearance/appearancePort";
 import type {
   ApplicationInfo,
   ApplicationInfoPort,
@@ -118,6 +132,7 @@ import {
   bridgeCallFailed,
   bridgeFailureCode,
 } from "../../application/errors/appError";
+import type { FavoritesPort, SaveFavoritePresets } from "../../application/favorites/favoritesPort";
 import type {
   ItemMutationReceipt,
   ItemPage,
@@ -938,6 +953,8 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   SaveSessionPort &
   DiagnosticsPort &
   CharacterPort &
+  AppearancePort &
+  FavoritesPort &
   ItemsPort &
   EquipmentPort &
   SettingsPort &
@@ -1157,6 +1174,114 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       baseMaxSP: result.baseMaxSP,
     };
   },
+
+  setCharacterName: async ({ saveSessionID, characterID, name, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() => SetCharacterName(saveSessionID, characterID, name, expectedRevision)),
+    ),
+
+  setCharacterStats: async ({
+    saveSessionID,
+    characterID,
+    attributes,
+    levelPolicy,
+    expectedRevision,
+  }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        SetCharacterStats(
+          saveSessionID,
+          characterID,
+          new saveengine.CharacterAttributes(attributes),
+          levelPolicy,
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setCharacterStartingClass: async ({
+    saveSessionID,
+    characterID,
+    startingClassID,
+    confirmReset,
+    expectedRevision,
+  }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        SetCharacterStartingClass(
+          saveSessionID,
+          characterID,
+          startingClassID,
+          confirmReset,
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setCharacterGender: async ({ saveSessionID, characterID, gender, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        SetCharacterGender(saveSessionID, characterID, gender, expectedRevision),
+      ),
+    ),
+
+  getAppearancePresets: async ({
+    search = "",
+    tags = [],
+  } = {}): Promise<readonly AppearancePresetSummary[]> => {
+    const result = await callBridge(() => GetAppearancePresets(search, [...tags]));
+    return result.presets.map((preset) => ({
+      id: preset.id,
+      name: preset.name,
+      image: preset.image,
+      bodyType: preset.bodyType,
+      tags: [...preset.tags],
+    }));
+  },
+
+  applyAppearancePreset: async ({ saveSessionID, characterID, presetID, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        ApplyAppearancePreset(saveSessionID, characterID, presetID, expectedRevision),
+      ),
+    ),
+
+  getFavoritePresets: async (saveSessionID, favoriteSlotID): Promise<SaveFavoritePresets> => {
+    const result = await callBridge(() =>
+      GetFavoritePresets(saveSessionID, favoriteSlotID !== undefined ? favoriteSlotID : null),
+    );
+    return {
+      saveSessionID: result.saveSessionID,
+      presets: result.presets.map((preset) => ({
+        favoriteSlotID: preset.favoriteSlotID,
+        active: preset.active,
+      })),
+    };
+  },
+
+  setFavoritePreset: async ({
+    saveSessionID,
+    favoriteSlotID,
+    sourceCharacterID,
+    expectedRevision,
+  }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        SetFavoritePreset(saveSessionID, favoriteSlotID, sourceCharacterID, expectedRevision),
+      ),
+    ),
+
+  applyFavoritePreset: async ({ saveSessionID, characterID, favoriteSlotID, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        ApplyFavoritePreset(saveSessionID, characterID, favoriteSlotID, expectedRevision),
+      ),
+    ),
+
+  deleteFavoritePreset: async ({ saveSessionID, favoriteSlotID, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() => DeleteFavoritePreset(saveSessionID, favoriteSlotID, expectedRevision)),
+    ),
 
   // The five arguments reach the bridge in the order the backend contract
   // defines; the grouped request only protects the caller from transposing them.

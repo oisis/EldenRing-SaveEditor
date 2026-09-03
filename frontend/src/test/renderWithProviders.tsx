@@ -2,6 +2,11 @@ import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type RenderResult, render } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { AppearancePortProvider } from "../application/appearance/appearanceClient";
+import type {
+  AppearancePort,
+  AppearancePresetSummary,
+} from "../application/appearance/appearancePort";
 import { ApplicationInfoPortProvider } from "../application/application-info/applicationInfoClient";
 import type {
   ApplicationInfo,
@@ -40,6 +45,8 @@ import type {
   EquipmentMutationReceipt,
   EquipmentPort,
 } from "../application/equipment/equipmentPort";
+import { FavoritesPortProvider } from "../application/favorites/favoritesClient";
+import type { FavoritesPort, SaveFavoritePresets } from "../application/favorites/favoritesPort";
 import { ItemsPortProvider } from "../application/items/itemsClient";
 import type {
   ItemMutationReceipt,
@@ -50,7 +57,11 @@ import type {
 } from "../application/items/itemsPort";
 import { ItemPreferencesProvider } from "../application/preferences/itemPreferences";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
-import type { SaveSession, SaveSessionPort } from "../application/save-session/saveSessionPort";
+import type {
+  MutationReceipt,
+  SaveSession,
+  SaveSessionPort,
+} from "../application/save-session/saveSessionPort";
 import { SettingsPortProvider } from "../application/settings/settingsClient";
 import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
@@ -905,6 +916,39 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
   };
 }
 
+export const stubCharacterMutationReceipt: MutationReceipt = {
+  operationID: "op-1",
+  operationKind: "set_character_name",
+  saveSessionID: "session-1",
+  saveRevision: "1",
+  changedScopes: ["save.session", "character.list", "character.profile", "diagnostics.report"],
+};
+
+export const stubAppearancePresetSummaries: readonly AppearancePresetSummary[] = [
+  {
+    id: "geralt-of-rivia-the-witcher",
+    name: "Geralt of Rivia, the Witcher",
+    image: "geralt-of-rivia-the-witcher.jpg",
+    bodyType: "Type A",
+    tags: ["witcher"],
+  },
+  {
+    id: "ciri-the-princess-of-cintra-from-witcher",
+    name: "Ciri, the Princess of Cintra",
+    image: "ciri-the-princess-of-cintra-from-witcher.jpg",
+    bodyType: "Type B",
+    tags: ["witcher"],
+  },
+];
+
+export const stubFavoritePresets: SaveFavoritePresets = {
+  saveSessionID: "session-1",
+  presets: Array.from({ length: 15 }, (_, i) => ({
+    favoriteSlotID: i,
+    active: i === 0,
+  })),
+};
+
 export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): CharacterPort {
   return {
     getSaveCharacters: (saveSessionID) => Promise.resolve({ ...stubSaveCharacters, saveSessionID }),
@@ -912,6 +956,29 @@ export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): Chara
       Promise.resolve({ ...stubCharacterProfile, saveSessionID, characterID }),
     getCharacterStats: (saveSessionID, characterID) =>
       Promise.resolve({ ...stubCharacterStats, saveSessionID, characterID }),
+    setCharacterName: () => Promise.resolve(stubCharacterMutationReceipt),
+    setCharacterStats: () => Promise.resolve(stubCharacterMutationReceipt),
+    setCharacterStartingClass: () => Promise.resolve(stubCharacterMutationReceipt),
+    setCharacterGender: () => Promise.resolve(stubCharacterMutationReceipt),
+    ...overrides,
+  };
+}
+
+export function makeAppearancePort(overrides: Partial<AppearancePort> = {}): AppearancePort {
+  return {
+    getAppearancePresets: () => Promise.resolve(stubAppearancePresetSummaries),
+    applyAppearancePreset: () => Promise.resolve(stubCharacterMutationReceipt),
+    ...overrides,
+  };
+}
+
+export function makeFavoritesPort(overrides: Partial<FavoritesPort> = {}): FavoritesPort {
+  return {
+    getFavoritePresets: (saveSessionID) =>
+      Promise.resolve({ ...stubFavoritePresets, saveSessionID }),
+    setFavoritePreset: () => Promise.resolve(stubCharacterMutationReceipt),
+    applyFavoritePreset: () => Promise.resolve(stubCharacterMutationReceipt),
+    deleteFavoritePreset: () => Promise.resolve(stubCharacterMutationReceipt),
     ...overrides,
   };
 }
@@ -934,6 +1001,8 @@ export function TestProviders({
   port,
   saveSessionPort,
   characterPort,
+  appearancePort,
+  favoritesPort,
   diagnosticsPort,
   itemsPort,
   equipmentPort,
@@ -946,6 +1015,8 @@ export function TestProviders({
   port?: ApplicationInfoPort;
   saveSessionPort?: SaveSessionPort;
   characterPort?: CharacterPort;
+  appearancePort?: AppearancePort;
+  favoritesPort?: FavoritesPort;
   diagnosticsPort?: DiagnosticsPort;
   itemsPort?: ItemsPort;
   equipmentPort?: EquipmentPort;
@@ -959,17 +1030,21 @@ export function TestProviders({
         <SettingsPortProvider port={settingsPort ?? makeSettingsPort()}>
           <ItemPreferencesProvider initialShowItemID={showItemID}>
             <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
-              <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
-                <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-                  <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
-                    <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
-                      <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
-                        {children}
-                      </EquipmentPortProvider>
-                    </ItemsPortProvider>
-                  </DiagnosticsPortProvider>
-                </CharacterPortProvider>
-              </SaveSessionPortProvider>
+              <AppearancePortProvider port={appearancePort ?? makeAppearancePort()}>
+                <FavoritesPortProvider port={favoritesPort ?? makeFavoritesPort()}>
+                  <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
+                    <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
+                      <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
+                        <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
+                          <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
+                            {children}
+                          </EquipmentPortProvider>
+                        </ItemsPortProvider>
+                      </DiagnosticsPortProvider>
+                    </CharacterPortProvider>
+                  </SaveSessionPortProvider>
+                </FavoritesPortProvider>
+              </AppearancePortProvider>
             </CatalogPortProvider>
           </ItemPreferencesProvider>
         </SettingsPortProvider>
@@ -984,6 +1059,8 @@ export async function renderApp(
     port?: ApplicationInfoPort;
     saveSessionPort?: SaveSessionPort;
     characterPort?: CharacterPort;
+    appearancePort?: AppearancePort;
+    favoritesPort?: FavoritesPort;
     diagnosticsPort?: DiagnosticsPort;
     itemsPort?: ItemsPort;
     equipmentPort?: EquipmentPort;
@@ -1003,6 +1080,8 @@ export async function renderApp(
         port={options.port}
         saveSessionPort={options.saveSessionPort}
         characterPort={options.characterPort}
+        appearancePort={options.appearancePort}
+        favoritesPort={options.favoritesPort}
         diagnosticsPort={options.diagnosticsPort}
         itemsPort={options.itemsPort}
         equipmentPort={options.equipmentPort}

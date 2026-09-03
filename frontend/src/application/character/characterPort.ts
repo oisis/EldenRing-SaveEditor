@@ -1,3 +1,5 @@
+import type { MutationReceipt } from "../save-session/saveSessionPort";
+
 /**
  * The port the application layer needs in order to read the characters of a
  * save session. Infrastructure implements it; feature modules depend on it
@@ -72,6 +74,47 @@ export type CharacterStats = {
   baseMaxSP: number;
 };
 
+export type CharacterAttributes = {
+  vigor: number;
+  mind: number;
+  endurance: number;
+  strength: number;
+  dexterity: number;
+  intelligence: number;
+  faith: number;
+  arcane: number;
+};
+
+export type SetCharacterNameInput = {
+  saveSessionID: string;
+  characterID: number;
+  name: string;
+  expectedRevision: string;
+};
+
+export type SetCharacterStatsInput = {
+  saveSessionID: string;
+  characterID: number;
+  attributes: CharacterAttributes;
+  levelPolicy: "recalculate";
+  expectedRevision: string;
+};
+
+export type SetCharacterStartingClassInput = {
+  saveSessionID: string;
+  characterID: number;
+  startingClassID: number;
+  confirmReset: boolean;
+  expectedRevision: string;
+};
+
+export type SetCharacterGenderInput = {
+  saveSessionID: string;
+  characterID: number;
+  gender: number;
+  expectedRevision: string;
+};
+
 export type CharacterPort = {
   /**
    * Reads every slot of a session. Both this and the per-character getters pass
@@ -81,4 +124,8 @@ export type CharacterPort = {
   getSaveCharacters: (saveSessionID: string) => Promise<SaveCharacters>;
   getCharacterProfile: (saveSessionID: string, characterID: number) => Promise<CharacterProfile>;
   getCharacterStats: (saveSessionID: string, characterID: number) => Promise<CharacterStats>;
+  setCharacterName: (input: SetCharacterNameInput) => Promise<MutationReceipt>;
+  setCharacterStats: (input: SetCharacterStatsInput) => Promise<MutationReceipt>;
+  setCharacterStartingClass: (input: SetCharacterStartingClassInput) => Promise<MutationReceipt>;
+  setCharacterGender: (input: SetCharacterGenderInput) => Promise<MutationReceipt>;
 };

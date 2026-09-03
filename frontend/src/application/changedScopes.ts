@@ -106,8 +106,7 @@ export const changedScopeQueryKeyPatterns: Record<
   "world.flags": () => [],
   // No Network getter is wired into the frontend yet.
   network: () => [],
-  // No Favorites getter is wired into the frontend yet.
-  favorites: () => [],
+  favorites: (id) => [["save-session", id, "favorite-presets"]],
   "diagnostics.report": (id) => [characterView(id, "validation-report")],
 };
 

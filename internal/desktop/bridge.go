@@ -11,11 +11,13 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -361,6 +363,121 @@ func (b *Bridge) GetCharacterStats(
 	characterID int,
 ) (character.GetCharacterStatsResult, error) {
 	return bridged(character.GetCharacterStats(b.saveEngine, saveSessionID, characterID))
+}
+
+// SetCharacterName delegates to the SetCharacterName endpoint and returns its
+// result and error unchanged.
+func (b *Bridge) SetCharacterName(
+	saveSessionID string,
+	characterID int,
+	name string,
+	expectedRevision string,
+) (character.SetCharacterNameResult, error) {
+	return bridged(character.SetCharacterName(
+		b.saveEngine, saveSessionID, characterID, name, expectedRevision))
+}
+
+// SetCharacterStats delegates to the SetCharacterStats endpoint and returns its
+// result and error unchanged.
+func (b *Bridge) SetCharacterStats(
+	saveSessionID string,
+	characterID int,
+	attributes character.CharacterAttributes,
+	levelPolicy string,
+	expectedRevision string,
+) (character.SetCharacterStatsResult, error) {
+	return bridged(character.SetCharacterStats(
+		b.saveEngine, saveSessionID, characterID, attributes, levelPolicy, expectedRevision))
+}
+
+// SetCharacterStartingClass delegates to the SetCharacterStartingClass endpoint
+// and returns its result and error unchanged.
+func (b *Bridge) SetCharacterStartingClass(
+	saveSessionID string,
+	characterID int,
+	startingClassID uint8,
+	confirmReset bool,
+	expectedRevision string,
+) (character.SetCharacterStartingClassResult, error) {
+	return bridged(character.SetCharacterStartingClass(
+		b.saveEngine, saveSessionID, characterID, startingClassID, confirmReset, expectedRevision))
+}
+
+// SetCharacterGender delegates to the SetCharacterGender endpoint and returns
+// its result and error unchanged.
+func (b *Bridge) SetCharacterGender(
+	saveSessionID string,
+	characterID int,
+	gender uint8,
+	expectedRevision string,
+) (character.SetCharacterGenderResult, error) {
+	return bridged(character.SetCharacterGender(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, gender, expectedRevision))
+}
+
+// GetAppearancePresets delegates to the GetAppearancePresets endpoint and
+// returns its result and error unchanged.
+func (b *Bridge) GetAppearancePresets(
+	search string,
+	tags []string,
+) (appearance.GetAppearancePresetsResult, error) {
+	return bridged(appearance.GetAppearancePresets(b.gameCatalog, search, tags))
+}
+
+// ApplyAppearancePreset delegates to the ApplyAppearancePreset endpoint and
+// returns its result and error unchanged.
+func (b *Bridge) ApplyAppearancePreset(
+	saveSessionID string,
+	characterID int,
+	presetID string,
+	expectedRevision string,
+) (appearance.ApplyAppearancePresetResult, error) {
+	return bridged(appearance.ApplyAppearancePreset(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, presetID, expectedRevision))
+}
+
+// GetFavoritePresets delegates to the GetFavoritePresets endpoint and returns
+// its result and error unchanged.
+func (b *Bridge) GetFavoritePresets(
+	saveSessionID string,
+	favoriteSlotID *int,
+) (favorites.GetFavoritePresetsResult, error) {
+	return bridged(favorites.GetFavoritePresets(b.saveEngine, saveSessionID, favoriteSlotID))
+}
+
+// SetFavoritePreset delegates to the SetFavoritePreset endpoint and returns
+// its result and error unchanged.
+func (b *Bridge) SetFavoritePreset(
+	saveSessionID string,
+	favoriteSlotID int,
+	sourceCharacterID int,
+	expectedRevision string,
+) (favorites.SetFavoritePresetResult, error) {
+	return bridged(favorites.SetFavoritePreset(
+		b.saveEngine, saveSessionID, favoriteSlotID, sourceCharacterID, expectedRevision))
+}
+
+// ApplyFavoritePreset delegates to the ApplyFavoritePreset endpoint and returns
+// its result and error unchanged.
+func (b *Bridge) ApplyFavoritePreset(
+	saveSessionID string,
+	characterID int,
+	favoriteSlotID int,
+	expectedRevision string,
+) (favorites.ApplyFavoritePresetResult, error) {
+	return bridged(favorites.ApplyFavoritePreset(
+		b.saveEngine, saveSessionID, characterID, favoriteSlotID, expectedRevision))
+}
+
+// DeleteFavoritePreset delegates to the DeleteFavoritePreset endpoint and
+// returns its result and error unchanged.
+func (b *Bridge) DeleteFavoritePreset(
+	saveSessionID string,
+	favoriteSlotID int,
+	expectedRevision string,
+) (favorites.DeleteFavoritePresetResult, error) {
+	return bridged(favorites.DeleteFavoritePreset(
+		b.saveEngine, saveSessionID, favoriteSlotID, expectedRevision))
 }
 
 // GetInventory delegates to the GetInventory endpoint and returns its result

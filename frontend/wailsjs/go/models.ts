@@ -1,3 +1,102 @@
+export namespace appearance {
+	
+	export class AppearancePresetSummary {
+	    id: string;
+	    name: string;
+	    image: string;
+	    bodyType: string;
+	    tags: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AppearancePresetSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.image = source["image"];
+	        this.bodyType = source["bodyType"];
+	        this.tags = source["tags"];
+	    }
+	}
+	export class ApplyAppearancePresetResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    presetID: string;
+	    appearance: saveengine.CharacterAppearanceValues;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyAppearancePresetResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.presetID = source["presetID"];
+	        this.appearance = this.convertValues(source["appearance"], saveengine.CharacterAppearanceValues);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetAppearancePresetsResult {
+	    presets: AppearancePresetSummary[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetAppearancePresetsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.presets = this.convertValues(source["presets"], AppearancePresetSummary);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace application {
 	
 	export class SupportedSchema {
@@ -338,6 +437,55 @@ export namespace catalog {
 	        this.kind = source["kind"];
 	        this.key = source["key"];
 	    }
+	}
+
+}
+
+export namespace character {
+	
+	export class SetCharacterGenderResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    presetID: string;
+	    appearance: saveengine.CharacterAppearanceValues;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterGenderResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.presetID = source["presetID"];
+	        this.appearance = this.convertValues(source["appearance"], saveengine.CharacterAppearanceValues);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }
@@ -1544,6 +1692,78 @@ export namespace saveengine {
 		}
 	}
 	
+	export class ApplyFavoritePresetResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    favoriteSlotID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyFavoritePresetResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.favoriteSlotID = source["favoriteSlotID"];
+	    }
+	}
+	export class CharacterAppearanceValues {
+	    gender: number;
+	    voiceType: number;
+	    modelIDs: number[];
+	    faceShape: number[];
+	    body: number[];
+	    skin: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterAppearanceValues(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.gender = source["gender"];
+	        this.voiceType = source["voiceType"];
+	        this.modelIDs = source["modelIDs"];
+	        this.faceShape = source["faceShape"];
+	        this.body = source["body"];
+	        this.skin = source["skin"];
+	    }
+	}
+	export class CharacterAttributes {
+	    vigor: number;
+	    mind: number;
+	    endurance: number;
+	    strength: number;
+	    dexterity: number;
+	    intelligence: number;
+	    faith: number;
+	    arcane: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterAttributes(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.vigor = source["vigor"];
+	        this.mind = source["mind"];
+	        this.endurance = source["endurance"];
+	        this.strength = source["strength"];
+	        this.dexterity = source["dexterity"];
+	        this.intelligence = source["intelligence"];
+	        this.faith = source["faith"];
+	        this.arcane = source["arcane"];
+	    }
+	}
 	export class CharacterEquipment {
 	    saveSessionID: string;
 	    saveRevision: string;
@@ -1790,6 +2010,28 @@ export namespace saveengine {
 	        this.level = source["level"];
 	    }
 	}
+	export class DeleteFavoritePresetResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    favoriteSlotID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteFavoritePresetResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.favoriteSlotID = source["favoriteSlotID"];
+	    }
+	}
 	export class DiscardChangesResult {
 	    operationID: string;
 	    operationKind: string;
@@ -1811,6 +2053,52 @@ export namespace saveengine {
 	        this.changedScopes = source["changedScopes"];
 	        this.discardedOperations = source["discardedOperations"];
 	    }
+	}
+	export class FavoritePreset {
+	    favoriteSlotID: number;
+	    active: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new FavoritePreset(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.favoriteSlotID = source["favoriteSlotID"];
+	        this.active = source["active"];
+	    }
+	}
+	export class FavoritePresetsState {
+	    saveSessionID: string;
+	    presets: FavoritePreset[];
+	
+	    static createFrom(source: any = {}) {
+	        return new FavoritePresetsState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.presets = this.convertValues(source["presets"], FavoritePreset);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class HistoryMutationResult {
 	    operationID: string;
@@ -2284,6 +2572,148 @@ export namespace saveengine {
 	        this.saveRevision = source["saveRevision"];
 	        this.unsavedChanges = source["unsavedChanges"];
 	        this.eventSequence = source["eventSequence"];
+	    }
+	}
+	export class SetCharacterNameResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterNameResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.name = source["name"];
+	    }
+	}
+	export class SetCharacterStartingClassResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    startingClassID: number;
+	    attributes: CharacterAttributes;
+	    level: number;
+	    soulMemory: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterStartingClassResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.startingClassID = source["startingClassID"];
+	        this.attributes = this.convertValues(source["attributes"], CharacterAttributes);
+	        this.level = source["level"];
+	        this.soulMemory = source["soulMemory"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetCharacterStatsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    attributes: CharacterAttributes;
+	    level: number;
+	    soulMemory: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterStatsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.attributes = this.convertValues(source["attributes"], CharacterAttributes);
+	        this.level = source["level"];
+	        this.soulMemory = source["soulMemory"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetFavoritePresetResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    favoriteSlotID: number;
+	    sourceCharacterID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetFavoritePresetResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.favoriteSlotID = source["favoriteSlotID"];
+	        this.sourceCharacterID = source["sourceCharacterID"];
 	    }
 	}
 	export class SetOwnedItemQuantityResult {

@@ -31,6 +31,10 @@ msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Active"
+msgstr "Aktywny"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Active characters"
 msgstr "Aktywne postacie"
@@ -64,6 +68,10 @@ msgstr "Zaawansowane funkcje save"
 msgid "Advanced save features are not available yet."
 msgstr "Zaawansowane funkcje save nie są jeszcze dostępne."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "All Body Types"
+msgstr "Wszystkie typy sylwetki"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "All categories"
@@ -89,6 +97,10 @@ msgstr "Już założone"
 msgid "Ammunition"
 msgstr "Amunicja"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Appearance Presets"
+msgstr "Presety wyglądu"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
@@ -105,6 +117,28 @@ msgstr "Ustawienia aplikacji"
 #: src/features/app-shell/AppShell.tsx
 msgid "Application settings and tools"
 msgstr "Ustawienia i narzędzia aplikacji"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Apply"
+msgstr "Zastosuj"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Apply to Character"
+msgstr "Zastosuj do postaci"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Arcane"
+msgstr "Tajemność"
+
+#. placeholder {0}: (confirmDeleteFavSlot ?? 0) + 1
+#: src/features/character/CharacterPanel.tsx
+msgid "Are you sure you want to delete Mirror Favorite Slot {0}?"
+msgstr "Czy na pewno chcesz usunąć slot ulubionych Lustra {0}?"
+
+#. placeholder {0}: (confirmReplaceFavSlot ?? 0) + 1
+#: src/features/character/CharacterPanel.tsx
+msgid "Are you sure you want to overwrite Mirror Favorite Slot {0} with the current character's appearance?"
+msgstr "Czy na pewno chcesz nadpisać slot ulubionych Lustra {0} wyglądem bieżącej postaci?"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Area"
@@ -132,6 +166,10 @@ msgstr "Strzały i bełty są pokazane poglądowo i nie można ich tutaj zmieni�
 msgid "Ashes of War"
 msgstr "Prochy Wojny"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Attributes"
+msgstr "Atrybuty"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Automatic backups kept"
 msgstr "Liczba zachowanych automatycznych backupów"
@@ -157,11 +195,31 @@ msgstr "ryzyko bana"
 msgid "Ban risk"
 msgstr "Ryzyko bana"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Base Resources"
+msgstr "Zasoby bazowe"
+
+#. placeholder {0}: statsQuery.data.baseMaxFP
+#. placeholder {0}: statsQuery.data.baseMaxHP
+#. placeholder {0}: statsQuery.data.baseMaxSP
+#: src/features/character/CharacterPanel.tsx
+msgid "Base: {0}"
+msgstr "Baza: {0}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Body Type"
+msgstr "Typ sylwetki"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Body Type Filter"
+msgstr "Filtr typu sylwetki"
+
 #. placeholder {0}: index + 1
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Bolts {0}"
 msgstr "Bełty {0}"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
@@ -185,10 +243,22 @@ msgstr "Karta {servedPage} z {cardCount}"
 msgid "Category"
 msgstr "Kategoria"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Change Class"
+msgstr "Zmień klasę"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Change Class..."
+msgstr "Zmień klasę..."
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Changes"
 msgstr "Zmiany"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Changing the starting class is a destructive reset: all eight attributes and Rune Level will be reset to the base values of the selected class."
+msgstr "Zmiana klasy początkowej to destrukcyjny reset: wszystkie osiem atrybutów oraz poziom run zostanie przywróconych do wartości bazowych wybranej klasy."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Chaos Mode"
@@ -198,6 +268,10 @@ msgstr "Tryb chaosu"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Character"
 msgstr "Postać"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Character navigation"
+msgstr "Nawigacja postaci"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Character profile and appearance"
@@ -229,6 +303,7 @@ msgid "Clear this slot"
 msgstr "Wyczyść ten slot"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
@@ -238,6 +313,30 @@ msgstr "Zamknij"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Close Save"
 msgstr "Zamknij save"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Body Type Change"
+msgstr "Potwierdź zmianę typu sylwetki"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Change"
+msgstr "Potwierdź zmianę"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Class Reset"
+msgstr "Potwierdź reset klasy"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Delete"
+msgstr "Potwierdź usunięcie"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Overwrite"
+msgstr "Potwierdź nadpisanie"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Confirm Reset"
+msgstr "Potwierdź reset"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Console"
@@ -277,10 +376,18 @@ msgstr "Wycięta zawartość"
 msgid "Dark"
 msgstr "Ciemny"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Delete"
+msgstr "Usuń"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Details"
 msgstr "Szczegóły"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Dexterity"
+msgstr "Zręczność"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Diagnostic console"
@@ -305,9 +412,14 @@ msgstr "DLC"
 msgid "Elden Ring"
 msgstr "Elden Ring"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Empty"
 msgstr "Puste"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Endurance"
+msgstr "Wytrzymałość"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "English"
@@ -322,6 +434,11 @@ msgstr "Wyposażenie"
 msgid "Equipment and quick slots"
 msgstr "Wyposażenie i szybkie sloty"
 
+#. placeholder {0}: mutations.error.code
+#: src/features/character/CharacterPanel.tsx
+msgid "Error code: {0}"
+msgstr "Kod błędu: {0}"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Expanded Limits"
 msgstr "Rozszerzone limity"
@@ -330,6 +447,10 @@ msgstr "Rozszerzone limity"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Export"
 msgstr "Eksportuj"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Faith"
+msgstr "Wiara"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
@@ -352,6 +473,10 @@ msgstr "Plik"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Format"
 msgstr "Format"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "FP"
+msgstr "FP"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Gestures"
@@ -378,6 +503,10 @@ msgstr "Głowa"
 msgid "Home"
 msgstr "Główna"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "HP"
+msgstr "HP"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "I reviewed and accept the warnings."
 msgstr "Zapoznałem się z ostrzeżeniami i je akceptuję."
@@ -389,6 +518,14 @@ msgstr "Rozumiem i oddzielnie akceptuję ryzyko bana."
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "I understand that at least one of these items carries a ban risk and I confirm adding it."
 msgstr "Rozumiem, że co najmniej jeden z tych przedmiotów niesie ryzyko bana, i potwierdzam jego dodanie."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Identity & Progression"
+msgstr "Tożsamość i postęp"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Identity and Progression"
+msgstr "Tożsamość i postęp"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
@@ -405,6 +542,10 @@ msgstr "Informacje z GameCatalog."
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Information from the save and GameCatalog."
 msgstr "Informacje z save i GameCatalog."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Intelligence"
+msgstr "Inteligencja"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -507,13 +648,29 @@ msgstr "Bieżące komunikaty diagnostyczne nie są jeszcze dostępne w tej wersj
 msgid "Load a save and select a character to read the Inventory and the Storage Box."
 msgstr "Wczytaj save i wybierz postać, aby odczytać ekwipunek i skrzynię."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading appearance presets…"
+msgstr "Wczytywanie presetów wyglądu…"
+
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Loading application information…"
 msgstr "Wczytywanie informacji o aplikacji…"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading attributes…"
+msgstr "Wczytywanie atrybutów…"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading base resources…"
+msgstr "Wczytywanie zasobów bazowych…"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Loading candidates…"
 msgstr "Wczytywanie kandydatów…"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading character profile…"
+msgstr "Wczytywanie profilu postaci…"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Loading characters…"
@@ -532,6 +689,10 @@ msgstr "Wczytywanie szczegółów przedmiotu…"
 msgid "Loading items…"
 msgstr "Wczytywanie przedmiotów…"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading Mirror Favorites…"
+msgstr "Wczytywanie ulubionych Lustra…"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Loading the Inventory…"
 msgstr "Wczytywanie ekwipunku…"
@@ -543,6 +704,10 @@ msgstr "Wczytywanie skrzyni…"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Loading variants…"
 msgstr "Wczytywanie wariantów…"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading…"
+msgstr "Wczytywanie…"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Location"
@@ -579,6 +744,18 @@ msgstr "Memory Slots: {0}"
 msgid "Memory Slots: {0} / {1}"
 msgstr "Memory Slots: {0} / {1}"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Mind"
+msgstr "Umysł"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Mirror Favorites"
+msgstr "Ulubione Lustra"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Mirror Favorites require an active save session."
+msgstr "Ulubione Lustra wymagają aktywnej sesji zapisu."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Modified"
 msgstr "Zmodyfikowano"
@@ -607,6 +784,7 @@ msgstr "Przenieś do skrzyni"
 msgid "Move up"
 msgstr "Przesuń w górę"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name"
@@ -618,6 +796,7 @@ msgstr "Nazwa"
 msgid "Name unavailable"
 msgstr "Nazwa niedostępna"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -640,6 +819,10 @@ msgstr "Nie"
 #: src/features/character/CharacterSidebar.tsx
 msgid "No active character is available."
 msgstr "Brak dostępnej aktywnej postaci."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "No appearance presets matched your search."
+msgstr "Żaden preset wyglądu nie pasuje do wyszukiwania."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No file was chosen."
@@ -668,6 +851,10 @@ msgstr "Brak bieżących komunikatów"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "No operations match this view."
 msgstr "Żadne operacje nie pasują do tego widoku."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "No preview image"
+msgstr "Brak obrazu podglądu"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No save is open."
@@ -734,6 +921,10 @@ msgstr "operacji"
 msgid "Order position"
 msgstr "Pozycja w kolejności"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Overwrite"
+msgstr "Nadpisz"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Owned quantity"
 msgstr "Posiadana ilość"
@@ -788,6 +979,11 @@ msgstr "Sakiewka w górę"
 msgid "Pre-order"
 msgstr "Przedsprzedaż"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Preset Catalog"
+msgstr "Katalog presetów"
+
+#: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -801,6 +997,10 @@ msgstr "Poprzednia karta ekwipunku"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Previous storage card"
 msgstr "Poprzednia karta skrzyni"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Profile"
+msgstr "Profil"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Quantity"
@@ -881,6 +1081,10 @@ msgstr "Usuń"
 msgid "Remove {name} from favorites"
 msgstr "Usuń {name} z ulubionych"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Reset"
+msgstr "Przywróć"
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Restore"
@@ -943,6 +1147,10 @@ msgstr "Ryzyko"
 msgid "RL {level}"
 msgstr "RL {level}"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Rune Level"
+msgstr "Poziom run"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Safe"
 msgstr "Bezpieczny"
@@ -951,15 +1159,24 @@ msgstr "Bezpieczny"
 msgid "Safety profile"
 msgstr "Profil bezpieczeństwa"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save"
 msgstr "Zapisz"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Save Appearance"
+msgstr "Zapisz wygląd"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save As"
 msgstr "Zapisz jako"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Save Attributes"
+msgstr "Zapisz atrybuty"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Save or discard the current changes before continuing."
@@ -990,6 +1207,10 @@ msgstr "Zapisano do {0}."
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge znalazł dzienniki operacji z wcześniejszej sesji."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Search"
+msgstr "Szukaj"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Search candidates"
 msgstr "Szukaj kandydatów"
@@ -998,6 +1219,10 @@ msgstr "Szukaj kandydatów"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Szukaj przedmiotów"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Search presets..."
+msgstr "Szukaj presetów..."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1011,6 +1236,14 @@ msgstr "Zaznacz"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Select {0}"
 msgstr "Zaznacz {0}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Select an active character to view and edit profile data."
+msgstr "Wybierz aktywną postać, aby zobaczyć i edytować dane profilu."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Select Starting Class"
+msgstr "Wybierz klasę początkową"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1038,6 +1271,11 @@ msgstr "Podsumowanie sesji i operacje na pliku"
 #: src/features/app-shell/AppShell.tsx
 msgid "Show Item ID"
 msgstr "Pokaż ID przedmiotu"
+
+#. placeholder {0}: slot.favoriteSlotID + 1
+#: src/features/character/CharacterPanel.tsx
+msgid "Slot {0}"
+msgstr "Slot {0}"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
@@ -1074,6 +1312,10 @@ msgstr "Sortowanie: nazwa"
 msgid "Sort: quantity"
 msgstr "Sortowanie: ilość"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "SoulMemory and held runes will remain unchanged."
+msgstr "SoulMemory oraz posiadane runy pozostaną bez zmian."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Source"
 msgstr "Źródło"
@@ -1108,6 +1350,14 @@ msgstr "Prochy duchów"
 msgid "Stacks"
 msgstr "Stakuje się"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Stamina (SP)"
+msgstr "Kondycja (SP)"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Starting Class"
+msgstr "Klasa początkowa"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "State how much of each item goes to Inventory and to Storage."
 msgstr "Podaj, ile każdego przedmiotu trafi do ekwipunku, a ile do skrzyni."
@@ -1125,6 +1375,10 @@ msgstr "Karty skrzyni"
 msgid "Storage items"
 msgstr "Przedmioty w skrzyni"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Strength"
+msgstr "Siła"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Subcategory"
@@ -1133,6 +1387,16 @@ msgstr "Podkategoria"
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Supported schemas"
 msgstr "Wspierane schematy"
+
+#. placeholder {0}: profileQuery.data.gender === 1 ? "Type B" : "Type A"
+#: src/features/character/CharacterPanel.tsx
+msgid "Switch to {0}"
+msgstr "Przełącz na {0}"
+
+#. placeholder {0}: pendingGender === 1 ? "Type A" : "Type B"
+#: src/features/character/CharacterPanel.tsx
+msgid "Switching body type will apply the complete default appearance preset for {0}. Any custom facial or body appearance changes will be replaced with the default preset."
+msgstr "Przełączenie typu sylwetki zastosuje kompletny domyślny preset wyglądu dla {0}. Wszelkie własne zmiany wyglądu twarzy lub ciała zostaną zastąpione domyślnym presetem."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1154,6 +1418,10 @@ msgstr "Sloty talizmanów: {0}"
 msgid "Talismans"
 msgstr "Talizmany"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Target Class"
+msgstr "Klasa docelowa"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Target position"
 msgstr "Pozycja docelowa"
@@ -1170,15 +1438,12 @@ msgstr "Backend aplikacji napotkał błąd wewnętrzny."
 msgid "The automatic backup limit was reached. Future saves remove the oldest backup."
 msgstr "Osiągnięto limit automatycznych kopii zapasowych. Kolejne zapisy będą usuwać najstarszą kopię."
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The change was not applied."
 msgstr "Zmiana nie została zastosowana."
-
-#: src/features/app-shell/AppShell.tsx
-msgid "The Character workspace will be implemented in a later frontend stage."
-msgstr "Workspace postaci zostanie zaimplementowany na późniejszym etapie frontendu."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
@@ -1275,6 +1540,18 @@ msgstr "Nie udało się wczytać szczegółów przedmiotu."
 msgid "Unable to load item variants."
 msgstr "Nie udało się wczytać wariantów przedmiotu."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the appearance presets."
+msgstr "Nie udało się wczytać presetów wyglądu."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the attributes of this character slot."
+msgstr "Nie udało się wczytać atrybutów tego slotu postaci."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the base resources of this character slot."
+msgstr "Nie udało się wczytać zasobów bazowych tego slotu postaci."
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Unable to load the candidates for this slot."
 msgstr "Nie udało się wczytać kandydatów dla tego slotu."
@@ -1291,10 +1568,19 @@ msgstr "Nie udało się wczytać ekwipunku."
 msgid "Unable to load the Item Database."
 msgstr "Nie udało się wczytać bazy przedmiotów."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the Mirror Favorites of this save."
+msgstr "Nie udało się wczytać ulubionych Lustra tego zapisu."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the profile of this character slot."
+msgstr "Nie udało się wczytać profilu tego slotu postaci."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Unable to load the Storage Box."
 msgstr "Nie udało się wczytać skrzyni."
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unavailable"
@@ -1311,6 +1597,10 @@ msgstr "Cofnij"
 #: src/features/app-shell/AppShell.tsx
 msgid "Undo the last operation"
 msgstr "Cofnij ostatnią operację"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Unknown"
+msgstr "Nieznany"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -1362,6 +1652,10 @@ msgstr "Widok"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "View report"
 msgstr "Pokaż raport"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Vigor"
+msgstr "Krzepa"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"

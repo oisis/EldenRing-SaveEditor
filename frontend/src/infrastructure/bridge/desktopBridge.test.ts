@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ApplyAppearancePreset,
+  ApplyFavoritePreset,
   CloseSave,
+  DeleteFavoritePreset,
+  GetAppearancePresets,
   GetApplicationInfo,
   GetCharacterLoadout,
   GetCharacterProfile,
   GetCharacterStats,
   GetEquipment,
   GetEquippedSpells,
+  GetFavoritePresets,
   GetInventory,
   GetItemVariants,
   GetLoadedSave,
@@ -21,8 +26,21 @@ import {
   GetStorage,
   LoadSave,
   SelectSaveFile,
+  SetCharacterGender,
+  SetCharacterName,
+  SetCharacterStartingClass,
+  SetCharacterStats,
+  SetFavoritePreset,
 } from "../../../wailsjs/go/desktop/Bridge";
-import { application, catalog, equipment, inventory, saveengine } from "../../../wailsjs/go/models";
+import {
+  appearance,
+  application,
+  catalog,
+  character,
+  equipment,
+  inventory,
+  saveengine,
+} from "../../../wailsjs/go/models";
 import { toAppError } from "../../application/errors/appError";
 import { bridgeFailureCode, wailsDesktopBridge } from "./desktopBridge";
 
@@ -31,13 +49,18 @@ vi.mock("../../../wailsjs/runtime/runtime", () => ({
 }));
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
+  ApplyAppearancePreset: vi.fn(),
+  ApplyFavoritePreset: vi.fn(),
   CloseSave: vi.fn(),
+  DeleteFavoritePreset: vi.fn(),
+  GetAppearancePresets: vi.fn(),
   GetApplicationInfo: vi.fn(),
   GetCharacterLoadout: vi.fn(),
   GetCharacterProfile: vi.fn(),
   GetCharacterStats: vi.fn(),
   GetEquipment: vi.fn(),
   GetEquippedSpells: vi.fn(),
+  GetFavoritePresets: vi.fn(),
   GetInventory: vi.fn(),
   GetItemVariants: vi.fn(),
   GetLoadedSave: vi.fn(),
@@ -52,6 +75,11 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetStorage: vi.fn(),
   LoadSave: vi.fn(),
   SelectSaveFile: vi.fn(),
+  SetCharacterGender: vi.fn(),
+  SetCharacterName: vi.fn(),
+  SetCharacterStartingClass: vi.fn(),
+  SetCharacterStats: vi.fn(),
+  SetFavoritePreset: vi.fn(),
 }));
 
 const getApplicationInfo = vi.mocked(GetApplicationInfo);
@@ -75,6 +103,16 @@ const getResources = vi.mocked(GetResources);
 const getResourcePresentationSummaries = vi.mocked(GetResourcePresentationSummaries);
 const getResource = vi.mocked(GetResource);
 const getItemVariants = vi.mocked(GetItemVariants);
+const setCharacterName = vi.mocked(SetCharacterName);
+const setCharacterStats = vi.mocked(SetCharacterStats);
+const setCharacterStartingClass = vi.mocked(SetCharacterStartingClass);
+const setCharacterGender = vi.mocked(SetCharacterGender);
+const getAppearancePresets = vi.mocked(GetAppearancePresets);
+const applyAppearancePreset = vi.mocked(ApplyAppearancePreset);
+const getFavoritePresets = vi.mocked(GetFavoritePresets);
+const setFavoritePreset = vi.mocked(SetFavoritePreset);
+const applyFavoritePreset = vi.mocked(ApplyFavoritePreset);
+const deleteFavoritePreset = vi.mocked(DeleteFavoritePreset);
 
 beforeEach(() => {
   getApplicationInfo.mockReset();
@@ -96,6 +134,16 @@ beforeEach(() => {
   getResourcePresentationSummaries.mockReset();
   getResource.mockReset();
   getItemVariants.mockReset();
+  setCharacterName.mockReset();
+  setCharacterStats.mockReset();
+  setCharacterStartingClass.mockReset();
+  setCharacterGender.mockReset();
+  getAppearancePresets.mockReset();
+  applyAppearancePreset.mockReset();
+  getFavoritePresets.mockReset();
+  setFavoritePreset.mockReset();
+  applyFavoritePreset.mockReset();
+  deleteFavoritePreset.mockReset();
 });
 
 describe("wails application info adapter", () => {
@@ -1724,5 +1772,201 @@ describe("wails equipment adapter", () => {
     expect((failure as Error).message).toBe(bridgeFailureCode);
     expect(toAppError(failure).code).toBe(bridgeFailureCode);
     expect(JSON.stringify(toAppError(failure))).not.toContain("goroutine");
+  });
+
+  it("forwards character, appearance and favorites operations and projects receipts", async () => {
+    const rawReceipt = {
+      operationID: "op-1",
+      operationKind: "test",
+      saveSessionID: "session-1",
+      saveRevision: "2",
+      changedScopes: ["save.session", "favorites"],
+    };
+
+    const nameResult = new saveengine.SetCharacterNameResult({
+      ...rawReceipt,
+      characterID: 0,
+      name: "Hero",
+    });
+    const statsResult = new saveengine.SetCharacterStatsResult({
+      ...rawReceipt,
+      characterID: 0,
+      attributes: new saveengine.CharacterAttributes({
+        vigor: 10,
+        mind: 10,
+        endurance: 10,
+        strength: 10,
+        dexterity: 10,
+        intelligence: 10,
+        faith: 10,
+        arcane: 10,
+      }),
+      level: 10,
+      soulMemory: 0,
+    });
+    const classResult = new saveengine.SetCharacterStartingClassResult({
+      ...rawReceipt,
+      characterID: 0,
+      startingClassID: 1,
+      attributes: new saveengine.CharacterAttributes(),
+      level: 10,
+      soulMemory: 0,
+    });
+    const favSetResult = new saveengine.SetFavoritePresetResult({
+      ...rawReceipt,
+      favoriteSlotID: 0,
+      sourceCharacterID: 0,
+    });
+    const favDeleteResult = new saveengine.DeleteFavoritePresetResult({
+      ...rawReceipt,
+      favoriteSlotID: 0,
+    });
+
+    const genderResult = new character.SetCharacterGenderResult({
+      ...rawReceipt,
+      characterID: 0,
+      presetID: "",
+      appearance: new saveengine.CharacterAppearanceValues(),
+    });
+    const applyAppResult = new appearance.ApplyAppearancePresetResult({
+      ...rawReceipt,
+      characterID: 0,
+      presetID: "p-1",
+      appearance: new saveengine.CharacterAppearanceValues(),
+    });
+    const applyFavResult = new saveengine.ApplyFavoritePresetResult({
+      ...rawReceipt,
+      characterID: 0,
+      favoriteSlotID: 0,
+    });
+
+    setCharacterName.mockResolvedValue(nameResult);
+    setCharacterStats.mockResolvedValue(statsResult);
+    setCharacterStartingClass.mockResolvedValue(classResult);
+    setCharacterGender.mockResolvedValue(genderResult);
+    applyAppearancePreset.mockResolvedValue(applyAppResult);
+    setFavoritePreset.mockResolvedValue(favSetResult);
+    applyFavoritePreset.mockResolvedValue(applyFavResult);
+    deleteFavoritePreset.mockResolvedValue(favDeleteResult);
+
+    getAppearancePresets.mockResolvedValue(
+      new appearance.GetAppearancePresetsResult({
+        presets: [
+          new appearance.AppearancePresetSummary({
+            id: "p-1",
+            name: "Preset 1",
+            image: "p-1.jpg",
+            bodyType: "Type A",
+            tags: ["hero"],
+          }),
+        ],
+      }),
+    );
+
+    getFavoritePresets.mockResolvedValue(
+      new saveengine.FavoritePresetsState({
+        saveSessionID: "session-1",
+        presets: [new saveengine.FavoritePreset({ favoriteSlotID: 0, active: true })],
+      }),
+    );
+
+    const nameReceipt = await wailsDesktopBridge.setCharacterName({
+      saveSessionID: "session-1",
+      characterID: 0,
+      name: "Hero",
+      expectedRevision: "1",
+    });
+    expect(setCharacterName).toHaveBeenCalledWith("session-1", 0, "Hero", "1");
+    expect(nameReceipt.saveRevision).toBe("2");
+    expect(nameReceipt.changedScopes).toEqual(["save.session", "favorites"]);
+
+    const statsReceipt = await wailsDesktopBridge.setCharacterStats({
+      saveSessionID: "session-1",
+      characterID: 0,
+      attributes: {
+        vigor: 10,
+        mind: 10,
+        endurance: 10,
+        strength: 10,
+        dexterity: 10,
+        intelligence: 10,
+        faith: 10,
+        arcane: 10,
+      },
+      levelPolicy: "recalculate",
+      expectedRevision: "1",
+    });
+    expect(setCharacterStats).toHaveBeenCalledWith(
+      "session-1",
+      0,
+      expect.any(saveengine.CharacterAttributes),
+      "recalculate",
+      "1",
+    );
+    expect(statsReceipt.saveRevision).toBe("2");
+
+    const classReceipt = await wailsDesktopBridge.setCharacterStartingClass({
+      saveSessionID: "session-1",
+      characterID: 0,
+      startingClassID: 1,
+      confirmReset: true,
+      expectedRevision: "1",
+    });
+    expect(setCharacterStartingClass).toHaveBeenCalledWith("session-1", 0, 1, true, "1");
+    expect(classReceipt.saveRevision).toBe("2");
+
+    const genderReceipt = await wailsDesktopBridge.setCharacterGender({
+      saveSessionID: "session-1",
+      characterID: 0,
+      gender: 1,
+      expectedRevision: "1",
+    });
+    expect(setCharacterGender).toHaveBeenCalledWith("session-1", 0, 1, "1");
+    expect(genderReceipt.saveRevision).toBe("2");
+
+    const appearanceList = await wailsDesktopBridge.getAppearancePresets({ search: "Hero" });
+    expect(getAppearancePresets).toHaveBeenCalledWith("Hero", []);
+    expect(appearanceList).toHaveLength(1);
+    expect(appearanceList[0].id).toBe("p-1");
+
+    const applyAppReceipt = await wailsDesktopBridge.applyAppearancePreset({
+      saveSessionID: "session-1",
+      characterID: 0,
+      presetID: "p-1",
+      expectedRevision: "1",
+    });
+    expect(applyAppearancePreset).toHaveBeenCalledWith("session-1", 0, "p-1", "1");
+    expect(applyAppReceipt.saveRevision).toBe("2");
+
+    const favs = await wailsDesktopBridge.getFavoritePresets("session-1", 0);
+    expect(getFavoritePresets).toHaveBeenCalledWith("session-1", 0);
+    expect(favs.presets).toHaveLength(1);
+    expect(favs.presets[0].active).toBe(true);
+
+    const setFavReceipt = await wailsDesktopBridge.setFavoritePreset({
+      saveSessionID: "session-1",
+      favoriteSlotID: 0,
+      sourceCharacterID: 0,
+      expectedRevision: "1",
+    });
+    expect(setFavoritePreset).toHaveBeenCalledWith("session-1", 0, 0, "1");
+    expect(setFavReceipt.saveRevision).toBe("2");
+
+    const applyFavReceipt = await wailsDesktopBridge.applyFavoritePreset({
+      saveSessionID: "session-1",
+      characterID: 0,
+      favoriteSlotID: 0,
+      expectedRevision: "1",
+    });
+    expect(applyFavoritePreset).toHaveBeenCalledWith("session-1", 0, 0, "1");
+    expect(applyFavReceipt.saveRevision).toBe("2");
+
+    const deleteFavReceipt = await wailsDesktopBridge.deleteFavoritePreset({
+      saveSessionID: "session-1",
+      favoriteSlotID: 0,
+      expectedRevision: "1",
+    });
+    expect(deleteFavoritePreset).toHaveBeenCalledWith("session-1", 0, "1");
+    expect(deleteFavReceipt.saveRevision).toBe("2");
   });
 });

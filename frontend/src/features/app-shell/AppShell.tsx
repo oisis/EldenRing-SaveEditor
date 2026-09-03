@@ -15,6 +15,7 @@ import { message } from "../../ui/patterns/panel.css";
 import type { ThemeName } from "../../ui/tokens/themes.css";
 import { themeNames } from "../../ui/tokens/themes.css";
 import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
+import { CharacterPanel } from "../character/CharacterPanel";
 import { CharacterSidebar } from "../character/CharacterSidebar";
 import { EquipmentPanel } from "../equipment/EquipmentPanel";
 import { InventoryAndStoragePanel } from "../items/inventory-storage/InventoryAndStoragePanel";
@@ -253,9 +254,15 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
       <main className={workspace} id="workspace" tabIndex={-1}>
         {section === "home" && <SaveSessionContent flow={flow} />}
         {section === "character" && (
-          <UnavailableScreen>
-            <Trans>The Character workspace will be implemented in a later frontend stage.</Trans>
-          </UnavailableScreen>
+          <section aria-label={t`Character`} className={screen}>
+            <CharacterPanel
+              saveSessionID={session?.saveSessionID}
+              saveRevision={session?.saveRevision}
+              characterID={selectedCharacterID}
+              applyMutationReceipt={flow.applyMutationReceipt}
+              sessionBusy={flow.isBusy}
+            />
+          </section>
         )}
         {section === "items" && (
           <section aria-label={t`Items`} className={screen}>

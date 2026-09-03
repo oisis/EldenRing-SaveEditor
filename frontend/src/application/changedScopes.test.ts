@@ -22,6 +22,8 @@ const equipmentCandidates = queryKeys.equipmentCandidates(session, 0, "3", {
   pageSize: 50,
 });
 
+const favoritePresets = queryKeys.favoritePresets(session, "3");
+
 /**
  * The expected mapping, written out by hand. Reading it back from the
  * implementation would prove only that the table was read; this is the reviewed
@@ -54,7 +56,7 @@ const expected: Record<ChangedScope, { invalidates: readonly (readonly unknown[]
   },
   "world.flags": { invalidates: [] },
   network: { invalidates: [] },
-  favorites: { invalidates: [] },
+  favorites: { invalidates: [favoritePresets] },
   "diagnostics.report": {
     invalidates: [queryKeys.saveValidationReport(session, 0, "3")],
   },
@@ -75,6 +77,7 @@ const everyKey: readonly (readonly unknown[])[] = [
   queryKeys.pouchItems(session, 0, "3"),
   queryKeys.physickMixture(session, 0, "3"),
   queryKeys.equippedSpells(session, 0, "3"),
+  favoritePresets,
   queryKeys.saveValidationReport(session, 0, "3"),
 ];
 

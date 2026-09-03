@@ -115,6 +115,11 @@ export const queryKeys = {
       pageSize,
     ] as const,
   /**
+   * The appearance preset catalog is global: it belongs to no save session.
+   */
+  appearancePresets: (search?: string, tags?: readonly string[]) =>
+    ["catalog", "appearance-presets", search ?? "", tags?.slice() ?? []] as const,
+  /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to
    * be keyed below it to be cleaned up with the session.
@@ -123,6 +128,14 @@ export const queryKeys = {
   loadedSave: (saveSessionID: string) => ["save-session", saveSessionID, "loaded"] as const,
   saveCharacters: (saveSessionID: string, saveRevision: string) =>
     ["save-session", saveSessionID, "characters", saveRevision] as const,
+  favoritePresets: (saveSessionID: string, saveRevision: string, favoriteSlotID?: number) =>
+    [
+      "save-session",
+      saveSessionID,
+      "favorite-presets",
+      favoriteSlotID ?? "all",
+      saveRevision,
+    ] as const,
   /**
    * One validation report per slot and per revision, below the session scope,
    * so closing the session drops every report of every revision with it and two
