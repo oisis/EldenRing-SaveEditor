@@ -16,6 +16,7 @@ import type { ThemeName } from "../../ui/tokens/themes.css";
 import { themeNames } from "../../ui/tokens/themes.css";
 import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
 import { CharacterSidebar } from "../character/CharacterSidebar";
+import { EquipmentPanel } from "../equipment/EquipmentPanel";
 import { InventoryAndStoragePanel } from "../items/inventory-storage/InventoryAndStoragePanel";
 import { ItemDatabasePanel } from "../items/item-database/ItemDatabasePanel";
 import { PendingChangesDialog, ReviewChangesDialog } from "../review-changes/ReviewChangesDialog";
@@ -295,9 +296,15 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           </section>
         )}
         {section === "equipment" && (
-          <UnavailableScreen>
-            <Trans>The Equipment workspace will be implemented in a later frontend stage.</Trans>
-          </UnavailableScreen>
+          <section aria-label={t`Equipment`} className={screen}>
+            <EquipmentPanel
+              saveSessionID={session?.saveSessionID}
+              saveRevision={session?.saveRevision}
+              characterID={selectedCharacterID}
+              applyMutationReceipt={flow.applyMutationReceipt}
+              sessionBusy={flow.isBusy}
+            />
+          </section>
         )}
         {section === "world" && (
           <UnavailableScreen>

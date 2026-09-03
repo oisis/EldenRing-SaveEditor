@@ -79,23 +79,9 @@ func SetEquippedArmor(
 		if !found || resource.Item == nil {
 			return fmt.Errorf("item with game ID 0x%08X is not found in game catalog", gameID)
 		}
-		item := resource.Item
-		if !item.Family.Known || item.Family.Value != schema.ItemFamilyArmor {
-			return fmt.Errorf("resource kind %q key %q has item family %q, want %q",
-				resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilyArmor)
-		}
-		equipment := item.Capabilities.Equipment
-		if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-			return fmt.Errorf("resource kind %q key %q has no confirmed armor equipment capability",
-				resource.Kind, resource.Key)
-		}
-		for _, allowed := range equipment.Rules.AllowedSlots {
-			if allowed == equippedArmorSlots[slot] {
-				return nil
-			}
-		}
-		return fmt.Errorf("resource kind %q key %q cannot be equipped in slot %q",
-			resource.Kind, resource.Key, equippedArmorSlots[slot])
+		return validateEquipmentSlotCompatibility(
+			resource, schema.ItemFamilyArmor, equippedArmorSlots[slot],
+			"armor", fmt.Sprintf("slot %q", equippedArmorSlots[slot]))
 	}
 
 	mutation, err := engine.SetEquippedArmor(

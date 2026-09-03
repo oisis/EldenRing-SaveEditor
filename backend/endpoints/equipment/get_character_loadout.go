@@ -43,10 +43,17 @@ const (
 type LoadoutSlot struct {
 	SlotType schema.EquipmentSlot `json:"slotType"`
 	State    LoadoutSlotState     `json:"state"`
-	Resource *schema.ResourceRef  `json:"resource,omitempty"`
-	Name     string               `json:"name,omitempty"`
-	IconPath string               `json:"iconPath,omitempty"`
-	RawValue uint32               `json:"rawValue"`
+	// OwnedItemID is the exact, revision-scoped Inventory common identity the
+	// occupied position references, so the hand, armor and talisman setters can
+	// be called with the record that is actually equipped. It is present only
+	// for those three groups when the position is occupied: an empty position,
+	// a locked position, an ammunition position and a Physick position carry
+	// none. It is never derived from a game ID and never minted by a caller.
+	OwnedItemID string              `json:"ownedItemID,omitempty"`
+	Resource    *schema.ResourceRef `json:"resource,omitempty"`
+	Name        string              `json:"name,omitempty"`
+	IconPath    string              `json:"iconPath,omitempty"`
+	RawValue    uint32              `json:"rawValue"`
 }
 
 type LoadoutOwnedSlot struct {
@@ -118,7 +125,7 @@ func GetCharacterLoadout(
 		return result, nil
 	}
 
-	result.RightHand, err = resolveLoadoutGroup(gameCatalog, stored.Equipment, []loadoutPosition{
+	result.RightHand, err = resolveLoadoutGroup(gameCatalog, stored, []loadoutPosition{
 		{index: 1, slot: schema.EquipmentSlotRightHand},
 		{index: 3, slot: schema.EquipmentSlotRightHand},
 		{index: 5, slot: schema.EquipmentSlotRightHand},
@@ -126,7 +133,7 @@ func GetCharacterLoadout(
 	if err != nil {
 		return GetCharacterLoadoutResult{}, fmt.Errorf("right hand: %w", err)
 	}
-	result.LeftHand, err = resolveLoadoutGroup(gameCatalog, stored.Equipment, []loadoutPosition{
+	result.LeftHand, err = resolveLoadoutGroup(gameCatalog, stored, []loadoutPosition{
 		{index: 0, slot: schema.EquipmentSlotLeftHand},
 		{index: 2, slot: schema.EquipmentSlotLeftHand},
 		{index: 4, slot: schema.EquipmentSlotLeftHand},
@@ -134,21 +141,21 @@ func GetCharacterLoadout(
 	if err != nil {
 		return GetCharacterLoadoutResult{}, fmt.Errorf("left hand: %w", err)
 	}
-	result.Arrows, err = resolveLoadoutGroup(gameCatalog, stored.Equipment, []loadoutPosition{
+	result.Arrows, err = resolveLoadoutGroup(gameCatalog, stored, []loadoutPosition{
 		{index: 6, slot: schema.EquipmentSlotArrow},
 		{index: 8, slot: schema.EquipmentSlotArrow},
 	}, schema.ItemFamilyWeapon)
 	if err != nil {
 		return GetCharacterLoadoutResult{}, fmt.Errorf("arrows: %w", err)
 	}
-	result.Bolts, err = resolveLoadoutGroup(gameCatalog, stored.Equipment, []loadoutPosition{
+	result.Bolts, err = resolveLoadoutGroup(gameCatalog, stored, []loadoutPosition{
 		{index: 7, slot: schema.EquipmentSlotBolt},
 		{index: 9, slot: schema.EquipmentSlotBolt},
 	}, schema.ItemFamilyWeapon)
 	if err != nil {
 		return GetCharacterLoadoutResult{}, fmt.Errorf("bolts: %w", err)
 	}
-	result.Armor, err = resolveLoadoutGroup(gameCatalog, stored.Equipment, []loadoutPosition{
+	result.Armor, err = resolveLoadoutGroup(gameCatalog, stored, []loadoutPosition{
 		{index: 12, slot: schema.EquipmentSlotHead},
 		{index: 13, slot: schema.EquipmentSlotChest},
 		{index: 14, slot: schema.EquipmentSlotArms},
@@ -219,13 +226,13 @@ type loadoutPosition struct {
 
 func resolveLoadoutGroup(
 	gameCatalog *gamecatalog.Catalog,
-	raw [22]uint32,
+	stored saveengine.CharacterLoadoutSnapshot,
 	positions []loadoutPosition,
 	family schema.ItemFamily,
 ) ([]LoadoutSlot, error) {
 	result := make([]LoadoutSlot, len(positions))
 	for outputIndex, position := range positions {
-		value := raw[position.index]
+		value := stored.Equipment[position.index]
 		result[outputIndex] = LoadoutSlot{
 			SlotType: position.slot,
 			State:    LoadoutSlotEmpty,
@@ -239,6 +246,7 @@ func resolveLoadoutGroup(
 			return nil, fmt.Errorf("slot %d: %w", outputIndex, err)
 		}
 		result[outputIndex].State = LoadoutSlotOccupied
+		result[outputIndex].OwnedItemID = stored.EquipmentOwned[position.index]
 		result[outputIndex].Resource = &resource
 		result[outputIndex].Name = name
 		result[outputIndex].IconPath = iconPath
@@ -271,6 +279,7 @@ func resolveTalismanGroup(
 			return nil, fmt.Errorf("talisman slot %d: %w", index, err)
 		}
 		result[index].State = LoadoutSlotOccupied
+		result[index].OwnedItemID = stored.EquipmentOwned[17+index]
 		result[index].Resource = &resource
 		result[index].Name = name
 		result[index].IconPath = iconPath

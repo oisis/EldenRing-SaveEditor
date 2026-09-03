@@ -82,16 +82,20 @@ export const changedScopeQueryKeyPatterns: Record<
   // questions about the same records, so a mutation of a container refreshes
   // both. The owned-items pattern carries the container as its next segment,
   // so `inventory` never invalidates the Storage workspace and the other way
-  // round.
+  // round. The Equipment pickers read Inventory common through their own getter,
+  // so a container mutation refreshes them together with both Inventory views.
   inventory: (id) => [
     characterView(id, "inventory"),
     [...characterView(id, "owned-items"), "inventory"],
+    characterView(id, "equipment-candidates"),
   ],
   storage: (id) => [characterView(id, "storage"), [...characterView(id, "owned-items"), "storage"]],
-  // The coherent loadout and the five narrow equipped views are independent
-  // getters of one scope, so all six are refreshed together.
+  // The coherent loadout, the picker candidates and the five narrow equipped
+  // views are independent getters of one scope, so all seven are refreshed
+  // together.
   "equipment.loadout": (id) => [
     characterView(id, "loadout"),
+    characterView(id, "equipment-candidates"),
     characterView(id, "equipment"),
     characterView(id, "quick-items"),
     characterView(id, "pouch-items"),

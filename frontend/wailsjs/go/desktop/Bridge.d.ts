@@ -30,6 +30,8 @@ export function GetCharacterStats(arg1:string,arg2:number):Promise<saveengine.Ch
 
 export function GetEquipment(arg1:string,arg2:number):Promise<saveengine.CharacterEquipment>;
 
+export function GetEquipmentCandidates(arg1:string,arg2:number,arg3:string,arg4:string,arg5:number,arg6:number):Promise<equipment.GetEquipmentCandidatesResult>;
+
 export function GetEquippedSpells(arg1:string,arg2:number):Promise<equipment.GetEquippedSpellsResult>;
 
 export function GetInventory(arg1:string,arg2:number,arg3:string,arg4:number,arg5:number):Promise<inventory.GetInventoryResult>;
@@ -102,7 +104,21 @@ export function SelectSaveFile():Promise<string>;
 
 export function SelectSaveTarget(arg1:string):Promise<string>;
 
+export function SetEquippedArmaments(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetEquippedArmamentsResult>;
+
+export function SetEquippedArmor(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetEquippedArmorResult>;
+
+export function SetEquippedSpells(arg1:string,arg2:number,arg3:Array<schema.ResourceRef>,arg4:string):Promise<equipment.SetEquippedSpellsResult>;
+
+export function SetEquippedTalismans(arg1:string,arg2:number,arg3:Array<string>,arg4:string):Promise<equipment.SetEquippedTalismansResult>;
+
 export function SetOwnedItemQuantity(arg1:string,arg2:number,arg3:string,arg4:number,arg5:string):Promise<saveengine.SetOwnedItemQuantityResult>;
+
+export function SetPhysickMixture(arg1:string,arg2:number,arg3:Array<schema.ResourceRef>,arg4:string):Promise<equipment.SetPhysickMixtureResult>;
+
+export function SetPouchItems(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetPouchItemsResult>;
+
+export function SetQuickItems(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetQuickItemsResult>;
 
 export function SetSafetyProfile(arg1:string):Promise<application.SafetyProfileResult>;
 

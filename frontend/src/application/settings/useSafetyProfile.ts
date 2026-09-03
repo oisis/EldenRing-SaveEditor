@@ -25,10 +25,12 @@ export function useSafetyProfile() {
  * updates the cache, so the interface never renders a profile the backend did
  * not confirm.
  *
- * Changing the profile changes what the backend reports for the Item Database
- * and for both containers, so every catalog and owned-item view is invalidated.
- * The save session itself does not change: no revision moves and no mutation
- * receipt exists, which is exactly why this is not routed through the shared
+ * Changing the profile changes what the backend reports for the Item Database,
+ * for both containers and for the Equipment pickers, so every catalog,
+ * owned-item and equipment-candidate view is invalidated. Those are the views
+ * whose answer the profile selects; nothing wider is touched, because the save
+ * session itself does not change: no revision moves and no mutation receipt
+ * exists, which is exactly why this is not routed through the shared
  * save-mutation path.
  */
 export function useSetSafetyProfile() {
@@ -41,7 +43,9 @@ export function useSetSafetyProfile() {
       queryClient.setQueryData(queryKeys.safetyProfile(), settings);
       await queryClient.invalidateQueries({ queryKey: ["catalog"] });
       await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey.includes("owned-items"),
+        predicate: (query) =>
+          query.queryKey.includes("owned-items") ||
+          query.queryKey.includes("equipment-candidates"),
       });
     },
   });

@@ -6717,7 +6717,7 @@
       },
       "LoadoutSlot": {
         "type": "object",
-        "description": "One positional equipment or Physick slot. Resource presentation is present only when the position is occupied.",
+        "description": "One positional equipment or Physick slot. Resource presentation is present only when the position is occupied, and an occupied hand, armor or talisman position also names the exact Inventory common record it references.",
         "properties": {
           "slotType": {
             "type": "string",
@@ -6734,6 +6734,11 @@
           },
           "iconPath": {
             "type": "string"
+          },
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Revision-scoped identity of the Inventory common record this position references. Present only for an occupied hand, armor or talisman position, which are the three groups whose setter addresses an owned record. Absent for an empty position, a locked position, an ammunition position and a Physick position."
           },
           "rawValue": {
             "type": "integer",

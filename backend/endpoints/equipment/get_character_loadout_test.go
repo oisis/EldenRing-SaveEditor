@@ -18,6 +18,32 @@ const (
 	loadoutEndpointMemoryStone = uint32(0x4000272E)
 	loadoutEndpointAlias       = uint32(0x400000FA)
 	loadoutEndpointTear        = uint32(0x40002AF9)
+
+	// The shared spells fixture anchors its slot 0x640 bytes in, which leaves no
+	// room in front of it for the confirmed GaItem table this loadout is now
+	// cross-checked against. This fixture therefore moves its own anchored region
+	// far enough into the same slot for the table to fit; every offset below
+	// stays relative to the anchor, so nothing else about the layout changes.
+	loadoutEndpointAnchorShift = int64(0x10000)
+	loadoutEndpointAnchorAt    = getEquippedSpellsAnchorAt + loadoutEndpointAnchorShift
+	loadoutEndpointRegionAt    = getEquippedSpellsAnchorAt - 0x100
+	loadoutEndpointRegionSize  = int64(0xA000)
+	loadoutEndpointSlotVersion = 82
+
+	// The two confirmed reference blocks in front of InventoryHeld, measured
+	// from the same anchor the rest of this fixture writes from. They are the
+	// distances SaveEngine derives from inventoryHeldCommonOffset: the handle
+	// block ends where the common count begins, and the index block sits two
+	// 22-field blocks and a 0x1C gap in front of it.
+	loadoutEndpointHandlesAt = int64(505 - 4 - 22*4)
+	loadoutEndpointIndexesAt = loadoutEndpointHandlesAt - 22*4 - 0x1C - 22*4
+
+	// The two Inventory common rows the equipped Dagger and the equipped
+	// talisman are referenced through, with their exact GaItem handles.
+	loadoutEndpointDaggerRow    = 100
+	loadoutEndpointDaggerHandle = uint32(0x80000064)
+	loadoutEndpointMoonRow      = 101
+	loadoutEndpointMoonHandle   = uint32(0xA0000474)
 )
 
 func writeGetCharacterLoadoutFixture(t *testing.T) string {
@@ -30,7 +56,23 @@ func writeGetCharacterLoadoutFixture(t *testing.T) string {
 
 	slotBase := int64(getEquippedSpellsHeaderSize) + 0x10 +
 		getEquippedSpellsSlot*getEquippedSpellsSlotBlockSize
-	anchor := slotBase + getEquippedSpellsAnchorAt
+
+	// Move the anchored region, then clear the region it came from so the
+	// anchor search finds exactly one marker, the new one.
+	source := slotBase + loadoutEndpointRegionAt
+	copy(data[source+loadoutEndpointAnchorShift:source+loadoutEndpointAnchorShift+loadoutEndpointRegionSize],
+		data[source:source+loadoutEndpointRegionSize])
+	for index := source; index < source+loadoutEndpointRegionSize; index++ {
+		data[index] = 0
+	}
+	// The slot declares its version, and the equipped Dagger gets the GaItem
+	// record its weapon handle resolves through. Every other record of the table
+	// stays the native empty eight-byte record.
+	binary.LittleEndian.PutUint32(data[slotBase:], loadoutEndpointSlotVersion)
+	binary.LittleEndian.PutUint32(data[slotBase+0x20:], loadoutEndpointDaggerHandle)
+	binary.LittleEndian.PutUint32(data[slotBase+0x24:], loadoutEndpointDagger)
+
+	anchor := slotBase + loadoutEndpointAnchorAt
 	put := func(at int64, value uint32) {
 		binary.LittleEndian.PutUint32(data[anchor+at:], value)
 	}
@@ -82,6 +124,23 @@ func writeGetCharacterLoadoutFixture(t *testing.T) string {
 	put(0x9279+12, 0x180+98)
 	put(blockAt+0x58+4, loadoutEndpointAlias)
 
+	// The equipped Dagger and talisman are addressed the way the three armament
+	// writers address them: the physical Inventory common row in EquipedItemIndex
+	// and the exact GaItem handle of that row in ActiveEquipedItemsGa.
+	daggerRowAt := int64(getEquippedSpellsInventoryAt + loadoutEndpointDaggerRow*12)
+	put(daggerRowAt, loadoutEndpointDaggerHandle)
+	put(daggerRowAt+4, 1)
+	put(daggerRowAt+8, uint32(loadoutEndpointDaggerRow))
+	put(loadoutEndpointIndexesAt+1*4, 0x180+loadoutEndpointDaggerRow)
+	put(loadoutEndpointHandlesAt+1*4, loadoutEndpointDaggerHandle)
+
+	moonRowAt := int64(getEquippedSpellsInventoryAt + loadoutEndpointMoonRow*12)
+	put(moonRowAt, loadoutEndpointMoonHandle)
+	put(moonRowAt+4, 1)
+	put(moonRowAt+8, uint32(loadoutEndpointMoonRow))
+	put(loadoutEndpointIndexesAt+17*4, 0x180+loadoutEndpointMoonRow)
+	put(loadoutEndpointHandlesAt+17*4, loadoutEndpointMoonHandle)
+
 	put(blockAt+0x9C, loadoutEndpointTear)
 	put(blockAt+0xA0, saveengine.PhysickEmptyTearID)
 	put(getEquippedSpellsSectionAt+14*8, 0)
@@ -117,6 +176,27 @@ func TestGetCharacterLoadoutResolvesEveryConfirmedGroup(t *testing.T) {
 		result.RightHand[0].Resource == nil || result.RightHand[0].Resource.Key == "" ||
 		result.LeftHand[0].State != LoadoutSlotEmpty {
 		t.Errorf("hands = right %+v left %+v", result.RightHand[0], result.LeftHand[0])
+	}
+	// The occupied hand and talisman positions name the exact Inventory common
+	// record they reference, and no other position invents one.
+	if result.RightHand[0].OwnedItemID == "" ||
+		result.RightHand[0].OwnedItemID == result.Talismans[0].OwnedItemID {
+		t.Errorf("right hand owned identity = %q", result.RightHand[0].OwnedItemID)
+	}
+	if result.Talismans[0].OwnedItemID == "" {
+		t.Errorf("talisman owned identity = %q", result.Talismans[0].OwnedItemID)
+	}
+	for _, slot := range append(append([]LoadoutSlot{}, result.LeftHand...),
+		append(append([]LoadoutSlot{}, result.Arrows...),
+			append(result.Bolts, result.Physick...)...)...) {
+		if slot.OwnedItemID != "" {
+			t.Errorf("slot %+v must carry no owned identity", slot)
+		}
+	}
+	for index := 1; index < 4; index++ {
+		if result.Talismans[index].OwnedItemID != "" {
+			t.Errorf("locked talisman %d = %+v", index, result.Talismans[index])
+		}
 	}
 	for index, slot := range result.Armor {
 		if slot.State != LoadoutSlotEmpty || slot.Resource != nil {
@@ -176,10 +256,14 @@ func TestGetCharacterLoadoutFailsClosedForUnknownOccupiedItem(t *testing.T) {
 	}
 	slotBase := int64(getEquippedSpellsHeaderSize) + 0x10 +
 		getEquippedSpellsSlot*getEquippedSpellsSlotBlockSize
-	anchor := slotBase + getEquippedSpellsAnchorAt
+	anchor := slotBase + loadoutEndpointAnchorAt
 	count := binary.LittleEndian.Uint32(data[anchor+getEquippedSpellsCountAt:])
 	blockAt := anchor + getEquippedSpellsCountAt + 4 + int64(count)*8
+	// The position and the GaItem record it resolves through are moved together,
+	// so the save stays internally consistent and the failure under test is the
+	// unknown catalog identity rather than a broken reference.
 	binary.LittleEndian.PutUint32(data[blockAt+4:], 0x0FFFFFFE)
+	binary.LittleEndian.PutUint32(data[slotBase+0x24:], 0x0FFFFFFE)
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("update fixture: %v", err)
 	}
@@ -194,6 +278,33 @@ func TestGetCharacterLoadoutFailsClosedForUnknownOccupiedItem(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "right hand: slot 0: game ID 0x0FFFFFFE is not a known item") {
 		t.Fatalf("error = %v", err)
 	}
+
+	// The adjacent boundary: every reference is structurally valid, but the
+	// handle of the equipped hand resolves through the GaItem table to a
+	// different item than the one the position presents. Reporting the name of
+	// one item next to the owned identity of another is exactly the failure this
+	// getter must never produce, so the whole read fails instead.
+	inconsistent := writeGetCharacterLoadoutFixture(t)
+	data, err = os.ReadFile(inconsistent)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	binary.LittleEndian.PutUint32(data[slotBase+0x24:], loadoutEndpointUnarmed)
+	if err := os.WriteFile(inconsistent, data, 0o600); err != nil {
+		t.Fatalf("update fixture: %v", err)
+	}
+
+	engine = saveengine.New()
+	loaded, err = engine.LoadSave(inconsistent, "", "local")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	_, err = GetCharacterLoadout(
+		engine, newEquippedSpellsCatalog(t), loaded.SaveSessionID, getEquippedSpellsSlot)
+	if err == nil ||
+		!strings.Contains(err.Error(), "equipment position 1: inconsistent existing save state") {
+		t.Fatalf("inconsistent handle error = %v", err)
+	}
 }
 
 func TestGetCharacterLoadoutFailsClosedWhenSpellsExceedAvailableCapacity(t *testing.T) {
@@ -204,7 +315,7 @@ func TestGetCharacterLoadoutFailsClosedWhenSpellsExceedAvailableCapacity(t *test
 	}
 	slotBase := int64(getEquippedSpellsHeaderSize) + 0x10 +
 		getEquippedSpellsSlot*getEquippedSpellsSlotBlockSize
-	anchor := slotBase + getEquippedSpellsAnchorAt
+	anchor := slotBase + loadoutEndpointAnchorAt
 	for index := 0; index < 8; index++ {
 		at := anchor + getEquippedSpellsSectionAt + int64(index*getEquippedSpellsRecordSize)
 		binary.LittleEndian.PutUint32(data[at:], rawGlintstonePebble)
@@ -234,7 +345,7 @@ func TestGetCharacterLoadoutRejectsWrongFamilyInOwnedSlot(t *testing.T) {
 	}
 	slotBase := int64(getEquippedSpellsHeaderSize) + 0x10 +
 		getEquippedSpellsSlot*getEquippedSpellsSlotBlockSize
-	anchor := slotBase + getEquippedSpellsAnchorAt
+	anchor := slotBase + loadoutEndpointAnchorAt
 	count := binary.LittleEndian.Uint32(data[anchor+getEquippedSpellsCountAt:])
 	blockAt := int64(getEquippedSpellsCountAt) + 4 + int64(count)*8
 	put := func(at int64, value uint32) {

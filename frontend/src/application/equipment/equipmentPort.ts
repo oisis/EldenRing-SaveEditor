@@ -4,8 +4,10 @@
  * it through the hooks in this directory and never on the transport that
  * fulfils it.
  *
- * All six getters are read-only: the port declares no `set*` method, so no
- * layer above it can reach a mutation through this contract.
+ * The port carries both halves of the Equipment contract: seven read-only
+ * getters and the seven mutations of `EquipmentMutationPort`. A getter never
+ * writes and a mutation is reached only through the application layer's single
+ * mutation runner, so no feature module calls a setter on this port directly.
  *
  * Four of them report raw save state. A raw identifier is carried exactly as
  * the backend reports it and nothing is derived from it here: no name, no icon,
@@ -23,6 +25,8 @@
  * consumers must not combine them into a second loadout model.
  */
 
+import type { ChangedScope } from "../changedScopes";
+
 /** The session and slot one equipped view is read for. */
 export type EquipmentRequest = {
   saveSessionID: string;
@@ -39,6 +43,14 @@ export type LoadoutResource = {
 export type LoadoutSlot = {
   slotType: string;
   state: LoadoutSlotState;
+  /**
+   * The backend's own, revision-scoped identity of the Inventory record this
+   * position references. It is present exactly for the occupied hand, armor and
+   * talisman positions, which are the three groups whose setter addresses an
+   * owned record; an empty, locked, ammunition or Physick position carries
+   * none. It is never derived, minted or repaired above this port.
+   */
+  ownedItemID?: string;
   resource?: LoadoutResource;
   name?: string;
   iconPath?: string;
@@ -170,7 +182,132 @@ export type CharacterEquippedSpells = {
   availableMemorySlots: number;
 };
 
-export type EquipmentPort = {
+/**
+ * One resource the backend accepts for the requested slot type. Compatibility,
+ * visibility and ordering are the backend's answer: nothing here is filtered,
+ * re-sorted or re-checked against a local rule.
+ *
+ * `ownedItemID` is present exactly for the slot types whose setter addresses an
+ * owned record. `memorySlots` is the confirmed capacity cost of a spell and is
+ * absent for every other slot type.
+ */
+export type EquipmentCandidate = {
+  resource: LoadoutResource;
+  ownedItemID?: string;
+  name: string;
+  iconPath: string;
+  quantity?: number;
+  memorySlots?: number;
+  banRisk: boolean;
+  cutContent: boolean;
+};
+
+/** One page of the candidates of one slot type, exactly as the backend served it. */
+export type EquipmentCandidatesPage = {
+  saveSessionID: string;
+  saveRevision: string;
+  characterID: number;
+  active: boolean;
+  safetyProfile: string;
+  slotType: string;
+  candidates: readonly EquipmentCandidate[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * The arguments of one candidate page. The slot type is one value of the closed
+ * backend dictionary and is passed on exactly as received; no safety profile is
+ * sent, because the backend reads the host setting itself.
+ */
+export type EquipmentCandidatesRequest = {
+  saveSessionID: string;
+  characterID: number;
+  slotType: string;
+  search: string;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * The committed receipt of one Equipment mutation. It is the shared backend
+ * receipt carried verbatim: no revision, scope list or operation identity is
+ * ever assembled above this port.
+ */
+export type EquipmentMutationReceipt = {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: readonly ChangedScope[];
+};
+
+/**
+ * The seven Equipment mutations. Every one of them replaces a complete group in
+ * the backend's own order, so a caller always sends the whole group and never
+ * only the position it touched. `null` is the backend's own empty position and
+ * is never replaced by a placeholder here.
+ */
+export type EquipmentMutationPort = {
+  /** Six hand positions in left 1, right 1, left 2, right 2, left 3, right 3 order. */
+  setEquippedArmaments: (request: {
+    saveSessionID: string;
+    characterID: number;
+    slotAssignments: readonly (string | null)[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** Four armor positions in head, chest, arms, legs order. */
+  setEquippedArmor: (request: {
+    saveSessionID: string;
+    characterID: number;
+    slotAssignments: readonly (string | null)[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** The compact talisman list; the unlocked-slot limit is the backend's. */
+  setEquippedTalismans: (request: {
+    saveSessionID: string;
+    characterID: number;
+    orderedOwnedItemIDs: readonly string[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** The compact spell list; the Memory Slots capacity rule is the backend's. */
+  setEquippedSpells: (request: {
+    saveSessionID: string;
+    characterID: number;
+    orderedResources: readonly LoadoutResource[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** Both Physick positions; clearing one never left-packs the other. */
+  setPhysickMixture: (request: {
+    saveSessionID: string;
+    characterID: number;
+    crystalTearResources: readonly (LoadoutResource | null)[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** All six Pouch positions, empty ones included. */
+  setPouchItems: (request: {
+    saveSessionID: string;
+    characterID: number;
+    slotAssignments: readonly (string | null)[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+  /** All ten Quick Items positions, empty ones included. */
+  setQuickItems: (request: {
+    saveSessionID: string;
+    characterID: number;
+    slotAssignments: readonly (string | null)[];
+    expectedRevision: string;
+  }) => Promise<EquipmentMutationReceipt>;
+};
+
+export type EquipmentPort = EquipmentMutationPort & {
+  /**
+   * Reads one page of the resources the requested slot type accepts. Which slot
+   * types exist, which resources each one accepts and how paging resolves are
+   * the backend's contract.
+   */
+  getEquipmentCandidates: (request: EquipmentCandidatesRequest) => Promise<EquipmentCandidatesPage>;
   /** Reads the coherent, catalog-resolved loadout used by frontend screens. */
   getCharacterLoadout: (request: EquipmentRequest) => Promise<CharacterLoadout>;
   /** Reads the 22 raw equipment fields of one slot. */

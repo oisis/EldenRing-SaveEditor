@@ -70,23 +70,9 @@ func SetEquippedTalismans(
 		if !found || resource.Item == nil {
 			return fmt.Errorf("item with game ID 0x%08X is not found in game catalog", gameID)
 		}
-		item := resource.Item
-		if !item.Family.Known || item.Family.Value != schema.ItemFamilyTalisman {
-			return fmt.Errorf("resource kind %q key %q has item family %q, want %q",
-				resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilyTalisman)
-		}
-		equipment := item.Capabilities.Equipment
-		if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-			return fmt.Errorf("resource kind %q key %q has no confirmed talisman equipment capability",
-				resource.Kind, resource.Key)
-		}
-		for _, slot := range equipment.Rules.AllowedSlots {
-			if slot == schema.EquipmentSlotTalisman {
-				return nil
-			}
-		}
-		return fmt.Errorf("resource kind %q key %q cannot be equipped in a talisman slot",
-			resource.Kind, resource.Key)
+		return validateEquipmentSlotCompatibility(
+			resource, schema.ItemFamilyTalisman, schema.EquipmentSlotTalisman,
+			"talisman", "a talisman slot")
 	}
 
 	mutation, err := engine.SetEquippedTalismans(

@@ -73,26 +73,9 @@ func SetQuickItems(
 		if !found || resource.Item == nil {
 			return fmt.Errorf("item with game ID 0x%08X is not found in game catalog", gameID)
 		}
-		item := resource.Item
-		if !item.Family.Known || item.Family.Value != schema.ItemFamilyGoods {
-			return fmt.Errorf(
-				"resource kind %q key %q has item family %q, want %q",
-				resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilyGoods)
-		}
-		equipment := item.Capabilities.Equipment
-		if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-			return fmt.Errorf(
-				"resource kind %q key %q has no confirmed quick-item equipment capability",
-				resource.Kind, resource.Key)
-		}
-		for _, slot := range equipment.Rules.AllowedSlots {
-			if slot == schema.EquipmentSlotQuickItem {
-				return nil
-			}
-		}
-		return fmt.Errorf(
-			"resource kind %q key %q cannot be equipped in a quick-item slot",
-			resource.Kind, resource.Key)
+		return validateEquipmentSlotCompatibility(
+			resource, schema.ItemFamilyGoods, schema.EquipmentSlotQuickItem,
+			"quick-item", "a quick-item slot")
 	}
 
 	mutation, err := engine.SetQuickItems(

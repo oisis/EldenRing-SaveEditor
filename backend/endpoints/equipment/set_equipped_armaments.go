@@ -90,23 +90,9 @@ func SetEquippedArmaments(
 		if !found || resource.Item == nil {
 			return fmt.Errorf("item with game ID 0x%08X is not found in game catalog", gameID)
 		}
-		item := resource.Item
-		if !item.Family.Known || item.Family.Value != schema.ItemFamilyWeapon {
-			return fmt.Errorf("resource kind %q key %q has item family %q, want %q",
-				resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilyWeapon)
-		}
-		equipment := item.Capabilities.Equipment
-		if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-			return fmt.Errorf("resource kind %q key %q has no confirmed hand equipment capability",
-				resource.Kind, resource.Key)
-		}
-		for _, allowed := range equipment.Rules.AllowedSlots {
-			if allowed == equippedArmamentSlots[slot] {
-				return nil
-			}
-		}
-		return fmt.Errorf("resource kind %q key %q cannot be equipped in slot %q",
-			resource.Kind, resource.Key, equippedArmamentSlots[slot])
+		return validateEquipmentSlotCompatibility(
+			resource, schema.ItemFamilyWeapon, equippedArmamentSlots[slot],
+			"hand", fmt.Sprintf("slot %q", equippedArmamentSlots[slot]))
 	}
 
 	mutation, err := engine.SetEquippedArmaments(

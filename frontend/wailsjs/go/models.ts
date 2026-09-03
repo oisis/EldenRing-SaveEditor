@@ -436,6 +436,66 @@ export namespace diagnostics {
 
 export namespace equipment {
 	
+	export class EquipmentCandidate {
+	    resource: schema.ResourceRef;
+	    ownedItemID?: string;
+	    name: string;
+	    iconPath: string;
+	    quantity?: number;
+	    memorySlots?: number;
+	    banRisk: boolean;
+	    cutContent: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new EquipmentCandidate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.resource = this.convertValues(source["resource"], schema.ResourceRef);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.name = source["name"];
+	        this.iconPath = source["iconPath"];
+	        this.quantity = source["quantity"];
+	        this.memorySlots = source["memorySlots"];
+	        this.banRisk = source["banRisk"];
+	        this.cutContent = source["cutContent"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class EquippedArmamentAssignment {
+	    kind: string;
+	    key: string;
+	    gameID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EquippedArmamentAssignment(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.gameID = source["gameID"];
+	    }
+	}
 	export class EquippedSpellSlot {
 	    rawMagicParamID: number;
 	    resourceKey: string;
@@ -537,6 +597,7 @@ export namespace equipment {
 	export class LoadoutSlot {
 	    slotType: string;
 	    state: string;
+	    ownedItemID?: string;
 	    resource?: schema.ResourceRef;
 	    name?: string;
 	    iconPath?: string;
@@ -550,6 +611,7 @@ export namespace equipment {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.slotType = source["slotType"];
 	        this.state = source["state"];
+	        this.ownedItemID = source["ownedItemID"];
 	        this.resource = this.convertValues(source["resource"], schema.ResourceRef);
 	        this.name = source["name"];
 	        this.iconPath = source["iconPath"];
@@ -640,6 +702,54 @@ export namespace equipment {
 		    return a;
 		}
 	}
+	export class GetEquipmentCandidatesResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    safetyProfile: string;
+	    slotType: string;
+	    candidates: EquipmentCandidate[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetEquipmentCandidatesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.safetyProfile = source["safetyProfile"];
+	        this.slotType = source["slotType"];
+	        this.candidates = this.convertValues(source["candidates"], EquipmentCandidate);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class GetEquippedSpellsResult {
 	    saveSessionID: string;
 	    saveRevision: string;
@@ -684,6 +794,307 @@ export namespace equipment {
 	}
 	
 	
+	
+	export class SetEquippedArmamentsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    slotAssignments: EquippedArmamentAssignment[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetEquippedArmamentsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.slotAssignments = this.convertValues(source["slotAssignments"], EquippedArmamentAssignment);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetEquippedArmorResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    slotAssignments: schema.ResourceRef[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetEquippedArmorResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.slotAssignments = this.convertValues(source["slotAssignments"], schema.ResourceRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetEquippedSpellsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    orderedResources: schema.ResourceRef[];
+	    usedMemorySlots: number;
+	    availableMemorySlots: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetEquippedSpellsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.orderedResources = this.convertValues(source["orderedResources"], schema.ResourceRef);
+	        this.usedMemorySlots = source["usedMemorySlots"];
+	        this.availableMemorySlots = source["availableMemorySlots"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetEquippedTalismansResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    orderedResources: schema.ResourceRef[];
+	    unlockedSlots: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetEquippedTalismansResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.orderedResources = this.convertValues(source["orderedResources"], schema.ResourceRef);
+	        this.unlockedSlots = source["unlockedSlots"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetPhysickMixtureResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    crystalTearResources: schema.ResourceRef[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetPhysickMixtureResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.crystalTearResources = this.convertValues(source["crystalTearResources"], schema.ResourceRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetPouchItemsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    slotAssignments: schema.ResourceRef[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetPouchItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.slotAssignments = this.convertValues(source["slotAssignments"], schema.ResourceRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetQuickItemsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    slotAssignments: schema.ResourceRef[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetQuickItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.slotAssignments = this.convertValues(source["slotAssignments"], schema.ResourceRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 

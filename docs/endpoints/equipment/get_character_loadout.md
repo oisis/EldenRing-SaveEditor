@@ -42,10 +42,10 @@ whether the character is active. An active slot has these positional groups:
 
 | Field | Count | Meaning |
 |---|---:|---|
-| `rightHand`, `leftHand` | 3 each | Armament positions 1–3. Native Unarmed records are `empty`. |
+| `rightHand`, `leftHand` | 3 each | Armament positions 1–3. Native Unarmed records are `empty`. An occupied position carries the `ownedItemID` of the Inventory common record it references. |
 | `arrows`, `bolts` | 2 each | Ammunition positions. |
-| `armor` | 4 | Head, chest, arms and legs. Native Bare records are `empty`. |
-| `talismans` | 4 | Positions beyond `unlockedTalismanSlots` are `locked`. |
+| `armor` | 4 | Head, chest, arms and legs. Native Bare records are `empty`. An occupied position carries its `ownedItemID`. |
+| `talismans` | 4 | Positions beyond `unlockedTalismanSlots` are `locked`. An occupied position carries its `ownedItemID`. |
 | `quickItems` | 10 | Inventory-backed positions with `ownedItemID` and quantity when occupied. |
 | `pouch` | 6 | Inventory-backed positions with `ownedItemID` and quantity when occupied. |
 | `physick` | 2 | Crystal Tear positions. |
@@ -55,6 +55,26 @@ The result also carries `activeQuickItem`, `activeSpellIndex`,
 `usedMemorySlots`, `availableMemorySlots` and `unlockedTalismanSlots`.
 `saveRevision` scopes every returned `ownedItemID`; clients must not reuse an
 owned-item token after the session revision changes.
+
+An occupied hand, armor or talisman position also reports the `ownedItemID` of
+the exact Inventory common record it references, so `SetEquippedArmaments`,
+`SetEquippedArmor` and `SetEquippedTalismans` can be called with the record that
+is actually equipped. SaveEngine derives it from the two confirmed reference
+blocks those three writers maintain in front of `InventoryHeld` — the physical
+row in `EquipedItemIndex` and the exact GaItem handle in `ActiveEquipedItemsGa`
+— and accepts it only when the physical row, the addressed Inventory record,
+the GaItem handle and its handle type agree, and that handle resolves to the
+very game ID the position presents. Resolution uses the shared handle resolver,
+which reads the GaItem table for the handle types that require a record — the
+weapon and armor handles of the hand and armor positions — while an accessory
+handle is resolved from the handle itself without a table record. The armament
+and armor writers read that same table; the talisman writer uses the same
+resolver but resolves its handle without it. This is not the complete pre-write
+validation those writers perform: the bare representation of the equipped item
+is not checked. It is never derived by matching a game ID or by choosing a
+similar record. An `empty`
+position, a `locked` position, an ammunition position and a Physick position
+carry no `ownedItemID`.
 
 Each positional record has a `state`:
 
@@ -74,6 +94,10 @@ rejects, among other cases:
 - a missing confirmed native section or a range outside the character slot;
 - a Quick Items or Pouch handle, Inventory row, equip index and tail game ID
   that do not all identify the same positive-quantity owned record;
+- an occupied hand, armor or talisman position whose row field, GaItem handle,
+  handle type, referenced record quantity or resolved game ID disagree, which
+  fails the whole getter rather than reporting the name of one item next to the
+  owned identity of another;
 - an occupied game ID absent from GameCatalog or belonging to the wrong family;
 - an invalid active spell index or an unknown spell Memory Slots cost;
 - equipped spells whose total cost exceeds the available capacity.

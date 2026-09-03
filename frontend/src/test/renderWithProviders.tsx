@@ -36,6 +36,8 @@ import type {
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
+  EquipmentCandidatesPage,
+  EquipmentMutationReceipt,
   EquipmentPort,
 } from "../application/equipment/equipmentPort";
 import { ItemsPortProvider } from "../application/items/itemsClient";
@@ -551,6 +553,9 @@ export const stubCharacterLoadout: CharacterLoadout = {
     {
       slotType: "right_hand",
       state: "occupied",
+      // The backend names the exact Inventory record an occupied hand, armor or
+      // talisman position references; the setters are called with it.
+      ownedItemID: "owned-weapon-1",
       resource: { kind: "item", key: "000F4240" },
       name: "Dagger",
       iconPath: "icons/items/000F4240.png",
@@ -567,6 +572,7 @@ export const stubCharacterLoadout: CharacterLoadout = {
     {
       slotType: "talisman",
       state: "occupied",
+      ownedItemID: "owned-talisman-1",
       resource: { kind: "item", key: "20000474" },
       name: "Moon of Nokstella",
       iconPath: "icons/items/20000474.png",
@@ -708,9 +714,63 @@ export const stubCharacterEquippedSpells: CharacterEquippedSpells = {
   availableMemorySlots: 10,
 };
 
+/**
+ * One candidate page in the shape the picker consumes. It carries a named
+ * candidate, a nameless one and one flagged as ban risk, so nothing above the
+ * port may invent a name or hide a row the backend already decided to serve.
+ */
+export const stubEquipmentCandidatesPage: EquipmentCandidatesPage = {
+  saveSessionID: "session-1",
+  saveRevision: "0",
+  characterID: 0,
+  active: true,
+  safetyProfile: "safe",
+  slotType: "right_hand",
+  candidates: [
+    {
+      resource: { kind: "item", key: "weapon/uchigatana" },
+      ownedItemID: "owned-weapon-1",
+      name: "Uchigatana",
+      iconPath: "assets/icons/items/uchigatana.png",
+      quantity: 1,
+      banRisk: false,
+      cutContent: false,
+    },
+    {
+      resource: { kind: "item", key: "weapon/unnamed" },
+      ownedItemID: "owned-weapon-2",
+      name: "",
+      iconPath: "",
+      quantity: 1,
+      banRisk: false,
+      cutContent: false,
+    },
+  ],
+  total: 2,
+  page: 1,
+  pageSize: 30,
+};
+
+/** The receipt every Equipment mutation stub returns unless a test overrides it. */
+export const stubEquipmentMutationReceipt: EquipmentMutationReceipt = {
+  operationID: "operation-equipment-1",
+  operationKind: "set_equipped_armaments",
+  saveSessionID: "session-1",
+  saveRevision: "1",
+  changedScopes: ["save.session", "equipment.loadout", "diagnostics.report"],
+};
+
 export function makeEquipmentPort(overrides: Partial<EquipmentPort> = {}): EquipmentPort {
   return {
     getCharacterLoadout: () => Promise.resolve(stubCharacterLoadout),
+    getEquipmentCandidates: () => Promise.resolve(stubEquipmentCandidatesPage),
+    setEquippedArmaments: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setEquippedArmor: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setEquippedTalismans: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setEquippedSpells: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setPhysickMixture: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setPouchItems: () => Promise.resolve(stubEquipmentMutationReceipt),
+    setQuickItems: () => Promise.resolve(stubEquipmentMutationReceipt),
     getEquipment: () => Promise.resolve(stubCharacterEquipment),
     getQuickItems: () => Promise.resolve(stubCharacterQuickItems),
     getPouchItems: () => Promise.resolve(stubCharacterPouchItems),

@@ -46,6 +46,10 @@ export function GetEquipment(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetEquipment'](arg1, arg2);
 }
 
+export function GetEquipmentCandidates(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['GetEquipmentCandidates'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
 export function GetEquippedSpells(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetEquippedSpells'](arg1, arg2);
 }
@@ -190,8 +194,36 @@ export function SelectSaveTarget(arg1) {
   return window['go']['desktop']['Bridge']['SelectSaveTarget'](arg1);
 }
 
+export function SetEquippedArmaments(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetEquippedArmaments'](arg1, arg2, arg3, arg4);
+}
+
+export function SetEquippedArmor(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetEquippedArmor'](arg1, arg2, arg3, arg4);
+}
+
+export function SetEquippedSpells(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetEquippedSpells'](arg1, arg2, arg3, arg4);
+}
+
+export function SetEquippedTalismans(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetEquippedTalismans'](arg1, arg2, arg3, arg4);
+}
+
 export function SetOwnedItemQuantity(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['SetOwnedItemQuantity'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function SetPhysickMixture(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetPhysickMixture'](arg1, arg2, arg3, arg4);
+}
+
+export function SetPouchItems(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetPouchItems'](arg1, arg2, arg3, arg4);
+}
+
+export function SetQuickItems(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetQuickItems'](arg1, arg2, arg3, arg4);
 }
 
 export function SetSafetyProfile(arg1) {

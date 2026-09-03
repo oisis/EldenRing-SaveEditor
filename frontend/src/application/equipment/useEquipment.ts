@@ -9,6 +9,8 @@ import type {
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
+  EquipmentCandidatesPage,
+  EquipmentCandidatesRequest,
   EquipmentRequest,
 } from "./equipmentPort";
 
@@ -122,4 +124,64 @@ export function useEquippedSpells(query: EquipmentQuery) {
     queryKeys.equippedSpells(...scope(query)),
     (request) => port.getEquippedSpells(request),
   );
+}
+
+/**
+ * One picker page as a view asks for it: the session, the revision and the slot
+ * may still be unknown, and the slot type is `undefined` while no picker is
+ * open. The slot type is one value of the closed backend dictionary and is
+ * forwarded unchecked.
+ */
+export type EquipmentCandidatesQuery = EquipmentQuery & {
+  slotType: string | undefined;
+  search: string;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * The candidates of one slot type.
+ *
+ * Every argument that selects a different answer takes part in the key, so two
+ * slot types, two searches and two pages never share an entry. Without a
+ * session, a revision, a slot or an open picker there is nothing to ask for, so
+ * `skipToken` keeps the port out of reach entirely rather than merely disabling
+ * the query. The result is not retried and is accepted only when its own
+ * session and revision match the ones it was requested for.
+ */
+export function useEquipmentCandidates(query: EquipmentCandidatesQuery) {
+  const port = useEquipmentPort();
+  const { saveSessionID, saveRevision, characterID, slotType, search, page, pageSize } = query;
+  const identifier = saveSessionID ?? "";
+
+  return useQuery({
+    queryKey: queryKeys.equipmentCandidates(
+      identifier,
+      characterID ?? noCharacter,
+      saveRevision ?? "",
+      { slotType: slotType ?? "", search, page, pageSize },
+    ),
+    queryFn:
+      identifier === "" ||
+      saveRevision === undefined ||
+      characterID === undefined ||
+      slotType === undefined
+        ? skipToken
+        : async (): Promise<EquipmentCandidatesPage> => {
+            const request: EquipmentCandidatesRequest = {
+              saveSessionID: identifier,
+              characterID,
+              slotType,
+              search,
+              page,
+              pageSize,
+            };
+            return requireCurrentSaveResponse(
+              await port.getEquipmentCandidates(request),
+              identifier,
+              saveRevision,
+            );
+          },
+    retry: false,
+  });
 }

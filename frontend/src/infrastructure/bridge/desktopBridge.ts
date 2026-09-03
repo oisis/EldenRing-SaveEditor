@@ -14,6 +14,7 @@ import {
   GetCharacterProfile,
   GetCharacterStats,
   GetEquipment,
+  GetEquipmentCandidates,
   GetEquippedSpells,
   GetInventory,
   GetItemDatabase,
@@ -50,7 +51,14 @@ import {
   SaveAs,
   SelectSaveFile,
   SelectSaveTarget,
+  SetEquippedArmaments,
+  SetEquippedArmor,
+  SetEquippedSpells,
+  SetEquippedTalismans,
   SetOwnedItemQuantity,
+  SetPhysickMixture,
+  SetPouchItems,
+  SetQuickItems,
   SetSafetyProfile,
   SetSaveLifecycleSettings,
   UndoLastOperation,
@@ -97,6 +105,8 @@ import type {
   CharacterPhysickMixture,
   CharacterPouchItems,
   CharacterQuickItems,
+  EquipmentCandidatesPage,
+  EquipmentMutationReceipt,
   EquipmentPort,
   LoadoutOwnedSlot,
   LoadoutSlot,
@@ -408,6 +418,7 @@ function toLoadoutSlot(
   return {
     slotType: slot.slotType,
     state: slot.state as LoadoutSlotState,
+    ownedItemID: slot.ownedItemID,
     resource: slot.resource === undefined ? undefined : { ...slot.resource },
     name: slot.name,
     iconPath: slot.iconPath,
@@ -853,6 +864,60 @@ function toItemMutationReceipt(result: {
   };
 }
 
+/**
+ * Projects one served candidate page. The candidates are copied into arrays and
+ * objects this layer owns, in the backend's own order: nothing is re-filtered,
+ * re-sorted, de-duplicated or checked against a local compatibility rule.
+ */
+function toEquipmentCandidatesPage(
+  result: Awaited<ReturnType<typeof GetEquipmentCandidates>>,
+): EquipmentCandidatesPage {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    active: result.active,
+    safetyProfile: result.safetyProfile,
+    slotType: result.slotType,
+    candidates: result.candidates.map((candidate) => ({
+      resource: { kind: candidate.resource.kind, key: candidate.resource.key },
+      ownedItemID: candidate.ownedItemID,
+      name: candidate.name,
+      iconPath: candidate.iconPath,
+      quantity: candidate.quantity,
+      memorySlots: candidate.memorySlots,
+      banRisk: candidate.banRisk,
+      cutContent: candidate.cutContent,
+    })),
+    total: result.total,
+    // The served page and page size are the backend's answer, not an echo of
+    // the request: zero paging resolves to the backend default there.
+    page: result.page,
+    pageSize: result.pageSize,
+  };
+}
+
+/**
+ * Projects one committed Equipment mutation onto the shared receipt. The scopes
+ * pass through the same validation every other receipt uses, so an unknown
+ * scope is rejected at this boundary instead of reaching the invalidation map.
+ */
+function toEquipmentMutationReceipt(result: {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: string[];
+}): EquipmentMutationReceipt {
+  return {
+    operationID: result.operationID,
+    operationKind: result.operationKind,
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    changedScopes: toChangedScopes(result.changedScopes),
+  };
+}
+
 /** Projects the generated settings result onto the application port shape. */
 function toSafetyProfileSettings(
   result: Awaited<ReturnType<typeof GetSafetyProfile>>,
@@ -1258,6 +1323,105 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   getEquippedSpells: async ({ saveSessionID, characterID }) =>
     toCharacterEquippedSpells(
       await callBridge(() => GetEquippedSpells(saveSessionID, characterID)),
+    ),
+
+  // The six arguments reach the bridge in the order the backend contract
+  // defines; the grouped request only protects the caller from transposing
+  // them. No safety profile is sent: the backend reads the host setting itself.
+  getEquipmentCandidates: async ({
+    saveSessionID,
+    characterID,
+    slotType,
+    search,
+    page,
+    pageSize,
+  }) =>
+    toEquipmentCandidatesPage(
+      await callBridge(() =>
+        GetEquipmentCandidates(saveSessionID, characterID, slotType, search, page, pageSize),
+      ),
+    ),
+
+  // Every Equipment mutation forwards the complete group in the backend's own
+  // order. The arrays are copied so a generated transport object never becomes
+  // application state, and `null` stays the backend's own empty position.
+  setEquippedArmaments: async ({ saveSessionID, characterID, slotAssignments, expectedRevision }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetEquippedArmaments(saveSessionID, characterID, [...slotAssignments], expectedRevision),
+      ),
+    ),
+
+  setEquippedArmor: async ({ saveSessionID, characterID, slotAssignments, expectedRevision }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetEquippedArmor(saveSessionID, characterID, [...slotAssignments], expectedRevision),
+      ),
+    ),
+
+  setEquippedTalismans: async ({
+    saveSessionID,
+    characterID,
+    orderedOwnedItemIDs,
+    expectedRevision,
+  }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetEquippedTalismans(
+          saveSessionID,
+          characterID,
+          [...orderedOwnedItemIDs],
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setEquippedSpells: async ({ saveSessionID, characterID, orderedResources, expectedRevision }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetEquippedSpells(
+          saveSessionID,
+          characterID,
+          orderedResources.map(({ kind, key }) => ({ kind, key })),
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setPhysickMixture: async ({
+    saveSessionID,
+    characterID,
+    crystalTearResources,
+    expectedRevision,
+  }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetPhysickMixture(
+          saveSessionID,
+          characterID,
+          // The backend position is nullable and the generated signature is not,
+          // so the empty position is asserted here rather than replaced by a
+          // placeholder: `null` is what clears exactly that Physick position.
+          crystalTearResources.map((entry) =>
+            entry === null ? null : { kind: entry.kind, key: entry.key },
+          ) as schema.ResourceRef[],
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setPouchItems: async ({ saveSessionID, characterID, slotAssignments, expectedRevision }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetPouchItems(saveSessionID, characterID, [...slotAssignments], expectedRevision),
+      ),
+    ),
+
+  setQuickItems: async ({ saveSessionID, characterID, slotAssignments, expectedRevision }) =>
+    toEquipmentMutationReceipt(
+      await callBridge(() =>
+        SetQuickItems(saveSessionID, characterID, [...slotAssignments], expectedRevision),
+      ),
     ),
 
   // The seven arguments reach the bridge in the order the backend contract

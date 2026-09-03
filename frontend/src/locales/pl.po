@@ -23,6 +23,10 @@ msgstr "Nie udało się rozpoznać rekordów: {0}."
 msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
 msgstr "Nie udało się sprawdzić zakresów: {0}, więc ten save nie jest potwierdzony jako poprawny."
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
+msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała; backend podaje, ile jest dostępnych."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
@@ -77,6 +81,14 @@ msgstr "Wszystkie poziomy"
 msgid "All operations"
 msgstr "Wszystkie operacje"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Already equipped"
+msgstr "Już założone"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Ammunition"
+msgstr "Amunicja"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application"
@@ -98,9 +110,23 @@ msgstr "Ustawienia i narzędzia aplikacji"
 msgid "Area"
 msgstr "Obszar"
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Armor"
 msgstr "Pancerze"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Arms"
+msgstr "Ramiona"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Arrows {0}"
+msgstr "Strzały {0}"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Arrows and bolts are shown for reference and cannot be changed here."
+msgstr "Strzały i bełty są pokazane poglądowo i nie można ich tutaj zmienić."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Ashes of War"
@@ -124,16 +150,27 @@ msgstr "Backup: {0}."
 msgid "ban risk"
 msgstr "ryzyko bana"
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Ban risk"
 msgstr "Ryzyko bana"
 
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Bolts {0}"
+msgstr "Bełty {0}"
+
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Cancel"
 msgstr "Anuluj"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Candidate pages"
+msgstr "Strony kandydatów"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Capabilities"
@@ -170,6 +207,14 @@ msgstr "Profil i wygląd postaci"
 msgid "Characters"
 msgstr "Postacie"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Chest"
+msgstr "Korpus"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Choose an item"
+msgstr "Wybierz przedmiot"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Clear"
 msgstr "Wyczyść"
@@ -178,6 +223,10 @@ msgstr "Wyczyść"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Clear selection"
 msgstr "Wyczyść zaznaczenie"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Clear this slot"
+msgstr "Wyczyść ten slot"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
@@ -213,6 +262,11 @@ msgstr "Krytyczne"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Critical validation issues block saving."
 msgstr "Krytyczne problemy walidacji blokują zapis."
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Crystal Tear {0}"
+msgstr "Kryształowa Łza {0}"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -251,11 +305,16 @@ msgstr "DLC"
 msgid "Elden Ring"
 msgstr "Elden Ring"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Empty"
+msgstr "Puste"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "English"
 msgstr "angielski"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/equipment/EquipmentPanel.tsx
 msgid "Equipment"
 msgstr "Wyposażenie"
 
@@ -310,6 +369,10 @@ msgstr "Siatka"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Group by"
 msgstr "Grupuj według"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Head"
+msgstr "Głowa"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Home"
@@ -419,6 +482,19 @@ msgstr "Język"
 msgid "Later"
 msgstr "Później"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Left hand"
+msgstr "Lewa ręka"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Left hand {0}"
+msgstr "Lewa ręka {0}"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Legs"
+msgstr "Nogi"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Light"
 msgstr "Jasny"
@@ -435,9 +511,17 @@ msgstr "Wczytaj save i wybierz postać, aby odczytać ekwipunek i skrzynię."
 msgid "Loading application information…"
 msgstr "Wczytywanie informacji o aplikacji…"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Loading candidates…"
+msgstr "Wczytywanie kandydatów…"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Loading characters…"
 msgstr "Ładowanie postaci…"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Loading equipment…"
+msgstr "Wczytywanie wyposażenia…"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -478,6 +562,23 @@ msgstr "Maksimum w ekwipunku"
 msgid "Maximum in Storage"
 msgstr "Maksimum w skrzyni"
 
+#. placeholder {0}: model.usedMemorySlots
+#. placeholder {1}: model.availableMemorySlots
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Memory Slots used: {0} of {1}"
+msgstr "Wykorzystane Memory Slots: {0} z {1}"
+
+#. placeholder {0}: option.memorySlots
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Memory Slots: {0}"
+msgstr "Memory Slots: {0}"
+
+#. placeholder {0}: model.usedMemorySlots
+#. placeholder {1}: model.availableMemorySlots
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Memory Slots: {0} / {1}"
+msgstr "Memory Slots: {0} / {1}"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Modified"
 msgstr "Zmodyfikowano"
@@ -511,11 +612,13 @@ msgstr "Przesuń w górę"
 msgid "Name"
 msgstr "Nazwa"
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Name unavailable"
 msgstr "Nazwa niedostępna"
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Next"
@@ -549,6 +652,10 @@ msgstr "Bez grupowania"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "No Inventory item matches the current filters."
 msgstr "Żaden przedmiot w ekwipunku nie pasuje do bieżących filtrów."
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "No item of this character can go into this slot."
+msgstr "Żaden przedmiot tej postaci nie pasuje do tego slotu."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No items match the current search."
@@ -590,6 +697,18 @@ msgstr "Brak dostępnych wariantów."
 msgid "Normal"
 msgstr "Normalne"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Not unlocked yet"
+msgstr "Jeszcze nieodblokowane"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Only the items the backend accepts for this slot are offered here."
+msgstr "Pokazywane są wyłącznie przedmioty, które backend akceptuje dla tego slotu."
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Open a save and select a character slot to edit its equipment."
+msgstr "Otwórz save i wybierz slot postaci, aby edytować jej wyposażenie."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
 msgstr "Otwórz save na ekranie Główna, aby zobaczyć jego sloty postaci."
@@ -619,6 +738,11 @@ msgstr "Pozycja w kolejności"
 msgid "Owned quantity"
 msgstr "Posiadana ilość"
 
+#. placeholder {0}: candidates.data.page
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Page {0}"
+msgstr "Strona {0}"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
 msgstr "Strona {servedPage}"
@@ -635,11 +759,36 @@ msgstr "polski"
 msgid "Position"
 msgstr "Pozycja"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch 5"
+msgstr "Sakiewka 5"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch 6"
+msgstr "Sakiewka 6"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch down"
+msgstr "Sakiewka w dół"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch left"
+msgstr "Sakiewka w lewo"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch right"
+msgstr "Sakiewka w prawo"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Pouch up"
+msgstr "Sakiewka w górę"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Pre-order"
 msgstr "Przedsprzedaż"
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Previous"
@@ -661,6 +810,33 @@ msgstr "Ilość"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Quantity of {0}"
 msgstr "Ilość: {0}"
+
+#. placeholder {0}: option.quantity
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Quantity: {0}"
+msgstr "Ilość: {0}"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Quick Item {0}"
+msgstr "Szybki przedmiot {0}"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Quick Item {0} · active"
+msgstr "Szybki przedmiot {0} · aktywny"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Quick Items"
+msgstr "Szybkie przedmioty"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Quick Pouch"
+msgstr "Szybka sakiewka"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Read-only"
+msgstr "Tylko do odczytu"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Recent files"
@@ -750,6 +926,15 @@ msgstr "Przejrzyj uporządkowany dziennik operacji i walidację przed zapisem."
 msgid "Revision"
 msgstr "Rewizja"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Right hand"
+msgstr "Prawa ręka"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Right hand {0}"
+msgstr "Prawa ręka {0}"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Risk"
 msgstr "Ryzyko"
@@ -804,6 +989,10 @@ msgstr "Zapisano do {0}."
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge znalazł dzienniki operacji z wcześniejszej sesji."
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Search candidates"
+msgstr "Szukaj kandydatów"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -889,6 +1078,23 @@ msgstr "Sortowanie: ilość"
 msgid "Source"
 msgstr "Źródło"
 
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Spell {0}"
+msgstr "Zaklęcie {0}"
+
+#. placeholder {0}: index + 1
+#. placeholder {1}: entry.memorySlots
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Spell {0} · {1} Memory Slots"
+msgstr "Zaklęcie {0} · {1} Memory Slots"
+
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Spell {0} · active"
+msgstr "Zaklęcie {0} · aktywne"
+
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spells"
 msgstr "Zaklęcia"
@@ -933,6 +1139,17 @@ msgstr "Wspierane schematy"
 msgid "Table"
 msgstr "Tabela"
 
+#. placeholder {0}: index + 1
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Talisman {0}"
+msgstr "Talizman {0}"
+
+#. placeholder {0}: model.unlockedTalismanSlots
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Talisman slots: {0}"
+msgstr "Sloty talizmanów: {0}"
+
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Talismans"
 msgstr "Talizmany"
@@ -953,6 +1170,7 @@ msgstr "Backend aplikacji napotkał błąd wewnętrzny."
 msgid "The automatic backup limit was reached. Future saves remove the oldest backup."
 msgstr "Osiągnięto limit automatycznych kopii zapasowych. Kolejne zapisy będą usuwać najstarszą kopię."
 
+#: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The change was not applied."
@@ -961,10 +1179,6 @@ msgstr "Zmiana nie została zastosowana."
 #: src/features/app-shell/AppShell.tsx
 msgid "The Character workspace will be implemented in a later frontend stage."
 msgstr "Workspace postaci zostanie zaimplementowany na późniejszym etapie frontendu."
-
-#: src/features/app-shell/AppShell.tsx
-msgid "The Equipment workspace will be implemented in a later frontend stage."
-msgstr "Workspace wyposażenia zostanie zaimplementowany na późniejszym etapie frontendu."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
@@ -1014,6 +1228,10 @@ msgstr "Workspace świata zostanie zaimplementowany na późniejszym etapie fron
 msgid "Theme"
 msgstr "Motyw"
 
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "This character slot is empty, so it has no equipment to show."
+msgstr "Ten slot postaci jest pusty, więc nie ma wyposażenia do pokazania."
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
 msgstr "Tego dziennika nie można automatycznie odtworzyć. Możesz go wyeksportować albo usunąć."
@@ -1056,6 +1274,14 @@ msgstr "Nie udało się wczytać szczegółów przedmiotu."
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unable to load item variants."
 msgstr "Nie udało się wczytać wariantów przedmiotu."
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Unable to load the candidates for this slot."
+msgstr "Nie udało się wczytać kandydatów dla tego slotu."
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Unable to load the equipment of this character slot."
+msgstr "Nie udało się wczytać wyposażenia tego slotu postaci."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Unable to load the Inventory."
@@ -1148,6 +1374,10 @@ msgstr "ostrzeżeń"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
 msgstr "Bronie"
+
+#: src/features/equipment/EquipmentPanel.tsx
+msgid "Wondrous Physick"
+msgstr "Cudowny Eliksir"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "World"

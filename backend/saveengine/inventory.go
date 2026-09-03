@@ -23,6 +23,12 @@ const (
 	// Like GetResources this getter has no maximum page size.
 	InventoryDefaultPageSize = 50
 
+	// InventoryHeldMaxRecords is the number of physical rows the two sections
+	// hold together. A caller that has to filter over the whole container asks
+	// for this page size instead of restating the physical capacities, which
+	// stay private to this package.
+	InventoryHeldMaxRecords = inventoryHeldCommonRecords + inventoryHeldKeyRecords
+
 	// inventoryHeldCommonOffset is the distance from the anchor to the first
 	// common record. The anchor is followed by the fixed structures in front of
 	// InventoryHeld and by the four-byte common-item count, so the first record

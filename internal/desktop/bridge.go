@@ -503,6 +503,124 @@ func (b *Bridge) GetEquippedSpells(
 	return bridged(equipment.GetEquippedSpells(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
 }
 
+// GetEquipmentCandidates delegates to the GetEquipmentCandidates endpoint under
+// the active Safety Profile. The slot type, the search and the paging are
+// forwarded exactly as received; the profile is read from the host setting and
+// is never taken from the caller, so a call that bypasses the interface cannot
+// reveal a resource the setting hides. Which slot types exist, which resources
+// each one accepts and how an unsupported one is rejected are the endpoint's
+// contract.
+//
+// This method is exposed through Wails only. It has no route in the local
+// explorer, because no explorer surface consumes it.
+func (b *Bridge) GetEquipmentCandidates(
+	saveSessionID string,
+	characterID int,
+	slotType string,
+	search string,
+	page int,
+	pageSize int,
+) (equipment.GetEquipmentCandidatesResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return equipment.GetEquipmentCandidatesResult{}, bridgeError(err)
+	}
+	return bridged(equipment.GetEquipmentCandidates(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID,
+		slotType, search, page, pageSize))
+}
+
+// SetEquippedArmaments delegates to the SetEquippedArmaments endpoint and
+// returns its result and error unchanged. The six ordered assignments, the
+// expected revision and the exact receipt remain endpoint and SaveEngine
+// concerns; the bridge validates nothing and reorders nothing.
+func (b *Bridge) SetEquippedArmaments(
+	saveSessionID string,
+	characterID int,
+	slotAssignments []*string,
+	expectedRevision string,
+) (equipment.SetEquippedArmamentsResult, error) {
+	return bridged(equipment.SetEquippedArmaments(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, slotAssignments, expectedRevision))
+}
+
+// SetEquippedArmor delegates to the SetEquippedArmor endpoint under the same
+// rules: four ordered assignments, forwarded unchanged.
+func (b *Bridge) SetEquippedArmor(
+	saveSessionID string,
+	characterID int,
+	slotAssignments []*string,
+	expectedRevision string,
+) (equipment.SetEquippedArmorResult, error) {
+	return bridged(equipment.SetEquippedArmor(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, slotAssignments, expectedRevision))
+}
+
+// SetEquippedTalismans delegates to the SetEquippedTalismans endpoint. The
+// compact ordered list is forwarded exactly as received: the unlocked-slot
+// limit and the duplicate rule are the endpoint's contract.
+func (b *Bridge) SetEquippedTalismans(
+	saveSessionID string,
+	characterID int,
+	orderedOwnedItemIDs []string,
+	expectedRevision string,
+) (equipment.SetEquippedTalismansResult, error) {
+	return bridged(equipment.SetEquippedTalismans(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		orderedOwnedItemIDs, expectedRevision))
+}
+
+// SetEquippedSpells delegates to the SetEquippedSpells endpoint. The compact
+// ordered references are forwarded unchanged; the Memory Slots capacity rule
+// stays the endpoint's.
+func (b *Bridge) SetEquippedSpells(
+	saveSessionID string,
+	characterID int,
+	orderedResources []*schema.ResourceRef,
+	expectedRevision string,
+) (equipment.SetEquippedSpellsResult, error) {
+	return bridged(equipment.SetEquippedSpells(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		orderedResources, expectedRevision))
+}
+
+// SetPhysickMixture delegates to the SetPhysickMixture endpoint. Both positions
+// are forwarded as received, so clearing one never left-packs the other.
+func (b *Bridge) SetPhysickMixture(
+	saveSessionID string,
+	characterID int,
+	crystalTearResources []*schema.ResourceRef,
+	expectedRevision string,
+) (equipment.SetPhysickMixtureResult, error) {
+	return bridged(equipment.SetPhysickMixture(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		crystalTearResources, expectedRevision))
+}
+
+// SetPouchItems delegates to the SetPouchItems endpoint. All six positions are
+// forwarded as received, empty ones included.
+func (b *Bridge) SetPouchItems(
+	saveSessionID string,
+	characterID int,
+	slotAssignments []*string,
+	expectedRevision string,
+) (equipment.SetPouchItemsResult, error) {
+	return bridged(equipment.SetPouchItems(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, slotAssignments, expectedRevision))
+}
+
+// SetQuickItems delegates to the SetQuickItems endpoint. All ten positions are
+// forwarded as received, empty ones included.
+func (b *Bridge) SetQuickItems(
+	saveSessionID string,
+	characterID int,
+	slotAssignments []*string,
+	expectedRevision string,
+) (equipment.SetQuickItemsResult, error) {
+	return bridged(equipment.SetQuickItems(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, slotAssignments, expectedRevision))
+}
+
 // activeSafetyProfile reads the profile the backend currently enforces. It is
 // the only way a profile reaches an endpoint through this bridge: the frontend
 // never sends one, so a call that bypasses the interface cannot widen the

@@ -21,11 +21,21 @@ type CharacterLoadoutOwnedItem struct {
 // confirmed player-facing loadout group. It is internal SaveEngine domain data:
 // GameCatalog presentation and public slot labels belong to the endpoint.
 type CharacterLoadoutSnapshot struct {
-	SaveSessionID         string
-	SaveRevision          string
-	CharacterID           int
-	Active                bool
-	Equipment             [equipmentSlotCount]uint32
+	SaveSessionID string
+	SaveRevision  string
+	CharacterID   int
+	Active        bool
+	Equipment     [equipmentSlotCount]uint32
+	// EquipmentOwned carries the revision-scoped Inventory common identity of
+	// every occupied hand, armor and talisman position, indexed exactly like
+	// Equipment. Positions without an owned identity — the ammunition fields,
+	// technically empty records and talisman positions above the unlocked count
+	// — stay the empty string. It is resolved from the confirmed EquipedItemIndex
+	// and ActiveEquipedItemsGa references the three armament writers already
+	// maintain and is accepted only when the GaItem table resolves that handle to
+	// the very game ID the position presents, never by searching the container
+	// for a matching game ID.
+	EquipmentOwned        [equipmentSlotCount]string
 	QuickItems            [quickItemSlotCount]CharacterLoadoutOwnedItem
 	Pouch                 [pouchItemSlotCount]CharacterLoadoutOwnedItem
 	ActiveQuickItem       int32
@@ -136,8 +146,15 @@ func (engine *Engine) GetCharacterLoadoutSnapshot(
 		return CharacterLoadoutSnapshot{}, err
 	}
 
+	owned, err := resolveCharacterLoadoutEquipmentOwners(
+		loaded, characterID, equipment, spellState.unlockedTalismanSlots)
+	if err != nil {
+		return CharacterLoadoutSnapshot{}, err
+	}
+
 	result.Active = true
 	result.Equipment = equipment
+	result.EquipmentOwned = owned
 	copy(result.QuickItems[:], quickResolved)
 	copy(result.Pouch[:], pouchResolved)
 	result.ActiveQuickItem = activeQuick
@@ -246,4 +263,136 @@ func inconsistentLoadoutOwnedItemError(
 	return fmt.Errorf(
 		"%s slot %d: inconsistent existing save state (handle=0x%08X, equipIndex=0x%08X, tailGameID=0x%08X)",
 		label, index, pair.itemID, pair.equipIndex, gameID)
+}
+
+// characterLoadoutOwnedPosition is one public equipment position backed by an
+// Inventory common record, with the GaItem handle type its group requires. The
+// ammunition fields are deliberately absent: no confirmed writer addresses them,
+// so this getter states no owned identity for them either.
+type characterLoadoutOwnedPosition struct {
+	index      int
+	handleType uint32
+}
+
+var characterLoadoutOwnedPositions = []characterLoadoutOwnedPosition{
+	{index: 0, handleType: gaItemWeaponHandle},
+	{index: 1, handleType: gaItemWeaponHandle},
+	{index: 2, handleType: gaItemWeaponHandle},
+	{index: 3, handleType: gaItemWeaponHandle},
+	{index: 4, handleType: gaItemWeaponHandle},
+	{index: 5, handleType: gaItemWeaponHandle},
+	{index: equippedArmorFirstSlot, handleType: gaItemArmorHandle},
+	{index: equippedArmorFirstSlot + 1, handleType: gaItemArmorHandle},
+	{index: equippedArmorFirstSlot + 2, handleType: gaItemArmorHandle},
+	{index: equippedArmorFirstSlot + 3, handleType: gaItemArmorHandle},
+	{index: equippedTalismanFirstSlot, handleType: gaItemAccessoryHandle},
+	{index: equippedTalismanFirstSlot + 1, handleType: gaItemAccessoryHandle},
+	{index: equippedTalismanFirstSlot + 2, handleType: gaItemAccessoryHandle},
+	{index: equippedTalismanFirstSlot + 3, handleType: gaItemAccessoryHandle},
+}
+
+// resolveCharacterLoadoutEquipmentOwners resolves the owned-item identity of
+// every occupied hand, armor and talisman position from the two confirmed
+// reference blocks the three armament writers maintain in front of
+// InventoryHeld: EquipedItemIndex, which stores removeReferenceInventoryRowBase
+// plus the physical row of the referenced Inventory common record, and
+// ActiveEquipedItemsGa, which stores that record's exact GaItem handle.
+//
+// Both must agree with the record they address, the handle type must be the one
+// the group requires, and the handle must resolve to exactly the game ID the
+// ChrAsmEquipment field of that position carries. Resolution goes through the
+// shared resolveGaItemHandle, which reads the GaItem table for the handle types
+// that require a record — the weapon and armor handles of the hand and armor
+// positions — while an accessory handle is resolved from the handle itself
+// without a table record. The armament and armor writers read that same table;
+// the talisman writer uses the same resolver but resolves its handle without it.
+//
+// This is not the complete pre-write validation those writers perform: the bare
+// representation of the equipped item is not checked here.
+//
+// Nothing is matched by game ID, nothing falls back to a similar record and
+// nothing is guessed on a duplicate: a position whose reference, handle, handle
+// type, quantity or resolved game ID disagrees fails the whole getter, so a name
+// is never reported next to the owned identity of a different item.
+func resolveCharacterLoadoutEquipmentOwners(
+	loaded *loadedSave,
+	characterID int,
+	equipment [equipmentSlotCount]uint32,
+	unlockedTalismanSlots int,
+) ([equipmentSlotCount]string, error) {
+	var owned [equipmentSlotCount]string
+
+	sectionAt, err := inventoryHeldSectionAt(loaded, characterID)
+	if err != nil {
+		return owned, err
+	}
+	anchor := sectionAt - inventoryHeldCommonOffset
+	rawIndexes, err := loaded.snapshot.readAt(anchor+removeEquipmentIndexesOffset, equipmentBlockSize)
+	if err != nil {
+		return owned, fmt.Errorf(
+			"cannot read equipment references of character %d: %w", characterID, err)
+	}
+	rawHandles, err := loaded.snapshot.readAt(anchor+removeEquipmentHandlesOffset, equipmentBlockSize)
+	if err != nil {
+		return owned, fmt.Errorf(
+			"cannot read equipment handles of character %d: %w", characterID, err)
+	}
+	byHandle, err := readGaItemMap(loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return owned, fmt.Errorf(
+			"cannot resolve equipped items of character %d: %w", characterID, err)
+	}
+	records, err := readInventoryRecords(loaded, characterID)
+	if err != nil {
+		return owned, err
+	}
+	common := make(map[int]InventoryRecord, len(records))
+	for _, record := range records {
+		if record.ContainerSection == InventorySectionCommon {
+			common[record.PhysicalIndex] = record
+		}
+	}
+
+	for _, position := range characterLoadoutOwnedPositions {
+		index := position.index
+		gameID := equipment[index]
+		if IsTechnicalEmptyEquipmentSlot(index, gameID) {
+			continue
+		}
+		// A talisman position above the unlocked count is reported as locked and
+		// its residual value is never presented, so no identity is minted for it.
+		if index >= equippedTalismanFirstSlot &&
+			index-equippedTalismanFirstSlot >= unlockedTalismanSlots {
+			continue
+		}
+		row := binary.LittleEndian.Uint32(rawIndexes[index*4:])
+		handle := binary.LittleEndian.Uint32(rawHandles[index*4:])
+		if row < removeReferenceInventoryRowBase ||
+			handle&gaItemHandleTypeMask != position.handleType {
+			return owned, inconsistentLoadoutEquipmentError(index, row, handle, gameID)
+		}
+		physicalIndex := int(row - removeReferenceInventoryRowBase)
+		if physicalIndex >= inventoryHeldCommonRecords {
+			return owned, inconsistentLoadoutEquipmentError(index, row, handle, gameID)
+		}
+		record, exists := common[physicalIndex]
+		if !exists || record.Quantity == 0 || record.GaItemHandle != handle {
+			return owned, inconsistentLoadoutEquipmentError(index, row, handle, gameID)
+		}
+		// The referenced record must be the item the position actually presents:
+		// its handle has to resolve to the very game ID stored in ChrAsmEquipment.
+		resolved, resolveErr := resolveGaItemHandle(byHandle, handle)
+		if resolveErr != nil || resolved != gameID {
+			return owned, inconsistentLoadoutEquipmentError(index, row, handle, gameID)
+		}
+		owned[index] = record.OwnedItemID
+	}
+	return owned, nil
+}
+
+func inconsistentLoadoutEquipmentError(index int, row, handle, gameID uint32) error {
+	return fmt.Errorf(
+		"equipment position %d: inconsistent existing save state "+
+			"(rowField=0x%08X, handle=0x%08X, equipmentGameID=0x%08X)",
+		index, row, handle, gameID)
 }

@@ -74,31 +74,9 @@ func SetPouchItems(
 			return fmt.Errorf(
 				"item with game ID 0x%08X is not found in game catalog", gameID)
 		}
-		item := resource.Item
-		if !item.Family.Known || item.Family.Value != schema.ItemFamilyGoods {
-			return fmt.Errorf(
-				"resource kind %q key %q has item family %q, want %q",
-				resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilyGoods)
-		}
-		equipment := item.Capabilities.Equipment
-		if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-			return fmt.Errorf(
-				"resource kind %q key %q has no confirmed pouch equipment capability",
-				resource.Kind, resource.Key)
-		}
-		allowed := false
-		for _, slot := range equipment.Rules.AllowedSlots {
-			if slot == schema.EquipmentSlotPouch {
-				allowed = true
-				break
-			}
-		}
-		if !allowed {
-			return fmt.Errorf(
-				"resource kind %q key %q cannot be equipped in the pouch slot",
-				resource.Kind, resource.Key)
-		}
-		return nil
+		return validateEquipmentSlotCompatibility(
+			resource, schema.ItemFamilyGoods, schema.EquipmentSlotPouch,
+			"pouch", "the pouch slot")
 	}
 
 	mutation, err := engine.SetPouchItems(

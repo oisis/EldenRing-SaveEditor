@@ -80,6 +80,34 @@ func writeCharacterLoadoutFixture(t *testing.T, platform Platform) string {
 	put(pouchItemsSectionOffset+4, removeReferenceInventoryRowBase)
 	put(blockAt+pouchItemsTailOffset, loadoutTestMemoryStone)
 
+	// The equipped Dagger and talisman are addressed the way the three armament
+	// writers address them: the physical Inventory common row in EquipedItemIndex
+	// and the exact GaItem handle of that row in ActiveEquipedItemsGa.
+	const (
+		loadoutTestDaggerRow    = 100
+		loadoutTestDaggerHandle = uint32(0x80000064)
+		loadoutTestMoonRow      = 101
+		loadoutTestMoonHandle   = uint32(0xA0000474)
+	)
+	// A weapon handle carries no game ID of its own, so the equipped Dagger also
+	// needs its record in the GaItem table the writers resolve through.
+	binary.LittleEndian.PutUint32(data[slotBase+gaItemTableOffset:], loadoutTestDaggerHandle)
+	binary.LittleEndian.PutUint32(data[slotBase+gaItemTableOffset+4:], loadoutTestDagger)
+
+	daggerRowAt := inventoryHeldCommonOffset + int64(loadoutTestDaggerRow*inventoryHeldRecordSize)
+	put(daggerRowAt, loadoutTestDaggerHandle)
+	put(daggerRowAt+4, 1)
+	put(daggerRowAt+8, uint32(loadoutTestDaggerRow))
+	put(removeEquipmentIndexesOffset+1*4, removeReferenceInventoryRowBase+loadoutTestDaggerRow)
+	put(removeEquipmentHandlesOffset+1*4, loadoutTestDaggerHandle)
+
+	moonRowAt := inventoryHeldCommonOffset + int64(loadoutTestMoonRow*inventoryHeldRecordSize)
+	put(moonRowAt, loadoutTestMoonHandle)
+	put(moonRowAt+4, 1)
+	put(moonRowAt+8, uint32(loadoutTestMoonRow))
+	put(removeEquipmentIndexesOffset+17*4, removeReferenceInventoryRowBase+loadoutTestMoonRow)
+	put(removeEquipmentHandlesOffset+17*4, loadoutTestMoonHandle)
+
 	// The mixture is positional and keeps its second slot empty.
 	put(blockAt+physickArmamentsBlockSize, loadoutTestCrimsonTear)
 	put(blockAt+physickArmamentsBlockSize+4, PhysickEmptyTearID)

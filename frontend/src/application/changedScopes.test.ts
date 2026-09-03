@@ -11,6 +11,18 @@ import { queryKeys } from "./queryKeys";
 const session = "session-1";
 
 /**
+ * One candidates page of one Equipment slot type. The picker reads Inventory
+ * common through its own getter, so both the container scope and the loadout
+ * scope have to reach this key.
+ */
+const equipmentCandidates = queryKeys.equipmentCandidates(session, 0, "3", {
+  slotType: "right_hand",
+  search: "",
+  page: 1,
+  pageSize: 50,
+});
+
+/**
  * The expected mapping, written out by hand. Reading it back from the
  * implementation would prove only that the table was read; this is the reviewed
  * contract of every backend scope.
@@ -25,11 +37,14 @@ const expected: Record<ChangedScope, { invalidates: readonly (readonly unknown[]
   "character.profile": { invalidates: [queryKeys.characterProfile(session, 0, "3")] },
   "character.stats": { invalidates: [queryKeys.characterStats(session, 0, "3")] },
   "character.appearance": { invalidates: [] },
-  inventory: { invalidates: [queryKeys.inventory(session, 0, "common", 1, 50, "3")] },
+  inventory: {
+    invalidates: [queryKeys.inventory(session, 0, "common", 1, 50, "3"), equipmentCandidates],
+  },
   storage: { invalidates: [queryKeys.storage(session, 0, "common", 1, 50, "3")] },
   "equipment.loadout": {
     invalidates: [
       queryKeys.characterLoadout(session, 0, "3"),
+      equipmentCandidates,
       queryKeys.equipment(session, 0, "3"),
       queryKeys.quickItems(session, 0, "3"),
       queryKeys.pouchItems(session, 0, "3"),
@@ -54,6 +69,7 @@ const everyKey: readonly (readonly unknown[])[] = [
   queryKeys.inventory(session, 0, "common", 1, 50, "3"),
   queryKeys.storage(session, 0, "common", 1, 50, "3"),
   queryKeys.characterLoadout(session, 0, "3"),
+  equipmentCandidates,
   queryKeys.equipment(session, 0, "3"),
   queryKeys.quickItems(session, 0, "3"),
   queryKeys.pouchItems(session, 0, "3"),

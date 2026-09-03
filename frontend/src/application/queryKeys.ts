@@ -3,6 +3,7 @@ import type {
   CatalogResourcePresentationIdentity,
   CatalogResourcesRequest,
 } from "./catalog/catalogPort";
+import type { EquipmentCandidatesRequest } from "./equipment/equipmentPort";
 import type { OwnedItemsRequest } from "./items/itemsPort";
 
 /**
@@ -178,6 +179,32 @@ export const queryKeys = {
       "character",
       characterID,
       "equipped-spells",
+      saveRevision,
+    ] as const,
+  /**
+   * One page of the candidates of one Equipment slot type. It is a different
+   * question from the loadout — the backend filters the whole container or the
+   * whole catalog for it — so it keeps its own branch below the same session and
+   * slot scope, and every argument that selects a different answer takes part in
+   * the key. The active Safety Profile is not part of it: it is a host setting
+   * the backend reads itself.
+   */
+  equipmentCandidates: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    saveRevision: string,
+    request: Omit<EquipmentCandidatesRequest, "saveSessionID" | "characterID">,
+  ) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "equipment-candidates",
+      request.slotType,
+      request.search,
+      request.page,
+      request.pageSize,
       saveRevision,
     ] as const,
   /**
