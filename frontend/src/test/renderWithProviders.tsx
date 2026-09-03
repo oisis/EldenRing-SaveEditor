@@ -65,7 +65,10 @@ import type {
 import { SettingsPortProvider } from "../application/settings/settingsClient";
 import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
 import { WorldPortProvider } from "../application/world/worldClient";
-import type { WorldPort } from "../application/world/worldPort";
+import type {
+  WorldMutationReceipt,
+  WorldPort,
+} from "../application/world/worldPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
 
 /**
@@ -807,6 +810,18 @@ const stubWorldIdentity = {
   active: true,
 };
 
+/**
+ * The receipt every stubbed World mutation returns. It carries the World scope,
+ * so a panel test can assert exactly what the mutation published.
+ */
+export const stubWorldMutationReceipt: WorldMutationReceipt = {
+  operationID: "operation-world-1",
+  operationKind: "set_region_unlocked",
+  saveSessionID: "session-1",
+  saveRevision: "4",
+  changedScopes: ["save.session", "world.flags", "diagnostics.report"],
+};
+
 export function makeWorldPort(overrides: Partial<WorldPort> = {}): WorldPort {
   return {
     getRegions: () => Promise.resolve({ ...stubWorldIdentity, regions: [] }),
@@ -828,6 +843,25 @@ export function makeWorldPort(overrides: Partial<WorldPort> = {}): WorldPort {
         activeAttireKey: "",
         attires: [],
       }),
+    // No capability by default: a World writer exists only where the backend
+    // published one, so a test that does not state a contract gets the
+    // read-only workspace rather than an assumed set of actions.
+    getWorldMutationCapabilities: () => Promise.resolve([]),
+    setRegionUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setMapRegionRevealed: () => Promise.resolve(stubWorldMutationReceipt),
+    setGraceVisited: () => Promise.resolve(stubWorldMutationReceipt),
+    setBossDefeated: () => Promise.resolve(stubWorldMutationReceipt),
+    setGestureUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setCookbookUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setBellBearingUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setWhetbladeUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setTutorialUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setSummoningPoolActivated: () => Promise.resolve(stubWorldMutationReceipt),
+    setColosseumUnlocked: () => Promise.resolve(stubWorldMutationReceipt),
+    setFogOfWarRemoved: () => Promise.resolve(stubWorldMutationReceipt),
+    setQuestStep: () => Promise.resolve(stubWorldMutationReceipt),
+    setSpectralSteedAttire: () => Promise.resolve(stubWorldMutationReceipt),
+    lockAllSpectralSteedAttires: () => Promise.resolve(stubWorldMutationReceipt),
     ...overrides,
   };
 }

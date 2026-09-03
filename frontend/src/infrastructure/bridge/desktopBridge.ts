@@ -54,7 +54,9 @@ import {
   GetSummoningPools,
   GetTutorials,
   GetWhetblades,
+  GetWorldMutationCapabilities,
   LoadSave,
+  LockAllSpectralSteedAttires,
   MoveOwnedItemsToInventory,
   MoveOwnedItemsToStorage,
   QuitApplication,
@@ -83,7 +85,21 @@ import {
   SetPhysickMixture,
   SetPouchItems,
   SetQuickItems,
+  SetBellBearingUnlocked,
+  SetBossDefeated,
+  SetColosseumUnlocked,
+  SetCookbookUnlocked,
+  SetFogOfWarRemoved,
+  SetGestureUnlocked,
+  SetGraceVisited,
+  SetMapRegionRevealed,
+  SetQuestStep,
+  SetRegionUnlocked,
   SetSafetyProfile,
+  SetSpectralSteedAttire,
+  SetSummoningPoolActivated,
+  SetTutorialUnlocked,
+  SetWhetbladeUnlocked,
   SetSaveLifecycleSettings,
   UndoLastOperation,
   ValidateReviewChanges,
@@ -177,14 +193,19 @@ import type {
   WorldGestures,
   WorldGraces,
   WorldMapRegions,
+  WorldMutationCapability,
+  WorldMutationReceipt,
+  WorldOperationKind,
   WorldPort,
   WorldQuests,
   WorldRegions,
+  WorldResourceToggleRequest,
   WorldSpectralSteedAttires,
   WorldSummoningPools,
   WorldTutorials,
   WorldWhetblades,
 } from "../../application/world/worldPort";
+import { worldOperationKinds } from "../../application/world/worldPort";
 import { parseBridgeError } from "./bridgeError";
 import { parseSessionChangedEvent, sessionChangedEventName } from "./sessionChangedEvent";
 
@@ -998,6 +1019,60 @@ function toWorldIdentity(result: {
 }
 
 /**
+ * The positional arguments of one World resource toggle. Every one of the
+ * eleven toggle endpoints takes the same six values in the same order, so the
+ * request is unpacked once here instead of eleven times, and no name, kind, key
+ * or value changes meaning on the way.
+ */
+function toggleArguments({
+  saveSessionID,
+  characterID,
+  resourceKind,
+  resourceKey,
+  value,
+  expectedRevision,
+}: WorldResourceToggleRequest): [string, number, string, string, boolean, string] {
+  return [saveSessionID, characterID, resourceKind, resourceKey, value, expectedRevision];
+}
+
+/**
+ * The World mutation contract, validated as the closed vocabulary it is. An
+ * operation kind this build does not know, or a risk level outside the shared
+ * backend vocabulary, fails the whole answer with the same stable code as any
+ * other bridge failure: an unknown capability must never reach the screen as an
+ * enabled action, and a missing risk must never be replaced by a default.
+ */
+function toWorldMutationCapabilities(
+  result: Awaited<ReturnType<typeof GetWorldMutationCapabilities>>,
+): readonly WorldMutationCapability[] {
+  return result.capabilities.map((capability) => {
+    if (!worldOperationKinds.includes(capability.operationKind as WorldOperationKind)) {
+      throw new AppErrorException(bridgeCallFailed());
+    }
+    return {
+      operationKind: capability.operationKind as WorldOperationKind,
+      risk: toOperationRisk(capability.risk),
+      riskReason: capability.riskReason,
+      supportsBulk: capability.supportsBulk,
+    };
+  });
+}
+
+/**
+ * Projects one committed World mutation onto the shared receipt, through the
+ * same scope validation every other receipt uses.
+ */
+function toWorldMutationReceipt(result: {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: string[];
+}): WorldMutationReceipt {
+  return toMutationReceipt(result);
+}
+
+/**
  * The thirteen World projections below copy the arrays and the entries into
  * objects this layer owns, in the backend's own order. No entry is filtered,
  * re-sorted, grouped, renamed or completed with a locally derived fact: the
@@ -1739,6 +1814,113 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   getSpectralSteedAttires: async ({ saveSessionID, characterID }) =>
     toWorldSpectralSteedAttires(
       await callBridge(() => GetSpectralSteedAttires(saveSessionID, characterID)),
+    ),
+
+
+  // The capability contract is read as reported and validated as a closed
+  // vocabulary: an operation kind or a risk level this build does not know is an
+  // unknown contract, so the whole answer is refused rather than partially
+  // trusted. Nothing here fills in a missing capability or a missing risk.
+  getWorldMutationCapabilities: async () =>
+    toWorldMutationCapabilities(await callBridge(GetWorldMutationCapabilities)),
+
+  // The eleven resource toggles below place the caller's own pair and value in
+  // the positions their endpoint declares and add the expected revision. No
+  // value is derived from the current view, and nothing is retried.
+  setRegionUnlocked: async (request) =>
+    toWorldMutationReceipt(await callBridge(() => SetRegionUnlocked(...toggleArguments(request)))),
+
+  setMapRegionRevealed: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetMapRegionRevealed(...toggleArguments(request))),
+    ),
+
+  setGraceVisited: async (request) =>
+    toWorldMutationReceipt(await callBridge(() => SetGraceVisited(...toggleArguments(request)))),
+
+  setBossDefeated: async (request) =>
+    toWorldMutationReceipt(await callBridge(() => SetBossDefeated(...toggleArguments(request)))),
+
+  setGestureUnlocked: async (request) =>
+    toWorldMutationReceipt(await callBridge(() => SetGestureUnlocked(...toggleArguments(request)))),
+
+  setCookbookUnlocked: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetCookbookUnlocked(...toggleArguments(request))),
+    ),
+
+  setBellBearingUnlocked: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetBellBearingUnlocked(...toggleArguments(request))),
+    ),
+
+  setWhetbladeUnlocked: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetWhetbladeUnlocked(...toggleArguments(request))),
+    ),
+
+  setTutorialUnlocked: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetTutorialUnlocked(...toggleArguments(request))),
+    ),
+
+  setSummoningPoolActivated: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetSummoningPoolActivated(...toggleArguments(request))),
+    ),
+
+  setColosseumUnlocked: async (request) =>
+    toWorldMutationReceipt(
+      await callBridge(() => SetColosseumUnlocked(...toggleArguments(request))),
+    ),
+
+  // `removed` is the literal `true` of the port: the backend accepts no other
+  // value, so the adapter has nothing to decide and passes what it received.
+  setFogOfWarRemoved: async ({ saveSessionID, characterID, removed, expectedRevision }) =>
+    toWorldMutationReceipt(
+      await callBridge(() =>
+        SetFogOfWarRemoved(saveSessionID, characterID, removed, expectedRevision),
+      ),
+    ),
+
+  setQuestStep: async ({
+    saveSessionID,
+    characterID,
+    questKind,
+    questKey,
+    stepKind,
+    stepKey,
+    expectedRevision,
+  }) =>
+    toWorldMutationReceipt(
+      await callBridge(() =>
+        SetQuestStep(
+          saveSessionID,
+          characterID,
+          questKind,
+          questKey,
+          stepKind,
+          stepKey,
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setSpectralSteedAttire: async ({ saveSessionID, characterID, attireKey, expectedRevision }) =>
+    toWorldMutationReceipt(
+      await callBridge(() =>
+        SetSpectralSteedAttire(saveSessionID, characterID, attireKey, expectedRevision),
+      ),
+    ),
+
+  // One atomic call. The adapter never composes this out of a removal and a
+  // selection, because a failure between them would leave the save wearing an
+  // appearance whose item is gone.
+  lockAllSpectralSteedAttires: async ({ saveSessionID, characterID, expectedRevision }) =>
+    toWorldMutationReceipt(
+      await callBridge(() =>
+        LockAllSpectralSteedAttires(saveSessionID, characterID, expectedRevision),
+      ),
     ),
 
 

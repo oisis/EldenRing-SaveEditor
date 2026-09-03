@@ -295,6 +295,19 @@ func newHandlerWithTemplatesStore(
 		writeJSON(writer, http.StatusOK, result)
 	})
 
+	// The World mutation capabilities are a property of the build: they name no
+	// session and no character, so the route is registered even when the
+	// save-session lifecycle is not.
+	mux.HandleFunc("GET /api/v1/world/mutation-capabilities", func(writer http.ResponseWriter, _ *http.Request) {
+		result, err := world.GetWorldMutationCapabilities()
+		if err != nil {
+			// The endpoint takes no input, so a failure is always server side.
+			writeError(writer, http.StatusInternalServerError, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
 	// The presets and their assets live in the catalog data, so the route needs
 	// the catalog only. It serves preset metadata; the images themselves are not
 	// exposed by any route yet.

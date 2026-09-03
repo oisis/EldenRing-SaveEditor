@@ -250,6 +250,12 @@ export const queryKeys = {
    * The revision takes part in the key, so an answer produced for an earlier
    * revision can never be served for a later one.
    */
+  /**
+   * The World mutation contract is a property of the build, not of a save: it
+   * names no session, no slot and no revision, so it gets one stable key of its
+   * own rather than a key that would refetch it whenever a revision advances.
+   */
+  worldMutationCapabilities: () => ["world", "mutation-capabilities"] as const,
   worldView: (
     saveSessionID: string,
     characterID: CharacterKey,

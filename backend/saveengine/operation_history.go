@@ -530,3 +530,38 @@ func validateSnapshotCandidate(loaded *loadedSave, data []byte) error {
 	}
 	return validateSerialized(serialized, loaded.session.platform)
 }
+
+// MutationOperationDescription is the read-only description of one registered
+// mutation kind: the risk the backend attaches to every execution of that kind
+// and the scopes it invalidates. It is the projection an endpoint uses to
+// publish a capability contract, so no consumer has to rebuild a risk table.
+//
+// The values come from the same tables the operation history is built from.
+// Nothing here inspects a session: a kind is described the same way whether or
+// not a save is open, and the elevated ban-risk of one concrete execution
+// belongs to that execution and is therefore not part of this description.
+type MutationOperationDescription struct {
+	OperationKind string
+	Area          string
+	Risk          OperationRisk
+	RiskReason    string
+	ChangedScopes []string
+}
+
+// DescribeMutationOperation returns the description of one registered mutation
+// kind. An unknown or empty kind is rejected rather than described with a
+// default risk.
+func DescribeMutationOperation(operationKind string) (MutationOperationDescription, error) {
+	scopes, err := changedScopesForMutationKind(operationKind)
+	if err != nil {
+		return MutationOperationDescription{}, err
+	}
+	area, risk, riskReason := operationPresentation(operationKind, scopes)
+	return MutationOperationDescription{
+		OperationKind: operationKind,
+		Area:          area,
+		Risk:          risk,
+		RiskReason:    riskReason,
+		ChangedScopes: scopes,
+	}, nil
+}

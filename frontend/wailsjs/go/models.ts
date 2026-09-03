@@ -6553,10 +6553,469 @@ export namespace world {
 		    return a;
 		}
 	}
+	export class WorldMutationCapability {
+	    operationKind: string;
+	    risk: string;
+	    riskReason: string;
+	    supportsBulk: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new WorldMutationCapability(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationKind = source["operationKind"];
+	        this.risk = source["risk"];
+	        this.riskReason = source["riskReason"];
+	        this.supportsBulk = source["supportsBulk"];
+	    }
+	}
+	export class GetWorldMutationCapabilitiesResult {
+	    capabilities: WorldMutationCapability[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetWorldMutationCapabilitiesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.capabilities = this.convertValues(source["capabilities"], WorldMutationCapability);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class LockAllSpectralSteedAttiresResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    attireKey: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new LockAllSpectralSteedAttiresResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.attireKey = source["attireKey"];
+	    }
+	}
 	
 	
 	
 	
+	export class SetBellBearingUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    bellBearingKind: string;
+	    bellBearingKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetBellBearingUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.bellBearingKind = source["bellBearingKind"];
+	        this.bellBearingKey = source["bellBearingKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetBossDefeatedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    bossKind: string;
+	    bossKey: string;
+	    defeated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetBossDefeatedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.bossKind = source["bossKind"];
+	        this.bossKey = source["bossKey"];
+	        this.defeated = source["defeated"];
+	    }
+	}
+	export class SetColosseumUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    colosseumKind: string;
+	    colosseumKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetColosseumUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.colosseumKind = source["colosseumKind"];
+	        this.colosseumKey = source["colosseumKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetCookbookUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    cookbookKind: string;
+	    cookbookKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCookbookUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.cookbookKind = source["cookbookKind"];
+	        this.cookbookKey = source["cookbookKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetFogOfWarRemovedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    removed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetFogOfWarRemovedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.removed = source["removed"];
+	    }
+	}
+	export class SetGestureUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    gestureKind: string;
+	    gestureKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetGestureUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.gestureKind = source["gestureKind"];
+	        this.gestureKey = source["gestureKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetGraceVisitedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    graceKind: string;
+	    graceKey: string;
+	    visited: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetGraceVisitedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.graceKind = source["graceKind"];
+	        this.graceKey = source["graceKey"];
+	        this.visited = source["visited"];
+	    }
+	}
+	export class SetMapRegionRevealedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    mapRegionKind: string;
+	    mapRegionKey: string;
+	    revealed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetMapRegionRevealedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.mapRegionKind = source["mapRegionKind"];
+	        this.mapRegionKey = source["mapRegionKey"];
+	        this.revealed = source["revealed"];
+	    }
+	}
+	export class SetQuestStepResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    questKind: string;
+	    questKey: string;
+	    stepKind: string;
+	    stepKey: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetQuestStepResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.questKind = source["questKind"];
+	        this.questKey = source["questKey"];
+	        this.stepKind = source["stepKind"];
+	        this.stepKey = source["stepKey"];
+	    }
+	}
+	export class SetRegionUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    regionKind: string;
+	    regionKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetRegionUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.regionKind = source["regionKind"];
+	        this.regionKey = source["regionKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetSpectralSteedAttireResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    attireKey: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetSpectralSteedAttireResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.attireKey = source["attireKey"];
+	    }
+	}
+	export class SetSummoningPoolActivatedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    summoningPoolKind: string;
+	    summoningPoolKey: string;
+	    activated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetSummoningPoolActivatedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.summoningPoolKind = source["summoningPoolKind"];
+	        this.summoningPoolKey = source["summoningPoolKey"];
+	        this.activated = source["activated"];
+	    }
+	}
+	export class SetTutorialUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    tutorialKind: string;
+	    tutorialKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetTutorialUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.tutorialKind = source["tutorialKind"];
+	        this.tutorialKey = source["tutorialKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
+	export class SetWhetbladeUnlockedResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    whetbladeKind: string;
+	    whetbladeKey: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetWhetbladeUnlockedResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.whetbladeKind = source["whetbladeKind"];
+	        this.whetbladeKey = source["whetbladeKey"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
 	
 	
 	

@@ -23,6 +23,21 @@ msgstr "Nie udało się rozpoznać rekordów: {0}."
 msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
 msgstr "Nie udało się sprawdzić zakresów: {0}, więc ten save nie jest potwierdzony jako poprawny."
 
+#. placeholder {0}: displayName(item.name)
+#: src/features/world/WorldPanel.tsx
+msgid "{0}: apply step"
+msgstr "{0}: zastosuj krok"
+
+#. placeholder {0}: displayName(item.name)
+#: src/features/world/WorldPanel.tsx
+msgid "{0}: quest step"
+msgstr "{0}: krok zadania"
+
+#. placeholder {0}: displayName(item.name)
+#: src/features/world/WorldPanel.tsx
+msgid "{0}: select appearance"
+msgstr "{0}: wybierz wygląd"
+
 #. placeholder {0}: item.steps.length
 #: src/features/world/WorldPanel.tsx
 msgid "{matched} of {0} matched steps"
@@ -129,6 +144,7 @@ msgid "Application settings and tools"
 msgstr "Ustawienia i narzędzia aplikacji"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Apply"
 msgstr "Zastosuj"
 
@@ -516,6 +532,10 @@ msgstr "Tylko ulubione"
 msgid "File"
 msgstr "Plik"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Fog of War"
+msgstr "Mgła wojny"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Format"
 msgstr "Format"
@@ -768,6 +788,10 @@ msgstr "Wczytywanie…"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Location"
 msgstr "Lokalizacja"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Lock all Spectral Steed Attires"
+msgstr "Zablokuj wszystkie stroje Spectral Steed"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Locked"
@@ -1214,6 +1238,10 @@ msgstr "Usuń"
 msgid "Remove {name} from favorites"
 msgstr "Usuń {name} z ulubionych"
 
+#: src/features/world/WorldPanel.tsx
+msgid "Remove Fog of War"
+msgstr "Usuń mgłę wojny"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Reset"
 msgstr "Przywróć"
@@ -1279,6 +1307,12 @@ msgstr "Prawa ręka {0}"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Risk"
 msgstr "Ryzyko"
+
+#. placeholder {0}: found.risk
+#. placeholder {1}: found.riskReason
+#: src/features/world/WorldPanel.tsx
+msgid "Risk: {0} - {1}"
+msgstr "Ryzyko: {0} - {1}"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "RL {level}"
@@ -1375,6 +1409,7 @@ msgstr "Szukaj wpisów świata"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "Select"
 msgstr "Zaznacz"
 
@@ -1385,6 +1420,10 @@ msgstr "Zaznacz"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Select {0}"
 msgstr "Zaznacz {0}"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Select a step"
+msgstr "Wybierz krok"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Select an active character to view and edit profile data."
@@ -1416,6 +1455,46 @@ msgstr "Operacje sesji"
 #: src/features/app-shell/AppShell.tsx
 msgid "Session overview and file actions"
 msgstr "Podsumowanie sesji i operacje na pliku"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set activated"
+msgstr "Ustaw aktywowany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set defeated"
+msgstr "Ustaw pokonany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set locked"
+msgstr "Ustaw zablokowane"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set not activated"
+msgstr "Ustaw nieaktywowany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set not defeated"
+msgstr "Ustaw niepokonany"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set not revealed"
+msgstr "Ustaw nieodkryty"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set not visited"
+msgstr "Ustaw nieodwiedzone"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set revealed"
+msgstr "Ustaw odkryty"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set unlocked"
+msgstr "Ustaw odblokowane"
+
+#: src/features/world/WorldPanel.tsx
+msgid "Set visited"
+msgstr "Ustaw odwiedzone"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Show Item ID"
@@ -1623,6 +1702,7 @@ msgstr "Osiągnięto limit automatycznych kopii zapasowych. Kolejne zapisy będ�
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/world/WorldPanel.tsx
 msgid "The change was not applied."
 msgstr "Zmiana nie została zastosowana."
 

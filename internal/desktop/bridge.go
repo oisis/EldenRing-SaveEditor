@@ -932,11 +932,21 @@ func (b *Bridge) SetOwnedItemQuantity(
 		quantity, expectedRevision))
 }
 
-// The thirteen World getters below are the complete read-only World surface of
-// the desktop bridge. Each one delegates to its endpoint and returns the
-// endpoint result and error unchanged: the bridge validates nothing, reads
-// neither SaveEngine nor GameCatalog itself, and derives no state. No World
-// mutation is bound, so the frontend cannot write a flag through this surface.
+// The World getters below are the complete read-only World surface of the
+// desktop bridge. Each one delegates to its endpoint and returns the endpoint
+// result and error unchanged: the bridge validates nothing, reads neither
+// SaveEngine nor GameCatalog itself, and derives no state.
+//
+// GetWorldMutationCapabilities is the one World getter that names no session:
+// it publishes which World mutations exist and what risk each carries, so the
+// frontend renders a World writer only for a capability the backend returned
+// and never carries its own risk table.
+
+// GetWorldMutationCapabilities delegates to the GetWorldMutationCapabilities
+// endpoint.
+func (b *Bridge) GetWorldMutationCapabilities() (world.GetWorldMutationCapabilitiesResult, error) {
+	return bridged(world.GetWorldMutationCapabilities())
+}
 
 // GetRegions delegates to the GetRegions endpoint.
 func (b *Bridge) GetRegions(
@@ -1058,4 +1068,216 @@ func (b *Bridge) GetSpectralSteedAttires(
 ) (world.GetSpectralSteedAttiresResult, error) {
 	return bridged(world.GetSpectralSteedAttires(
 		b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// The fifteen World mutations below complete the World surface. Each one
+// delegates to its endpoint with the arguments it received, expectedRevision
+// included, and returns the endpoint's receipt and error unchanged: the bridge
+// resolves no resource, invents no current state and retries nothing.
+// LockAllSpectralSteedAttires is the one atomic set operation; the bridge never
+// composes a bulk change out of single mutations.
+
+// SetRegionUnlocked delegates to the SetRegionUnlocked endpoint.
+func (b *Bridge) SetRegionUnlocked(
+	saveSessionID string,
+	characterID int,
+	regionKind string,
+	regionKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetRegionUnlockedResult, error) {
+	return bridged(world.SetRegionUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		regionKind, regionKey, unlocked, expectedRevision))
+}
+
+// SetMapRegionRevealed delegates to the SetMapRegionRevealed endpoint.
+func (b *Bridge) SetMapRegionRevealed(
+	saveSessionID string,
+	characterID int,
+	mapRegionKind string,
+	mapRegionKey string,
+	revealed bool,
+	expectedRevision string,
+) (world.SetMapRegionRevealedResult, error) {
+	return bridged(world.SetMapRegionRevealed(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		mapRegionKind, mapRegionKey, revealed, expectedRevision))
+}
+
+// SetFogOfWarRemoved delegates to the SetFogOfWarRemoved endpoint. The endpoint
+// accepts removed=true only; the bridge forwards the value it was given and
+// does not decide that rule for it.
+func (b *Bridge) SetFogOfWarRemoved(
+	saveSessionID string,
+	characterID int,
+	removed bool,
+	expectedRevision string,
+) (world.SetFogOfWarRemovedResult, error) {
+	return bridged(world.SetFogOfWarRemoved(
+		b.saveEngine, saveSessionID, characterID, removed, expectedRevision))
+}
+
+// SetGraceVisited delegates to the SetGraceVisited endpoint.
+func (b *Bridge) SetGraceVisited(
+	saveSessionID string,
+	characterID int,
+	graceKind string,
+	graceKey string,
+	visited bool,
+	expectedRevision string,
+) (world.SetGraceVisitedResult, error) {
+	return bridged(world.SetGraceVisited(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		graceKind, graceKey, visited, expectedRevision))
+}
+
+// SetBossDefeated delegates to the SetBossDefeated endpoint.
+func (b *Bridge) SetBossDefeated(
+	saveSessionID string,
+	characterID int,
+	bossKind string,
+	bossKey string,
+	defeated bool,
+	expectedRevision string,
+) (world.SetBossDefeatedResult, error) {
+	return bridged(world.SetBossDefeated(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		bossKind, bossKey, defeated, expectedRevision))
+}
+
+// SetQuestStep delegates to the SetQuestStep endpoint. The quest and the step
+// are addressed by their own kind and key pairs, forwarded exactly as received.
+func (b *Bridge) SetQuestStep(
+	saveSessionID string,
+	characterID int,
+	questKind string,
+	questKey string,
+	stepKind string,
+	stepKey string,
+	expectedRevision string,
+) (world.SetQuestStepResult, error) {
+	return bridged(world.SetQuestStep(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		questKind, questKey, stepKind, stepKey, expectedRevision))
+}
+
+// SetGestureUnlocked delegates to the SetGestureUnlocked endpoint.
+func (b *Bridge) SetGestureUnlocked(
+	saveSessionID string,
+	characterID int,
+	gestureKind string,
+	gestureKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetGestureUnlockedResult, error) {
+	return bridged(world.SetGestureUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		gestureKind, gestureKey, unlocked, expectedRevision))
+}
+
+// SetCookbookUnlocked delegates to the SetCookbookUnlocked endpoint.
+func (b *Bridge) SetCookbookUnlocked(
+	saveSessionID string,
+	characterID int,
+	cookbookKind string,
+	cookbookKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetCookbookUnlockedResult, error) {
+	return bridged(world.SetCookbookUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		cookbookKind, cookbookKey, unlocked, expectedRevision))
+}
+
+// SetBellBearingUnlocked delegates to the SetBellBearingUnlocked endpoint.
+func (b *Bridge) SetBellBearingUnlocked(
+	saveSessionID string,
+	characterID int,
+	bellBearingKind string,
+	bellBearingKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetBellBearingUnlockedResult, error) {
+	return bridged(world.SetBellBearingUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		bellBearingKind, bellBearingKey, unlocked, expectedRevision))
+}
+
+// SetWhetbladeUnlocked delegates to the SetWhetbladeUnlocked endpoint.
+func (b *Bridge) SetWhetbladeUnlocked(
+	saveSessionID string,
+	characterID int,
+	whetbladeKind string,
+	whetbladeKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetWhetbladeUnlockedResult, error) {
+	return bridged(world.SetWhetbladeUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		whetbladeKind, whetbladeKey, unlocked, expectedRevision))
+}
+
+// SetTutorialUnlocked delegates to the SetTutorialUnlocked endpoint.
+func (b *Bridge) SetTutorialUnlocked(
+	saveSessionID string,
+	characterID int,
+	tutorialKind string,
+	tutorialKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetTutorialUnlockedResult, error) {
+	return bridged(world.SetTutorialUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		tutorialKind, tutorialKey, unlocked, expectedRevision))
+}
+
+// SetSummoningPoolActivated delegates to the SetSummoningPoolActivated endpoint.
+func (b *Bridge) SetSummoningPoolActivated(
+	saveSessionID string,
+	characterID int,
+	summoningPoolKind string,
+	summoningPoolKey string,
+	activated bool,
+	expectedRevision string,
+) (world.SetSummoningPoolActivatedResult, error) {
+	return bridged(world.SetSummoningPoolActivated(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		summoningPoolKind, summoningPoolKey, activated, expectedRevision))
+}
+
+// SetColosseumUnlocked delegates to the SetColosseumUnlocked endpoint.
+func (b *Bridge) SetColosseumUnlocked(
+	saveSessionID string,
+	characterID int,
+	colosseumKind string,
+	colosseumKey string,
+	unlocked bool,
+	expectedRevision string,
+) (world.SetColosseumUnlockedResult, error) {
+	return bridged(world.SetColosseumUnlocked(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID,
+		colosseumKind, colosseumKey, unlocked, expectedRevision))
+}
+
+// SetSpectralSteedAttire delegates to the SetSpectralSteedAttire endpoint.
+func (b *Bridge) SetSpectralSteedAttire(
+	saveSessionID string,
+	characterID int,
+	attireKey string,
+	expectedRevision string,
+) (world.SetSpectralSteedAttireResult, error) {
+	return bridged(world.SetSpectralSteedAttire(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, attireKey, expectedRevision))
+}
+
+// LockAllSpectralSteedAttires delegates to the LockAllSpectralSteedAttires
+// endpoint: one atomic call, never a sequence of single mutations.
+func (b *Bridge) LockAllSpectralSteedAttires(
+	saveSessionID string,
+	characterID int,
+	expectedRevision string,
+) (world.LockAllSpectralSteedAttiresResult, error) {
+	return bridged(world.LockAllSpectralSteedAttires(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, expectedRevision))
 }

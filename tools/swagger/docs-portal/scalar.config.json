@@ -696,6 +696,11 @@
                 "filepath": "../../../docs/endpoints/world/set_whetblade_unlocked.md",
                 "title": "SetWhetbladeUnlocked"
               },
+              "/get-world-mutation-capabilities": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_world_mutation_capabilities.md",
+                "title": "GetWorldMutationCapabilities"
+              },
               "/get-spectral-steed-attires": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_spectral_steed_attires.md",

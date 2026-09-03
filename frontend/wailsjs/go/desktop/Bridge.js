@@ -206,8 +206,16 @@ export function GetWhetblades(arg1, arg2, arg3) {
   return window['go']['desktop']['Bridge']['GetWhetblades'](arg1, arg2, arg3);
 }
 
+export function GetWorldMutationCapabilities() {
+  return window['go']['desktop']['Bridge']['GetWorldMutationCapabilities']();
+}
+
 export function LoadSave(arg1, arg2, arg3) {
   return window['go']['desktop']['Bridge']['LoadSave'](arg1, arg2, arg3);
+}
+
+export function LockAllSpectralSteedAttires(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['LockAllSpectralSteedAttires'](arg1, arg2, arg3);
 }
 
 export function MoveOwnedItemsToInventory(arg1, arg2, arg3, arg4) {
@@ -266,6 +274,14 @@ export function SelectSaveTarget(arg1) {
   return window['go']['desktop']['Bridge']['SelectSaveTarget'](arg1);
 }
 
+export function SetBellBearingUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetBellBearingUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetBossDefeated(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetBossDefeated'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
 export function SetCharacterGender(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetCharacterGender'](arg1, arg2, arg3, arg4);
 }
@@ -284,6 +300,14 @@ export function SetCharacterStartingClass(arg1, arg2, arg3, arg4, arg5) {
 
 export function SetCharacterStats(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['SetCharacterStats'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function SetColosseumUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetColosseumUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetCookbookUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetCookbookUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 export function SetEquippedArmaments(arg1, arg2, arg3, arg4) {
@@ -306,6 +330,22 @@ export function SetFavoritePreset(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetFavoritePreset'](arg1, arg2, arg3, arg4);
 }
 
+export function SetFogOfWarRemoved(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetFogOfWarRemoved'](arg1, arg2, arg3, arg4);
+}
+
+export function SetGestureUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetGestureUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetGraceVisited(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetGraceVisited'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetMapRegionRevealed(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetMapRegionRevealed'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
 export function SetOwnedItemQuantity(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['SetOwnedItemQuantity'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -318,8 +358,16 @@ export function SetPouchItems(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetPouchItems'](arg1, arg2, arg3, arg4);
 }
 
+export function SetQuestStep(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['desktop']['Bridge']['SetQuestStep'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
 export function SetQuickItems(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetQuickItems'](arg1, arg2, arg3, arg4);
+}
+
+export function SetRegionUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetRegionUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 export function SetSafetyProfile(arg1) {
@@ -328,6 +376,22 @@ export function SetSafetyProfile(arg1) {
 
 export function SetSaveLifecycleSettings(arg1) {
   return window['go']['desktop']['Bridge']['SetSaveLifecycleSettings'](arg1);
+}
+
+export function SetSpectralSteedAttire(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetSpectralSteedAttire'](arg1, arg2, arg3, arg4);
+}
+
+export function SetSummoningPoolActivated(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetSummoningPoolActivated'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetTutorialUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetTutorialUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetWhetbladeUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['desktop']['Bridge']['SetWhetbladeUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 export function UndoLastOperation(arg1, arg2) {

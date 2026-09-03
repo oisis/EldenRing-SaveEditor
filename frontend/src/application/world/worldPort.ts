@@ -4,16 +4,19 @@
  * through the hooks in this directory and never on the transport that fulfils
  * it.
  *
- * Stage 9A is read-only. The port carries the thirteen World getters and no
- * mutation at all: writing a World flag needs the operation risk level, the
- * risk reason and the per-action capabilities the backend does not publish yet,
- * and those, together with the safe bulk operations, belong to stage 9B. No
- * risk, capability or "current step" is invented here to fill the gap.
+ * Stage 9B adds the write side. The port carries the thirteen World getters,
+ * the backend capability contract and the fifteen World mutations. The
+ * capability contract is what makes a writer available: the risk level, the
+ * risk reason and the bulk support of an operation are the backend's own
+ * answers, and no risk, availability, bulk capability or "current step" is
+ * invented above this port to fill a gap.
  *
  * Every field is the backend's own answer, carried as reported. Nothing above
  * this port resolves an event flag, derives a region from a name, normalises a
  * Spectral Steed conflict into one active attire or re-orders an entry list.
  */
+
+import type { MutationReceipt, OperationRisk } from "../save-session/saveSessionPort";
 
 /** The session and slot one World view is read for. */
 export type WorldRequest = {
@@ -182,6 +185,71 @@ export type WorldSpectralSteedAttires = WorldViewIdentity & {
   attires: readonly SpectralSteedAttireEntry[];
 };
 
+/**
+ * The closed set of World mutations this build can perform. It is the
+ * vocabulary the backend publishes its capabilities under, and a value outside
+ * it is an unknown contract that is rejected at the bridge boundary rather than
+ * carried into the application.
+ */
+export const worldOperationKinds = [
+  "lock_all_spectral_steed_attires",
+  "set_bell_bearing_unlocked",
+  "set_boss_defeated",
+  "set_colosseum_unlocked",
+  "set_cookbook_unlocked",
+  "set_fog_of_war_removed",
+  "set_gesture_unlocked",
+  "set_grace_visited",
+  "set_map_region_revealed",
+  "set_quest_step",
+  "set_region_unlocked",
+  "set_spectral_steed_attire",
+  "set_summoning_pool_activated",
+  "set_tutorial_unlocked",
+  "set_whetblade_unlocked",
+] as const;
+
+export type WorldOperationKind = (typeof worldOperationKinds)[number];
+
+/**
+ * One supported World mutation as the backend describes it. Its presence in the
+ * answer is what declares the operation available; `risk` and `riskReason` are
+ * the backend's own values, shown before the operation runs and never derived,
+ * defaulted or upgraded locally.
+ */
+export type WorldMutationCapability = {
+  operationKind: WorldOperationKind;
+  risk: OperationRisk;
+  riskReason: string;
+  supportsBulk: boolean;
+};
+
+/**
+ * The receipt of a committed World mutation is the shared save-session receipt,
+ * carried verbatim. World does not own a second receipt model, so the scopes it
+ * reports go through the one invalidation path every other workspace uses.
+ */
+export type WorldMutationReceipt = MutationReceipt;
+
+/** The session, slot and revision every World mutation is committed under. */
+export type WorldMutationScope = {
+  saveSessionID: string;
+  characterID: number;
+  expectedRevision: string;
+};
+
+/**
+ * The eleven World mutations that assign one boolean to one catalog resource.
+ * `resourceKind` and `resourceKey` are the endpoint's own pair and `value` is
+ * the state being written, forwarded unchanged; the adapter only places them in
+ * the positions the endpoint declares.
+ */
+export type WorldResourceToggleRequest = WorldMutationScope & {
+  resourceKind: string;
+  resourceKey: string;
+  value: boolean;
+};
+
 export type WorldPort = {
   getRegions: (request: WorldRequest) => Promise<WorldRegions>;
   getMapRegions: (request: WorldRequest) => Promise<WorldMapRegions>;
@@ -196,4 +264,57 @@ export type WorldPort = {
   getSummoningPools: (request: WorldRequest) => Promise<WorldSummoningPools>;
   getColosseums: (request: WorldRequest) => Promise<WorldColosseums>;
   getSpectralSteedAttires: (request: WorldRequest) => Promise<WorldSpectralSteedAttires>;
+
+  /**
+   * The World mutation contract of this build. It takes no session and no slot,
+   * so it is read once and is not tied to a save revision.
+   */
+  getWorldMutationCapabilities: () => Promise<readonly WorldMutationCapability[]>;
+
+  setRegionUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setMapRegionRevealed: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setGraceVisited: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setBossDefeated: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setGestureUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setCookbookUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setBellBearingUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setWhetbladeUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setTutorialUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setSummoningPoolActivated: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+  setColosseumUnlocked: (request: WorldResourceToggleRequest) => Promise<WorldMutationReceipt>;
+
+  /**
+   * The one-way Fog of War removal. `removed` is typed as the literal `true`
+   * because the backend accepts no other value: the inverse has no confirmed
+   * contract, so it cannot be expressed here at all.
+   */
+  setFogOfWarRemoved: (
+    request: WorldMutationScope & { removed: true },
+  ) => Promise<WorldMutationReceipt>;
+
+  /**
+   * One curated quest step, addressed by its own kind and key pair. A step is
+   * chosen explicitly: `matched` is an independent per-step fact and is never
+   * treated as a current step that could be toggled.
+   */
+  setQuestStep: (
+    request: WorldMutationScope & {
+      questKind: string;
+      questKey: string;
+      stepKind: string;
+      stepKey: string;
+    },
+  ) => Promise<WorldMutationReceipt>;
+
+  /** Activates one appearance; the ownership rule is the backend's. */
+  setSpectralSteedAttire: (
+    request: WorldMutationScope & { attireKey: string },
+  ) => Promise<WorldMutationReceipt>;
+
+  /**
+   * The one bulk World mutation: a single atomic call that removes the three
+   * attire items and restores the default appearance together. It is never
+   * emulated by a sequence of single mutations.
+   */
+  lockAllSpectralSteedAttires: (request: WorldMutationScope) => Promise<WorldMutationReceipt>;
 };

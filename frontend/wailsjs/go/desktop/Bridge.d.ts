@@ -113,7 +113,11 @@ export function GetTutorials(arg1:string,arg2:number,arg3:string):Promise<world.
 
 export function GetWhetblades(arg1:string,arg2:number,arg3:string):Promise<world.GetWhetbladesResult>;
 
+export function GetWorldMutationCapabilities():Promise<world.GetWorldMutationCapabilitiesResult>;
+
 export function LoadSave(arg1:string,arg2:string,arg3:string):Promise<saveengine.SessionInfo>;
+
+export function LockAllSpectralSteedAttires(arg1:string,arg2:number,arg3:string):Promise<world.LockAllSpectralSteedAttiresResult>;
 
 export function MoveOwnedItemsToInventory(arg1:string,arg2:number,arg3:Array<string>,arg4:string):Promise<saveengine.MoveOwnedItemsResult>;
 
@@ -143,6 +147,10 @@ export function SelectSaveFile():Promise<string>;
 
 export function SelectSaveTarget(arg1:string):Promise<string>;
 
+export function SetBellBearingUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetBellBearingUnlockedResult>;
+
+export function SetBossDefeated(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetBossDefeatedResult>;
+
 export function SetCharacterGender(arg1:string,arg2:number,arg3:number,arg4:string):Promise<character.SetCharacterGenderResult>;
 
 export function SetCharacterName(arg1:string,arg2:number,arg3:string,arg4:string):Promise<saveengine.SetCharacterNameResult>;
@@ -152,6 +160,10 @@ export function SetCharacterRunes(arg1:string,arg2:number,arg3:number,arg4:strin
 export function SetCharacterStartingClass(arg1:string,arg2:number,arg3:number,arg4:boolean,arg5:string):Promise<saveengine.SetCharacterStartingClassResult>;
 
 export function SetCharacterStats(arg1:string,arg2:number,arg3:saveengine.CharacterAttributes,arg4:string,arg5:string):Promise<saveengine.SetCharacterStatsResult>;
+
+export function SetColosseumUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetColosseumUnlockedResult>;
+
+export function SetCookbookUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetCookbookUnlockedResult>;
 
 export function SetEquippedArmaments(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetEquippedArmamentsResult>;
 
@@ -163,17 +175,37 @@ export function SetEquippedTalismans(arg1:string,arg2:number,arg3:Array<string>,
 
 export function SetFavoritePreset(arg1:string,arg2:number,arg3:number,arg4:string):Promise<saveengine.SetFavoritePresetResult>;
 
+export function SetFogOfWarRemoved(arg1:string,arg2:number,arg3:boolean,arg4:string):Promise<world.SetFogOfWarRemovedResult>;
+
+export function SetGestureUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetGestureUnlockedResult>;
+
+export function SetGraceVisited(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetGraceVisitedResult>;
+
+export function SetMapRegionRevealed(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetMapRegionRevealedResult>;
+
 export function SetOwnedItemQuantity(arg1:string,arg2:number,arg3:string,arg4:number,arg5:string):Promise<saveengine.SetOwnedItemQuantityResult>;
 
 export function SetPhysickMixture(arg1:string,arg2:number,arg3:Array<schema.ResourceRef>,arg4:string):Promise<equipment.SetPhysickMixtureResult>;
 
 export function SetPouchItems(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetPouchItemsResult>;
 
+export function SetQuestStep(arg1:string,arg2:number,arg3:string,arg4:string,arg5:string,arg6:string,arg7:string):Promise<world.SetQuestStepResult>;
+
 export function SetQuickItems(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetQuickItemsResult>;
+
+export function SetRegionUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetRegionUnlockedResult>;
 
 export function SetSafetyProfile(arg1:string):Promise<application.SafetyProfileResult>;
 
 export function SetSaveLifecycleSettings(arg1:number):Promise<saveengine.SaveLifecycleSettings>;
+
+export function SetSpectralSteedAttire(arg1:string,arg2:number,arg3:string,arg4:string):Promise<world.SetSpectralSteedAttireResult>;
+
+export function SetSummoningPoolActivated(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetSummoningPoolActivatedResult>;
+
+export function SetTutorialUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetTutorialUnlockedResult>;
+
+export function SetWhetbladeUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetWhetbladeUnlockedResult>;
 
 export function UndoLastOperation(arg1:string,arg2:string):Promise<saveengine.HistoryMutationResult>;
 

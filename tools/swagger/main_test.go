@@ -565,6 +565,26 @@ func TestNetworkPresetsRouteMatchesGetter(t *testing.T) {
 	}
 }
 
+// The World mutation capabilities describe the build, not a save, so the route
+// is served with the same body the getter returns and without a save session.
+func TestWorldMutationCapabilitiesRouteMatchesGetter(t *testing.T) {
+	want, err := world.GetWorldMutationCapabilities()
+	if err != nil {
+		t.Fatalf("world.GetWorldMutationCapabilities: %v", err)
+	}
+
+	recorder := do(t, newPrototypeCatalog(t), "/api/v1/world/mutation-capabilities")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("world mutation capabilities route body differs from the getter result")
+	}
+}
+
 func TestNetworkPresetsRouteFiltersByPresetID(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 	want, err := network.GetNetworkPresets(gameCatalog, "faster-reds")
@@ -1153,6 +1173,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/catalog/resources",
 		"/api/v1/network/presets",
 		"/api/v1/appearance/presets",
+		"/api/v1/world/mutation-capabilities",
 		"/healthz",
 		"/openapi.json",
 	} {

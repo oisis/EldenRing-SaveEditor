@@ -393,6 +393,36 @@
         }
       }
     },
+    "/api/v1/world/mutation-capabilities": {
+      "get": {
+        "operationId": "getWorldMutationCapabilities",
+        "tags": ["World"],
+        "summary": "GetWorldMutationCapabilities",
+        "description": "Returns the fifteen supported World mutations with the risk contract the backend attaches to each of them. The list is static: it names no save session and no character, and the risk and its reason are the same values Review Changes presents for a committed operation. The presence of an entry is what declares the operation supported, so a client derives neither availability, nor risk, nor bulk support on its own.",
+        "responses": {
+          "200": {
+            "description": "The complete, deterministically ordered World mutation contract",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWorldMutationCapabilitiesResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The backend could not describe one of its own World mutation kinds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/appearance/presets": {
       "get": {
         "operationId": "getAppearancePresets",
@@ -8392,6 +8422,59 @@
           }
         },
         "required": ["attireKey", "name", "owned", "requiredResourceKind", "requiredResourceKey", "iconPath"]
+      },
+      "WorldMutationCapability": {
+        "type": "object",
+        "description": "One supported World mutation. operationKind is the EndpointID of that mutation endpoint and the SaveEngine operation kind it commits under.",
+        "properties": {
+          "operationKind": {
+            "type": "string",
+            "enum": [
+              "lock_all_spectral_steed_attires",
+              "set_bell_bearing_unlocked",
+              "set_boss_defeated",
+              "set_colosseum_unlocked",
+              "set_cookbook_unlocked",
+              "set_fog_of_war_removed",
+              "set_gesture_unlocked",
+              "set_grace_visited",
+              "set_map_region_revealed",
+              "set_quest_step",
+              "set_region_unlocked",
+              "set_spectral_steed_attire",
+              "set_summoning_pool_activated",
+              "set_tutorial_unlocked",
+              "set_whetblade_unlocked"
+            ]
+          },
+          "risk": {
+            "type": "string",
+            "enum": ["normal", "warning", "ban risk", "critical"],
+            "description": "The backend risk level every execution of this kind carries. A client displays it and never infers or upgrades it locally."
+          },
+          "riskReason": {
+            "type": "string",
+            "description": "The backend's own wording of why the kind carries that risk."
+          },
+          "supportsBulk": {
+            "type": "boolean",
+            "description": "True only for a mutation that changes a whole set in one atomic commit. A client never emulates bulk by looping single mutations."
+          }
+        },
+        "required": ["operationKind", "risk", "riskReason", "supportsBulk"]
+      },
+      "GetWorldMutationCapabilitiesResult": {
+        "type": "object",
+        "description": "The complete World mutation contract, ordered by operationKind. The array is empty rather than null.",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorldMutationCapability"
+            }
+          }
+        },
+        "required": ["capabilities"]
       },
       "GetSpectralSteedAttiresResult": {
         "type": "object",

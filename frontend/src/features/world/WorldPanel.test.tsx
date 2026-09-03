@@ -1,8 +1,16 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
-import type { WorldPort } from "../../application/world/worldPort";
-import { makeWorldPort, renderApp } from "../../test/renderWithProviders";
+import { describe, expect, it, vi } from "vitest";
+import type {
+  WorldMutationCapability,
+  WorldOperationKind,
+  WorldPort,
+} from "../../application/world/worldPort";
+import {
+  makeWorldPort,
+  renderApp,
+  stubWorldMutationReceipt,
+} from "../../test/renderWithProviders";
 import { WorldPanel, type WorldPanelProps } from "./WorldPanel";
 
 const identity = { saveSessionID: "session-1", saveRevision: "3", characterID: 0, active: true };
@@ -50,6 +58,23 @@ function PanelHarness(props: WorldPanelProps) {
       <WorldPanel {...props} characterID={characterID} />
     </>
   );
+}
+
+/**
+ * The backend's own capability entry. The risk and its reason are values the
+ * screen receives, never values it words itself, so a test states them here
+ * exactly as a backend would.
+ */
+function capability(
+  operationKind: WorldOperationKind,
+  supportsBulk = false,
+): WorldMutationCapability {
+  return {
+    operationKind,
+    risk: "warning",
+    riskReason: "This operation changes world progression state.",
+    supportsBulk,
+  };
 }
 
 function graceSection() {
@@ -170,5 +195,262 @@ describe("WorldPanel", () => {
     );
     // No counter is shown for a slot that carries no state.
     expect(within(graces).queryByText("0 / 0")).not.toBeInTheDocument();
+  });
+
+  it("renders one backend capability, sends the exact opposite state and publishes the receipt", async () => {
+    const setGraceVisited = vi.fn(() => Promise.resolve(stubWorldMutationReceipt));
+    const applyMutationReceipt = vi.fn(() => Promise.resolve());
+
+    await renderApp(
+      <WorldPanel
+        saveSessionID="session-1"
+        saveRevision="3"
+        characterID={0}
+        applyMutationReceipt={applyMutationReceipt}
+        sessionBusy={false}
+      />,
+      {
+        worldPort: makeWorldPort({
+          ...worldPortForSlots(),
+          // Only one capability, so only that one writer may appear.
+          getWorldMutationCapabilities: () => Promise.resolve([capability("set_grace_visited")]),
+          setGraceVisited,
+        }),
+      },
+    );
+
+    const graces = graceSection();
+    await waitFor(() => expect(within(graces).getByText("First Step")).toBeInTheDocument());
+
+    // The backend risk level and the backend reason are both shown before the
+    // operation runs, and neither is worded by the screen.
+    expect(
+      within(graceSection()).getByText(
+        "Risk: warning - This operation changes world progression state.",
+      ),
+    ).toBeInTheDocument();
+    // A dataset the backend published no capability for stays read-only.
+    expect(
+      within(screen.getByRole("group", { name: "Regions" })).queryByRole("button"),
+    ).not.toBeInTheDocument();
+
+    // "First Step" is visited, so the action writes the exact opposite value
+    // under the revision it was rendered for.
+    fireEvent.click(screen.getByRole("button", { name: "First Step: Set not visited" }));
+    await waitFor(() => expect(setGraceVisited).toHaveBeenCalledOnce());
+    expect(setGraceVisited).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 0,
+      resourceKind: "grace",
+      resourceKey: "First Step",
+      value: false,
+      expectedRevision: "3",
+    });
+    await waitFor(() =>
+      expect(applyMutationReceipt).toHaveBeenCalledWith(stubWorldMutationReceipt),
+    );
+
+    // A busy session blocks the action: the button stays visible and disabled
+    // rather than disappearing.
+    cleanup();
+    await renderApp(
+      <WorldPanel
+        saveSessionID="session-1"
+        saveRevision="3"
+        characterID={0}
+        applyMutationReceipt={applyMutationReceipt}
+        sessionBusy={true}
+      />,
+      {
+        worldPort: makeWorldPort({
+          ...worldPortForSlots(),
+          getWorldMutationCapabilities: () => Promise.resolve([capability("set_grace_visited")]),
+          setGraceVisited,
+        }),
+      },
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "First Step: Set not visited" })).toBeDisabled(),
+    );
+    expect(setGraceVisited).toHaveBeenCalledOnce();
+  });
+
+  it("applies a chosen quest step, removes Fog of War one-way and locks every attire in one call", async () => {
+    const setQuestStep = vi.fn(() => Promise.resolve(stubWorldMutationReceipt));
+    const setFogOfWarRemoved = vi.fn(() => Promise.resolve(stubWorldMutationReceipt));
+    const setSpectralSteedAttire = vi.fn(() => Promise.resolve(stubWorldMutationReceipt));
+    const lockAllSpectralSteedAttires = vi.fn(() => Promise.resolve(stubWorldMutationReceipt));
+
+    await renderApp(
+      <PanelHarness
+        saveSessionID="session-1"
+        saveRevision="3"
+        characterID={0}
+        applyMutationReceipt={() => Promise.resolve()}
+        sessionBusy={false}
+      />,
+      {
+        worldPort: makeWorldPort({
+          getWorldMutationCapabilities: () =>
+            Promise.resolve([
+              capability("set_quest_step"),
+              capability("set_fog_of_war_removed"),
+              capability("set_spectral_steed_attire"),
+              capability("lock_all_spectral_steed_attires", true),
+            ]),
+          getQuests: ({ characterID }) =>
+            Promise.resolve({
+              ...identity,
+              characterID,
+              quests: [
+                {
+                  kind: "quest",
+                  key: "ranni",
+                  name: "Ranni",
+                  steps: [
+                    {
+                      stepKind: "quest_step",
+                      stepKey: "met_ranni",
+                      description: "Met Ranni",
+                      location: "Church of Elleh",
+                      matched: true,
+                    },
+                    {
+                      stepKind: "quest_step",
+                      stepKey: "joined_ranni",
+                      description: "Joined Ranni",
+                      location: "Ranni's Rise",
+                      matched: false,
+                    },
+                  ],
+                },
+              ],
+            }),
+          getSpectralSteedAttires: ({ characterID }) =>
+            Promise.resolve({
+              ...identity,
+              characterID,
+              status: "resolved" as const,
+              activeAttireKey: "default",
+              attires: [
+                {
+                  attireKey: "default",
+                  name: "Default Appearance",
+                  owned: true,
+                  requiredResourceKind: "",
+                  requiredResourceKey: "",
+                  iconPath: "",
+                },
+                {
+                  attireKey: "tree_sentinel",
+                  name: "Tree Sentinel Attire",
+                  owned: true,
+                  requiredResourceKind: "item",
+                  requiredResourceKey: "goods/401EAA00",
+                  iconPath: "",
+                },
+                {
+                  attireKey: "funereal_night",
+                  name: "Funereal Night Attire",
+                  owned: false,
+                  requiredResourceKind: "item",
+                  requiredResourceKey: "goods/401EAA14",
+                  iconPath: "",
+                },
+              ],
+            }),
+          setQuestStep,
+          setFogOfWarRemoved,
+          setSpectralSteedAttire,
+          lockAllSpectralSteedAttires,
+        }),
+      },
+    );
+
+    // Fog of War is one-way: one action, no checkbox, no current state.
+    const fog = await screen.findByRole("region", { name: "Fog of War" });
+    expect(within(fog).queryAllByRole("checkbox")).toHaveLength(0);
+    fireEvent.click(within(fog).getByRole("button", { name: "Remove Fog of War" }));
+    await waitFor(() => expect(setFogOfWarRemoved).toHaveBeenCalledOnce());
+    expect(setFogOfWarRemoved).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 0,
+      removed: true,
+      expectedRevision: "3",
+    });
+
+    // A quest step is chosen explicitly: Apply stays disabled until it is, and
+    // `matched` never becomes a current step that could be inverted.
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
+    const apply = await screen.findByRole("button", { name: "Ranni: apply step" });
+    const questSelect = screen.getByRole("combobox", { name: "Ranni: quest step" });
+    expect(apply).toBeDisabled();
+    fireEvent.change(questSelect, {
+      target: { value: "quest_step/joined_ranni" },
+    });
+    expect(questSelect).toHaveValue("quest_step/joined_ranni");
+    expect(apply).toBeEnabled();
+
+    // Switching character slot keeps the panel mounted, but the draft is scoped
+    // to the context: the picker resets to empty and Apply is disabled.
+    fireEvent.click(screen.getByRole("button", { name: "Switch character slot" }));
+    await waitFor(() =>
+      expect(screen.getByRole("combobox", { name: "Ranni: quest step" })).toHaveValue(""),
+    );
+    expect(screen.getByRole("button", { name: "Ranni: apply step" })).toBeDisabled();
+    expect(setQuestStep).not.toHaveBeenCalled();
+
+    // Reselecting a step on the new character sends the new characterID and revision.
+    const newQuestSelect = screen.getByRole("combobox", { name: "Ranni: quest step" });
+    fireEvent.change(newQuestSelect, {
+      target: { value: "quest_step/joined_ranni" },
+    });
+    expect(screen.getByRole("button", { name: "Ranni: apply step" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Ranni: apply step" }));
+    await waitFor(() => expect(setQuestStep).toHaveBeenCalledOnce());
+    expect(setQuestStep).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 1,
+      questKind: "quest",
+      questKey: "ranni",
+      stepKind: "quest_step",
+      stepKey: "joined_ranni",
+      expectedRevision: "3",
+    });
+
+    // Only the default appearance and the owned one can be selected.
+    fireEvent.click(screen.getByRole("button", { name: "Unlocks" }));
+    const attireSection = await screen.findByRole("group", { name: "Spectral Steed Attires" });
+    expect(
+      within(attireSection).getByRole("button", { name: "Default Appearance: select appearance" }),
+    ).toBeInTheDocument();
+    expect(
+      within(attireSection).queryByRole("button", {
+        name: "Funereal Night Attire: select appearance",
+      }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      within(attireSection).getByRole("button", { name: "Tree Sentinel Attire: select appearance" }),
+    );
+    await waitFor(() => expect(setSpectralSteedAttire).toHaveBeenCalledOnce());
+    expect(setSpectralSteedAttire).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 1,
+      attireKey: "tree_sentinel",
+      expectedRevision: "3",
+    });
+
+    // The bulk lock is exactly one atomic backend call, never a loop of the
+    // single setters.
+    fireEvent.click(
+      within(attireSection).getByRole("button", { name: "Lock all Spectral Steed Attires" }),
+    );
+    await waitFor(() => expect(lockAllSpectralSteedAttires).toHaveBeenCalledOnce());
+    expect(lockAllSpectralSteedAttires).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 1,
+      expectedRevision: "3",
+    });
+    expect(setSpectralSteedAttire).toHaveBeenCalledOnce();
   });
 });

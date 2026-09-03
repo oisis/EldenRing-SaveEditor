@@ -320,6 +320,8 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               saveSessionID={session?.saveSessionID}
               saveRevision={session?.saveRevision}
               characterID={selectedCharacterID}
+              applyMutationReceipt={flow.applyMutationReceipt}
+              sessionBusy={flow.isBusy}
             />
           </section>
         )}

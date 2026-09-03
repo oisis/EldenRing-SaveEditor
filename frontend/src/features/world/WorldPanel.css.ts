@@ -85,3 +85,19 @@ export const stepList = style({
   padding: 0,
   listStyle: "none",
 });
+
+/** The row that carries a dataset's backend risk line and its bulk action. */
+export const datasetControls = style({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: tokens.space.sm,
+});
+
+/** The explicit step picker and its Apply button inside one quest entry. */
+export const stepPicker = style({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: tokens.space.xs,
+});

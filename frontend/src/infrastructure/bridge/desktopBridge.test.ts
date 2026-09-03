@@ -25,7 +25,9 @@ import {
   GetSaveValidationReport,
   GetSpectralSteedAttires,
   GetStorage,
+  GetWorldMutationCapabilities,
   LoadSave,
+  SetGraceVisited,
   SelectSaveFile,
   SetCharacterGender,
   SetCharacterName,
@@ -76,7 +78,9 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetSaveValidationReport: vi.fn(),
   GetSpectralSteedAttires: vi.fn(),
   GetStorage: vi.fn(),
+  GetWorldMutationCapabilities: vi.fn(),
   LoadSave: vi.fn(),
+  SetGraceVisited: vi.fn(),
   SelectSaveFile: vi.fn(),
   SetCharacterGender: vi.fn(),
   SetCharacterName: vi.fn(),
@@ -103,6 +107,8 @@ const getEquippedSpells = vi.mocked(GetEquippedSpells);
 const getInventory = vi.mocked(GetInventory);
 const getStorage = vi.mocked(GetStorage);
 const getSpectralSteedAttires = vi.mocked(GetSpectralSteedAttires);
+const getWorldMutationCapabilities = vi.mocked(GetWorldMutationCapabilities);
+const setGraceVisited = vi.mocked(SetGraceVisited);
 const getResources = vi.mocked(GetResources);
 const getResourcePresentationSummaries = vi.mocked(GetResourcePresentationSummaries);
 const getResource = vi.mocked(GetResource);
@@ -1983,6 +1989,125 @@ describe("wails equipment adapter", () => {
 });
 
 describe("wails World adapter", () => {
+  // The capability contract decides which World writers exist and what risk each
+  // one shows, so an entry outside the closed vocabulary must fail the whole
+  // answer rather than reach the screen as an enabled action, and a mutation
+  // must carry the caller's own arguments and revision to the backend unchanged.
+  it("validates the World capability contract and forwards a mutation verbatim", async () => {
+    getWorldMutationCapabilities.mockResolvedValue(
+      world.GetWorldMutationCapabilitiesResult.createFrom({
+        capabilities: [
+          {
+            operationKind: "set_grace_visited",
+            risk: "warning",
+            riskReason: "This operation changes world progression state.",
+            supportsBulk: false,
+          },
+          {
+            operationKind: "lock_all_spectral_steed_attires",
+            risk: "warning",
+            riskReason: "This operation changes world progression state.",
+            supportsBulk: true,
+          },
+        ],
+      }),
+    );
+
+    expect(await wailsDesktopBridge.getWorldMutationCapabilities()).toEqual([
+      {
+        operationKind: "set_grace_visited",
+        risk: "warning",
+        riskReason: "This operation changes world progression state.",
+        supportsBulk: false,
+      },
+      {
+        operationKind: "lock_all_spectral_steed_attires",
+        risk: "warning",
+        riskReason: "This operation changes world progression state.",
+        supportsBulk: true,
+      },
+    ]);
+
+    getWorldMutationCapabilities.mockResolvedValue(
+      world.GetWorldMutationCapabilitiesResult.createFrom({
+        capabilities: [
+          {
+            // Outside the closed vocabulary: an unknown contract, not a
+            // fifteenth operation to offer.
+            operationKind: "set_world_flag",
+            risk: "warning",
+            riskReason: "This operation changes world progression state.",
+            supportsBulk: false,
+          },
+        ],
+      }),
+    );
+    const unknownKind = await wailsDesktopBridge
+      .getWorldMutationCapabilities()
+      .catch((reason: unknown) => reason);
+    expect(toAppError(unknownKind).code).toBe(bridgeFailureCode);
+    expect(JSON.stringify(toAppError(unknownKind))).not.toContain("set_world_flag");
+
+    getWorldMutationCapabilities.mockResolvedValue(
+      world.GetWorldMutationCapabilitiesResult.createFrom({
+        capabilities: [
+          {
+            operationKind: "set_grace_visited",
+            // Outside the shared backend risk vocabulary.
+            risk: "mild",
+            riskReason: "This operation changes world progression state.",
+            supportsBulk: false,
+          },
+        ],
+      }),
+    );
+    const unknownRisk = await wailsDesktopBridge
+      .getWorldMutationCapabilities()
+      .catch((reason: unknown) => reason);
+    expect(toAppError(unknownRisk).code).toBe(bridgeFailureCode);
+
+    setGraceVisited.mockResolvedValue(
+      world.SetGraceVisitedResult.createFrom({
+        operationID: "operation-9",
+        operationKind: "set_grace_visited",
+        saveSessionID: "session-1",
+        saveRevision: "4",
+        changedScopes: ["save.session", "world.flags", "diagnostics.report"],
+        characterID: 0,
+        graceKind: "grace",
+        graceKey: "limgrave/first_step",
+        visited: true,
+      }),
+    );
+
+    expect(
+      await wailsDesktopBridge.setGraceVisited({
+        saveSessionID: "session-1",
+        characterID: 0,
+        resourceKind: "grace",
+        resourceKey: "limgrave/first_step",
+        value: true,
+        expectedRevision: "3",
+      }),
+    ).toEqual({
+      operationID: "operation-9",
+      operationKind: "set_grace_visited",
+      saveSessionID: "session-1",
+      saveRevision: "4",
+      changedScopes: ["save.session", "world.flags", "diagnostics.report"],
+    });
+    // The pair, the value and the revision reach the backend in the positions
+    // its contract declares, with nothing trimmed, defaulted or reordered.
+    expect(setGraceVisited).toHaveBeenCalledWith(
+      "session-1",
+      0,
+      "grace",
+      "limgrave/first_step",
+      true,
+      "3",
+    );
+  });
+
   it("rejects an unknown Spectral Steed status", async () => {
     getSpectralSteedAttires.mockResolvedValue(
       world.GetSpectralSteedAttiresResult.createFrom({
