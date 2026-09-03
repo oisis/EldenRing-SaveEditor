@@ -120,6 +120,8 @@ export function SetCharacterGender(arg1:string,arg2:number,arg3:number,arg4:stri
 
 export function SetCharacterName(arg1:string,arg2:number,arg3:string,arg4:string):Promise<saveengine.SetCharacterNameResult>;
 
+export function SetCharacterRunes(arg1:string,arg2:number,arg3:number,arg4:string):Promise<saveengine.SetCharacterRunesResult>;
+
 export function SetCharacterStartingClass(arg1:string,arg2:number,arg3:number,arg4:boolean,arg5:string):Promise<saveengine.SetCharacterStartingClassResult>;
 
 export function SetCharacterStats(arg1:string,arg2:number,arg3:saveengine.CharacterAttributes,arg4:string,arg5:string):Promise<saveengine.SetCharacterStatsResult>;

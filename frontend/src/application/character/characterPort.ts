@@ -72,6 +72,11 @@ export type CharacterStats = {
   sp: number;
   maxSP: number;
   baseMaxSP: number;
+
+  /** Held runes, the only editable value of this group. */
+  runes: number;
+  /** Lifetime runes (TotalGetSoul). The backend exposes no writer for it. */
+  soulMemory: number;
 };
 
 export type CharacterAttributes = {
@@ -108,6 +113,13 @@ export type SetCharacterStartingClassInput = {
   expectedRevision: string;
 };
 
+export type SetCharacterRunesInput = {
+  saveSessionID: string;
+  characterID: number;
+  runes: number;
+  expectedRevision: string;
+};
+
 export type SetCharacterGenderInput = {
   saveSessionID: string;
   characterID: number;
@@ -128,4 +140,5 @@ export type CharacterPort = {
   setCharacterStats: (input: SetCharacterStatsInput) => Promise<MutationReceipt>;
   setCharacterStartingClass: (input: SetCharacterStartingClassInput) => Promise<MutationReceipt>;
   setCharacterGender: (input: SetCharacterGenderInput) => Promise<MutationReceipt>;
+  setCharacterRunes: (input: SetCharacterRunesInput) => Promise<MutationReceipt>;
 };

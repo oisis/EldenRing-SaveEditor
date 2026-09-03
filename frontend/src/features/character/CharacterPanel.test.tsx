@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { AppearancePort } from "../../application/appearance/appearancePort";
@@ -53,6 +53,10 @@ function setup(
     overrides.characterPort?.setCharacterStats ??
       (() => Promise.resolve(stubCharacterMutationReceipt)),
   );
+  const setCharacterRunes = vi.fn(
+    overrides.characterPort?.setCharacterRunes ??
+      (() => Promise.resolve(stubCharacterMutationReceipt)),
+  );
   const applyAppearancePreset = vi.fn(
     overrides.appearancePort?.applyAppearancePreset ??
       (() => Promise.resolve(stubCharacterMutationReceipt)),
@@ -67,6 +71,7 @@ function setup(
     ...overrides.characterPort,
     setCharacterName,
     setCharacterStats,
+    setCharacterRunes,
   });
   const appearancePort = makeAppearancePort({
     ...overrides.appearancePort,
@@ -80,6 +85,7 @@ function setup(
   return {
     setCharacterName,
     setCharacterStats,
+    setCharacterRunes,
     applyAppearancePreset,
     applyFavoritePreset,
     applyMutationReceipt,
@@ -99,19 +105,21 @@ function setup(
 
 describe("CharacterPanel", () => {
   it("renders profile data and commits name and stats mutations with receipts", async () => {
-    const { render, setCharacterName, setCharacterStats, applyMutationReceipt } = setup({
-      characterPort: {
-        // Both slots keep the stub name, so only the attribute value tells the
-        // two cached characters apart.
-        getCharacterStats: (saveSessionID, characterID) =>
-          Promise.resolve({
-            ...stubCharacterStats,
-            saveSessionID,
-            characterID,
-            vigor: characterID === 0 ? 40 : 55,
-          }),
-      },
-    });
+    const { render, setCharacterName, setCharacterStats, setCharacterRunes, applyMutationReceipt } =
+      setup({
+        characterPort: {
+          // Both slots keep the stub name, so only the attribute and rune values
+          // tell the two cached characters apart.
+          getCharacterStats: (saveSessionID, characterID) =>
+            Promise.resolve({
+              ...stubCharacterStats,
+              saveSessionID,
+              characterID,
+              vigor: characterID === 0 ? 40 : 55,
+              runes: characterID === 0 ? 250000 : 777,
+            }),
+        },
+      });
     await render();
 
     // Renders character profile details
@@ -154,6 +162,26 @@ describe("CharacterPanel", () => {
       expectedRevision: "0",
     });
 
+    // Progression: the read-only values come from their own successful reads,
+    // and held runes are written by their own explicit action.
+    const progression = await screen.findByRole("region", { name: "Progression" });
+    expect(within(progression).getByText("1750000")).toBeInTheDocument();
+    await waitFor(() => expect(within(progression).getByText("Memory Stones")).toBeInTheDocument());
+    expect(within(progression).getByText("3")).toBeInTheDocument();
+    expect(within(progression).getByText("Talisman Slots")).toBeInTheDocument();
+
+    const runesInput = screen.getByLabelText("Runes Held");
+    expect(runesInput).toHaveValue(250000);
+    fireEvent.change(runesInput, { target: { value: "31337" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save Runes" }));
+    await waitFor(() => expect(setCharacterRunes).toHaveBeenCalled());
+    expect(setCharacterRunes).toHaveBeenCalledWith({
+      saveSessionID: "session-1",
+      characterID: 0,
+      runes: 31337,
+      expectedRevision: "0",
+    });
+
     // A failed mutation shows the interface's own wording plus the stable code,
     // and never the backend message.
     setCharacterName.mockRejectedValueOnce(new Error("bridge exploded at /Users/host/save.sl2"));
@@ -169,6 +197,7 @@ describe("CharacterPanel", () => {
     // draft, and must not let it reach the mutation under the new slot's ID.
     fireEvent.change(nameInput, { target: { value: "Leaked" } });
     fireEvent.change(screen.getByLabelText("Vigor"), { target: { value: "99" } });
+    fireEvent.change(screen.getByLabelText("Runes Held"), { target: { value: "424242" } });
     expect(screen.getByLabelText("Name")).toHaveValue("Leaked");
 
     fireEvent.click(screen.getByRole("button", { name: "Switch character slot" }));
@@ -177,6 +206,9 @@ describe("CharacterPanel", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("Tarnished");
     expect(screen.queryByDisplayValue("99")).not.toBeInTheDocument();
     expect(screen.queryByDisplayValue("Leaked")).not.toBeInTheDocument();
+    // The runes draft belonged to slot 0 and must not survive the switch.
+    expect(screen.getByLabelText("Runes Held")).toHaveValue(777);
+    expect(screen.queryByDisplayValue("424242")).not.toBeInTheDocument();
 
     setCharacterName.mockClear();
     setCharacterStats.mockClear();
@@ -279,13 +311,19 @@ describe("CharacterPanel", () => {
   ])(
     "never offers default attributes while the stats query is $label",
     async ({ getCharacterStats, status }) => {
-      const { render, setCharacterStats } = setup({ characterPort: { getCharacterStats } });
+      const { render, setCharacterStats, setCharacterRunes } = setup({
+        characterPort: { getCharacterStats },
+      });
       await render();
 
       expect(await screen.findByText(status)).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Save Attributes" })).not.toBeInTheDocument();
       expect(screen.queryByLabelText("Vigor")).not.toBeInTheDocument();
       expect(setCharacterStats).not.toHaveBeenCalled();
+      // The same read gates held runes, so no default value can be written back.
+      expect(screen.queryByRole("button", { name: "Save Runes" })).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Runes Held")).not.toBeInTheDocument();
+      expect(setCharacterRunes).not.toHaveBeenCalled();
     },
   );
 

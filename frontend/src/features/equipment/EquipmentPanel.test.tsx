@@ -213,6 +213,7 @@ describe("EquipmentPanel", () => {
           activeSpellIndex: -1,
           usedMemorySlots: 0,
           availableMemorySlots: 0,
+          memoryStones: 0,
           unlockedTalismanSlots: 0,
         }),
     });

@@ -58,6 +58,7 @@ import {
   SelectSaveTarget,
   SetCharacterGender,
   SetCharacterName,
+  SetCharacterRunes,
   SetCharacterStartingClass,
   SetCharacterStats,
   SetEquippedArmaments,
@@ -493,6 +494,7 @@ function toCharacterLoadout(
     activeSpellIndex: result.activeSpellIndex,
     usedMemorySlots: result.usedMemorySlots,
     availableMemorySlots: result.availableMemorySlots,
+    memoryStones: result.memoryStones,
     unlockedTalismanSlots: result.unlockedTalismanSlots,
   };
 }
@@ -1172,6 +1174,8 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       sp: result.sp,
       maxSP: result.maxSP,
       baseMaxSP: result.baseMaxSP,
+      runes: result.runes,
+      soulMemory: result.soulMemory,
     };
   },
 
@@ -1222,6 +1226,13 @@ export const wailsDesktopBridge: ApplicationInfoPort &
     toMutationReceipt(
       await callBridge(() =>
         SetCharacterGender(saveSessionID, characterID, gender, expectedRevision),
+      ),
+    ),
+
+  setCharacterRunes: async ({ saveSessionID, characterID, runes, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        SetCharacterRunes(saveSessionID, characterID, runes, expectedRevision),
       ),
     ),
 

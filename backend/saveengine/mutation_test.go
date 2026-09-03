@@ -214,7 +214,7 @@ func TestRepresentativeMutationsReportTheirExactChangedScopes(t *testing.T) {
 		// today: they invalidate the session and the pinned validation report only.
 		{kindWriteSave, []string{"save.session", "diagnostics.report"}},
 		{kindSetSaveAccountID, []string{"save.session", "diagnostics.report"}},
-		{kindSetCharacterRunes, []string{"save.session", "diagnostics.report"}},
+		{kindSetCharacterRunes, []string{"save.session", "character.stats", "diagnostics.report"}},
 	}
 
 	for _, testCase := range testCases {

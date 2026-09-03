@@ -6,7 +6,7 @@ How it works: The runtime handler passes saveSessionID and characterID to SaveEn
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
 GameCatalog variables read: none required by the current contract.
-Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the confirmed raw attributes, level and HP/FP/SP values of its slot data; the getter is non-mutating and computes no value.
+Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the confirmed raw attributes, level, HP/FP/SP values, held runes and the adjacent TotalGetSoul (SoulMemory) field of its slot data; the getter is non-mutating and computes no value.
 Implementation status: implemented
 */
 package character

@@ -182,7 +182,7 @@ func (engine *Engine) ApplyCharacterTemplate(
 					"physical spell position 13 or 14 of character %d is not empty; mutation aborted", characterID)
 			}
 
-			available, err := readAvailableMemorySlots(loaded.snapshot, spellAnchor, slotBase, slotEnd, characterID)
+			available, _, err := readAvailableMemorySlots(loaded.snapshot, spellAnchor, slotBase, slotEnd, characterID)
 			if err != nil {
 				return err
 			}

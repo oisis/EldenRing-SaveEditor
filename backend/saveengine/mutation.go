@@ -233,9 +233,7 @@ var domainChangedScopes = map[string][]string{
 	kindSetCharacterGender:     {ScopeCharacterProfile, ScopeCharacterAppearance},
 	kindApplyAppearancePreset:  {ScopeCharacterProfile, ScopeCharacterAppearance},
 	kindApplyFavoritePreset:    {ScopeCharacterProfile, ScopeCharacterAppearance},
-	// Held runes have no getter today, so this mutation invalidates the universal
-	// scopes only. It gains a domain scope in the same task that exposes runes.
-	kindSetCharacterRunes: nil,
+	kindSetCharacterRunes:      {ScopeCharacterStats},
 	kindApplyBuildTemplate: {
 		ScopeCharacterList, ScopeCharacterProfile, ScopeCharacterStats, ScopeEquipmentLoadout,
 	},

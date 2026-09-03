@@ -86,6 +86,8 @@ func writeStatsFixture(t *testing.T, content statsFixture) string {
 			-355: values.Faith,
 			-351: values.Arcane,
 			-335: values.Level,
+			-331: values.Runes,
+			-327: values.SoulMemory,
 		} {
 			binary.LittleEndian.PutUint32(data[anchor+offset:], value)
 		}
@@ -113,7 +115,7 @@ func TestGetCharacterStatsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 				SP: 130, MaxSP: 135, BaseMaxSP: 132,
 				Vigor: 40, Mind: 20, Endurance: 25, Strength: 50,
 				Dexterity: 18, Intelligence: 12, Faith: 14, Arcane: 9,
-				Level: 109,
+				Level: 109, Runes: 999_999_999, SoulMemory: 1_750_000,
 			},
 		},
 		{
@@ -127,7 +129,7 @@ func TestGetCharacterStatsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 				SP: 100, MaxSP: 100, BaseMaxSP: 100,
 				Vigor: 15, Mind: 10, Endurance: 11, Strength: 14,
 				Dexterity: 13, Intelligence: 9, Faith: 12, Arcane: 8,
-				Level: 13,
+				Level: 13, Runes: 4_242, SoulMemory: 9_001,
 			},
 		},
 	}
@@ -169,7 +171,7 @@ func TestGetCharacterStatsReportsAResidualSlotAsInactive(t *testing.T) {
 			SP: 88, MaxSP: 88, BaseMaxSP: 88,
 			Vigor: 60, Mind: 30, Endurance: 40, Strength: 70,
 			Dexterity: 20, Intelligence: 15, Faith: 16, Arcane: 10,
-			Level: 178,
+			Level: 178, Runes: 555_000, SoulMemory: 2_100_000,
 		},
 	}
 

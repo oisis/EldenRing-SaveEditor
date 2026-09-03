@@ -52,7 +52,10 @@ whether the character is active. An active slot has these positional groups:
 | `spells` | 12 | Public spell positions with per-spell Memory Slots cost. |
 
 The result also carries `activeQuickItem`, `activeSpellIndex`,
-`usedMemorySlots`, `availableMemorySlots` and `unlockedTalismanSlots`.
+`usedMemorySlots`, `availableMemorySlots`, `memoryStones` and
+`unlockedTalismanSlots`. `memoryStones` is the effective Memory Stone count
+`availableMemorySlots` was derived from, already capped at the game maximum of
+8; it is read once and reported as used, never counted a second time.
 `saveRevision` scopes every returned `ownedItemID`; clients must not reuse an
 owned-item token after the session revision changes.
 

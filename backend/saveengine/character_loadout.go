@@ -35,14 +35,18 @@ type CharacterLoadoutSnapshot struct {
 	// maintain and is accepted only when the GaItem table resolves that handle to
 	// the very game ID the position presents, never by searching the container
 	// for a matching game ID.
-	EquipmentOwned        [equipmentSlotCount]string
-	QuickItems            [quickItemSlotCount]CharacterLoadoutOwnedItem
-	Pouch                 [pouchItemSlotCount]CharacterLoadoutOwnedItem
-	ActiveQuickItem       int32
-	Physick               [physickTearCount]uint32
-	Spells                [spellMaxMemorySlots]uint32
-	ActiveSpellIndex      int
-	AvailableMemorySlots  int
+	EquipmentOwned       [equipmentSlotCount]string
+	QuickItems           [quickItemSlotCount]CharacterLoadoutOwnedItem
+	Pouch                [pouchItemSlotCount]CharacterLoadoutOwnedItem
+	ActiveQuickItem      int32
+	Physick              [physickTearCount]uint32
+	Spells               [spellMaxMemorySlots]uint32
+	ActiveSpellIndex     int
+	AvailableMemorySlots int
+	// MemoryStones is the effective Memory Stone count AvailableMemorySlots was
+	// computed from, already capped by the game maximum. It is the same value,
+	// read once, never a second count of the same items.
+	MemoryStones          uint32
 	UnlockedTalismanSlots int
 }
 
@@ -162,6 +166,7 @@ func (engine *Engine) GetCharacterLoadoutSnapshot(
 	copy(result.Spells[:], spellState.records[:spellMaxMemorySlots])
 	result.ActiveSpellIndex = spellState.activeSpellIndex
 	result.AvailableMemorySlots = spellState.availableMemorySlots
+	result.MemoryStones = spellState.memoryStones
 	result.UnlockedTalismanSlots = spellState.unlockedTalismanSlots
 	return result, nil
 }

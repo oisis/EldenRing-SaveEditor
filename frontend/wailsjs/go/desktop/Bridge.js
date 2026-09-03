@@ -222,6 +222,10 @@ export function SetCharacterName(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['SetCharacterName'](arg1, arg2, arg3, arg4);
 }
 
+export function SetCharacterRunes(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetCharacterRunes'](arg1, arg2, arg3, arg4);
+}
+
 export function SetCharacterStartingClass(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['desktop']['Bridge']['SetCharacterStartingClass'](arg1, arg2, arg3, arg4, arg5);
 }

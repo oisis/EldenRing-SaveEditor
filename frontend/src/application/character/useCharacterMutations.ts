@@ -13,6 +13,7 @@ import { useCharacterPort } from "./characterClient";
 import type {
   SetCharacterGenderInput,
   SetCharacterNameInput,
+  SetCharacterRunesInput,
   SetCharacterStartingClassInput,
   SetCharacterStatsInput,
 } from "./characterPort";
@@ -25,6 +26,7 @@ export type CharacterMutations = {
   setStats: (input: SetCharacterStatsInput) => Promise<boolean>;
   setStartingClass: (input: SetCharacterStartingClassInput) => Promise<boolean>;
   setGender: (input: SetCharacterGenderInput) => Promise<boolean>;
+  setRunes: (input: SetCharacterRunesInput) => Promise<boolean>;
   applyAppearancePreset: (input: ApplyAppearancePresetInput) => Promise<boolean>;
   setFavoritePreset: (input: SetFavoritePresetInput) => Promise<boolean>;
   applyFavoritePreset: (input: ApplyFavoritePresetInput) => Promise<boolean>;
@@ -70,6 +72,7 @@ export function useCharacterMutations(
     setStats: (input) => run(() => characterPort.setCharacterStats(input)),
     setStartingClass: (input) => run(() => characterPort.setCharacterStartingClass(input)),
     setGender: (input) => run(() => characterPort.setCharacterGender(input)),
+    setRunes: (input) => run(() => characterPort.setCharacterRunes(input)),
     applyAppearancePreset: (input) => run(() => appearancePort.applyAppearancePreset(input)),
     setFavoritePreset: (input) => run(() => favoritesPort.setFavoritePreset(input)),
     applyFavoritePreset: (input) => run(() => favoritesPort.applyFavoritePreset(input)),

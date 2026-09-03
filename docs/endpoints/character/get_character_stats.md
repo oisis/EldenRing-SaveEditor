@@ -80,6 +80,9 @@ type CharacterStats struct {
 	SP        uint32 `json:"sp"`
 	MaxSP     uint32 `json:"maxSP"`
 	BaseMaxSP uint32 `json:"baseMaxSP"`
+
+	Runes      uint32 `json:"runes"`
+	SoulMemory uint32 `json:"soulMemory"`
 }
 ```
 
@@ -94,6 +97,8 @@ type CharacterStats struct {
 | `hp`, `maxHP`, `baseMaxHP` | `uint32` | The stored current, maximum and base maximum HP of an active slot. Always `0` for an inactive slot. |
 | `fp`, `maxFP`, `baseMaxFP` | `uint32` | The stored current, maximum and base maximum FP of an active slot. Always `0` for an inactive slot. |
 | `sp`, `maxSP`, `baseMaxSP` | `uint32` | The stored current, maximum and base maximum stamina of an active slot. Always `0` for an inactive slot. |
+| `runes` | `uint32` | The stored held runes of an active slot, the field `SetCharacterRunes` writes. Always `0` for an inactive slot. |
+| `soulMemory` | `uint32` | The stored lifetime runes (`TotalGetSoul`) of an active slot. Read-only: no endpoint writes it. Always `0` for an inactive slot. |
 
 ### Raw values only
 
@@ -108,11 +113,10 @@ The endpoint computes nothing:
 
 ### What is not returned
 
-The result contains only the fields above. It carries no runes and no
-`TotalGetSoul`, no resistances, no equip load, no spell slots, no level-up cost,
-no predicted or simulated value, no starting-class name, no name, no play time,
-no appearance, no inventory, no offsets, and no raw bytes. None of that is read
-or computed to produce it.
+The result contains only the fields above. It carries no resistances, no equip
+load, no spell slots, no level-up cost, no predicted or simulated value, no
+starting-class name, no name, no play time, no appearance, no inventory, no
+offsets, and no raw bytes. None of that is read or computed to produce it.
 
 ### Inactive and residual slots
 
@@ -122,7 +126,8 @@ with `saveSessionID` and `characterID` filled in and every other field zeroed.
 This holds for a residual slot too, where the raw statistics of a deleted
 character are still present in the file: the activity flag alone decides what is
 reported. An inactive slot's data is never searched and never read, so its
-residual attributes, level, and HP/FP/SP values are neither located nor decoded.
+residual attributes, level, HP/FP/SP, runes and `TotalGetSoul` values are neither
+located nor decoded.
 
 On any error the result is the zero value.
 

@@ -6,7 +6,7 @@ How it works: SaveEngine reads all confirmed loadout groups under one session lo
 Supported resource types: ItemDocument of the family required by each loadout group.
 Input variables: saveSessionID, characterID.
 GameCatalog variables read: item family, presentation name, presentation iconPath, spell memorySlots and canonical ResourceRef.
-Save variables read: equipment, quick items, pouch, Physick, spells, active indexes, Inventory common references, unlocked talisman slots and current saveRevision.
+Save variables read: equipment, quick items, pouch, Physick, spells, active indexes, Inventory common references, the effective Memory Stone count, unlocked talisman slots and current saveRevision.
 Implementation status: implemented
 */
 package equipment
@@ -97,6 +97,7 @@ type GetCharacterLoadoutResult struct {
 	ActiveSpellIndex      int                `json:"activeSpellIndex"`
 	UsedMemorySlots       int                `json:"usedMemorySlots"`
 	AvailableMemorySlots  int                `json:"availableMemorySlots"`
+	MemoryStones          uint32             `json:"memoryStones"`
 	UnlockedTalismanSlots int                `json:"unlockedTalismanSlots"`
 }
 
@@ -215,6 +216,7 @@ func emptyCharacterLoadout(stored saveengine.CharacterLoadoutSnapshot) GetCharac
 		Spells:                []LoadoutSpellSlot{},
 		ActiveSpellIndex:      stored.ActiveSpellIndex,
 		AvailableMemorySlots:  stored.AvailableMemorySlots,
+		MemoryStones:          stored.MemoryStones,
 		UnlockedTalismanSlots: stored.UnlockedTalismanSlots,
 	}
 }

@@ -11,6 +11,7 @@ import type {
 import { useCharacterMutations } from "../../application/character/useCharacterMutations";
 import { useCharacterProfile } from "../../application/character/useCharacterProfile";
 import { useCharacterStats } from "../../application/character/useCharacterStats";
+import { useCharacterLoadout } from "../../application/equipment/useEquipment";
 import { useFavoritePresets } from "../../application/favorites/useFavoritePresets";
 import type { MutationReceipt } from "../../application/save-session/saveSessionPort";
 import { Badge } from "../../ui/components/Badge/Badge";
@@ -48,6 +49,9 @@ import {
   statGrid,
   subnav,
 } from "./CharacterPanel.css";
+
+/** The confirmed backend maximum for held runes; the field never offers more. */
+const runesHeldMaximum = 999_999_999;
 
 export type CharacterPanelProps = {
   saveSessionID?: string | undefined;
@@ -103,6 +107,9 @@ export function CharacterPanel({
   // Profile queries
   const profileQuery = useCharacterProfile(saveSessionID, saveRevision, characterID);
   const statsQuery = useCharacterStats(saveSessionID, saveRevision, characterID);
+  // Memory Stones and Talisman Slots are owned by the Equipment loadout contract.
+  // Character reads that one existing snapshot instead of restating its rules.
+  const loadoutQuery = useCharacterLoadout({ saveSessionID, saveRevision, characterID });
   const classesQuery = useCatalogResources({
     resourceType: "class",
     family: "",
@@ -124,6 +131,7 @@ export function CharacterPanel({
   // never enables the mutation that would write that placeholder back.
   const profileReady = profileQuery.isSuccess;
   const statsReady = statsQuery.isSuccess;
+  const loadoutReady = loadoutQuery.isSuccess;
   const classesReady = classesQuery.isSuccess;
   const presetsReady = presetsQuery.isSuccess;
   const favoritesReady = favoritesQuery.isSuccess;
@@ -146,6 +154,25 @@ export function CharacterPanel({
       : statsQuery.isSuccess
         ? statsAttributes(statsQuery.data)
         : undefined;
+
+  // Held runes are edited as raw text so a partially typed value is never
+  // rounded, clamped or silently written back; the save action validates it.
+  const [runesDraft, setRunesDraft] = useState<{ key: string; value: string } | undefined>(
+    undefined,
+  );
+  const runesValue =
+    runesDraft?.key === editContextKey
+      ? runesDraft.value
+      : statsQuery.isSuccess
+        ? String(statsQuery.data.runes)
+        : undefined;
+  const runesParsed = runesValue === undefined ? Number.NaN : Number(runesValue);
+  const runesValid =
+    runesValue !== undefined &&
+    runesValue.trim() !== "" &&
+    Number.isInteger(runesParsed) &&
+    runesParsed >= 0 &&
+    runesParsed <= runesHeldMaximum;
 
   // Dialog states
   const [classPickerOpen, setClassPickerOpen] = useState(false);
@@ -203,6 +230,16 @@ export function CharacterPanel({
       characterID,
       attributes: attributeValues,
       levelPolicy: "recalculate",
+      expectedRevision: saveRevision,
+    });
+  };
+
+  const handleSaveRunes = async () => {
+    if (!hasActiveCharacter || !statsReady || !runesValid || isBusy) return;
+    await mutations.setRunes({
+      saveSessionID,
+      characterID,
+      runes: runesParsed,
       expectedRevision: saveRevision,
     });
   };
@@ -503,7 +540,10 @@ export function CharacterPanel({
                             onChange={(e) =>
                               setAttributesDraft({
                                 key: editContextKey,
-                                value: { ...attributeValues, [attr]: Number(e.currentTarget.value) },
+                                value: {
+                                  ...attributeValues,
+                                  [attr]: Number(e.currentTarget.value),
+                                },
                               })
                             }
                             className={attributeSlider}
@@ -586,6 +626,85 @@ export function CharacterPanel({
                         </span>
                         <span className={statBoxSub}>
                           <Trans>Base: {statsQuery.data.baseMaxSP}</Trans>
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+                </Card>
+
+                <Card aria-label={t`Progression`}>
+                  <h2>
+                    <Trans>Progression</Trans>
+                  </h2>
+                  {statsQuery.isPending ? (
+                    <p role="status" className={message}>
+                      <Trans>Loading progression…</Trans>
+                    </p>
+                  ) : null}
+                  {statsQuery.isError ? (
+                    <p role="alert" className={alert}>
+                      <Trans>Unable to load the progression of this character slot.</Trans>
+                    </p>
+                  ) : null}
+                  {statsReady && runesValue !== undefined ? (
+                    <>
+                      <div className={fieldGroup}>
+                        <label htmlFor="character-runes-input" className={fieldLabel}>
+                          <Trans>Runes Held</Trans>
+                        </label>
+                        <div className={nameForm}>
+                          <Input
+                            id="character-runes-input"
+                            type="number"
+                            min={0}
+                            max={runesHeldMaximum}
+                            value={runesValue}
+                            disabled={isBusy}
+                            onChange={(e) =>
+                              setRunesDraft({ key: editContextKey, value: e.currentTarget.value })
+                            }
+                          />
+                          <Button
+                            size="sm"
+                            disabled={isBusy || !runesValid}
+                            onClick={handleSaveRunes}
+                          >
+                            <Trans>Save Runes</Trans>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className={fieldGroup}>
+                        <span className={fieldLabel}>
+                          <Trans>Soul Memory</Trans>
+                        </span>
+                        <span className={statBoxValue}>{statsQuery.data.soulMemory}</span>
+                      </div>
+                    </>
+                  ) : null}
+                  {loadoutQuery.isPending ? (
+                    <p role="status" className={message}>
+                      <Trans>Loading loadout capacity…</Trans>
+                    </p>
+                  ) : null}
+                  {loadoutQuery.isError ? (
+                    <p role="alert" className={alert}>
+                      <Trans>Unable to load the loadout capacity of this character slot.</Trans>
+                    </p>
+                  ) : null}
+                  {loadoutReady ? (
+                    <div className={statGrid}>
+                      <div className={statBox}>
+                        <span className={statBoxLabel}>
+                          <Trans>Memory Stones</Trans>
+                        </span>
+                        <span className={statBoxValue}>{loadoutQuery.data.memoryStones}</span>
+                      </div>
+                      <div className={statBox}>
+                        <span className={statBoxLabel}>
+                          <Trans>Talisman Slots</Trans>
+                        </span>
+                        <span className={statBoxValue}>
+                          {loadoutQuery.data.unlockedTalismanSlots}
                         </span>
                       </div>
                     </div>

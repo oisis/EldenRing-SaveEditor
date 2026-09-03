@@ -134,6 +134,8 @@ export const stubCharacterStats: CharacterStats = {
   sp: 130,
   maxSP: 130,
   baseMaxSP: 130,
+  runes: 250000,
+  soulMemory: 1750000,
 };
 
 export const stubInventoryPage: ItemPage = {
@@ -639,6 +641,7 @@ export const stubCharacterLoadout: CharacterLoadout = {
   activeSpellIndex: 0,
   usedMemorySlots: 1,
   availableMemorySlots: 7,
+  memoryStones: 3,
   unlockedTalismanSlots: 1,
 };
 
@@ -960,6 +963,7 @@ export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): Chara
     setCharacterStats: () => Promise.resolve(stubCharacterMutationReceipt),
     setCharacterStartingClass: () => Promise.resolve(stubCharacterMutationReceipt),
     setCharacterGender: () => Promise.resolve(stubCharacterMutationReceipt),
+    setCharacterRunes: () => Promise.resolve(stubCharacterMutationReceipt),
     ...overrides,
   };
 }

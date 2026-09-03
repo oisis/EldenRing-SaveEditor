@@ -223,12 +223,15 @@ func TestGetCharacterLoadoutResolvesEveryConfirmedGroup(t *testing.T) {
 	if result.Physick[0].State != LoadoutSlotOccupied || result.Physick[1].State != LoadoutSlotEmpty {
 		t.Errorf("Physick = %+v", result.Physick)
 	}
+	// availableMemorySlots is base 2 + 3 stones + the Moon of Nokstella bonus, so
+	// memoryStones must report exactly the 3 stones that capacity was built from.
 	if result.Spells[0].State != LoadoutSlotOccupied || result.Spells[0].MemorySlots != 1 ||
 		result.ActiveSpellIndex != 0 || result.UsedMemorySlots != 1 ||
-		result.AvailableMemorySlots != 7 || result.UnlockedTalismanSlots != 1 {
-		t.Errorf("spell/capacity = %+v active=%d used=%d available=%d talismans=%d",
+		result.AvailableMemorySlots != 7 || result.MemoryStones != 3 ||
+		result.UnlockedTalismanSlots != 1 {
+		t.Errorf("spell/capacity = %+v active=%d used=%d available=%d stones=%d talismans=%d",
 			result.Spells[0], result.ActiveSpellIndex, result.UsedMemorySlots,
-			result.AvailableMemorySlots, result.UnlockedTalismanSlots)
+			result.AvailableMemorySlots, result.MemoryStones, result.UnlockedTalismanSlots)
 	}
 }
 

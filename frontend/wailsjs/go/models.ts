@@ -803,6 +803,7 @@ export namespace equipment {
 	    activeSpellIndex: number;
 	    usedMemorySlots: number;
 	    availableMemorySlots: number;
+	    memoryStones: number;
 	    unlockedTalismanSlots: number;
 	
 	    static createFrom(source: any = {}) {
@@ -829,6 +830,7 @@ export namespace equipment {
 	        this.activeSpellIndex = source["activeSpellIndex"];
 	        this.usedMemorySlots = source["usedMemorySlots"];
 	        this.availableMemorySlots = source["availableMemorySlots"];
+	        this.memoryStones = source["memoryStones"];
 	        this.unlockedTalismanSlots = source["unlockedTalismanSlots"];
 	    }
 	
@@ -1961,6 +1963,8 @@ export namespace saveengine {
 	    sp: number;
 	    maxSP: number;
 	    baseMaxSP: number;
+	    runes: number;
+	    soulMemory: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CharacterStats(source);
@@ -1990,6 +1994,8 @@ export namespace saveengine {
 	        this.sp = source["sp"];
 	        this.maxSP = source["maxSP"];
 	        this.baseMaxSP = source["baseMaxSP"];
+	        this.runes = source["runes"];
+	        this.soulMemory = source["soulMemory"];
 	    }
 	}
 	export class CharacterSummary {
@@ -2596,6 +2602,30 @@ export namespace saveengine {
 	        this.changedScopes = source["changedScopes"];
 	        this.characterID = source["characterID"];
 	        this.name = source["name"];
+	    }
+	}
+	export class SetCharacterRunesResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    runes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterRunesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.runes = source["runes"];
 	    }
 	}
 	export class SetCharacterStartingClassResult {

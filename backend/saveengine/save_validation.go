@@ -374,7 +374,7 @@ func readValidationSpells(loaded *loadedSave, characterID int) ([equippedSpellSl
 	if err != nil {
 		return records, 0, err
 	}
-	available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+	available, _, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
 	if err != nil {
 		return records, 0, err
 	}

@@ -6418,6 +6418,16 @@
           "baseMaxSP": {
             "type": "integer",
             "format": "int64"
+          },
+          "runes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Held runes as stored; the field SetCharacterRunes writes."
+          },
+          "soulMemory": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Lifetime runes (TotalGetSoul) as stored. Read-only: no endpoint writes it."
           }
         },
         "required": [
@@ -6442,7 +6452,9 @@
           "baseMaxFP",
           "sp",
           "maxSP",
-          "baseMaxSP"
+          "baseMaxSP",
+          "runes",
+          "soulMemory"
         ]
       },
       "CharacterAppearance": {
@@ -6861,6 +6873,10 @@
           "activeSpellIndex": { "type": "integer", "format": "int32", "minimum": -1, "maximum": 11 },
           "usedMemorySlots": { "type": "integer", "format": "int32", "minimum": 0 },
           "availableMemorySlots": { "type": "integer", "format": "int32", "minimum": 0 },
+          "memoryStones": {
+            "type": "integer", "format": "int64", "minimum": 0, "maximum": 8,
+            "description": "Effective Memory Stone count availableMemorySlots was derived from, already capped at the game maximum."
+          },
           "unlockedTalismanSlots": { "type": "integer", "format": "int32", "minimum": 0, "maximum": 4 }
         },
         "required": [
@@ -6868,7 +6884,7 @@
           "rightHand", "leftHand", "arrows", "bolts", "armor", "talismans",
           "quickItems", "pouch", "activeQuickItem", "physick", "spells",
           "activeSpellIndex", "usedMemorySlots", "availableMemorySlots",
-          "unlockedTalismanSlots"
+          "memoryStones", "unlockedTalismanSlots"
         ]
       },
       "SetEquippedArmamentsRequest": {

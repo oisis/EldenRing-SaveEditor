@@ -373,6 +373,8 @@ const stats = saveengine.CharacterStats.createFrom({
   sp: 130,
   maxSP: 130,
   baseMaxSP: 130,
+  runes: 250000,
+  soulMemory: 1750000,
 });
 
 describe("wails character adapter", () => {
@@ -456,6 +458,8 @@ describe("wails character adapter", () => {
       sp: 130,
       maxSP: 130,
       baseMaxSP: 130,
+      runes: 250000,
+      soulMemory: 1750000,
     });
   });
 
@@ -1512,6 +1516,7 @@ const generatedCharacterLoadout = equipment.GetCharacterLoadoutResult.createFrom
   activeSpellIndex: 0,
   usedMemorySlots: 1,
   availableMemorySlots: 7,
+  memoryStones: 3,
   unlockedTalismanSlots: 1,
 });
 
@@ -1578,6 +1583,7 @@ describe("wails equipment adapter", () => {
     expect(result.activeSpellIndex).toBe(0);
     expect(result.usedMemorySlots).toBe(1);
     expect(result.availableMemorySlots).toBe(7);
+    expect(result.memoryStones).toBe(3);
     expect(result.unlockedTalismanSlots).toBe(1);
 
     // The adapter treats canonical keys, slot states and aggregate values as

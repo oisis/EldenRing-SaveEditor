@@ -233,6 +233,7 @@ type equippedSpellsState struct {
 	records               [equippedSpellSlotCount]uint32
 	activeSpellIndex      int
 	availableMemorySlots  int
+	memoryStones          uint32
 	unlockedTalismanSlots int
 }
 
@@ -257,7 +258,7 @@ func readEquippedSpellsState(loaded *loadedSave, characterID int) (equippedSpell
 	if err != nil {
 		return equippedSpellsState{}, err
 	}
-	available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+	available, stones, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
 	if err != nil {
 		return equippedSpellsState{}, err
 	}
@@ -285,6 +286,7 @@ func readEquippedSpellsState(loaded *loadedSave, characterID int) (equippedSpell
 		records:               records,
 		activeSpellIndex:      active,
 		availableMemorySlots:  available,
+		memoryStones:          stones,
 		unlockedTalismanSlots: unlocked,
 	}, nil
 }
@@ -371,7 +373,7 @@ func (engine *Engine) SetEquippedSpells(
 			return fmt.Errorf("cannot read equipped spells section of character %d: %w", characterID, err)
 		}
 
-		available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+		available, _, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
 		if err != nil {
 			return err
 		}
@@ -494,19 +496,23 @@ func readEquippedSpellRecords(
 }
 
 // readAvailableMemorySlots computes how many memory slots the character may
-// fill. The rule is the confirmed one: the base capacity plus the effective
-// Memory Stones, capped by the game maximum, plus the Moon of Nokstella bonus
-// when that talisman sits in an unlocked talisman field. Every input is read
-// from the slot itself, and a missing range is a hard error rather than a
-// silently reduced capacity.
+// fill and reports the effective Memory Stone count it used. The rule is the
+// confirmed one: the base capacity plus the effective Memory Stones, capped by
+// the game maximum, plus the Moon of Nokstella bonus when that talisman sits in
+// an unlocked talisman field. Every input is read from the slot itself, and a
+// missing range is a hard error rather than a silently reduced capacity.
+//
+// The stone cap is applied here and only here, and the returned count is the
+// very value the capacity was computed from, so no caller can present a
+// different number of stones than the one the capacity reflects.
 func readAvailableMemorySlots(
 	source *codec,
 	anchor, base, slotEnd int64,
 	characterID int,
-) (int, error) {
+) (int, uint32, error) {
 	stones, err := readMemoryStones(source, anchor, slotEnd, characterID)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	if stones > spellMaxMemoryStones {
 		stones = spellMaxMemoryStones
@@ -515,15 +521,15 @@ func readAvailableMemorySlots(
 
 	moon, err := wearsMoonOfNokstella(source, anchor, base, slotEnd, characterID)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	if moon {
 		slots += moonOfNokstellaMemorySlots
 	}
 	if slots > spellMaxMemorySlots {
-		return spellMaxMemorySlots, nil
+		return spellMaxMemorySlots, stones, nil
 	}
-	return slots, nil
+	return slots, stones, nil
 }
 
 // readMemoryStones reports the effective Memory Stone count of the slot: the

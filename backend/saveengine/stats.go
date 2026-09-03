@@ -102,6 +102,13 @@ type CharacterStats struct {
 	SP        uint32 `json:"sp"`
 	MaxSP     uint32 `json:"maxSP"`
 	BaseMaxSP uint32 `json:"baseMaxSP"`
+
+	// Runes is the held-rune field SetCharacterRunes writes; SoulMemory is the
+	// adjacent lifetime-rune field (TotalGetSoul), which has no writer. Both are
+	// read through the same statistics anchor as every field above and are
+	// reported exactly as stored.
+	Runes      uint32 `json:"runes"`
+	SoulMemory uint32 `json:"soulMemory"`
 }
 
 // GetCharacterStats returns the raw statistics stored in one physical character
@@ -175,6 +182,8 @@ func (engine *Engine) GetCharacterStats(saveSessionID string, characterID int) (
 		{statsFaithOffset, &stats.Faith},
 		{statsArcaneOffset, &stats.Arcane},
 		{statsLevelOffset, &stats.Level},
+		{playerRunesOffset, &stats.Runes},
+		{statsTotalGetSoulOffset, &stats.SoulMemory},
 	}
 	for _, field := range fields {
 		value, err := loaded.snapshot.uint32At(anchor + field.offset)

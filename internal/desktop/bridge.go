@@ -415,6 +415,18 @@ func (b *Bridge) SetCharacterGender(
 		b.saveEngine, b.gameCatalog, saveSessionID, characterID, gender, expectedRevision))
 }
 
+// SetCharacterRunes delegates to the SetCharacterRunes endpoint and returns
+// its result and error unchanged.
+func (b *Bridge) SetCharacterRunes(
+	saveSessionID string,
+	characterID int,
+	runes uint32,
+	expectedRevision string,
+) (character.SetCharacterRunesResult, error) {
+	return bridged(character.SetCharacterRunes(
+		b.saveEngine, saveSessionID, characterID, runes, expectedRevision))
+}
+
 // GetAppearancePresets delegates to the GetAppearancePresets endpoint and
 // returns its result and error unchanged.
 func (b *Bridge) GetAppearancePresets(

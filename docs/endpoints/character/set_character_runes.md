@@ -81,8 +81,9 @@ reassembled from the EndpointID, the session, the revision or a scope lookup.
   `operationID` at all.
 - `operationKind` is the stable kind of the mutation and is always exactly
   `set_character_runes`.
-- `changedScopes` are exactly `save.session`, `diagnostics.report`, in that
-  canonical order.
+- `changedScopes` are exactly `save.session`, `character.stats`,
+  `diagnostics.report`, in that canonical order. `character.stats` is included
+  because `GetCharacterStats` reports the held runes this mutation writes.
 
 The receipt returns the exact accepted value and the revision created by the
 mutation. It exposes no save offset or private save bytes.

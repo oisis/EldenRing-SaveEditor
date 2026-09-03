@@ -690,8 +690,16 @@ msgid "Loading items…"
 msgstr "Wczytywanie przedmiotów…"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Loading loadout capacity…"
+msgstr "Wczytywanie pojemności wyposażenia…"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Loading Mirror Favorites…"
 msgstr "Wczytywanie ulubionych Lustra…"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Loading progression…"
+msgstr "Wczytywanie postępu…"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Loading the Inventory…"
@@ -743,6 +751,10 @@ msgstr "Memory Slots: {0}"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Memory Slots: {0} / {1}"
 msgstr "Memory Slots: {0} / {1}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Memory Stones"
+msgstr "Kamienie pamięci"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Mind"
@@ -1002,6 +1014,10 @@ msgstr "Poprzednia karta skrzyni"
 msgid "Profile"
 msgstr "Profil"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Progression"
+msgstr "Postęp"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Quantity"
 msgstr "Ilość"
@@ -1151,6 +1167,10 @@ msgstr "RL {level}"
 msgid "Rune Level"
 msgstr "Poziom run"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Runes Held"
+msgstr "Posiadane runy"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Safe"
 msgstr "Bezpieczny"
@@ -1181,6 +1201,10 @@ msgstr "Zapisz atrybuty"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Save or discard the current changes before continuing."
 msgstr "Zapisz lub odrzuć bieżące zmiany przed kontynuowaniem."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Save Runes"
+msgstr "Zapisz runy"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save session"
@@ -1313,6 +1337,10 @@ msgid "Sort: quantity"
 msgstr "Sortowanie: ilość"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Soul Memory"
+msgstr "SoulMemory"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "SoulMemory and held runes will remain unchanged."
 msgstr "SoulMemory oraz posiadane runy pozostaną bez zmian."
 
@@ -1407,6 +1435,10 @@ msgstr "Tabela"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Talisman {0}"
 msgstr "Talizman {0}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Talisman Slots"
+msgstr "Sloty talizmanów"
 
 #. placeholder {0}: model.unlockedTalismanSlots
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1569,12 +1601,20 @@ msgid "Unable to load the Item Database."
 msgstr "Nie udało się wczytać bazy przedmiotów."
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the loadout capacity of this character slot."
+msgstr "Nie udało się wczytać pojemności wyposażenia tego slotu postaci."
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Unable to load the Mirror Favorites of this save."
 msgstr "Nie udało się wczytać ulubionych Lustra tego zapisu."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Unable to load the profile of this character slot."
 msgstr "Nie udało się wczytać profilu tego slotu postaci."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Unable to load the progression of this character slot."
+msgstr "Nie udało się wczytać postępu tego slotu postaci."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Unable to load the Storage Box."

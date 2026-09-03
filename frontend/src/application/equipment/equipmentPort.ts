@@ -99,6 +99,8 @@ export type CharacterLoadout = {
   activeSpellIndex: number;
   usedMemorySlots: number;
   availableMemorySlots: number;
+  /** Effective Memory Stone count the backend derived the capacity from. */
+  memoryStones: number;
   unlockedTalismanSlots: number;
 };
 

@@ -40,8 +40,9 @@ var (
 		"save.session", "character.list", "character.profile", "character.stats",
 		"diagnostics.report",
 	}
-	// Held runes reach no getter today, so only the universal scopes move.
-	characterRunesScopes = []string{"save.session", "diagnostics.report"}
+	// Held runes are reported by GetCharacterStats, so the stats scope moves with
+	// the universal ones.
+	characterRunesScopes = []string{"save.session", "character.stats", "diagnostics.report"}
 )
 
 func TestCloneCharacterResultCarriesItsCommitReceipt(t *testing.T) {
