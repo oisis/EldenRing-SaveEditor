@@ -3,6 +3,7 @@
 // on `window.go`.
 
 import {
+  AddItemsToContainers,
   ClearRecentFiles,
   CloseSave,
   DiscardChanges,
@@ -15,9 +16,11 @@ import {
   GetEquipment,
   GetEquippedSpells,
   GetInventory,
+  GetItemDatabase,
   GetItemVariants,
   GetLoadedSave,
   GetOperationHistory,
+  GetOwnedItems,
   GetPhysickMixture,
   GetPouchItems,
   GetQuickItems,
@@ -27,21 +30,28 @@ import {
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
+  GetSafetyProfile,
   GetSaveCharacters,
   GetSaveLifecycleSettings,
   GetSaveValidationReport,
   GetStorage,
   LoadSave,
+  MoveOwnedItemsToInventory,
+  MoveOwnedItemsToStorage,
   QuitApplication,
   RecordRecentFile,
   RedoLastOperation,
+  RemoveOwnedItems,
   RemoveRecentFile,
+  ReorderInventoryItems,
   RestoreRecoveryJournal,
   RevertOperation,
   Save,
   SaveAs,
   SelectSaveFile,
   SelectSaveTarget,
+  SetOwnedItemQuantity,
+  SetSafetyProfile,
   SetSaveLifecycleSettings,
   UndoLastOperation,
   ValidateReviewChanges,
@@ -58,6 +68,7 @@ import type {
   CatalogEquipmentRules,
   CatalogFact,
   CatalogInfusionRules,
+  CatalogItemDatabasePage,
   CatalogItemDetail,
   CatalogItemVariantsResult,
   CatalogPort,
@@ -97,7 +108,12 @@ import {
   bridgeCallFailed,
   bridgeFailureCode,
 } from "../../application/errors/appError";
-import type { ItemPage, ItemsPort } from "../../application/items/itemsPort";
+import type {
+  ItemMutationReceipt,
+  ItemPage,
+  ItemsPort,
+  OwnedItemsPage,
+} from "../../application/items/itemsPort";
 import type {
   HistoryMutationResult,
   MutationReceipt,
@@ -112,6 +128,7 @@ import type {
   SaveSession,
   SaveSessionPort,
 } from "../../application/save-session/saveSessionPort";
+import type { SafetyProfileSettings, SettingsPort } from "../../application/settings/settingsPort";
 import { parseBridgeError } from "./bridgeError";
 import { parseSessionChangedEvent, sessionChangedEventName } from "./sessionChangedEvent";
 
@@ -729,6 +746,125 @@ function toCatalogItemVariants(
 }
 
 /**
+ * Projects the generated authoritative container page onto the application port
+ * shape. Every value is copied into an object this layer owns, exactly as the
+ * backend reported it: nothing is renamed, defaulted, clamped or recomputed,
+ * and the action flags stay the backend's own decisions.
+ */
+function toOwnedItemsPage(result: Awaited<ReturnType<typeof GetOwnedItems>>): OwnedItemsPage {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    active: result.active,
+    safetyProfile: result.safetyProfile,
+    container: result.container,
+    records: result.records.map((record) => ({
+      ownedItemID: record.ownedItemID,
+      kind: record.kind,
+      key: record.key,
+      gameID: record.gameID,
+      container: record.container,
+      containerSection: record.containerSection,
+      physicalIndex: record.physicalIndex,
+      acquisitionIndex: record.acquisitionIndex,
+      orderPosition: record.orderPosition,
+      orderPositionKnown: record.orderPositionKnown,
+      quantity: record.quantity,
+      maxQuantity: record.maxQuantity,
+      maxQuantityKnown: record.maxQuantityKnown,
+      family: record.family,
+      category: record.category,
+      subcategory: record.subcategory,
+      name: record.name,
+      iconPath: record.iconPath,
+      recordMode: record.recordMode,
+      banRisk: record.banRisk,
+      cutContent: record.cutContent,
+      dlc: record.dlc,
+      preOrder: record.preOrder,
+      actions: {
+        moveToStorage: record.actions.moveToStorage,
+        moveToInventory: record.actions.moveToInventory,
+        remove: record.actions.remove,
+        setQuantity: record.actions.setQuantity,
+        reorder: record.actions.reorder,
+      },
+    })),
+    categories: result.categories.map((entry) => ({
+      category: entry.category,
+      count: entry.count,
+    })),
+    total: result.total,
+    page: result.page,
+    pageSize: result.pageSize,
+  };
+}
+
+/** Projects the generated Item Database page onto the application port shape. */
+function toCatalogItemDatabasePage(
+  result: Awaited<ReturnType<typeof GetItemDatabase>>,
+): CatalogItemDatabasePage {
+  return {
+    safetyProfile: result.safetyProfile,
+    resources: result.resources.map((entry) => ({
+      kind: entry.kind,
+      key: entry.key,
+      gameID: entry.gameID,
+      gameIDKnown: entry.gameIDKnown,
+      family: entry.family,
+      category: entry.category,
+      subcategory: entry.subcategory,
+      name: entry.name,
+      iconPath: entry.iconPath,
+      banRisk: entry.banRisk,
+      cutContent: entry.cutContent,
+      dlc: entry.dlc,
+      preOrder: entry.preOrder,
+    })),
+    categories: result.categories.map((entry) => ({
+      category: entry.category,
+      count: entry.count,
+    })),
+    total: result.total,
+    page: result.page,
+    pageSize: result.pageSize,
+  };
+}
+
+/**
+ * Projects one committed item mutation onto the shared receipt. The scopes pass
+ * through the same validation every other receipt uses, so an unknown scope is
+ * rejected at this boundary instead of reaching the invalidation map.
+ */
+function toItemMutationReceipt(result: {
+  operationID: string;
+  operationKind: string;
+  saveSessionID: string;
+  saveRevision: string;
+  changedScopes: string[];
+}): ItemMutationReceipt {
+  return {
+    operationID: result.operationID,
+    operationKind: result.operationKind,
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    changedScopes: toChangedScopes(result.changedScopes),
+  };
+}
+
+/** Projects the generated settings result onto the application port shape. */
+function toSafetyProfileSettings(
+  result: Awaited<ReturnType<typeof GetSafetyProfile>>,
+): SafetyProfileSettings {
+  return {
+    safetyProfile: result.safetyProfile,
+    availableProfiles: [...result.availableProfiles],
+    defaultProfile: result.defaultProfile,
+  };
+}
+
+/**
  * The single adapter behind every application port. A second, parallel
  * adaptation layer would give the generated bindings a second way into the
  * application, so all ports are fulfilled here.
@@ -739,6 +875,7 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   CharacterPort &
   ItemsPort &
   EquipmentPort &
+  SettingsPort &
   CatalogPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
     const result = await callBridge(GetApplicationInfo);
@@ -972,6 +1109,132 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       ),
     ),
 
+  // The eleven arguments reach the bridge in the backend's own order. No safety
+  // profile is sent: the backend reads the host setting itself, so a call from
+  // here can never widen a limit or reveal a hidden resource.
+  getOwnedItems: async ({
+    saveSessionID,
+    characterID,
+    container,
+    containerSection,
+    search,
+    category,
+    favoritesOnly,
+    favorites,
+    sort,
+    page,
+    pageSize,
+  }) =>
+    toOwnedItemsPage(
+      await callBridge(() =>
+        GetOwnedItems(
+          saveSessionID,
+          characterID,
+          container,
+          containerSection,
+          search,
+          category,
+          favoritesOnly,
+          favorites.map(({ kind, key }) => ({ kind, key })),
+          sort,
+          page,
+          pageSize,
+        ),
+      ),
+    ),
+
+  addItemsToContainers: async ({
+    saveSessionID,
+    characterID,
+    items,
+    confirmBanRisk,
+    expectedRevision,
+  }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        AddItemsToContainers(
+          saveSessionID,
+          characterID,
+          items.map((entry) => ({
+            kind: entry.kind,
+            key: entry.key,
+            variantID: entry.variantID,
+            inventoryQuantity: entry.inventoryQuantity,
+            storageQuantity: entry.storageQuantity,
+          })),
+          confirmBanRisk,
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  moveOwnedItemsToStorage: async ({ saveSessionID, characterID, ownedItemIDs, expectedRevision }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        MoveOwnedItemsToStorage(saveSessionID, characterID, [...ownedItemIDs], expectedRevision),
+      ),
+    ),
+
+  moveOwnedItemsToInventory: async ({
+    saveSessionID,
+    characterID,
+    ownedItemIDs,
+    expectedRevision,
+  }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        MoveOwnedItemsToInventory(saveSessionID, characterID, [...ownedItemIDs], expectedRevision),
+      ),
+    ),
+
+  removeOwnedItems: async ({ saveSessionID, characterID, ownedItemIDs, expectedRevision }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        RemoveOwnedItems(saveSessionID, characterID, [...ownedItemIDs], expectedRevision),
+      ),
+    ),
+
+  reorderInventoryItems: async ({
+    saveSessionID,
+    characterID,
+    anchorOwnedItemID,
+    groupOwnedItemIDs,
+    targetPosition,
+    expectedRevision,
+  }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        ReorderInventoryItems(
+          saveSessionID,
+          characterID,
+          anchorOwnedItemID,
+          [...groupOwnedItemIDs],
+          targetPosition,
+          expectedRevision,
+        ),
+      ),
+    ),
+
+  setOwnedItemQuantity: async ({
+    saveSessionID,
+    characterID,
+    ownedItemID,
+    quantity,
+    expectedRevision,
+  }) =>
+    toItemMutationReceipt(
+      await callBridge(() =>
+        SetOwnedItemQuantity(saveSessionID, characterID, ownedItemID, quantity, expectedRevision),
+      ),
+    ),
+
+  getSafetyProfile: async () => toSafetyProfileSettings(await callBridge(GetSafetyProfile)),
+
+  // The value reaches the bridge exactly as received: which profiles exist and
+  // how an unknown one is rejected are the backend's contract.
+  setSafetyProfile: async (safetyProfile) =>
+    toSafetyProfileSettings(await callBridge(() => SetSafetyProfile(safetyProfile))),
+
   // The pair reaches the bridge in the order the backend contract defines; the
   // grouped request only protects the caller from transposing them. Neither
   // value is trimmed, defaulted or clamped on the way.
@@ -1000,6 +1263,31 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // The seven arguments reach the bridge in the order the backend contract
   // defines; the grouped request only protects the caller from transposing
   // them. No filter is trimmed, recased or dropped on the way.
+  getItemDatabase: async ({
+    family,
+    category,
+    search,
+    favoritesOnly,
+    favorites,
+    sort,
+    page,
+    pageSize,
+  }) =>
+    toCatalogItemDatabasePage(
+      await callBridge(() =>
+        GetItemDatabase(
+          family,
+          category,
+          search,
+          favoritesOnly,
+          favorites.map(({ kind, key }) => ({ kind, key })),
+          sort,
+          page,
+          pageSize,
+        ),
+      ),
+    ),
+
   getResources: async ({ resourceType, family, capability, endpointID, search, page, pageSize }) =>
     toCatalogResourcesPage(
       await callBridge(() =>

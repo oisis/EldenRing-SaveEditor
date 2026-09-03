@@ -10,6 +10,7 @@ import type {
 import { CatalogPortProvider } from "../application/catalog/catalogClient";
 import type {
   CatalogFact,
+  CatalogItemDatabasePage,
   CatalogItemVariantsResult,
   CatalogPort,
   CatalogResourceDetail,
@@ -38,9 +39,18 @@ import type {
   EquipmentPort,
 } from "../application/equipment/equipmentPort";
 import { ItemsPortProvider } from "../application/items/itemsClient";
-import type { ItemPage, ItemsPort } from "../application/items/itemsPort";
+import type {
+  ItemMutationReceipt,
+  ItemPage,
+  ItemsPort,
+  OwnedItemRow,
+  OwnedItemsPage,
+} from "../application/items/itemsPort";
+import { ItemPreferencesProvider } from "../application/preferences/itemPreferences";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
 import type { SaveSession, SaveSessionPort } from "../application/save-session/saveSessionPort";
+import { SettingsPortProvider } from "../application/settings/settingsClient";
+import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
 import { activateLocale, i18n, type Locale } from "../i18n/i18n";
 
 /**
@@ -281,8 +291,55 @@ export const stubCatalogItemVariants: CatalogItemVariantsResult = {
   ],
 };
 
+/**
+ * The Item Database stub mixes the shapes the mapping has to survive: a named
+ * row with an icon and a known identifier, and a nameless one whose identifier
+ * the catalog does not know. One row is marked ban risk, so the confirmation
+ * path has something real to act on.
+ */
+export const stubItemDatabasePage: CatalogItemDatabasePage = {
+  safetyProfile: "safe",
+  resources: [
+    {
+      kind: "item",
+      key: "weapon/uchigatana",
+      gameID: 0x00bb8000,
+      gameIDKnown: true,
+      family: "weapon",
+      category: "melee_armaments",
+      subcategory: "katana",
+      name: "Uchigatana",
+      iconPath: "assets/icons/items/uchigatana.png",
+      banRisk: false,
+      cutContent: false,
+      dlc: false,
+      preOrder: false,
+    },
+    {
+      kind: "item",
+      key: "goods/unnamed",
+      gameID: 0,
+      gameIDKnown: false,
+      family: "",
+      category: "",
+      subcategory: "",
+      name: "",
+      iconPath: "",
+      banRisk: true,
+      cutContent: false,
+      dlc: false,
+      preOrder: false,
+    },
+  ],
+  categories: [{ category: "melee_armaments", count: 1 }],
+  total: 2,
+  page: 1,
+  pageSize: 20,
+};
+
 export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPort {
   return {
+    getItemDatabase: () => Promise.resolve(stubItemDatabasePage),
     getResources: () => Promise.resolve(stubCatalogPage),
     getResourcePresentationSummaries: (identities) =>
       Promise.resolve({
@@ -294,10 +351,168 @@ export function makeCatalogPort(overrides: Partial<CatalogPort> = {}): CatalogPo
   };
 }
 
+/**
+ * One authoritative Inventory row. Every action the backend can allow is true
+ * here, so a test that expects an action to be hidden has to make the backend
+ * say so rather than rely on a stub that never offered it.
+ */
+export const stubOwnedInventoryRow: OwnedItemRow = {
+  ownedItemID: "owned-1",
+  kind: "item",
+  key: "weapon/uchigatana",
+  gameID: 0x00bb8000,
+  container: "inventory",
+  containerSection: "common",
+  physicalIndex: 3,
+  acquisitionIndex: 42,
+  orderPosition: 0,
+  orderPositionKnown: true,
+  quantity: 1,
+  maxQuantity: 99,
+  maxQuantityKnown: true,
+  family: "weapon",
+  category: "melee_armaments",
+  subcategory: "katana",
+  name: "Uchigatana",
+  iconPath: "assets/icons/items/uchigatana.png",
+  recordMode: "quantity_stack",
+  banRisk: false,
+  cutContent: false,
+  dlc: false,
+  preOrder: false,
+  actions: {
+    moveToStorage: true,
+    moveToInventory: false,
+    remove: true,
+    setQuantity: true,
+    reorder: true,
+  },
+};
+
+export const stubOwnedStorageRow: OwnedItemRow = {
+  ...stubOwnedInventoryRow,
+  ownedItemID: "owned-2",
+  container: "storage",
+  physicalIndex: 7,
+  orderPosition: 0,
+  orderPositionKnown: false,
+  actions: {
+    moveToStorage: false,
+    moveToInventory: true,
+    remove: true,
+    setQuantity: true,
+    reorder: false,
+  },
+};
+
+export const stubOwnedInventoryPage: OwnedItemsPage = {
+  saveSessionID: "session-1",
+  saveRevision: "0",
+  characterID: 0,
+  active: true,
+  safetyProfile: "safe",
+  container: "inventory",
+  records: [stubOwnedInventoryRow],
+  categories: [{ category: "melee_armaments", count: 1 }],
+  total: 1,
+  page: 1,
+  pageSize: 30,
+};
+
+export const stubOwnedStoragePage: OwnedItemsPage = {
+  ...stubOwnedInventoryPage,
+  container: "storage",
+  records: [stubOwnedStorageRow],
+};
+
+/** The receipt every mutation stub reports, in the shared backend shape. */
+export function stubItemMutationReceipt(
+  operationKind: string,
+  changedScopes: ItemMutationReceipt["changedScopes"],
+): ItemMutationReceipt {
+  return {
+    operationID: `operation-${operationKind}`,
+    operationKind,
+    saveSessionID: "session-1",
+    saveRevision: "1",
+    changedScopes,
+  };
+}
+
 export function makeItemsPort(overrides: Partial<ItemsPort> = {}): ItemsPort {
   return {
     getInventory: () => Promise.resolve(stubInventoryPage),
     getStorage: () => Promise.resolve(stubStoragePage),
+    getOwnedItems: ({ container }) =>
+      Promise.resolve(container === "storage" ? stubOwnedStoragePage : stubOwnedInventoryPage),
+    addItemsToContainers: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("add_items_to_containers", [
+          "save.session",
+          "inventory",
+          "diagnostics.report",
+        ]),
+      ),
+    moveOwnedItemsToStorage: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("move_owned_items_to_storage", [
+          "save.session",
+          "inventory",
+          "storage",
+          "diagnostics.report",
+        ]),
+      ),
+    moveOwnedItemsToInventory: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("move_owned_items_to_inventory", [
+          "save.session",
+          "inventory",
+          "storage",
+          "diagnostics.report",
+        ]),
+      ),
+    removeOwnedItems: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("remove_owned_items", [
+          "save.session",
+          "inventory",
+          "storage",
+          "diagnostics.report",
+        ]),
+      ),
+    reorderInventoryItems: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("reorder_inventory_items", [
+          "save.session",
+          "inventory",
+          "diagnostics.report",
+        ]),
+      ),
+    setOwnedItemQuantity: () =>
+      Promise.resolve(
+        stubItemMutationReceipt("set_owned_item_quantity", [
+          "save.session",
+          "inventory",
+          "storage",
+          "equipment.loadout",
+          "diagnostics.report",
+        ]),
+      ),
+    ...overrides,
+  };
+}
+
+/** The product default: the safest profile, with the closed vocabulary. */
+export const stubSafetyProfile: SafetyProfileSettings = {
+  safetyProfile: "safe",
+  availableProfiles: ["safe", "expanded_limits", "chaos"],
+  defaultProfile: "safe",
+};
+
+export function makeSettingsPort(overrides: Partial<SettingsPort> = {}): SettingsPort {
+  return {
+    getSafetyProfile: () => Promise.resolve(stubSafetyProfile),
+    setSafetyProfile: (safetyProfile) => Promise.resolve({ ...stubSafetyProfile, safetyProfile }),
     ...overrides,
   };
 }
@@ -663,6 +878,8 @@ export function TestProviders({
   itemsPort,
   equipmentPort,
   catalogPort,
+  settingsPort,
+  showItemID,
 }: {
   children: ReactNode;
   queryClient: QueryClient;
@@ -673,23 +890,29 @@ export function TestProviders({
   itemsPort?: ItemsPort;
   equipmentPort?: EquipmentPort;
   catalogPort?: CatalogPort;
+  settingsPort?: SettingsPort;
+  showItemID?: boolean;
 }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ApplicationInfoPortProvider port={port ?? makePort()}>
-        <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
-          <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
-            <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-              <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
-                <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
-                  <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
-                    {children}
-                  </EquipmentPortProvider>
-                </ItemsPortProvider>
-              </DiagnosticsPortProvider>
-            </CharacterPortProvider>
-          </SaveSessionPortProvider>
-        </CatalogPortProvider>
+        <SettingsPortProvider port={settingsPort ?? makeSettingsPort()}>
+          <ItemPreferencesProvider initialShowItemID={showItemID}>
+            <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
+              <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
+                <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
+                  <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
+                    <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
+                      <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
+                        {children}
+                      </EquipmentPortProvider>
+                    </ItemsPortProvider>
+                  </DiagnosticsPortProvider>
+                </CharacterPortProvider>
+              </SaveSessionPortProvider>
+            </CatalogPortProvider>
+          </ItemPreferencesProvider>
+        </SettingsPortProvider>
       </ApplicationInfoPortProvider>
     </QueryClientProvider>
   );
@@ -705,6 +928,8 @@ export async function renderApp(
     itemsPort?: ItemsPort;
     equipmentPort?: EquipmentPort;
     catalogPort?: CatalogPort;
+    settingsPort?: SettingsPort;
+    showItemID?: boolean;
     locale?: Locale;
     queryClient?: QueryClient;
   } = {},
@@ -722,6 +947,8 @@ export async function renderApp(
         itemsPort={options.itemsPort}
         equipmentPort={options.equipmentPort}
         catalogPort={options.catalogPort}
+        settingsPort={options.settingsPort}
+        showItemID={options.showItemID}
       >
         {ui}
       </TestProviders>

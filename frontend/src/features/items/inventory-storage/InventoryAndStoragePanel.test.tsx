@@ -1,115 +1,131 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { CatalogPort } from "../../../application/catalog/catalogPort";
 import type {
-  CatalogPort,
-  CatalogResourcePresentationIdentity,
-} from "../../../application/catalog/catalogPort";
-import type {
-  ItemPage,
-  ItemPageRequest,
-  ItemRecord,
+  ItemMutationReceipt,
   ItemsPort,
+  OwnedItemRow,
+  OwnedItemsPage,
+  OwnedItemsRequest,
 } from "../../../application/items/itemsPort";
 import {
   makeCatalogPort,
   makeItemsPort,
   renderApp,
   stubCatalogResourceDetail,
-  stubInventoryPage,
+  stubOwnedInventoryPage,
+  stubOwnedInventoryRow,
+  stubOwnedStoragePage,
+  stubOwnedStorageRow,
 } from "../../../test/renderWithProviders";
 import {
   InventoryAndStoragePanel,
   type InventoryAndStoragePanelProps,
 } from "./InventoryAndStoragePanel";
 
-const uchigatana: ItemRecord = stubInventoryPage.records[0];
-
-function record(overrides: Partial<ItemRecord>): ItemRecord {
-  return { ...uchigatana, ...overrides };
+function row(base: OwnedItemRow, overrides: Partial<OwnedItemRow>): OwnedItemRow {
+  return { ...base, ...overrides, actions: { ...base.actions, ...overrides.actions } };
 }
 
-function page(overrides: Partial<ItemPage>): ItemPage {
-  return { ...stubInventoryPage, ...overrides };
-}
-
-const inventoryPage = page({
-  records: [record({ ownedItemID: "inv-1", key: "weapon/uchigatana", physicalIndex: 3 })],
+const inventoryPage: OwnedItemsPage = {
+  ...stubOwnedInventoryPage,
+  records: [row(stubOwnedInventoryRow, { ownedItemID: "inv-1", physicalIndex: 3 })],
   total: 45,
-  page: 1,
-  pageSize: 30,
-});
+};
 
-const storagePage = page({
+const storagePage: OwnedItemsPage = {
+  ...stubOwnedStoragePage,
   records: [
-    record({
+    row(stubOwnedStorageRow, {
       ownedItemID: "sto-1",
       kind: "goods",
-      key: "weapon/uchigatana",
+      name: "Golden Rune",
+      iconPath: "",
       physicalIndex: 9,
       quantity: 7,
+      maxQuantity: 99,
+      category: "consumables",
     }),
   ],
   total: 1,
-  page: 1,
-  pageSize: 30,
-});
-
-/**
- * The batch answers with one name per exact identity so a test can prove that
- * the same `key` under two different `kind` values stays two resources.
- */
-const presentationNames: Record<string, { name: string; iconPath: string }> = {
-  "item/weapon/uchigatana": {
-    name: "Uchigatana",
-    iconPath: "assets/icons/items/uchigatana.png",
-  },
-  "goods/weapon/uchigatana": { name: "Golden Rune", iconPath: "" },
 };
 
 function makePorts(overrides: { items?: Partial<ItemsPort>; catalog?: Partial<CatalogPort> } = {}) {
-  const getInventory = vi.fn(
-    overrides.items?.getInventory ?? (() => Promise.resolve(inventoryPage)),
+  const getOwnedItems = vi.fn(
+    overrides.items?.getOwnedItems ??
+      ((request: OwnedItemsRequest) =>
+        Promise.resolve(
+          request.container === "storage"
+            ? { ...storagePage, page: request.page }
+            : { ...inventoryPage, page: request.page },
+        )),
   );
-  const getStorage = vi.fn(overrides.items?.getStorage ?? (() => Promise.resolve(storagePage)));
-  const getResourcePresentationSummaries = vi.fn(
-    overrides.catalog?.getResourcePresentationSummaries ??
-      ((identities: readonly CatalogResourcePresentationIdentity[]) =>
-        Promise.resolve({
-          resources: identities.map(({ kind, key }) => ({
-            kind,
-            key,
-            name: presentationNames[`${kind}/${key}`]?.name ?? "",
-            iconPath: presentationNames[`${kind}/${key}`]?.iconPath ?? "",
-          })),
-        })),
+  const moveOwnedItemsToStorage = vi.fn(
+    overrides.items?.moveOwnedItemsToStorage ?? makeItemsPort().moveOwnedItemsToStorage,
+  );
+  const moveOwnedItemsToInventory = vi.fn(
+    overrides.items?.moveOwnedItemsToInventory ?? makeItemsPort().moveOwnedItemsToInventory,
+  );
+  const removeOwnedItems = vi.fn(
+    overrides.items?.removeOwnedItems ?? makeItemsPort().removeOwnedItems,
+  );
+  const reorderInventoryItems = vi.fn(
+    overrides.items?.reorderInventoryItems ?? makeItemsPort().reorderInventoryItems,
+  );
+  const setOwnedItemQuantity = vi.fn(
+    overrides.items?.setOwnedItemQuantity ?? makeItemsPort().setOwnedItemQuantity,
   );
   const getResource = vi.fn(
     overrides.catalog?.getResource ?? (() => Promise.resolve(stubCatalogResourceDetail)),
   );
 
   return {
-    getInventory,
-    getStorage,
-    getResourcePresentationSummaries,
+    getOwnedItems,
+    moveOwnedItemsToStorage,
+    moveOwnedItemsToInventory,
+    removeOwnedItems,
+    reorderInventoryItems,
+    setOwnedItemQuantity,
     getResource,
-    itemsPort: makeItemsPort({ getInventory, getStorage }),
-    catalogPort: makeCatalogPort({ getResourcePresentationSummaries, getResource }),
+    itemsPort: makeItemsPort({
+      getOwnedItems,
+      moveOwnedItemsToStorage,
+      moveOwnedItemsToInventory,
+      removeOwnedItems,
+      reorderInventoryItems,
+      setOwnedItemQuantity,
+    }),
+    catalogPort: makeCatalogPort({ getResource }),
   };
 }
 
-function renderPanel(
-  ports: ReturnType<typeof makePorts>,
-  options: { locale?: "en" | "pl"; saveSessionID?: string; characterID?: number } = {},
-) {
+type RenderOptions = {
+  locale?: "en" | "pl";
+  saveSessionID?: string | undefined;
+  saveRevision?: string | undefined;
+  characterID?: number | undefined;
+  sessionBusy?: boolean;
+  showItemID?: boolean;
+  applyMutationReceipt?: (receipt: ItemMutationReceipt) => Promise<unknown>;
+};
+
+function renderPanel(ports: ReturnType<typeof makePorts>, options: RenderOptions = {}) {
   return renderApp(
     <InventoryAndStoragePanel
       saveSessionID={"saveSessionID" in options ? options.saveSessionID : "session-1"}
-      saveRevision="0"
+      saveRevision={"saveRevision" in options ? options.saveRevision : "0"}
       characterID={"characterID" in options ? options.characterID : 0}
       containerSection="common"
+      applyMutationReceipt={options.applyMutationReceipt ?? (() => Promise.resolve())}
+      sessionBusy={options.sessionBusy ?? false}
     />,
-    { itemsPort: ports.itemsPort, catalogPort: ports.catalogPort, locale: options.locale },
+    {
+      itemsPort: ports.itemsPort,
+      catalogPort: ports.catalogPort,
+      locale: options.locale,
+      showItemID: options.showItemID,
+    },
   );
 }
 
@@ -135,69 +151,29 @@ function WorkspaceSwitch({
   );
 }
 
-const servedPagePorts = {
-  items: {
-    getInventory: (request: ItemPageRequest) =>
-      Promise.resolve({
-        ...inventoryPage,
-        saveSessionID: request.saveSessionID,
-        page: request.page,
-      }),
-    getStorage: (request: ItemPageRequest) =>
-      Promise.resolve({
-        ...storagePage,
-        saveSessionID: request.saveSessionID,
-        total: 45,
-        page: request.page,
-      }),
-  },
-};
-
-function cardsRequestedBy(
-  getter: ReturnType<typeof makePorts>["getInventory"],
-  identity: Partial<ItemPageRequest>,
-): number[] {
+function requestsFor(
+  getter: ReturnType<typeof makePorts>["getOwnedItems"],
+  identity: Partial<OwnedItemsRequest>,
+): OwnedItemsRequest[] {
   return getter.mock.calls
-    .map(([request]) => request as ItemPageRequest)
+    .map(([request]) => request as OwnedItemsRequest)
     .filter((request) =>
       Object.entries(identity).every(
-        ([field, value]) => request[field as keyof ItemPageRequest] === value,
+        ([field, value]) => request[field as keyof OwnedItemsRequest] === value,
       ),
-    )
-    .map((request) => request.page);
+    );
 }
 
-async function switchWorkspaceAfterPagingBoth(
-  ports: ReturnType<typeof makePorts>,
-  to: InventoryAndStoragePanelProps,
-) {
-  await renderApp(
-    <WorkspaceSwitch
-      from={{
-        saveSessionID: "session-1",
-        saveRevision: "0",
-        characterID: 0,
-        containerSection: "common",
-      }}
-      to={to}
-    />,
-    { itemsPort: ports.itemsPort, catalogPort: ports.catalogPort },
-  );
+/** The exact column set of the shared table, in render order. */
+function columnNames(table: HTMLElement): string[] {
+  return within(table)
+    .getAllByRole("columnheader")
+    .map((header) => header.textContent ?? "");
+}
 
-  const nextInventory = await screen.findByRole("button", { name: "Next inventory card" });
-  const nextStorage = await screen.findByRole("button", { name: "Next storage card" });
-  await waitFor(() => expect(nextInventory).toBeEnabled());
-  await waitFor(() => expect(nextStorage).toBeEnabled());
-  fireEvent.click(nextInventory);
-  fireEvent.click(nextStorage);
-  await waitFor(() =>
-    expect(ports.getInventory).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })),
-  );
-  await waitFor(() =>
-    expect(ports.getStorage).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })),
-  );
-
-  fireEvent.click(screen.getByRole("button", { name: "switch workspace" }));
+async function openTable() {
+  fireEvent.click(screen.getByRole("button", { name: "Table" }));
+  return screen.findByRole("table", { name: "Inventory and Storage records" });
 }
 
 describe("InventoryAndStoragePanel", () => {
@@ -205,60 +181,89 @@ describe("InventoryAndStoragePanel", () => {
     const ports = makePorts();
     await renderPanel(ports);
 
-    await screen.findByRole("button", { name: /Uchigatana/ });
+    await screen.findByRole("button", { name: "Uchigatana" });
     const inventoryGrid = await screen.findByRole("region", { name: "Inventory items" });
     const storageGrid = screen.getByRole("region", { name: "Storage items" });
     expect(screen.getAllByRole("region", { name: "Inventory and Storage" })).toHaveLength(1);
     expect(inventoryGrid.children).toHaveLength(30);
     expect(storageGrid.children).toHaveLength(30);
-    expect(within(inventoryGrid).getAllByRole("button")).toHaveLength(1);
-    expect(within(storageGrid).getAllByRole("button")).toHaveLength(1);
 
-    expect(ports.getInventory).toHaveBeenCalledExactlyOnceWith({
+    expect(requestsFor(ports.getOwnedItems, { container: "inventory" })[0]).toEqual({
       saveSessionID: "session-1",
       characterID: 0,
+      container: "inventory",
       containerSection: "common",
+      search: "",
+      category: "",
+      favoritesOnly: false,
+      favorites: [],
+      sort: "",
       page: 1,
       pageSize: 30,
     });
-    expect(ports.getStorage).toHaveBeenCalledExactlyOnceWith({
-      saveSessionID: "session-1",
-      characterID: 0,
-      containerSection: "common",
-      page: 1,
-      pageSize: 30,
-    });
+    expect(requestsFor(ports.getOwnedItems, { container: "storage" })[0]).toEqual(
+      expect.objectContaining({ container: "storage", page: 1, pageSize: 30 }),
+    );
   });
 
-  it("names and illustrates tiles from the presentation batch and separates identical keys", async () => {
+  it("gives one tile exactly the controls its record allows, with accessible names", async () => {
     const ports = makePorts();
     await renderPanel(ports);
 
-    const inventoryGrid = await screen.findByRole("region", { name: "Inventory items" });
+    const tile = await screen.findByRole("button", { name: "Uchigatana" });
+    const inventoryGrid = screen.getByRole("region", { name: "Inventory items" });
+    // Three controls and no more: open the details, select the record, toggle
+    // the presentational favourite.
+    expect(within(inventoryGrid).getAllByRole("button")).toHaveLength(2);
+    expect(tile).toBeInTheDocument();
+    expect(
+      within(inventoryGrid).getByRole("button", { name: "Add Uchigatana to favorites" }),
+    ).toBeInTheDocument();
+    expect(
+      within(inventoryGrid).getByRole("checkbox", { name: "Select Uchigatana" }),
+    ).toBeInTheDocument();
+    // The icon comes from the backend row and is decorative.
+    const icons = inventoryGrid.querySelectorAll("img");
+    expect(icons).toHaveLength(1);
+    expect(icons[0]).toHaveAttribute("src", "/catalog-assets/assets/icons/items/uchigatana.png");
+    expect(icons[0]).toHaveAttribute("alt", "");
+
     const storageGrid = screen.getByRole("region", { name: "Storage items" });
-    await within(inventoryGrid).findByText("Uchigatana");
-
-    // The same key under two kinds resolves to two distinct catalog resources.
     expect(within(storageGrid).getByText("Golden Rune")).toBeInTheDocument();
-    expect(ports.getResourcePresentationSummaries).toHaveBeenCalledExactlyOnceWith([
-      { kind: "item", key: "weapon/uchigatana" },
-      { kind: "goods", key: "weapon/uchigatana" },
-    ]);
-
-    const icon = within(inventoryGrid).getByRole("presentation", { hidden: true });
-    expect(icon).toHaveAttribute("src", "/catalog-assets/assets/icons/items/uchigatana.png");
-    expect(within(storageGrid).queryByRole("presentation", { hidden: true })).toBeNull();
-
+    expect(storageGrid.querySelectorAll("img")).toHaveLength(0);
     expect(document.body).not.toHaveTextContent("weapon/uchigatana");
     expect(document.body).not.toHaveTextContent("inv-1");
   });
 
-  it("navigates the two container cards independently without numbered pagination", async () => {
-    const ports = makePorts({
-      items: {
-        getInventory: (request) => Promise.resolve({ ...inventoryPage, page: request.page }),
-      },
+  it("sends every filter and the favourites to the backend, never filtering a served page", async () => {
+    const ports = makePorts();
+    await renderPanel(ports);
+    await screen.findByRole("button", { name: "Uchigatana" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Add Uchigatana to favorites" }));
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search items" }), {
+      target: { value: "uchi" },
     });
+    fireEvent.change(screen.getByRole("combobox", { name: "Sort order" }), {
+      target: { value: "name" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Favorites only" }));
+
+    await waitFor(() =>
+      expect(ports.getOwnedItems).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: "uchi",
+          sort: "name",
+          favoritesOnly: true,
+          favorites: [{ kind: "item", key: "weapon/uchigatana" }],
+          page: 1,
+        }),
+      ),
+    );
+  });
+
+  it("navigates the two container cards independently without numbered pagination", async () => {
+    const ports = makePorts();
     await renderPanel(ports);
 
     await screen.findByText("Card 1 of 2");
@@ -268,112 +273,318 @@ describe("InventoryAndStoragePanel", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Next inventory card" }));
     await waitFor(() =>
-      expect(ports.getInventory).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })),
+      expect(ports.getOwnedItems).toHaveBeenLastCalledWith(
+        expect.objectContaining({ container: "inventory", page: 2 }),
+      ),
     );
     await screen.findByText("Card 2 of 2");
-    expect(ports.getStorage).toHaveBeenCalledOnce();
+    expect(requestsFor(ports.getOwnedItems, { container: "storage" }).map((r) => r.page)).toEqual([
+      1,
+    ]);
   });
 
-  it("restarts both containers at card 1 after a session and character change", async () => {
-    const ports = makePorts(servedPagePorts);
-    const next = {
-      saveSessionID: "session-2",
-      saveRevision: "0",
-      characterID: 1,
-      containerSection: "common",
-    };
-    await switchWorkspaceAfterPagingBoth(ports, next);
-
-    await waitFor(() =>
-      expect(ports.getInventory).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          saveSessionID: next.saveSessionID,
-          characterID: next.characterID,
-          containerSection: next.containerSection,
-        }),
-      ),
-    );
-    await waitFor(() =>
-      expect(ports.getStorage).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          saveSessionID: next.saveSessionID,
-          characterID: next.characterID,
-          containerSection: next.containerSection,
-        }),
-      ),
-    );
-
-    const inventoryCards = cardsRequestedBy(ports.getInventory, { saveSessionID: "session-2" });
-    const storageCards = cardsRequestedBy(ports.getStorage, { saveSessionID: "session-2" });
-    expect(inventoryCards[0]).toBe(1);
-    expect(storageCards[0]).toBe(1);
-    expect(inventoryCards).not.toContain(2);
-    expect(storageCards).not.toContain(2);
-  });
-
-  it("restarts both containers at card 1 after a container section change", async () => {
-    const ports = makePorts(servedPagePorts);
-    const next = {
+  it("restarts both containers at card 1 after a workspace identity change", async () => {
+    const ports = makePorts();
+    const base: InventoryAndStoragePanelProps = {
       saveSessionID: "session-1",
       saveRevision: "0",
       characterID: 0,
+      containerSection: "common",
+      applyMutationReceipt: () => Promise.resolve(),
+      sessionBusy: false,
+    };
+    const next: InventoryAndStoragePanelProps = {
+      ...base,
+      saveSessionID: "session-2",
+      characterID: 1,
       containerSection: "key",
     };
-    await switchWorkspaceAfterPagingBoth(ports, next);
+    await renderApp(<WorkspaceSwitch from={base} to={next} />, {
+      itemsPort: ports.itemsPort,
+      catalogPort: ports.catalogPort,
+    });
 
+    const nextInventory = await screen.findByRole("button", { name: "Next inventory card" });
+    await waitFor(() => expect(nextInventory).toBeEnabled());
+    fireEvent.click(nextInventory);
     await waitFor(() =>
-      expect(ports.getInventory).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          saveSessionID: next.saveSessionID,
-          characterID: next.characterID,
-          containerSection: next.containerSection,
-        }),
-      ),
-    );
-    await waitFor(() =>
-      expect(ports.getStorage).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          saveSessionID: next.saveSessionID,
-          characterID: next.characterID,
-          containerSection: next.containerSection,
-        }),
+      expect(ports.getOwnedItems).toHaveBeenLastCalledWith(
+        expect.objectContaining({ container: "inventory", page: 2 }),
       ),
     );
 
-    const inventoryCards = cardsRequestedBy(ports.getInventory, { containerSection: "key" });
-    const storageCards = cardsRequestedBy(ports.getStorage, { containerSection: "key" });
-    expect(inventoryCards[0]).toBe(1);
-    expect(storageCards[0]).toBe(1);
-    expect(inventoryCards).not.toContain(2);
-    expect(storageCards).not.toContain(2);
+    fireEvent.click(screen.getByRole("button", { name: "switch workspace" }));
+    await waitFor(() =>
+      expect(
+        requestsFor(ports.getOwnedItems, { saveSessionID: "session-2" }).length,
+      ).toBeGreaterThan(0),
+    );
+    const pages = requestsFor(ports.getOwnedItems, { saveSessionID: "session-2" }).map(
+      (request) => request.page,
+    );
+    expect(pages[0]).toBe(1);
+    expect(pages).not.toContain(2);
+    expect(
+      requestsFor(ports.getOwnedItems, { saveSessionID: "session-2" }).every(
+        (request) => request.characterID === 1 && request.containerSection === "key",
+      ),
+    ).toBe(true);
   });
 
-  it("switches to one shared table that keeps the container of every record", async () => {
+  it("lists the exact table columns for Show Item ID off and on", async () => {
     const ports = makePorts();
-    await renderPanel(ports);
-
+    const first = await renderPanel(ports);
     await screen.findByText("Uchigatana");
-    fireEvent.click(screen.getByRole("button", { name: "Table" }));
 
-    const table = await screen.findByRole("table", { name: "Inventory and Storage records" });
-    for (const column of ["Container", "Name", "Quantity", "Position", "Details"]) {
-      expect(within(table).getByRole("columnheader", { name: column })).toBeInTheDocument();
-    }
-    const rows = within(table).getAllByRole("row");
-    expect(rows).toHaveLength(3);
-    expect(within(rows[1]).getByRole("cell", { name: "Inventory" })).toBeInTheDocument();
-    expect(within(rows[2]).getByRole("cell", { name: "Storage" })).toBeInTheDocument();
-    expect(within(rows[2]).getByRole("cell", { name: "7" })).toBeInTheDocument();
-    expect(within(rows[2]).getByRole("cell", { name: "9" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Next inventory card" })).toBeInTheDocument();
-    expect(table).not.toHaveTextContent("2147483658");
+    const table = await openTable();
+    expect(columnNames(table)).toEqual([
+      "Select",
+      "Container",
+      "Name",
+      "Category",
+      "Quantity",
+      "Position",
+      "Favorite",
+      "Details",
+    ]);
+
+    // `Show Item ID` is a presentational preference of the host, so switching it
+    // adds exactly one column and changes no backend request.
+    first.unmount();
+
+    const second = makePorts();
+    const view = await renderPanel(second, { showItemID: true });
+    await screen.findAllByText("Uchigatana");
+    const withIdentifier = await openTable();
+    expect(columnNames(withIdentifier)).toEqual([
+      "Select",
+      "Container",
+      "Name",
+      "Item ID",
+      "Category",
+      "Quantity",
+      "Position",
+      "Favorite",
+      "Details",
+    ]);
+    expect(within(withIdentifier).getAllByRole("cell", { name: "0x00BB8000" })).toHaveLength(2);
+    // The preference changes no backend request: the same eleven arguments are
+    // sent with it on and off.
+    expect(second.getOwnedItems.mock.calls.map(([request]) => request)).toEqual(
+      ports.getOwnedItems.mock.calls
+        .map(([request]) => request)
+        .slice(0, second.getOwnedItems.mock.calls.length),
+    );
+    view.unmount();
   });
 
-  it("opens the detail modal for the exact selected identity and restores focus on close", async () => {
+  it("shows the quantity as Owned / Max and commits an edited value once", async () => {
+    const ports = makePorts();
+    await renderPanel(ports);
+    await screen.findByText("Uchigatana");
+    const table = await openTable();
+
+    const field = within(table).getByRole("spinbutton", { name: "Quantity of Golden Rune" });
+    expect(field).toHaveValue(7);
+    expect(within(table).getAllByText("/ 99").length).toBeGreaterThan(0);
+
+    fireEvent.change(field, { target: { value: "12" } });
+    fireEvent.blur(field);
+
+    await waitFor(() =>
+      expect(ports.setOwnedItemQuantity).toHaveBeenCalledExactlyOnceWith({
+        saveSessionID: "session-1",
+        characterID: 0,
+        expectedRevision: "0",
+        ownedItemID: "sto-1",
+        quantity: 12,
+      }),
+    );
+  });
+
+  it("commits one atomic batch for a multi-selection and applies its receipt once", async () => {
+    const applyMutationReceipt = vi.fn((_receipt: ItemMutationReceipt) => Promise.resolve());
+    const ports = makePorts({
+      items: {
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          Promise.resolve(
+            request.container === "storage"
+              ? { ...storagePage, records: [] }
+              : {
+                  ...inventoryPage,
+                  records: [
+                    row(stubOwnedInventoryRow, { ownedItemID: "inv-1" }),
+                    row(stubOwnedInventoryRow, {
+                      ownedItemID: "inv-2",
+                      name: "Rusted Key",
+                      physicalIndex: 5,
+                    }),
+                  ],
+                },
+          ),
+      },
+    });
+    await renderPanel(ports, { applyMutationReceipt });
+
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Uchigatana" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Rusted Key" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Move to Storage" }));
+
+    await waitFor(() =>
+      expect(ports.moveOwnedItemsToStorage).toHaveBeenCalledExactlyOnceWith({
+        saveSessionID: "session-1",
+        characterID: 0,
+        expectedRevision: "0",
+        ownedItemIDs: ["inv-1", "inv-2"],
+      }),
+    );
+    // One receipt for the whole batch, applied exactly once through the shared
+    // path; the panel invalidates nothing itself.
+    await waitFor(() => expect(applyMutationReceipt).toHaveBeenCalledOnce());
+    expect(applyMutationReceipt.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        operationKind: "move_owned_items_to_storage",
+        saveRevision: "1",
+        changedScopes: ["save.session", "inventory", "storage", "diagnostics.report"],
+      }),
+    );
+    expect(ports.moveOwnedItemsToInventory).not.toHaveBeenCalled();
+    expect(ports.removeOwnedItems).not.toHaveBeenCalled();
+  });
+
+  it("hides every batch action the backend capabilities do not allow", async () => {
+    const ports = makePorts({
+      items: {
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          Promise.resolve(
+            request.container === "storage"
+              ? { ...storagePage, records: [] }
+              : {
+                  ...inventoryPage,
+                  records: [
+                    row(stubOwnedInventoryRow, {
+                      ownedItemID: "inv-1",
+                      actions: {
+                        moveToStorage: false,
+                        moveToInventory: false,
+                        remove: false,
+                        setQuantity: true,
+                        reorder: false,
+                      },
+                    }),
+                  ],
+                },
+          ),
+      },
+    });
+    await renderPanel(ports);
+
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Uchigatana" }));
+    const bar = await screen.findByRole("group", { name: "Selected items" });
+    expect(within(bar).queryByRole("button", { name: "Move to Storage" })).toBeNull();
+    expect(within(bar).queryByRole("button", { name: "Move to Inventory" })).toBeNull();
+    expect(within(bar).queryByRole("button", { name: "Remove" })).toBeNull();
+    expect(within(bar).getByRole("button", { name: "Clear selection" })).toBeInTheDocument();
+  });
+
+  it("offers no save mutation without an active session and revision", async () => {
+    const ports = makePorts();
+    const view = await renderPanel(ports, { saveSessionID: undefined });
+    expect(
+      screen.getByText(
+        "Load a save and select a character to read the Inventory and the Storage Box.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Inventory items" })).toBeNull();
+    expect(ports.getOwnedItems).not.toHaveBeenCalled();
+    view.unmount();
+
+    // A session with no revision cannot address a snapshot, so the record is
+    // shown and every save mutation stays absent.
+    const withoutRevision = makePorts();
+    await renderPanel(withoutRevision, { saveRevision: undefined });
+    expect(withoutRevision.getOwnedItems).not.toHaveBeenCalled();
+    for (const pattern of [/^Move to Storage$/, /^Move to Inventory$/, /^Remove$/]) {
+      expect(screen.queryByRole("button", { name: pattern })).toBeNull();
+    }
+  });
+
+  it("keeps mutations out of reach while the session controller is busy", async () => {
+    const ports = makePorts();
+    await renderPanel(ports, { sessionBusy: true });
+
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Uchigatana" }));
+    const bar = await screen.findByRole("group", { name: "Selected items" });
+    expect(within(bar).queryByRole("button", { name: "Move to Storage" })).toBeNull();
+    expect(within(bar).queryByRole("button", { name: "Remove" })).toBeNull();
+  });
+
+  it("moves an anchored group to an explicit position from the detail dialog", async () => {
+    const ports = makePorts({
+      items: {
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          Promise.resolve(
+            request.container === "storage"
+              ? { ...storagePage, records: [] }
+              : {
+                  ...inventoryPage,
+                  records: [
+                    row(stubOwnedInventoryRow, { ownedItemID: "inv-1", orderPosition: 0 }),
+                    row(stubOwnedInventoryRow, {
+                      ownedItemID: "inv-2",
+                      name: "Rusted Key",
+                      orderPosition: 1,
+                    }),
+                  ],
+                },
+          ),
+      },
+    });
+    await renderPanel(ports);
+
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Uchigatana" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Rusted Key" }));
+    fireEvent.click(screen.getByRole("button", { name: "Rusted Key" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Item details" });
+    fireEvent.change(within(dialog).getByRole("spinbutton", { name: "Target position" }), {
+      target: { value: "4" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Move to position" }));
+
+    await waitFor(() =>
+      expect(ports.reorderInventoryItems).toHaveBeenCalledExactlyOnceWith({
+        saveSessionID: "session-1",
+        characterID: 0,
+        expectedRevision: "0",
+        anchorOwnedItemID: "inv-2",
+        groupOwnedItemIDs: ["inv-1", "inv-2"],
+        targetPosition: 3,
+      }),
+    );
+  });
+
+  it("offers no manual order outside the container's own sort order", async () => {
+    const ports = makePorts();
+    await renderPanel(ports);
+    await screen.findByRole("button", { name: "Uchigatana" });
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Sort order" }), {
+      target: { value: "name" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "Uchigatana" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Item details" });
+    expect(within(dialog).queryByRole("button", { name: "Move up" })).toBeNull();
+    expect(within(dialog).queryByRole("button", { name: "Move down" })).toBeNull();
+    expect(within(dialog).queryByRole("button", { name: "Move to position" })).toBeNull();
+  });
+
+  it("opens the detail modal for the exact record and restores focus on close", async () => {
     const ports = makePorts();
     await renderPanel(ports);
 
-    const tile = await screen.findByRole("button", { name: /Golden Rune/ });
+    const tile = await screen.findByRole("button", { name: "Golden Rune" });
     tile.focus();
     fireEvent.click(tile);
 
@@ -382,11 +593,9 @@ describe("InventoryAndStoragePanel", () => {
       kind: "goods",
       key: "weapon/uchigatana",
     });
-    expect(await within(dialog).findByRole("heading", { name: "Dagger" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading", { name: "Golden Rune" })).toBeInTheDocument();
     expect(within(dialog).getByText("Storage")).toBeInTheDocument();
-    expect(within(dialog).getByText("7")).toBeInTheDocument();
     expect(within(dialog).getByText("9")).toBeInTheDocument();
-    expect(within(dialog).getAllByText("600")).toHaveLength(2);
     expect(dialog).not.toHaveTextContent("weapon/uchigatana");
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
@@ -397,17 +606,26 @@ describe("InventoryAndStoragePanel", () => {
   it("reports loading, empty and failed containers independently", async () => {
     const pending = makePorts({
       items: {
-        getInventory: () => new Promise<ItemPage>(() => undefined),
-        getStorage: () => Promise.resolve(page({ records: [], total: 0 })),
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          request.container === "inventory"
+            ? new Promise<OwnedItemsPage>(() => undefined)
+            : Promise.resolve({ ...storagePage, records: [], total: 0 }),
       },
     });
     const pendingView = await renderPanel(pending);
     expect(await screen.findByText("Loading the Inventory…")).toHaveAttribute("role", "status");
-    expect(await screen.findByText("This Storage card is empty.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No Storage item matches the current filters."),
+    ).toBeInTheDocument();
     pendingView.unmount();
 
     const failed = makePorts({
-      items: { getStorage: () => Promise.reject(new Error("bridge_call_failed /Users/private")) },
+      items: {
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          request.container === "storage"
+            ? Promise.reject(new Error("bridge_call_failed /Users/private"))
+            : Promise.resolve(inventoryPage),
+      },
     });
     await renderPanel(failed);
     expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load the Storage Box.");
@@ -416,21 +634,21 @@ describe("InventoryAndStoragePanel", () => {
     expect(document.body).not.toHaveTextContent("/Users/private");
   });
 
-  it("keeps save records when the presentation batch fails", async () => {
+  it("rejects a container response from a different save revision", async () => {
     const ports = makePorts({
-      catalog: {
-        getResourcePresentationSummaries: () =>
-          Promise.reject(new Error("bridge_call_failed secret")),
+      items: {
+        getOwnedItems: (request: OwnedItemsRequest) =>
+          Promise.resolve(
+            request.container === "storage"
+              ? { ...storagePage, saveRevision: "revision-2" }
+              : inventoryPage,
+          ),
       },
     });
     await renderPanel(ports);
 
-    await screen.findAllByRole("button", { name: /Name unavailable/ });
-    const inventoryGrid = await screen.findByRole("region", { name: "Inventory items" });
-    expect(within(inventoryGrid).getAllByRole("button")).toHaveLength(1);
-    expect(await screen.findByText("Item names and icons are unavailable.")).toBeInTheDocument();
-    expect(within(inventoryGrid).getByText("Name unavailable")).toBeInTheDocument();
-    expect(document.body).not.toHaveTextContent("bridge_call_failed");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load the Storage Box.");
+    expect(await screen.findByText("Uchigatana")).toBeInTheDocument();
   });
 
   it("keeps a failing detail query technical-free and outside both lists", async () => {
@@ -441,47 +659,14 @@ describe("InventoryAndStoragePanel", () => {
     });
     await renderPanel(ports);
 
-    fireEvent.click(await screen.findByRole("button", { name: /Uchigatana/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Uchigatana" }));
     const dialog = await screen.findByRole("dialog", { name: "Item details" });
     expect(await within(dialog).findByRole("alert")).toHaveTextContent(
       "Unable to load item details.",
     );
-    expect(within(dialog).getByText("Uchigatana")).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading", { name: "Uchigatana" })).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent("bridge_call_failed");
     expect(document.body).not.toHaveTextContent("/Users/private");
-    expect(
-      screen.getByRole("region", { name: "Inventory items", hidden: true }).children,
-    ).toHaveLength(30);
-  });
-
-  it("rejects a container response from a different save revision", async () => {
-    const ports = makePorts({
-      items: { getStorage: () => Promise.resolve({ ...storagePage, saveRevision: "revision-2" }) },
-    });
-    await renderPanel(ports);
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load the Storage Box.");
-    expect(screen.queryByText(/read at different save revisions/)).toBeNull();
-  });
-
-  it("asks for nothing without a session or a character", async () => {
-    const withoutSession = makePorts();
-    const view = await renderPanel(withoutSession, { saveSessionID: undefined });
-    expect(
-      screen.getByText(
-        "Load a save and select a character to read the Inventory and the Storage Box.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Inventory items" })).toBeNull();
-    view.unmount();
-
-    const withoutCharacter = makePorts();
-    await renderPanel(withoutCharacter, { characterID: undefined });
-    expect(withoutSession.getInventory).not.toHaveBeenCalled();
-    expect(withoutSession.getStorage).not.toHaveBeenCalled();
-    expect(withoutCharacter.getInventory).not.toHaveBeenCalled();
-    expect(withoutCharacter.getStorage).not.toHaveBeenCalled();
-    expect(withoutCharacter.getResourcePresentationSummaries).not.toHaveBeenCalled();
   });
 
   it("renders the workspace labels in Polish", async () => {
@@ -494,20 +679,5 @@ describe("InventoryAndStoragePanel", () => {
     expect(screen.getByRole("button", { name: "Siatka" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tabela" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Poprzednia karta ekwipunku" })).toBeInTheDocument();
-  });
-
-  it("offers no mutating control anywhere in the read-only workspace", async () => {
-    const ports = makePorts();
-    await renderPanel(ports);
-
-    fireEvent.click(await screen.findByRole("button", { name: /Uchigatana/ }));
-    await screen.findByRole("dialog", { name: "Item details" });
-
-    for (const pattern of [/move/i, /delete/i, /remove/i, /favorite/i, /add/i, /save/i, /apply/i]) {
-      expect(screen.queryByRole("button", { name: pattern })).toBeNull();
-    }
-    expect(screen.queryByRole("textbox")).toBeNull();
-    expect(screen.queryByRole("spinbutton")).toBeNull();
-    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 });

@@ -31,6 +31,23 @@ msgstr "A save session could not be closed and is still open. Nothing was change
 msgid "Active characters"
 msgstr "Active characters"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Add"
+msgstr "Add"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Add {name} to favorites"
+msgstr "Add {name} to favorites"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Add items"
+msgstr "Add items"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Add to save"
+msgstr "Add to save"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Advanced"
 msgstr "Advanced"
@@ -42,6 +59,11 @@ msgstr "Advanced save features"
 #: src/features/app-shell/AppShell.tsx
 msgid "Advanced save features are not available yet."
 msgstr "Advanced save features are not available yet."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "All categories"
+msgstr "All categories"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "All families"
@@ -102,10 +124,13 @@ msgstr "Backup: {0}."
 msgid "ban risk"
 msgstr "ban risk"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Ban risk"
 msgstr "Ban risk"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Cancel"
 msgstr "Cancel"
@@ -129,6 +154,10 @@ msgid "Changes"
 msgstr "Changes"
 
 #: src/features/app-shell/AppShell.tsx
+msgid "Chaos Mode"
+msgstr "Chaos Mode"
+
+#: src/features/app-shell/AppShell.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Character"
 msgstr "Character"
@@ -144,6 +173,11 @@ msgstr "Characters"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Clear"
 msgstr "Clear"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Clear selection"
+msgstr "Clear selection"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
@@ -180,6 +214,11 @@ msgstr "Critical"
 msgid "Critical validation issues block saving."
 msgstr "Critical validation issues block saving."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Cut content"
+msgstr "Cut content"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Dark"
 msgstr "Dark"
@@ -203,6 +242,11 @@ msgstr "Diagnostic ID:"
 msgid "Discard"
 msgstr "Discard"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "DLC"
+msgstr "DLC"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Elden Ring"
 msgstr "Elden Ring"
@@ -219,6 +263,10 @@ msgstr "Equipment"
 msgid "Equipment and quick slots"
 msgstr "Equipment and quick slots"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Expanded Limits"
+msgstr "Expanded Limits"
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Export"
@@ -227,6 +275,16 @@ msgstr "Export"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Family"
 msgstr "Family"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Favorite"
+msgstr "Favorite"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Favorites only"
+msgstr "Favorites only"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "File"
@@ -265,6 +323,10 @@ msgstr "I reviewed and accept the warnings."
 msgid "I understand and accept the separate ban risk."
 msgstr "I understand and accept the separate ban risk."
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "I understand that at least one of these items carries a ban risk and I confirm adding it."
+msgstr "I understand that at least one of these items carries a ban risk and I confirm adding it."
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
 msgstr "Inactive slot"
@@ -273,7 +335,16 @@ msgstr "Inactive slot"
 msgid "Inactive slots"
 msgstr "Inactive slots"
 
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Information from GameCatalog."
+msgstr "Information from GameCatalog."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Information from the save and GameCatalog."
+msgstr "Information from the save and GameCatalog."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Inventory"
 msgstr "Inventory"
 
@@ -320,8 +391,9 @@ msgid "Item family"
 msgstr "Item family"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
-msgid "Item names and icons are unavailable."
-msgstr "Item names and icons are unavailable."
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Item ID"
+msgstr "Item ID"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Item results"
@@ -393,10 +465,16 @@ msgid "Location"
 msgstr "Location"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Manual sort order"
+msgstr "Manual sort order"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Maximum in Inventory"
 msgstr "Maximum in Inventory"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Maximum in Storage"
 msgstr "Maximum in Storage"
 
@@ -407,6 +485,26 @@ msgstr "Modified"
 #: src/features/app-shell/AppShell.tsx
 msgid "Modules"
 msgstr "Modules"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Move down"
+msgstr "Move down"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Move to Inventory"
+msgstr "Move to Inventory"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Move to position"
+msgstr "Move to position"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Move to Storage"
+msgstr "Move to Storage"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Move up"
+msgstr "Move up"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -431,6 +529,11 @@ msgstr "Next inventory card"
 msgid "Next storage card"
 msgstr "Next storage card"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "No"
+msgstr "No"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "No active character is available."
 msgstr "No active character is available."
@@ -442,6 +545,10 @@ msgstr "No file was chosen."
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "No grouping"
 msgstr "No grouping"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "No Inventory item matches the current filters."
+msgstr "No Inventory item matches the current filters."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "No items match the current search."
@@ -466,6 +573,10 @@ msgstr "No save loaded"
 #: src/features/character/CharacterSidebar.tsx
 msgid "No save loaded."
 msgstr "No save loaded."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "No Storage item matches the current filters."
+msgstr "No Storage item matches the current filters."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "No unsaved changes"
@@ -500,6 +611,14 @@ msgstr "Operation history"
 msgid "operation(s)"
 msgstr "operation(s)"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Order position"
+msgstr "Order position"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Owned quantity"
+msgstr "Owned quantity"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
 msgstr "Page {servedPage}"
@@ -518,6 +637,11 @@ msgstr "Position"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Pre-order"
+msgstr "Pre-order"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Previous"
 msgstr "Previous"
 
@@ -533,13 +657,10 @@ msgstr "Previous storage card"
 msgid "Quantity"
 msgstr "Quantity"
 
-#: src/features/items/item-database/ItemDatabasePanel.tsx
-msgid "Read-only information from GameCatalog."
-msgstr "Read-only information from GameCatalog."
-
+#. placeholder {0}: displayName(row.original.record, nameUnavailable)
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
-msgid "Read-only information from the save and GameCatalog."
-msgstr "Read-only information from the save and GameCatalog."
+msgid "Quantity of {0}"
+msgstr "Quantity of {0}"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Recent files"
@@ -574,9 +695,15 @@ msgstr "Redo"
 msgid "Redo the last undone operation"
 msgstr "Redo the last undone operation"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Remove"
 msgstr "Remove"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Remove {name} from favorites"
+msgstr "Remove {name} from favorites"
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -631,6 +758,14 @@ msgstr "Risk"
 msgid "RL {level}"
 msgstr "RL {level}"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Safe"
+msgstr "Safe"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Safety profile"
+msgstr "Safety profile"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save"
@@ -670,9 +805,34 @@ msgstr "Saved to {0}."
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge found operation journals from an earlier session."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Search items"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Select"
+msgstr "Select"
+
+#. placeholder {0}: displayName(record, nameUnavailable)
+#. placeholder {0}: displayName(row, nameUnavailable)
+#. placeholder {0}: displayName(row.original, nameUnavailable)
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Select {0}"
+msgstr "Select {0}"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Selected items"
+msgstr "Selected items"
+
+#. placeholder {0}: model.selected.length
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Selected: {0}"
+msgstr "Selected: {0}"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Session"
@@ -686,9 +846,44 @@ msgstr "Session operations"
 msgid "Session overview and file actions"
 msgstr "Session overview and file actions"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Show Item ID"
+msgstr "Show Item ID"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber}"
 msgstr "Slot {slotNumber}"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Sort order"
+msgstr "Sort order"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Sort: catalog order"
+msgstr "Sort: catalog order"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Sort: category"
+msgstr "Sort: category"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Sort: default order"
+msgstr "Sort: default order"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Sort: item ID"
+msgstr "Sort: item ID"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Sort: name"
+msgstr "Sort: name"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Sort: quantity"
+msgstr "Sort: quantity"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Source"
@@ -703,6 +898,16 @@ msgid "Spirit Ashes"
 msgstr "Spirit Ashes"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Stacks"
+msgstr "Stacks"
+
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "State how much of each item goes to Inventory and to Storage."
+msgstr "State how much of each item goes to Inventory and to Storage."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Storage"
 msgstr "Storage"
 
@@ -732,6 +937,10 @@ msgstr "Table"
 msgid "Talismans"
 msgstr "Talismans"
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+msgid "Target position"
+msgstr "Target position"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The application backend could not be reached."
 msgstr "The application backend could not be reached."
@@ -743,6 +952,11 @@ msgstr "The application backend encountered an internal error."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The automatic backup limit was reached. Future saves remove the oldest backup."
 msgstr "The automatic backup limit was reached. Future saves remove the oldest backup."
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "The change was not applied."
+msgstr "The change was not applied."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "The Character workspace will be implemented in a later frontend stage."
@@ -756,10 +970,6 @@ msgstr "The Equipment workspace will be implemented in a later frontend stage."
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
 msgstr "The file chooser could not be opened. No file was selected and nothing was loaded."
 
-#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
-msgid "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
-msgstr "The Inventory and the Storage Box were read at different save revisions. Reload the character before relying on this view."
-
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The request was rejected because some input was invalid."
 msgstr "The request was rejected because some input was invalid."
@@ -767,6 +977,10 @@ msgstr "The request was rejected because some input was invalid."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The requested operation could not be completed."
 msgstr "The requested operation could not be completed."
+
+#: src/features/app-shell/AppShell.tsx
+msgid "The safety profile is unavailable."
+msgstr "The safety profile is unavailable."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The save changed before the operation could be applied."
@@ -784,7 +998,6 @@ msgstr "The save session is no longer available."
 msgid "The save was not opened for editing."
 msgstr "The save was not opened for editing."
 
-#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "The selected resource has no item details."
 msgstr "The selected resource has no item details."
@@ -800,10 +1013,6 @@ msgstr "The World workspace will be implemented in a later frontend stage."
 #: src/features/app-shell/AppShell.tsx
 msgid "Theme"
 msgstr "Theme"
-
-#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
-msgid "This Inventory card is empty."
-msgstr "This Inventory card is empty."
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
@@ -830,10 +1039,6 @@ msgstr "This save has no active character, so it cannot be edited. It was not op
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
 msgstr "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
-
-#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
-msgid "This Storage card is empty."
-msgstr "This Storage card is empty."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Tools"
@@ -864,6 +1069,7 @@ msgstr "Unable to load the Item Database."
 msgid "Unable to load the Storage Box."
 msgstr "Unable to load the Storage Box."
 
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Unavailable"
 msgstr "Unavailable"
@@ -884,6 +1090,11 @@ msgstr "Undo the last operation"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Upgradeable"
+msgstr "Upgradeable"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Validate again"
@@ -945,3 +1156,8 @@ msgstr "World"
 #: src/features/app-shell/AppShell.tsx
 msgid "World progress and unlocks"
 msgstr "World progress and unlocks"
+
+#: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
+#: src/features/items/item-database/ItemDatabasePanel.tsx
+msgid "Yes"
+msgstr "Yes"

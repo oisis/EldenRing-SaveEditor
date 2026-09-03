@@ -129,3 +129,57 @@ export const detailIconPlaceholder = style({
   border: `1px dashed ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
 });
+
+/** The cell of one physical field: the tile plus its selection and favourite controls. */
+export const cell = style({
+  position: "relative",
+  display: "flex",
+  minWidth: 0,
+});
+
+/** The two overlay controls of a tile, kept out of the tile's own click target. */
+export const cellControls = style({
+  position: "absolute",
+  insetBlockStart: tokens.space.xs,
+  insetInlineStart: tokens.space.xs,
+  insetInlineEnd: tokens.space.xs,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: tokens.space.xs,
+  pointerEvents: "none",
+});
+
+export const cellControl = style({
+  pointerEvents: "auto",
+});
+
+/** The bulk action bar shown while at least one record is selected. */
+export const bulkBar = style({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: tokens.space.sm,
+  padding: tokens.space.sm,
+  border: `1px solid ${tokens.color.border}`,
+  borderRadius: tokens.radius.md,
+  background: tokens.color.surfaceRaised,
+});
+
+export const filters = style({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: tokens.space.sm,
+});
+
+export const searchField = style({ flex: "1 1 220px", maxWidth: "420px" });
+export const filterField = style({ flex: "0 1 180px" });
+export const quantityField = style({ width: "6rem" });
+
+/** The badge row of a tile or a detail dialog: safety and presentation flags. */
+export const flagRow = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: tokens.space.xs,
+});

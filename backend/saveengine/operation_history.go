@@ -149,11 +149,17 @@ func cloneOperationRecord(record OperationRecord) OperationRecord {
 	return cloned
 }
 
+// executionBanRiskReason is the one reason text of a risk that belongs to a
+// concrete execution rather than to its kind. It lives here, beside the kind
+// table, so the history contract stays the single place a risk is named.
+const executionBanRiskReason = "This operation writes a resource the GameCatalog marks as a ban risk."
+
 func operationEntryForCommit(
 	receipt MutationReceipt,
 	order int,
 	characterScoped bool,
 	characterID int,
+	banRisk bool,
 	before []byte,
 	after []byte,
 ) (operationEntry, error) {
@@ -161,7 +167,14 @@ func operationEntryForCommit(
 	if err != nil {
 		return operationEntry{}, err
 	}
-	area, risk, riskReason := operationPresentation(receipt.OperationKind)
+	area, risk, riskReason := operationPresentation(receipt.OperationKind, receipt.ChangedScopes)
+	// The kind states the risk every execution of it carries; banRisk is what the
+	// backend derived from authoritative GameCatalog data about this one
+	// execution. A ban risk outranks a warning and is outranked by a critical, so
+	// the elevated value replaces the baseline in exactly that case.
+	if banRisk && risk != OperationRiskCritical {
+		risk, riskReason = OperationRiskBanRisk, executionBanRiskReason
+	}
 	var character *int
 	if characterScoped {
 		value := characterID
@@ -207,8 +220,7 @@ func humanizeOperationKind(kind string) string {
 	return strings.Join(parts, " ")
 }
 
-func operationPresentation(kind string) (string, OperationRisk, string) {
-	scopes, _ := changedScopesForMutationKind(kind)
+func operationPresentation(kind string, scopes []string) (string, OperationRisk, string) {
 	area := "Session"
 	for _, scope := range scopes {
 		switch scope {

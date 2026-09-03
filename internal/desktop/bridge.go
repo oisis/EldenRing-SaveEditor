@@ -19,6 +19,8 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -40,6 +42,11 @@ type Bridge struct {
 	// root. The bridge only passes it to public endpoints and resolves nothing
 	// through it itself.
 	gameCatalog *gamecatalog.Catalog
+	// safetyProfiles is the host-local application settings store that owns the
+	// global Safety Profile. The bridge only reads the active profile from it and
+	// hands it to the endpoints that need it; it interprets no profile rule of
+	// its own, and the frontend never supplies a profile with a call.
+	safetyProfiles *safetyprofile.Store
 	// chooseSaveFile is the host's native file dialog, injected by the
 	// composition root so the bridge can be exercised without a real window. The
 	// bridge holds no dialog implementation of its own.
@@ -72,10 +79,32 @@ func NewBridge(
 	chooseSaveFile SaveFileChooser,
 	chooseSaveTarget ...SaveTargetChooser,
 ) *Bridge {
+	// A caller that states no settings store gets a store with no state
+	// directory, which is the package's own in-memory mode. It never writes host
+	// state and always reports the product default, so a bridge built this way
+	// still answers the profile getter truthfully.
+	return NewBridgeWithSettings(
+		applicationVersion, saveEngine, gameCatalog, safetyprofile.NewStore(""),
+		chooseSaveFile, chooseSaveTarget...)
+}
+
+// NewBridgeWithSettings is NewBridge for a composition root that owns a
+// persistent application settings store. The store is injected rather than
+// created here, so the host directory has one owner and the bridge stays
+// exercisable without one.
+func NewBridgeWithSettings(
+	applicationVersion string,
+	saveEngine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+	safetyProfiles *safetyprofile.Store,
+	chooseSaveFile SaveFileChooser,
+	chooseSaveTarget ...SaveTargetChooser,
+) *Bridge {
 	bridge := &Bridge{
 		applicationVersion: applicationVersion,
 		saveEngine:         saveEngine,
 		gameCatalog:        gameCatalog,
+		safetyProfiles:     safetyProfiles,
 		chooseSaveFile:     chooseSaveFile,
 	}
 	if len(chooseSaveTarget) > 0 {
@@ -472,4 +501,185 @@ func (b *Bridge) GetEquippedSpells(
 	characterID int,
 ) (equipment.GetEquippedSpellsResult, error) {
 	return bridged(equipment.GetEquippedSpells(b.saveEngine, b.gameCatalog, saveSessionID, characterID))
+}
+
+// activeSafetyProfile reads the profile the backend currently enforces. It is
+// the only way a profile reaches an endpoint through this bridge: the frontend
+// never sends one, so a call that bypasses the interface cannot widen the
+// limits or reveal a resource the host setting hides.
+func (b *Bridge) activeSafetyProfile() (string, error) {
+	if b.safetyProfiles == nil {
+		return "", errors.New("application settings are not available")
+	}
+	profile, err := b.safetyProfiles.Get()
+	if err != nil {
+		return "", err
+	}
+	return string(profile), nil
+}
+
+// GetSafetyProfile delegates to the GetSafetyProfile endpoint and returns its
+// result and error unchanged.
+func (b *Bridge) GetSafetyProfile() (application.SafetyProfileResult, error) {
+	return bridged(application.GetSafetyProfile(b.safetyProfiles))
+}
+
+// SetSafetyProfile delegates to the SetSafetyProfile endpoint and returns its
+// result and error unchanged. The value is forwarded exactly as received: which
+// profiles exist and how an unknown one is rejected are the endpoint's
+// contract.
+func (b *Bridge) SetSafetyProfile(safetyProfile string) (application.SetSafetyProfileResult, error) {
+	return bridged(application.SetSafetyProfile(b.safetyProfiles, safetyProfile))
+}
+
+// GetItemDatabase delegates to the GetItemDatabase endpoint under the active
+// Safety Profile. Every filter, the favourites, the sort order and the paging
+// are forwarded exactly as received; the profile is read from the host setting
+// and is never taken from the caller.
+func (b *Bridge) GetItemDatabase(
+	family string,
+	category string,
+	search string,
+	favoritesOnly bool,
+	favorites []schema.ResourceRef,
+	sort string,
+	page int,
+	pageSize int,
+) (catalog.GetItemDatabaseResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return catalog.GetItemDatabaseResult{}, bridgeError(err)
+	}
+	return bridged(catalog.GetItemDatabase(
+		b.gameCatalog, profile, family, category, search, favoritesOnly, favorites,
+		sort, page, pageSize))
+}
+
+// GetOwnedItems delegates to the GetOwnedItems endpoint under the active Safety
+// Profile. The container, the section, every filter, the favourites, the sort
+// order and the paging are forwarded exactly as received.
+func (b *Bridge) GetOwnedItems(
+	saveSessionID string,
+	characterID int,
+	container string,
+	containerSection string,
+	search string,
+	category string,
+	favoritesOnly bool,
+	favorites []schema.ResourceRef,
+	sort string,
+	page int,
+	pageSize int,
+) (inventory.GetOwnedItemsResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return inventory.GetOwnedItemsResult{}, bridgeError(err)
+	}
+	return bridged(inventory.GetOwnedItems(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID, container,
+		containerSection, search, category, favoritesOnly, favorites, sort, page, pageSize))
+}
+
+// AddItemsToContainers delegates to the AddItemsToContainers endpoint under the
+// active Safety Profile. Atomicity, limits, ban-risk confirmation and the exact
+// changed scopes remain endpoint and SaveEngine concerns.
+func (b *Bridge) AddItemsToContainers(
+	saveSessionID string,
+	characterID int,
+	items []inventory.AddItemsRequestEntry,
+	confirmBanRisk bool,
+	expectedRevision string,
+) (inventory.AddItemsToContainersResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return inventory.AddItemsToContainersResult{}, bridgeError(err)
+	}
+	return bridged(inventory.AddItemsToContainers(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID, items,
+		confirmBanRisk, expectedRevision))
+}
+
+// MoveOwnedItemsToStorage delegates to the matching batch endpoint under the
+// active Safety Profile.
+func (b *Bridge) MoveOwnedItemsToStorage(
+	saveSessionID string,
+	characterID int,
+	ownedItemIDs []string,
+	expectedRevision string,
+) (inventory.MoveOwnedItemsToStorageResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return inventory.MoveOwnedItemsToStorageResult{}, bridgeError(err)
+	}
+	return bridged(inventory.MoveOwnedItemsToStorage(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID,
+		ownedItemIDs, expectedRevision))
+}
+
+// MoveOwnedItemsToInventory delegates to the matching batch endpoint under the
+// active Safety Profile.
+func (b *Bridge) MoveOwnedItemsToInventory(
+	saveSessionID string,
+	characterID int,
+	ownedItemIDs []string,
+	expectedRevision string,
+) (inventory.MoveOwnedItemsToInventoryResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return inventory.MoveOwnedItemsToInventoryResult{}, bridgeError(err)
+	}
+	return bridged(inventory.MoveOwnedItemsToInventory(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID,
+		ownedItemIDs, expectedRevision))
+}
+
+// RemoveOwnedItems delegates to the RemoveOwnedItems endpoint and returns its
+// result and error unchanged. A removal is addressed by identity and needs no
+// catalog document and no profile.
+func (b *Bridge) RemoveOwnedItems(
+	saveSessionID string,
+	characterID int,
+	ownedItemIDs []string,
+	expectedRevision string,
+) (inventory.RemoveOwnedItemsResult, error) {
+	return bridged(inventory.RemoveOwnedItems(
+		b.saveEngine, saveSessionID, characterID, ownedItemIDs, expectedRevision))
+}
+
+// ReorderInventoryItems delegates to the ReorderInventoryItems endpoint and
+// returns its result and error unchanged. The anchor, the group and the target
+// position are forwarded exactly as received.
+func (b *Bridge) ReorderInventoryItems(
+	saveSessionID string,
+	characterID int,
+	anchorOwnedItemID string,
+	groupOwnedItemIDs []string,
+	targetPosition int,
+	expectedRevision string,
+) (inventory.ReorderInventoryItemsResult, error) {
+	return bridged(inventory.ReorderInventoryItems(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, anchorOwnedItemID,
+		groupOwnedItemIDs, targetPosition, expectedRevision))
+}
+
+// SetOwnedItemQuantity delegates to the SetOwnedItemQuantity endpoint under the
+// active Safety Profile. The exported signature carries no profile: it is read
+// from the host setting here, exactly as for every other profile-aware Items
+// method, so the frontend can neither widen nor narrow the container limit.
+// The two limits, the stack rules and the atomic write remain endpoint and
+// SaveEngine concerns.
+func (b *Bridge) SetOwnedItemQuantity(
+	saveSessionID string,
+	characterID int,
+	ownedItemID string,
+	quantity uint32,
+	expectedRevision string,
+) (inventory.SetOwnedItemQuantityResult, error) {
+	profile, err := b.activeSafetyProfile()
+	if err != nil {
+		return inventory.SetOwnedItemQuantityResult{}, bridgeError(err)
+	}
+	return bridged(inventory.SetOwnedItemQuantity(
+		b.saveEngine, b.gameCatalog, profile, saveSessionID, characterID, ownedItemID,
+		quantity, expectedRevision))
 }

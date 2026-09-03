@@ -266,7 +266,68 @@ export type CatalogItemVariantsRequest = {
   key: string;
 };
 
+/**
+ * One Item Database row exactly as the backend reports it. Visibility, order
+ * and paging are the backend's decisions under the active Safety Profile; the
+ * three safety flags are carried so a row can be badged without a second call
+ * and are never turned into a risk level or an ordering here.
+ */
+export type CatalogItemDatabaseEntry = {
+  kind: string;
+  key: string;
+  /** Meaningless unless `gameIDKnown`; the raw value is carried regardless. */
+  gameID: number;
+  gameIDKnown: boolean;
+  family: string;
+  category: string;
+  subcategory: string;
+  /** Empty when the catalog does not know the name; never a synthesised one. */
+  name: string;
+  /** Embedded catalog path only; turn it into a URL through catalogAssetURL. */
+  iconPath: string;
+  banRisk: boolean;
+  cutContent: boolean;
+  dlc: boolean;
+  preOrder: boolean;
+};
+
+/** One category the profile can reach, with the rows behind it. */
+export type CatalogItemDatabaseCategory = {
+  category: string;
+  count: number;
+};
+
+/** One resolved page of the Item Database. */
+export type CatalogItemDatabasePage = {
+  /** The profile the backend resolved this page under, carried verbatim. */
+  safetyProfile: string;
+  resources: readonly CatalogItemDatabaseEntry[];
+  categories: readonly CatalogItemDatabaseCategory[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+/**
+ * The arguments of one Item Database page. Which filters are accepted, which
+ * sort orders exist, that an empty filter never filters and which defaults zero
+ * paging resolves to are the backend's contract; no safety profile is sent,
+ * because the backend reads its own host setting.
+ */
+export type CatalogItemDatabaseRequest = {
+  family: string;
+  category: string;
+  search: string;
+  favoritesOnly: boolean;
+  favorites: readonly CatalogResourcePresentationIdentity[];
+  sort: string;
+  page: number;
+  pageSize: number;
+};
+
 export type CatalogPort = {
+  /** Reads one authoritative page of the Item Database under the active profile. */
+  getItemDatabase: (request: CatalogItemDatabaseRequest) => Promise<CatalogItemDatabasePage>;
   /** Reads one page of the catalog under the backend's own filter contract. */
   getResources: (request: CatalogResourcesRequest) => Promise<CatalogResourcesPage>;
   /** Reads scalar presentation metadata for an ordered batch of exact identities. */

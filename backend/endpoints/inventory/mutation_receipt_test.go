@@ -138,7 +138,7 @@ func TestSetOwnedItemQuantityCarriesItsCommitReceiptInBothContainers(t *testing.
 			engine, sessionID, ownedItemID := quantityTestTarget(t, container, catalog)
 
 			result, err := SetOwnedItemQuantity(
-				engine, catalog, sessionID, quantityTestSlot(container), ownedItemID, 42, "0")
+				engine, catalog, expandedLimits, sessionID, quantityTestSlot(container), ownedItemID, 42, "0")
 			if err != nil {
 				t.Fatalf("SetOwnedItemQuantity: %v", err)
 			}
@@ -325,7 +325,7 @@ func TestTwoExecutionsOfOneInventoryMutationGetDifferentOperationIDs(t *testing.
 	engine, sessionID, ownedItemID := quantityTestTarget(t, "inventory", catalog)
 
 	first, err := SetOwnedItemQuantity(
-		engine, catalog, sessionID, getInventorySlot, ownedItemID, 42, "0")
+		engine, catalog, expandedLimits, sessionID, getInventorySlot, ownedItemID, 42, "0")
 	if err != nil {
 		t.Fatalf("first SetOwnedItemQuantity: %v", err)
 	}
@@ -333,7 +333,7 @@ func TestTwoExecutionsOfOneInventoryMutationGetDifferentOperationIDs(t *testing.
 	if err != nil {
 		t.Fatalf("GetInventory under the new revision: %v", err)
 	}
-	second, err := SetOwnedItemQuantity(engine, catalog, sessionID, getInventorySlot,
+	second, err := SetOwnedItemQuantity(engine, catalog, expandedLimits, sessionID, getInventorySlot,
 		quantityTestIdentity(t, getInventoryIdentities(t, listed.Records)), 7, "1")
 	if err != nil {
 		t.Fatalf("second SetOwnedItemQuantity: %v", err)
@@ -394,7 +394,7 @@ func TestRejectedInventoryMutationsExposeNoReceipt(t *testing.T) {
 		catalog := quantityTestCatalog(t, quantityTestItem(99, 600, 600))
 		engine, sessionID, ownedItemID := quantityTestTarget(t, "inventory", catalog)
 		result, err := SetOwnedItemQuantity(
-			engine, catalog, sessionID, getInventorySlot, ownedItemID, 100, "0")
+			engine, catalog, expandedLimits, sessionID, getInventorySlot, ownedItemID, 100, "0")
 		assertZeroResult(t, err, result, SetOwnedItemQuantityResult{})
 	})
 	t.Run("SetInventoryOrder/stale expectedRevision", func(t *testing.T) {

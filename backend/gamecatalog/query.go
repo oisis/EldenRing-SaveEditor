@@ -128,11 +128,30 @@ type ResourceSummary struct {
 	// resource belongs to the endpoint that lists them.
 	NoDatabaseKnown bool
 	NoDatabase      bool
-	Upgrade         CapabilitySummary
-	Infusion        CapabilitySummary
-	AshOfWarMount   CapabilitySummary
-	Stack           CapabilitySummary
-	Equipment       CapabilitySummary
+	// The remaining item facts a general item list filters, sorts or displays
+	// on: the catalog classification, the save-side identifier and the safety
+	// flags. Each one keeps its own Known flag for the same reason as the facts
+	// above: interpreting an undecided value belongs to the endpoint, never to
+	// this projection.
+	CategoryKnown    bool
+	Category         string
+	SubcategoryKnown bool
+	Subcategory      string
+	GameIDKnown      bool
+	GameID           uint32
+	BanRiskKnown     bool
+	BanRisk          bool
+	CutContentKnown  bool
+	CutContent       bool
+	DLCKnown         bool
+	DLC              bool
+	PreOrderKnown    bool
+	PreOrder         bool
+	Upgrade          CapabilitySummary
+	Infusion         CapabilitySummary
+	AshOfWarMount    CapabilitySummary
+	Stack            CapabilitySummary
+	Equipment        CapabilitySummary
 }
 
 // ResourceSummaries returns one summary per stored resource, ordered by kind and
@@ -176,6 +195,20 @@ func summariseResource(resource schema.Resource) ResourceSummary {
 		summary.IconPath = resource.Item.Presentation.IconPath.Value
 		summary.NoDatabaseKnown = resource.Item.Safety.NoDatabase.Known
 		summary.NoDatabase = resource.Item.Safety.NoDatabase.Value
+		summary.CategoryKnown = resource.Item.Category.Known
+		summary.Category = resource.Item.Category.Value
+		summary.SubcategoryKnown = resource.Item.Subcategory.Known
+		summary.Subcategory = resource.Item.Subcategory.Value
+		summary.GameIDKnown = resource.Item.GameID.Known
+		summary.GameID = resource.Item.GameID.Value
+		summary.BanRiskKnown = resource.Item.Safety.BanRisk.Known
+		summary.BanRisk = resource.Item.Safety.BanRisk.Value
+		summary.CutContentKnown = resource.Item.Safety.CutContent.Known
+		summary.CutContent = resource.Item.Safety.CutContent.Value
+		summary.DLCKnown = resource.Item.Safety.DLC.Known
+		summary.DLC = resource.Item.Safety.DLC.Value
+		summary.PreOrderKnown = resource.Item.Safety.PreOrder.Known
+		summary.PreOrder = resource.Item.Safety.PreOrder.Value
 
 		capabilities := resource.Item.Capabilities
 		summary.Upgrade = summariseCapability(capabilities.Upgrade)

@@ -35,6 +35,7 @@ var notSaveSessionMutations = map[string]string{
 	"remove_recent_file":          "writes the host-local Recent Files store",
 	"clear_recent_files":          "writes the host-local Recent Files store",
 	"set_save_lifecycle_settings": "writes host-local lifecycle settings",
+	"set_safety_profile":          "writes the host-local application settings store",
 	"restore_recovery_journal":    "creates a session from protected recovery state",
 	"discard_recovery_journal":    "removes protected recovery state",
 	"export_recovery_journal":     "copies protected recovery state",

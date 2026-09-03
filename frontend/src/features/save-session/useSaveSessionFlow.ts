@@ -72,6 +72,14 @@ export type SaveSessionFlow = {
   recentFiles: readonly RecentFile[];
   recoveryJournals: readonly RecoveryJournal[];
   lifecycleSettings: SaveLifecycleSettings | undefined;
+  /**
+   * The single post-mutation step of the whole application: it notes the
+   * mutation against the `session.changed` stream, maps the receipt's
+   * `changedScopes` onto query keys, refreshes the session and re-reads the
+   * operation history. Feature modules that commit a save mutation hand their
+   * receipt to this function and invalidate nothing themselves.
+   */
+  applyMutationReceipt: (receipt: MutationReceipt) => Promise<SaveSession>;
   openSave: () => void;
   openRecent: (path: string) => void;
   closeSave: () => void;
@@ -538,6 +546,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
 
   return {
     state,
+    applyMutationReceipt: refreshAfterMutation,
     blockedReason,
     failure,
     appError,

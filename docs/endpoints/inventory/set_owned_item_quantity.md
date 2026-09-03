@@ -25,8 +25,8 @@ container under the new revision and use the freshly minted identity.
 
 The endpoint owns exactly one decision SaveEngine cannot make: the two limits the
 mutation is validated against. It reads them from the record's own ItemDocument
-and passes them down. It opens no file, parses no save data of its own and calls
-no other endpoint.
+under the active Safety Profile and passes them down. It opens no file, parses no
+save data of its own and calls no other endpoint.
 
 | | |
 |---|---|
@@ -34,7 +34,7 @@ no other endpoint.
 | Kind | Mutation |
 | Domain | `inventory` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity` of the local explorer. The route exists only without `-allow-external-bind`; no Wails binding, CLI command or frontend reaches it. |
+| Transport status | transport-exposed — `PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity` of the local explorer, which runs under the default profile, and `Bridge.SetOwnedItemQuantity`, whose exported signature carries no profile because the bridge reads the host setting itself. |
 | Implementation source | [../../../backend/endpoints/inventory/set_owned_item_quantity.go](../../../backend/endpoints/inventory/set_owned_item_quantity.go) |
 | Test source | [../../../backend/endpoints/inventory/set_owned_item_quantity_test.go](../../../backend/endpoints/inventory/set_owned_item_quantity_test.go) |
 | Save access | read-write on the session's private in-memory snapshot; no file is opened |
@@ -46,6 +46,7 @@ no other endpoint.
 func SetOwnedItemQuantity(
 	engine *saveengine.Engine,
 	gameCatalog *gamecatalog.Catalog,
+	safetyProfile string,
 	saveSessionID string,
 	characterID int,
 	ownedItemID string,
@@ -78,6 +79,7 @@ rule.
 |---|---|---|
 | `engine` | `*saveengine.Engine` | The SaveEngine instance supplied by the backend caller. It owns the sessions; the endpoint never creates one. A `nil` engine is rejected. |
 | `gameCatalog` | `*gamecatalog.Catalog` | The already loaded catalog the two limits are read from. A `nil` catalog is rejected. |
+| `safetyProfile` | `string` | The active Safety Profile, supplied by the host and never by a client. Exactly one of `safe`, `expanded_limits` or `chaos`; any other value is rejected before the session is read. |
 | `saveSessionID` | `string` | Identifier of an existing session, exactly as returned by `LoadSave`. It is passed to SaveEngine unchanged. |
 | `characterID` | `int` | The physical slot index, `0` to `9`. |
 | `ownedItemID` | `string` | The opaque identity of the owned instance, exactly as a getter of this session reported it under the current revision. |
@@ -119,8 +121,19 @@ SaveEngine, which enforces them exactly as supplied:
 
 | Limit | Value |
 |---|---|
-| `maxContainerTotal` | `item.storage.maxInventory` for a record in Inventory, `item.storage.maxStorage` for a record in Storage. |
+| `maxContainerTotal` | The container limit of the record's own container under the active profile, as `backend/safetyprofile` resolves it. |
 | `maxPerRecord` | `min(item.capabilities.stack.rules.maxPerStack, maxContainerTotal)` |
+
+Which catalog field `maxContainerTotal` reads is the profile's decision and is
+taken from `backend/safetyprofile` alone; the endpoint holds no copy of the rule:
+
+| Profile | Inventory | Storage |
+|---|---|---|
+| `safe` | `item.storage.safeModeMaxInventory` when the item declares it, otherwise `item.storage.maxInventory` | `item.storage.safeModeMaxStorage` when the item declares it, otherwise `item.storage.maxStorage` |
+| `expanded_limits` | `item.storage.maxInventory` | `item.storage.maxStorage` |
+| `chaos` | `item.storage.maxInventory` | `item.storage.maxStorage` |
+
+A missing Safe Mode field is an absent narrower rule, never a zero limit.
 
 `maxContainerTotal` bounds the sum of the addressed item across the whole
 physical container — both of its sections — because the game counts what a
@@ -133,9 +146,14 @@ exceeds `maxPerStack`, even when `maxStorage` is larger; the per-stack limit is
 what one physical row is known to hold, and nothing is merged, split or spilled
 into a second row to satisfy a larger request.
 
-The endpoint accepts no mode, so it reads neither `safeModeMaxInventory` and
-`safeModeMaxStorage` nor the `-sfv` fields. No limit is defaulted, invented,
-widened or clamped. Unknown catalog data rejects the request instead.
+The `-sfv` fields are never read: they are SaveForge-verified research values,
+not runtime limits. No limit is defaulted, invented, widened or clamped, and
+unknown catalog data rejects the request instead.
+
+**The profile is never a request value.** It reaches the endpoint from the host —
+the desktop bridge reads the stored application setting, the local explorer runs
+under the product default — so a call that bypasses the interface is refused
+above the active limit by exactly the rule the interface renders.
 
 ## Output
 

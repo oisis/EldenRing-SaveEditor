@@ -1,7 +1,9 @@
 import type {
+  CatalogItemDatabaseRequest,
   CatalogResourcePresentationIdentity,
   CatalogResourcesRequest,
 } from "./catalog/catalogPort";
+import type { OwnedItemsRequest } from "./items/itemsPort";
 
 /**
  * The placeholder a per-character query is keyed under while no character is
@@ -21,6 +23,11 @@ type CharacterKey = number | typeof noCharacter;
  */
 export const queryKeys = {
   applicationInfo: () => ["application", "info"] as const,
+  /**
+   * The global Safety Profile is a host application setting, not save state, so
+   * its key lives outside every session prefix and survives closing a save.
+   */
+  safetyProfile: () => ["settings", "safety-profile"] as const,
   /**
    * The catalog is global: it belongs to no save session, so its keys live
    * outside the `save-session` prefix and closing a save leaves them cached.
@@ -76,6 +83,36 @@ export const queryKeys = {
    */
   catalogItemVariants: (kind: string | null, key: string | null) =>
     ["catalog", "item-variants", kind, key] as const,
+  /**
+   * One Item Database page. The catalog is global, so the key stays outside the
+   * `save-session` prefix; the favourites take part in it because a favourites
+   * filter selects a different page of the same catalog, and the identities are
+   * rendered as ordered pairs so two different selections never share an entry.
+   * The active Safety Profile is not part of the key: it is a host setting the
+   * backend reads itself, and changing it invalidates the whole catalog prefix.
+   */
+  catalogItemDatabase: ({
+    family,
+    category,
+    search,
+    favoritesOnly,
+    favorites,
+    sort,
+    page,
+    pageSize,
+  }: CatalogItemDatabaseRequest) =>
+    [
+      "catalog",
+      "item-database",
+      family,
+      category,
+      search,
+      favoritesOnly,
+      favorites.map(({ kind, key }) => [kind, key] as const),
+      sort,
+      page,
+      pageSize,
+    ] as const,
   /**
    * The prefix covering every cached view of one save session. Closing a
    * session removes this whole scope, so a later per-session query only has to
@@ -186,6 +223,36 @@ export const queryKeys = {
       containerSection,
       page,
       pageSize,
+      saveRevision,
+    ] as const,
+  /**
+   * One authoritative container page. It is a different question from the raw
+   * `inventory` and `storage` pages — the backend filters and sorts the whole
+   * container for it — so it keeps its own branch below the same session and
+   * slot scope, and every argument that selects a different answer takes part
+   * in the key.
+   */
+  ownedItems: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    saveRevision: string,
+    request: Omit<OwnedItemsRequest, "saveSessionID" | "characterID">,
+  ) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "owned-items",
+      request.container,
+      request.containerSection,
+      request.search,
+      request.category,
+      request.favoritesOnly,
+      request.favorites.map(({ kind, key }) => [kind, key] as const),
+      request.sort,
+      request.page,
+      request.pageSize,
       saveRevision,
     ] as const,
 } as const;

@@ -574,8 +574,14 @@ func TestUndoResolvesTheScopesOfTheRevertedMutation(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.undoneKind, func(t *testing.T) {
-			scopes, err := changedScopesForMutationKind(
-				kindUndoCharacterChanges, undoneChangedScopes(testCase.undoneKind)...)
+			// The undo resolves its scopes from what the reverted execution
+			// recorded. For a kind whose scope set is static that recording is
+			// exactly the kind's own resolution, which is what is fed back here.
+			recorded, err := changedScopesForMutationKind(testCase.undoneKind)
+			if err != nil {
+				t.Fatalf("recorded scopes for %q: %v", testCase.undoneKind, err)
+			}
+			scopes, err := changedScopesForMutationKind(kindUndoCharacterChanges, recorded...)
 			if err != nil {
 				t.Fatalf("undo scopes for %q: %v", testCase.undoneKind, err)
 			}
@@ -704,6 +710,28 @@ func assertCommittedReceipt(
 ) {
 	t.Helper()
 
+	wantScopes, err := ChangedScopesForMutationKind(operationKind)
+	if err != nil {
+		t.Fatalf("ChangedScopesForMutationKind(%q): %v", operationKind, err)
+	}
+	assertCommittedReceiptWithScopes(
+		t, receipt, saveSessionID, operationKind, saveRevision, wantScopes)
+}
+
+// assertCommittedReceiptWithScopes is assertCommittedReceipt for a kind whose
+// changed scopes belong to the concrete execution rather than to the static
+// kind table, so the caller states the exact list that one execution has to
+// report. Every other member of the contract is checked identically.
+func assertCommittedReceiptWithScopes(
+	t *testing.T,
+	receipt MutationReceipt,
+	saveSessionID string,
+	operationKind string,
+	saveRevision string,
+	wantScopes []string,
+) {
+	t.Helper()
+
 	if receipt.OperationID == "" {
 		t.Errorf("receipt = %+v, want a minted operationID", receipt)
 	}
@@ -715,10 +743,6 @@ func assertCommittedReceipt(
 	}
 	if receipt.SaveRevision != saveRevision {
 		t.Errorf("saveRevision = %q, want %q", receipt.SaveRevision, saveRevision)
-	}
-	wantScopes, err := ChangedScopesForMutationKind(operationKind)
-	if err != nil {
-		t.Fatalf("ChangedScopesForMutationKind(%q): %v", operationKind, err)
 	}
 	if strings.Join(receipt.ChangedScopes, ",") != strings.Join(wantScopes, ",") {
 		t.Errorf("changedScopes = %v, want %v", receipt.ChangedScopes, wantScopes)

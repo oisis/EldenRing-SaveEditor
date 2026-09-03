@@ -7,6 +7,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -21,6 +22,12 @@ import (
 const (
 	quantityTestGameID = 0x4000272E
 	quantityTestRow    = "common#1"
+
+	// The base container limit is what Expanded Limits and Chaos apply, so every
+	// case about the base limit states Expanded Limits explicitly instead of
+	// relying on an item that happens to declare no Safe Mode field.
+	expandedLimits = string(safetyprofile.ExpandedLimits)
+	safeMode       = string(safetyprofile.Safe)
 )
 
 // quantityTestCatalog rebuilds the loaded catalog with the addressed document
@@ -202,7 +209,7 @@ func TestSetOwnedItemQuantityCommitsInBothContainers(t *testing.T) {
 			engine, sessionID, ownedItemID := quantityTestTarget(t, container, catalog)
 
 			result, err := SetOwnedItemQuantity(
-				engine, catalog, sessionID, quantityTestSlot(container), ownedItemID, 42, "0")
+				engine, catalog, expandedLimits, sessionID, quantityTestSlot(container), ownedItemID, 42, "0")
 			if err != nil {
 				t.Fatalf("SetOwnedItemQuantity: %v", err)
 			}
@@ -241,7 +248,7 @@ func TestSetOwnedItemQuantityTakesTheSmallerOfStackAndContainerLimits(t *testing
 	engine, sessionID, ownedItemID := quantityTestTarget(t, "storage", catalog)
 
 	result, err := SetOwnedItemQuantity(
-		engine, catalog, sessionID, getStorageSlot, ownedItemID, 6, "0")
+		engine, catalog, expandedLimits, sessionID, getStorageSlot, ownedItemID, 6, "0")
 	if err == nil {
 		t.Fatalf("SetOwnedItemQuantity accepted 6 above the stack limit of 5: %+v", result)
 	}
@@ -259,7 +266,7 @@ func TestSetOwnedItemQuantityTakesTheSmallerOfStackAndContainerLimits(t *testing
 	}
 
 	if _, err := SetOwnedItemQuantity(
-		engine, catalog, sessionID, getStorageSlot, ownedItemID, 5, "0"); err != nil {
+		engine, catalog, expandedLimits, sessionID, getStorageSlot, ownedItemID, 5, "0"); err != nil {
 		t.Fatalf("SetOwnedItemQuantity rejected the stack limit itself: %v", err)
 	}
 }
@@ -315,7 +322,7 @@ func TestSetOwnedItemQuantityRejectsUnusableCatalogData(t *testing.T) {
 			catalog := quantityTestCatalog(t, testCase.apply)
 			engine, sessionID, ownedItemID := quantityTestTarget(t, testCase.container, catalog)
 
-			result, err := SetOwnedItemQuantity(engine, catalog, sessionID,
+			result, err := SetOwnedItemQuantity(engine, catalog, expandedLimits, sessionID,
 				quantityTestSlot(testCase.container), ownedItemID, 42, "0")
 			if err == nil {
 				t.Fatalf("SetOwnedItemQuantity accepted the request: %+v", result)
@@ -344,7 +351,7 @@ func TestSetOwnedItemQuantityRejectsMissingDependencies(t *testing.T) {
 	engine, sessionID, ownedItemID := quantityTestTarget(t, "inventory", catalog)
 
 	result, err := SetOwnedItemQuantity(
-		nil, catalog, sessionID, getInventorySlot, ownedItemID, 42, "0")
+		nil, catalog, expandedLimits, sessionID, getInventorySlot, ownedItemID, 42, "0")
 	if err == nil || err.Error() != "save engine is not available" {
 		t.Errorf("nil engine error = %v, want save engine is not available", err)
 	}
@@ -353,7 +360,7 @@ func TestSetOwnedItemQuantityRejectsMissingDependencies(t *testing.T) {
 	}
 
 	result, err = SetOwnedItemQuantity(
-		engine, nil, sessionID, getInventorySlot, ownedItemID, 42, "0")
+		engine, nil, expandedLimits, sessionID, getInventorySlot, ownedItemID, 42, "0")
 	if err == nil || err.Error() != "game catalog is not available" {
 		t.Errorf("nil catalog error = %v, want game catalog is not available", err)
 	}
@@ -373,9 +380,107 @@ func TestSetOwnedItemQuantityContractDeclaresTheAcceptedVariables(t *testing.T) 
 		t.Errorf("supported resource types = %q, want ItemDocument z capability stack",
 			SetOwnedItemQuantityDefinition.SupportedResourceTypes)
 	}
-	want := []string{"saveSessionID", "characterID", "ownedItemID", "quantity", "expectedRevision"}
+	want := []string{
+		"safetyProfile", "saveSessionID", "characterID", "ownedItemID", "quantity",
+		"expectedRevision",
+	}
 	if !reflect.DeepEqual(SetOwnedItemQuantityDefinition.SupportedResourceVariables, want) {
 		t.Errorf("supported resource variables = %v, want %v",
 			SetOwnedItemQuantityDefinition.SupportedResourceVariables, want)
+	}
+}
+
+// quantityTestSafeModeItem is the known shape plus the two Safe Mode fields, so
+// the same document yields a narrower limit under Safe and the base limit under
+// the two other profiles.
+func quantityTestSafeModeItem(
+	maxPerStack, maxInventory, maxStorage, safeInventory, safeStorage uint32,
+) func(*schema.ItemDocument) {
+	return quantityTestThen(maxPerStack, maxInventory, maxStorage,
+		func(document *schema.ItemDocument) {
+			inventoryFact := schema.Fact[uint32]{
+				Known:      true,
+				Value:      safeInventory,
+				Provenance: document.Storage.MaxInventory.Provenance,
+			}
+			storageFact := schema.Fact[uint32]{
+				Known:      true,
+				Value:      safeStorage,
+				Provenance: document.Storage.MaxStorage.Provenance,
+			}
+			document.Storage.SafeModeMaxInventory = &inventoryFact
+			document.Storage.SafeModeMaxStorage = &storageFact
+		})
+}
+
+// The active profile decides which container limit the endpoint derives. The
+// profile reaches the endpoint from the host, so a call that bypasses the
+// interface is refused above the limit the active profile states.
+func TestSetOwnedItemQuantityAppliesTheLimitOfTheActiveProfile(t *testing.T) {
+	for _, container := range []string{"inventory", "storage"} {
+		t.Run(container, func(t *testing.T) {
+			// Safe narrows both containers to 99 while the base limit stays 600.
+			catalog := quantityTestCatalog(t, quantityTestSafeModeItem(600, 600, 600, 99, 99))
+
+			engine, sessionID, ownedItemID := quantityTestTarget(t, container, catalog)
+			result, err := SetOwnedItemQuantity(
+				engine, catalog, safeMode, sessionID, quantityTestSlot(container), ownedItemID, 100, "0")
+			if err == nil {
+				t.Fatalf("Safe accepted 100 above its limit of 99: %+v", result)
+			}
+			if !strings.Contains(err.Error(), "99") {
+				t.Errorf("Safe error = %v, want the Safe Mode limit of 99", err)
+			}
+			if !reflect.DeepEqual(result, SetOwnedItemQuantityResult{}) {
+				t.Errorf("rejected result = %+v, want the zero value", result)
+			}
+			quantity, revision, dirty := quantityTestState(t, engine, catalog, container, sessionID)
+			if quantity != 3 || revision != "0" || dirty {
+				t.Errorf("rejected mutation left quantity %d, revision %q, unsavedChanges %v;"+
+					" want 3, \"0\", false", quantity, revision, dirty)
+			}
+
+			// The Safe Mode limit itself is accepted, so 99 is the boundary and not
+			// one below it.
+			if _, err := SetOwnedItemQuantity(
+				engine, catalog, safeMode, sessionID, quantityTestSlot(container),
+				ownedItemID, 99, "0"); err != nil {
+				t.Fatalf("Safe rejected its own limit of 99: %v", err)
+			}
+
+			// Expanded Limits reads the base limit of the very same document, so the
+			// value Safe refused commits.
+			engine, sessionID, ownedItemID = quantityTestTarget(t, container, catalog)
+			if _, err := SetOwnedItemQuantity(
+				engine, catalog, expandedLimits, sessionID, quantityTestSlot(container),
+				ownedItemID, 100, "0"); err != nil {
+				t.Fatalf("Expanded Limits rejected 100 under a base limit of 600: %v", err)
+			}
+			quantity, _, _ = quantityTestState(t, engine, catalog, container, sessionID)
+			if quantity != 100 {
+				t.Errorf("stored quantity = %d, want 100", quantity)
+			}
+		})
+	}
+}
+
+// An unknown profile is refused before the session is read, so no snapshot,
+// revision or dirty flag can move on a call that names no known profile.
+func TestSetOwnedItemQuantityRejectsAnUnknownProfile(t *testing.T) {
+	catalog := quantityTestCatalog(t, quantityTestItem(99, 600, 600))
+	engine, sessionID, ownedItemID := quantityTestTarget(t, "inventory", catalog)
+
+	result, err := SetOwnedItemQuantity(
+		engine, catalog, "", sessionID, getInventorySlot, ownedItemID, 42, "0")
+	if err == nil || !strings.Contains(err.Error(), "unknown safety profile") {
+		t.Fatalf("error = %v, want an unknown safety profile", err)
+	}
+	if !reflect.DeepEqual(result, SetOwnedItemQuantityResult{}) {
+		t.Errorf("result = %+v, want the zero value", result)
+	}
+	quantity, revision, dirty := quantityTestState(t, engine, catalog, "inventory", sessionID)
+	if quantity != 3 || revision != "0" || dirty {
+		t.Errorf("rejected mutation left quantity %d, revision %q, unsavedChanges %v;"+
+			" want 3, \"0\", false", quantity, revision, dirty)
 	}
 }

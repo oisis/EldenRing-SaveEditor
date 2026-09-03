@@ -9,7 +9,9 @@ import { CharacterPortProvider } from "./application/character/characterClient";
 import { DiagnosticsPortProvider } from "./application/diagnostics/diagnosticsClient";
 import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
+import { ItemPreferencesProvider } from "./application/preferences/itemPreferences";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
+import { SettingsPortProvider } from "./application/settings/settingsClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
 import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
 import "./ui/tokens/global.css";
@@ -34,19 +36,26 @@ createRoot(container).render(
             not inside, the save session: Item Database reads the catalog with no
             save loaded. */}
         <ApplicationInfoPortProvider port={wailsDesktopBridge}>
-          <CatalogPortProvider port={wailsDesktopBridge}>
-            <SaveSessionPortProvider port={wailsDesktopBridge}>
-              <CharacterPortProvider port={wailsDesktopBridge}>
-                <DiagnosticsPortProvider port={wailsDesktopBridge}>
-                  <ItemsPortProvider port={wailsDesktopBridge}>
-                    <EquipmentPortProvider port={wailsDesktopBridge}>
-                      <App />
-                    </EquipmentPortProvider>
-                  </ItemsPortProvider>
-                </DiagnosticsPortProvider>
-              </CharacterPortProvider>
-            </SaveSessionPortProvider>
-          </CatalogPortProvider>
+          {/* The settings port and the presentational item preferences both sit
+              above the save session: the Safety Profile and the item favourites
+              are host state and survive closing a save. */}
+          <SettingsPortProvider port={wailsDesktopBridge}>
+            <ItemPreferencesProvider>
+              <CatalogPortProvider port={wailsDesktopBridge}>
+                <SaveSessionPortProvider port={wailsDesktopBridge}>
+                  <CharacterPortProvider port={wailsDesktopBridge}>
+                    <DiagnosticsPortProvider port={wailsDesktopBridge}>
+                      <ItemsPortProvider port={wailsDesktopBridge}>
+                        <EquipmentPortProvider port={wailsDesktopBridge}>
+                          <App />
+                        </EquipmentPortProvider>
+                      </ItemsPortProvider>
+                    </DiagnosticsPortProvider>
+                  </CharacterPortProvider>
+                </SaveSessionPortProvider>
+              </CatalogPortProvider>
+            </ItemPreferencesProvider>
+          </SettingsPortProvider>
         </ApplicationInfoPortProvider>
       </QueryClientProvider>
     </I18nProvider>

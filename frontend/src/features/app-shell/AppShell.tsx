@@ -1,11 +1,14 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { type ReactNode, useEffect, useState } from "react";
 import appIconURL from "../../../../build/appicon.png";
+import { useItemPreferences } from "../../application/preferences/itemPreferences";
+import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
 import type { Locale } from "../../i18n/i18n";
 import { locales } from "../../i18n/i18n";
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
+import { Checkbox } from "../../ui/components/Checkbox/Checkbox";
 import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
 import { message } from "../../ui/patterns/panel.css";
@@ -89,6 +92,9 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [itemsSection, setItemsSection] = useState<ItemsSection>("inventory");
   const [retentionDraft, setRetentionDraft] = useState("10");
+  const preferences = useItemPreferences();
+  const safetyProfile = useSafetyProfile();
+  const setSafetyProfile = useSetSafetyProfile();
 
   useEffect(() => {
     if (flow.lifecycleSettings !== undefined) {
@@ -118,6 +124,12 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
     light: t`Light`,
     dark: t`Dark`,
     "elden-ring": t`Elden Ring`,
+  };
+  // The three profile names are backend values; only their wording is local.
+  const safetyProfileLabels: Record<string, string> = {
+    safe: t`Safe`,
+    expanded_limits: t`Expanded Limits`,
+    chaos: t`Chaos Mode`,
   };
   const localeLabels: Record<Locale, string> = {
     en: t`English`,
@@ -268,9 +280,17 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
                 saveRevision={session?.saveRevision}
                 characterID={selectedCharacterID}
                 containerSection="common"
+                applyMutationReceipt={flow.applyMutationReceipt}
+                sessionBusy={flow.isBusy}
               />
             ) : (
-              <ItemDatabasePanel />
+              <ItemDatabasePanel
+                saveSessionID={session?.saveSessionID}
+                saveRevision={session?.saveRevision}
+                characterID={selectedCharacterID}
+                applyMutationReceipt={flow.applyMutationReceipt}
+                sessionBusy={flow.isBusy}
+              />
             )}
           </section>
         )}
@@ -322,6 +342,38 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
                     </option>
                   ))}
                 </Select>
+              </label>
+              <label htmlFor="tools-safety-profile">
+                <Trans>Safety profile</Trans>{" "}
+                <Select
+                  id="tools-safety-profile"
+                  value={safetyProfile.data?.safetyProfile ?? ""}
+                  disabled={safetyProfile.data === undefined || setSafetyProfile.isPending}
+                  onChange={(event) => setSafetyProfile.mutate(event.currentTarget.value)}
+                >
+                  {(safetyProfile.data?.availableProfiles ?? []).map((name) => (
+                    <option key={name} value={name}>
+                      {safetyProfileLabels[name] ?? name}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              {safetyProfile.isError || setSafetyProfile.isError ? (
+                <p role="alert" className={message}>
+                  {/* Reading and storing the setting fail for the same reasons
+                      and are reported the same way. The transport's own text
+                      never reaches the user: it carries bridge internals and
+                      host paths, and neither is actionable here. */}
+                  <Trans>The safety profile is unavailable.</Trans>
+                </p>
+              ) : null}
+              <label htmlFor="tools-show-item-id">
+                <Checkbox
+                  id="tools-show-item-id"
+                  checked={preferences.showItemID}
+                  onChange={(event) => preferences.setShowItemID(event.currentTarget.checked)}
+                />{" "}
+                <Trans>Show Item ID</Trans>
               </label>
               <label htmlFor="tools-backup-retention">
                 <Trans>Automatic backups kept</Trans>{" "}

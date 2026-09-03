@@ -38,6 +38,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -2360,9 +2361,13 @@ func registerSaveSessionRoutes(
 				writeError(writer, http.StatusBadRequest, requestBodyError(err))
 				return
 			}
+			// The local explorer stores no host application settings, so it runs
+			// under the default profile. The profile is never a request value:
+			// accepting one here would let a caller widen the container limit.
 			result, err := inventory.SetOwnedItemQuantity(
 				saveEngine,
 				gameCatalog,
+				string(safetyprofile.Default),
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.PathValue("ownedItemID"),

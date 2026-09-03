@@ -189,7 +189,7 @@ func (engine *Engine) commitRevision(
 	operationKind string,
 	commit func(*loadedSave) error,
 ) (MutationReceipt, error) {
-	return engine.commit(saveSessionID, operationKind, false, 0, commit)
+	return engine.commit(saveSessionID, operationKind, false, 0, execution{}, commit)
 }
 
 // commitCharacterRevision is commitRevision for a mutation that owns one
@@ -209,7 +209,37 @@ func (engine *Engine) commitCharacterRevision(
 	characterID int,
 	commit func(*loadedSave) error,
 ) (MutationReceipt, error) {
-	return engine.commit(saveSessionID, operationKind, true, characterID, commit)
+	return engine.commit(saveSessionID, operationKind, true, characterID, execution{}, commit)
+}
+
+// execution is what one concrete run of a mutation adds to what its kind
+// already states. Both members are resolved by the backend before the mutation
+// touches the session, so a rejected call publishes neither.
+//
+//   - extraScopes are the read scopes this request actually invalidated, for a
+//     mutation whose scope set is a property of its arguments. They are resolved
+//     through the same shared scope table as the kind itself, so nothing here
+//     assembles a scope list by hand and a value outside the closed vocabulary
+//     is rejected rather than dropped.
+//   - banRisk marks an execution the backend derived a ban risk for from
+//     authoritative GameCatalog data. The history contract turns it into the
+//     recorded risk; no caller names a risk level itself.
+type execution struct {
+	extraScopes []string
+	banRisk     bool
+}
+
+// commitCharacterRevisionWithExecution is commitCharacterRevision for a mutation
+// whose exact changed scopes, or whose risk, are a property of its request
+// rather than of its kind.
+func (engine *Engine) commitCharacterRevisionWithExecution(
+	saveSessionID string,
+	operationKind string,
+	characterID int,
+	details execution,
+	commit func(*loadedSave) error,
+) (MutationReceipt, error) {
+	return engine.commit(saveSessionID, operationKind, true, characterID, details, commit)
 }
 
 // commitCharacterRevisionWithHook runs commitCharacterRevision and executes
@@ -221,7 +251,8 @@ func (engine *Engine) commitCharacterRevisionWithHook(
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
 ) (MutationReceipt, error) {
-	return engine.commitWithHook(saveSessionID, operationKind, true, characterID, commit, afterCommit)
+	return engine.commitWithHook(
+		saveSessionID, operationKind, true, characterID, execution{}, commit, afterCommit)
 }
 
 // commit is the one implementation behind both entry points. characterScoped
@@ -231,9 +262,11 @@ func (engine *Engine) commit(
 	operationKind string,
 	characterScoped bool,
 	characterID int,
+	details execution,
 	commit func(*loadedSave) error,
 ) (MutationReceipt, error) {
-	return engine.commitWithHook(saveSessionID, operationKind, characterScoped, characterID, commit, nil)
+	return engine.commitWithHook(
+		saveSessionID, operationKind, characterScoped, characterID, details, commit, nil)
 }
 
 // commitWithHook commits under Engine.mutex and then publishes the
@@ -247,11 +280,12 @@ func (engine *Engine) commitWithHook(
 	operationKind string,
 	characterScoped bool,
 	characterID int,
+	details execution,
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
 ) (MutationReceipt, error) {
 	receipt, err := engine.commitLocked(
-		saveSessionID, operationKind, characterScoped, characterID, commit, afterCommit)
+		saveSessionID, operationKind, characterScoped, characterID, details, commit, afterCommit)
 	if err != nil {
 		// A rejected or rolled back mutation queued nothing, so there is nothing
 		// of its own to publish here. The drain still runs: an earlier committed
@@ -268,6 +302,7 @@ func (engine *Engine) commitLocked(
 	operationKind string,
 	characterScoped bool,
 	characterID int,
+	details execution,
 	commit func(*loadedSave) error,
 	afterCommit func(*loadedSave, string),
 ) (MutationReceipt, error) {
@@ -285,7 +320,7 @@ func (engine *Engine) commitLocked(
 	// Fail closed: an unknown operation kind and a failing identifier generator
 	// both reject the mutation here, before the undo point is captured and before
 	// the first byte can change.
-	pending, err := engine.prepareMutation(operationKind)
+	pending, err := engine.prepareMutation(operationKind, details.extraScopes...)
 	if err != nil {
 		return MutationReceipt{}, err
 	}
@@ -319,6 +354,7 @@ func (engine *Engine) commitLocked(
 		len(loaded.operations)+1,
 		characterScoped,
 		characterID,
+		details.banRisk,
 		snapshotBefore,
 		loaded.snapshot.data,
 	)

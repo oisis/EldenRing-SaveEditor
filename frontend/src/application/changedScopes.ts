@@ -77,8 +77,17 @@ export const changedScopeQueryKeyPatterns: Record<
   "character.stats": (id) => [characterView(id, "stats")],
   // No appearance getter is wired into the frontend yet.
   "character.appearance": () => [],
-  inventory: (id) => [characterView(id, "inventory")],
-  storage: (id) => [characterView(id, "storage")],
+  // Both containers have two getters: the raw physical page and the
+  // authoritative, backend-filtered workspace page. They answer different
+  // questions about the same records, so a mutation of a container refreshes
+  // both. The owned-items pattern carries the container as its next segment,
+  // so `inventory` never invalidates the Storage workspace and the other way
+  // round.
+  inventory: (id) => [
+    characterView(id, "inventory"),
+    [...characterView(id, "owned-items"), "inventory"],
+  ],
+  storage: (id) => [characterView(id, "storage"), [...characterView(id, "owned-items"), "storage"]],
   // The coherent loadout and the five narrow equipped views are independent
   // getters of one scope, so all six are refreshed together.
   "equipment.loadout": (id) => [

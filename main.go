@@ -14,6 +14,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/catalogassets"
 	"github.com/oisis/EldenRing-SaveForge/internal/desktop"
@@ -36,9 +37,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("locate application data directory: %v", err)
 	}
+	stateDirectory := filepath.Join(configDirectory, "SaveForge")
 	saveEngine := saveengine.NewWithOptions(saveengine.EngineOptions{
-		StateDirectory: filepath.Join(configDirectory, "SaveForge"),
+		StateDirectory: stateDirectory,
 	})
+	// The global Safety Profile is a host application setting, so it lives beside
+	// the other host state and deliberately outside SaveEngine and every save
+	// snapshot.
+	safetyProfiles := safetyprofile.NewStore(stateDirectory)
 	// The single process-wide GameCatalog, built from the embedded catalog data
 	// the backend already ships. A failure here is a build or data defect, not a
 	// user condition: the application stops instead of starting with a partial
@@ -54,10 +60,11 @@ func main() {
 	// The native dialog is injected rather than reached for inside the bridge, so
 	// the host capability has one owner and the bridge stays testable without a
 	// real window.
-	bridge := desktop.NewBridge(
+	bridge := desktop.NewBridgeWithSettings(
 		applicationVersion,
 		saveEngine,
 		gameCatalog,
+		safetyProfiles,
 		desktop.NewWailsSaveFileChooser(),
 		desktop.NewWailsSaveTargetChooser(),
 	)

@@ -35,6 +35,7 @@ import (
 const (
 	kindAddItemToInventory          = "add_item_to_inventory"
 	kindAddItemToStorage            = "add_item_to_storage"
+	kindAddItemsToContainers        = "add_items_to_containers"
 	kindApplyAppearancePreset       = "apply_appearance_preset"
 	kindApplyBuildTemplate          = "apply_build_template"
 	kindApplyFavoritePreset         = "apply_favorite_preset"
@@ -47,6 +48,10 @@ const (
 	kindLockAllSpectralSteedAttires = "lock_all_spectral_steed_attires"
 	kindMoveOwnedItemToInventory    = "move_owned_item_to_inventory"
 	kindMoveOwnedItemToStorage      = "move_owned_item_to_storage"
+	kindMoveOwnedItemsToInventory   = "move_owned_items_to_inventory"
+	kindMoveOwnedItemsToStorage     = "move_owned_items_to_storage"
+	kindRemoveOwnedItems            = "remove_owned_items"
+	kindReorderInventoryItems       = "reorder_inventory_items"
 	kindRemoveOwnedItem             = "remove_owned_item"
 	kindRedoLastOperation           = "redo_last_operation"
 	kindRevertOperation             = "revert_operation"
@@ -183,6 +188,23 @@ var domainChangedScopes = map[string][]string{
 	kindSetOwnedItemQuantity: {ScopeInventory, ScopeStorage, ScopeEquipmentLoadout},
 	kindSetInventoryOrder:    {ScopeInventory},
 	kindSetStorageOrder:      {ScopeStorage},
+
+	// The five atomic batch mutations of the Items workspace. Each one commits
+	// one revision, records one history entry and produces one receipt.
+	//
+	// A batch add is the single row that resolves its containers at commit time
+	// rather than statically: the endpoint accepts an Inventory list and a
+	// Storage list independently, so the containers it actually wrote are known
+	// from the request and are passed to the shared scope resolver as extra
+	// scopes. The row itself stays nil so no call can report a container it did
+	// not write.
+	kindAddItemsToContainers:      nil,
+	kindMoveOwnedItemsToInventory: {ScopeInventory, ScopeStorage},
+	kindMoveOwnedItemsToStorage:   {ScopeInventory, ScopeStorage},
+	// A batch removal addresses either container through opaque OwnedItemIDs and
+	// therefore keeps the scope contract of RemoveOwnedItem exactly.
+	kindRemoveOwnedItems:      {ScopeInventory, ScopeStorage},
+	kindReorderInventoryItems: {ScopeInventory},
 	// The weapon writers change the game ID of an owned record and keep the
 	// equipped references of that record coherent. Each of them addresses one
 	// common record through an opaque OwnedItemID, so the record can sit in
@@ -329,7 +351,14 @@ func changedScopesForMutationKind(operationKind string, extra ...string) ([]stri
 	for _, scope := range domain {
 		selected[scope] = true
 	}
+	// An extra scope is resolved at commit time, so it is the one part of this
+	// contract that does not come from the static table above. A value outside
+	// the closed vocabulary is rejected here rather than dropped by the
+	// canonical-order assembly below, where it would disappear without a trace.
 	for _, scope := range extra {
+		if !isRegisteredChangedScope(scope) {
+			return nil, fmt.Errorf("unknown changed scope %q", scope)
+		}
 		selected[scope] = true
 	}
 
@@ -342,6 +371,18 @@ func changedScopesForMutationKind(operationKind string, extra ...string) ([]stri
 		}
 	}
 	return scopes, nil
+}
+
+// isRegisteredChangedScope reports whether value is one of the closed scope
+// vocabulary. changedScopeOrder is the single list both this check and the
+// canonical ordering read, so no second registry of scope names exists.
+func isRegisteredChangedScope(value string) bool {
+	for _, scope := range changedScopeOrder {
+		if scope == value {
+			return true
+		}
+	}
+	return false
 }
 
 // sortStrings is an insertion sort over a list this package only ever builds

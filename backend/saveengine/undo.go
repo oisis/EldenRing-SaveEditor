@@ -247,14 +247,22 @@ func (engine *Engine) UndoCharacterChanges(
 			"undoToken does not match the undo point of character %d", characterID)
 	}
 
+	// The undo reverts the newest recorded operation, so the history entry it
+	// consumes is matched here, before the first write. Matching early is also
+	// what makes the exact scopes available: they are the scopes that concrete
+	// execution recorded, not the ones its kind would resolve to, so an
+	// Inventory-only batch add reports Inventory alone on the way back.
+	if len(loaded.operations) == 0 ||
+		loaded.operations[len(loaded.operations)-1].Record.OperationKind != point.operationKind {
+		return UndoCharacterChangesResult{}, errors.New("undo point does not match operation history")
+	}
+	undone := loaded.operations[len(loaded.operations)-1].Record
+
 	// The undo produces its own receipt through the shared mutation path. It is
-	// prepared here, before the first write: an unknown kind or a failing
-	// identifier generator refuses the undo instead of surfacing after the
-	// restore has already committed a revision. Its changed scopes are the scopes
-	// of the mutation being reverted, taken from the point, so an undo never
-	// reports a catch-all.
-	pending, err := engine.prepareMutation(
-		kindUndoCharacterChanges, undoneChangedScopes(point.operationKind)...)
+	// prepared here, before the first write: an unknown kind, a scope outside the
+	// closed vocabulary or a failing identifier generator refuses the undo
+	// instead of surfacing after the restore has already committed a revision.
+	pending, err := engine.prepareMutation(kindUndoCharacterChanges, undone.ChangedScopes...)
 	if err != nil {
 		return UndoCharacterChangesResult{}, err
 	}
@@ -301,11 +309,6 @@ func (engine *Engine) UndoCharacterChanges(
 	undoneKind := point.operationKind
 	nextRevision := fmt.Sprintf("%d", session.revision+1)
 	receipt := pending.receipt(saveSessionID, nextRevision)
-	if len(loaded.operations) == 0 ||
-		loaded.operations[len(loaded.operations)-1].Record.OperationKind != undoneKind {
-		loaded.snapshot = &codec{data: snapshotBefore}
-		return UndoCharacterChangesResult{}, errors.New("undo point does not match operation history")
-	}
 	nextOperations := append([]operationEntry(nil), loaded.operations[:len(loaded.operations)-1]...)
 	if err := engine.persistRecoveryState(loaded, nextOperations, nextRevision); err != nil {
 		loaded.snapshot = &codec{data: snapshotBefore}
@@ -328,16 +331,4 @@ func (engine *Engine) UndoCharacterChanges(
 		CharacterID:         characterID,
 		UndoneOperationKind: undoneKind,
 	}, nil
-}
-
-// undoneChangedScopes resolves the scopes the reverted mutation owned. An
-// unregistered kind cannot reach a stored undo point, because commitWithHook
-// validates the kind before it captures one, so an empty result here only
-// happens for a kind that carries no domain scope of its own.
-func undoneChangedScopes(undoneKind string) []string {
-	scopes, err := changedScopesForMutationKind(undoneKind)
-	if err != nil {
-		return nil
-	}
-	return scopes
 }

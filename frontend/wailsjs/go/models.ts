@@ -50,11 +50,117 @@ export namespace application {
 		    return a;
 		}
 	}
+	export class SafetyProfileResult {
+	    safetyProfile: string;
+	    availableProfiles: string[];
+	    defaultProfile: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SafetyProfileResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.safetyProfile = source["safetyProfile"];
+	        this.availableProfiles = source["availableProfiles"];
+	        this.defaultProfile = source["defaultProfile"];
+	    }
+	}
 
 }
 
 export namespace catalog {
 	
+	export class ItemDatabaseCategory {
+	    category: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemDatabaseCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.category = source["category"];
+	        this.count = source["count"];
+	    }
+	}
+	export class ItemDatabaseEntry {
+	    kind: string;
+	    key: string;
+	    gameID: number;
+	    gameIDKnown: boolean;
+	    family: string;
+	    category: string;
+	    subcategory: string;
+	    name: string;
+	    iconPath: string;
+	    banRisk: boolean;
+	    cutContent: boolean;
+	    dlc: boolean;
+	    preOrder: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemDatabaseEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.gameID = source["gameID"];
+	        this.gameIDKnown = source["gameIDKnown"];
+	        this.family = source["family"];
+	        this.category = source["category"];
+	        this.subcategory = source["subcategory"];
+	        this.name = source["name"];
+	        this.iconPath = source["iconPath"];
+	        this.banRisk = source["banRisk"];
+	        this.cutContent = source["cutContent"];
+	        this.dlc = source["dlc"];
+	        this.preOrder = source["preOrder"];
+	    }
+	}
+	export class GetItemDatabaseResult {
+	    safetyProfile: string;
+	    resources: ItemDatabaseEntry[];
+	    categories: ItemDatabaseCategory[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetItemDatabaseResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.safetyProfile = source["safetyProfile"];
+	        this.resources = this.convertValues(source["resources"], ItemDatabaseEntry);
+	        this.categories = this.convertValues(source["categories"], ItemDatabaseCategory);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class GetItemVariantsResult {
 	    variants: schema.ItemVariant[];
 	
@@ -217,6 +323,8 @@ export namespace catalog {
 		    return a;
 		}
 	}
+	
+	
 	export class ResourcePresentationIdentity {
 	    kind: string;
 	    key: string;
@@ -581,6 +689,26 @@ export namespace equipment {
 
 export namespace inventory {
 	
+	export class AddItemsRequestEntry {
+	    kind: string;
+	    key: string;
+	    variantID?: number;
+	    inventoryQuantity: number;
+	    storageQuantity: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new AddItemsRequestEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.variantID = source["variantID"];
+	        this.inventoryQuantity = source["inventoryQuantity"];
+	        this.storageQuantity = source["storageQuantity"];
+	    }
+	}
 	export class InventoryRecord {
 	    ownedItemID: string;
 	    kind: string;
@@ -630,6 +758,166 @@ export namespace inventory {
 	        this.characterID = source["characterID"];
 	        this.active = source["active"];
 	        this.records = this.convertValues(source["records"], InventoryRecord);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class OwnedItemCategory {
+	    category: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OwnedItemCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.category = source["category"];
+	        this.count = source["count"];
+	    }
+	}
+	export class OwnedItemActions {
+	    moveToStorage: boolean;
+	    moveToInventory: boolean;
+	    remove: boolean;
+	    setQuantity: boolean;
+	    reorder: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new OwnedItemActions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.moveToStorage = source["moveToStorage"];
+	        this.moveToInventory = source["moveToInventory"];
+	        this.remove = source["remove"];
+	        this.setQuantity = source["setQuantity"];
+	        this.reorder = source["reorder"];
+	    }
+	}
+	export class OwnedItemRow {
+	    ownedItemID: string;
+	    kind: string;
+	    key: string;
+	    gameID: number;
+	    container: string;
+	    containerSection: string;
+	    physicalIndex: number;
+	    acquisitionIndex: number;
+	    orderPosition: number;
+	    orderPositionKnown: boolean;
+	    quantity: number;
+	    maxQuantity: number;
+	    maxQuantityKnown: boolean;
+	    family: string;
+	    category: string;
+	    subcategory: string;
+	    name: string;
+	    iconPath: string;
+	    recordMode: string;
+	    banRisk: boolean;
+	    cutContent: boolean;
+	    dlc: boolean;
+	    preOrder: boolean;
+	    actions: OwnedItemActions;
+	
+	    static createFrom(source: any = {}) {
+	        return new OwnedItemRow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.kind = source["kind"];
+	        this.key = source["key"];
+	        this.gameID = source["gameID"];
+	        this.container = source["container"];
+	        this.containerSection = source["containerSection"];
+	        this.physicalIndex = source["physicalIndex"];
+	        this.acquisitionIndex = source["acquisitionIndex"];
+	        this.orderPosition = source["orderPosition"];
+	        this.orderPositionKnown = source["orderPositionKnown"];
+	        this.quantity = source["quantity"];
+	        this.maxQuantity = source["maxQuantity"];
+	        this.maxQuantityKnown = source["maxQuantityKnown"];
+	        this.family = source["family"];
+	        this.category = source["category"];
+	        this.subcategory = source["subcategory"];
+	        this.name = source["name"];
+	        this.iconPath = source["iconPath"];
+	        this.recordMode = source["recordMode"];
+	        this.banRisk = source["banRisk"];
+	        this.cutContent = source["cutContent"];
+	        this.dlc = source["dlc"];
+	        this.preOrder = source["preOrder"];
+	        this.actions = this.convertValues(source["actions"], OwnedItemActions);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetOwnedItemsResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    active: boolean;
+	    safetyProfile: string;
+	    container: string;
+	    records: OwnedItemRow[];
+	    categories: OwnedItemCategory[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetOwnedItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
+	        this.safetyProfile = source["safetyProfile"];
+	        this.container = source["container"];
+	        this.records = this.convertValues(source["records"], OwnedItemRow);
+	        this.categories = this.convertValues(source["categories"], OwnedItemCategory);
 	        this.total = source["total"];
 	        this.page = source["page"];
 	        this.pageSize = source["pageSize"];
@@ -726,10 +1014,124 @@ export namespace inventory {
 		}
 	}
 	
+	
+	
+	
+	export class ReorderInventoryItemsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    orderedResources: schema.ResourceRef[];
+	    acquisitionIndices: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReorderInventoryItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.orderedResources = this.convertValues(source["orderedResources"], schema.ResourceRef);
+	        this.acquisitionIndices = source["acquisitionIndices"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
 export namespace saveengine {
+	
+	export class AddedItem {
+	    gameID: number;
+	    container: string;
+	    containerSection: string;
+	    added: number;
+	    quantity: number;
+	    createdRecord: boolean;
+	    physicalIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new AddedItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.gameID = source["gameID"];
+	        this.container = source["container"];
+	        this.containerSection = source["containerSection"];
+	        this.added = source["added"];
+	        this.quantity = source["quantity"];
+	        this.createdRecord = source["createdRecord"];
+	        this.physicalIndex = source["physicalIndex"];
+	    }
+	}
+	export class AddItemsToContainersResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    added: AddedItem[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AddItemsToContainersResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.added = this.convertValues(source["added"], AddedItem);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class CharacterEquipment {
 	    saveSessionID: string;
@@ -1023,6 +1425,71 @@ export namespace saveengine {
 	        this.affectedOperationKind = source["affectedOperationKind"];
 	    }
 	}
+	export class MovedItem {
+	    ownedItemID: string;
+	    gameID: number;
+	    quantity: number;
+	    containerSection: string;
+	    physicalIndex: number;
+	    acquisitionIndex: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MovedItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.gameID = source["gameID"];
+	        this.quantity = source["quantity"];
+	        this.containerSection = source["containerSection"];
+	        this.physicalIndex = source["physicalIndex"];
+	        this.acquisitionIndex = source["acquisitionIndex"];
+	    }
+	}
+	export class MoveOwnedItemsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    moved: MovedItem[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MoveOwnedItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.moved = this.convertValues(source["moved"], MovedItem);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class OperationRecord {
 	    operationID: string;
 	    operationKind: string;
@@ -1170,6 +1637,63 @@ export namespace saveengine {
 		    return a;
 		}
 	}
+	export class RemovedItem {
+	    ownedItemID: string;
+	    gameID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RemovedItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ownedItemID = source["ownedItemID"];
+	        this.gameID = source["gameID"];
+	    }
+	}
+	export class RemoveOwnedItemsResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	    removed: RemovedItem[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RemoveOwnedItemsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.removed = this.convertValues(source["removed"], RemovedItem);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class ReviewValidationIssue {
 	    code: string;
 	    severity: string;
@@ -1349,6 +1873,32 @@ export namespace saveengine {
 	        this.saveRevision = source["saveRevision"];
 	        this.unsavedChanges = source["unsavedChanges"];
 	        this.eventSequence = source["eventSequence"];
+	    }
+	}
+	export class SetOwnedItemQuantityResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    ownedItemID: string;
+	    characterID: number;
+	    quantity: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetOwnedItemQuantityResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.ownedItemID = source["ownedItemID"];
+	        this.characterID = source["characterID"];
+	        this.quantity = source["quantity"];
 	    }
 	}
 
