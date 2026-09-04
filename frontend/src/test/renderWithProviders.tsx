@@ -911,6 +911,10 @@ export function makeDiagnosticsPort(overrides: Partial<DiagnosticsPort> = {}): D
   return {
     getSaveValidationReport: ({ saveSessionID, characterID }) =>
       Promise.resolve({ ...stubCleanValidationReport, saveSessionID, characterID }),
+    // The default save is clean, so there is nothing to plan or apply. A test
+    // about repairs supplies its own findings, plan and receipt.
+    getRepairPlan: () => Promise.reject(new Error("no repair plan was stubbed")),
+    applyRepairs: () => Promise.reject(new Error("no repair was stubbed")),
     ...overrides,
   };
 }
@@ -989,6 +993,14 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
     exportRecoveryJournal: () => Promise.resolve(),
     getSaveLifecycleSettings: () =>
       Promise.resolve({ backupRetention: 10, retentionNoticeShown: false }),
+    setSaveAccountID: (saveSessionID) =>
+      Promise.resolve({
+        operationID: "operation-set_save_account_id",
+        operationKind: "set_save_account_id",
+        saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["save.session"],
+      }),
     setSaveLifecycleSettings: (backupRetention) =>
       Promise.resolve({ backupRetention, retentionNoticeShown: false }),
     // No event ever arrives through the default stub, and unsubscribing is a

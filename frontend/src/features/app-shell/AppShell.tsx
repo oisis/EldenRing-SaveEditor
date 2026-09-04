@@ -1,21 +1,14 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import appIconURL from "../../../../build/appicon.png";
-import { useItemPreferences } from "../../application/preferences/itemPreferences";
-import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
 import type { Locale } from "../../i18n/i18n";
-import { locales } from "../../i18n/i18n";
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
-import { Card } from "../../ui/components/Card/Card";
-import { Checkbox } from "../../ui/components/Checkbox/Checkbox";
-import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
 import { message } from "../../ui/patterns/panel.css";
 import type { ThemeName } from "../../ui/tokens/themes.css";
 import { themeNames } from "../../ui/tokens/themes.css";
 import { AdvancedPanel } from "../advanced/AdvancedPanel";
-import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
 import { CharacterPanel } from "../character/CharacterPanel";
 import { CharacterSidebar } from "../character/CharacterSidebar";
 import { EquipmentPanel } from "../equipment/EquipmentPanel";
@@ -25,6 +18,7 @@ import { PendingChangesDialog, ReviewChangesDialog } from "../review-changes/Rev
 import { RecoveryJournalDialog } from "../save-session/RecoveryJournalDialog";
 import { SaveSessionContent } from "../save-session/SaveSessionPanel";
 import type { SaveSessionFlow } from "../save-session/useSaveSessionFlow";
+import { ToolsPanel } from "../tools/ToolsPanel";
 import { WorldPanel } from "../world/WorldPanel";
 import {
   brand,
@@ -94,16 +88,6 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   const [section, setSection] = useState<AppSection>("home");
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [itemsSection, setItemsSection] = useState<ItemsSection>("inventory");
-  const [retentionDraft, setRetentionDraft] = useState("10");
-  const preferences = useItemPreferences();
-  const safetyProfile = useSafetyProfile();
-  const setSafetyProfile = useSetSafetyProfile();
-
-  useEffect(() => {
-    if (flow.lifecycleSettings !== undefined) {
-      setRetentionDraft(String(flow.lifecycleSettings.backupRetention));
-    }
-  }, [flow.lifecycleSettings]);
 
   const labels: Record<AppSection, string> = {
     home: t`Home`,
@@ -127,16 +111,6 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
     light: t`Light`,
     dark: t`Dark`,
     "elden-ring": t`Elden Ring`,
-  };
-  // The three profile names are backend values; only their wording is local.
-  const safetyProfileLabels: Record<string, string> = {
-    safe: t`Safe`,
-    expanded_limits: t`Expanded Limits`,
-    chaos: t`Chaos Mode`,
-  };
-  const localeLabels: Record<Locale, string> = {
-    en: t`English`,
-    pl: t`Polish`,
   };
 
   const session = flow.session;
@@ -337,93 +311,20 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
         )}
         {section === "tools" && (
           <section aria-label={t`Tools`} className={screen}>
-            <Card aria-label={t`Application settings`}>
-              <h2>
-                <Trans>Application</Trans>
-              </h2>
-              <label htmlFor="tools-theme">
-                <Trans>Theme</Trans>{" "}
-                <Select
-                  id="tools-theme"
-                  value={theme}
-                  onChange={(event) => onThemeChange(event.currentTarget.value as ThemeName)}
-                >
-                  {themeNames.map((name) => (
-                    <option key={name} value={name}>
-                      {themeLabels[name]}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-              <label htmlFor="tools-language">
-                <Trans>Language</Trans>{" "}
-                <Select
-                  id="tools-language"
-                  value={locale}
-                  onChange={(event) => onLocaleChange(event.currentTarget.value as Locale)}
-                >
-                  {locales.map((name) => (
-                    <option key={name} value={name}>
-                      {localeLabels[name]}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-              <label htmlFor="tools-safety-profile">
-                <Trans>Safety profile</Trans>{" "}
-                <Select
-                  id="tools-safety-profile"
-                  value={safetyProfile.data?.safetyProfile ?? ""}
-                  disabled={safetyProfile.data === undefined || setSafetyProfile.isPending}
-                  onChange={(event) => setSafetyProfile.mutate(event.currentTarget.value)}
-                >
-                  {(safetyProfile.data?.availableProfiles ?? []).map((name) => (
-                    <option key={name} value={name}>
-                      {safetyProfileLabels[name] ?? name}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-              {safetyProfile.isError || setSafetyProfile.isError ? (
-                <p role="alert" className={message}>
-                  {/* Reading and storing the setting fail for the same reasons
-                      and are reported the same way. The transport's own text
-                      never reaches the user: it carries bridge internals and
-                      host paths, and neither is actionable here. */}
-                  <Trans>The safety profile is unavailable.</Trans>
-                </p>
-              ) : null}
-              <label htmlFor="tools-show-item-id">
-                <Checkbox
-                  id="tools-show-item-id"
-                  checked={preferences.showItemID}
-                  onChange={(event) => preferences.setShowItemID(event.currentTarget.checked)}
-                />{" "}
-                <Trans>Show Item ID</Trans>
-              </label>
-              <label htmlFor="tools-backup-retention">
-                <Trans>Automatic backups kept</Trans>{" "}
-                <Input
-                  id="tools-backup-retention"
-                  type="number"
-                  min={1}
-                  max={1000}
-                  step={1}
-                  value={retentionDraft}
-                  onChange={(event) => setRetentionDraft(event.currentTarget.value)}
-                  onBlur={() => {
-                    const retention = Number(retentionDraft);
-                    if (Number.isInteger(retention) && retention >= 1 && retention <= 1000) {
-                      flow.setBackupRetention(retention);
-                    } else {
-                      setRetentionDraft(String(flow.lifecycleSettings?.backupRetention ?? 10));
-                    }
-                  }}
-                  disabled={flow.isBusy}
-                />
-              </label>
-            </Card>
-            <ApplicationInfoPanel />
+            <ToolsPanel
+              theme={theme}
+              onThemeChange={onThemeChange}
+              locale={locale}
+              onLocaleChange={onLocaleChange}
+              saveSessionID={session?.saveSessionID}
+              saveRevision={session?.saveRevision}
+              platform={session?.platform}
+              characterID={selectedCharacterID}
+              backupRetention={flow.lifecycleSettings?.backupRetention}
+              onBackupRetentionChange={flow.setBackupRetention}
+              applyMutationReceipt={flow.applyMutationReceipt}
+              sessionBusy={flow.isBusy}
+            />
           </section>
         )}
       </main>

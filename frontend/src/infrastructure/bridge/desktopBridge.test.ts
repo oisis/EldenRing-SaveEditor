@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ApplyAppearancePreset,
   ApplyFavoritePreset,
+  ApplyRepairs,
   CloseSave,
   DeleteFavoritePreset,
   GetAppearancePresets,
@@ -22,6 +23,7 @@ import {
   GetQuickItems,
   GetResource,
   GetResourcePresentationSummaries,
+  GetRepairPlan,
   GetResources,
   GetSaveCharacters,
   GetSaveValidationReport,
@@ -37,12 +39,14 @@ import {
   SetCharacterStats,
   SetFavoritePreset,
   SetNetworkSettings,
+  SetSaveAccountID,
 } from "../../../wailsjs/go/desktop/Bridge";
 import {
   appearance,
   application,
   catalog,
   character,
+  diagnostics,
   equipment,
   inventory,
   network,
@@ -58,6 +62,7 @@ vi.mock("../../../wailsjs/runtime/runtime", () => ({
 
 vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   ApplyAppearancePreset: vi.fn(),
+  ApplyRepairs: vi.fn(),
   ApplyFavoritePreset: vi.fn(),
   CloseSave: vi.fn(),
   DeleteFavoritePreset: vi.fn(),
@@ -79,6 +84,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   GetQuickItems: vi.fn(),
   GetResource: vi.fn(),
   GetResourcePresentationSummaries: vi.fn(),
+  GetRepairPlan: vi.fn(),
   GetResources: vi.fn(),
   GetSaveCharacters: vi.fn(),
   GetSaveValidationReport: vi.fn(),
@@ -94,6 +100,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   SetCharacterStats: vi.fn(),
   SetFavoritePreset: vi.fn(),
   SetNetworkSettings: vi.fn(),
+  SetSaveAccountID: vi.fn(),
 }));
 
 const getApplicationInfo = vi.mocked(GetApplicationInfo);
@@ -105,6 +112,9 @@ const loadSave = vi.mocked(LoadSave);
 const closeSave = vi.mocked(CloseSave);
 const selectSaveFile = vi.mocked(SelectSaveFile);
 const getSaveValidationReport = vi.mocked(GetSaveValidationReport);
+const getRepairPlan = vi.mocked(GetRepairPlan);
+const applyRepairs = vi.mocked(ApplyRepairs);
+const setSaveAccountID = vi.mocked(SetSaveAccountID);
 const getSaveCharacters = vi.mocked(GetSaveCharacters);
 const getCharacterProfile = vi.mocked(GetCharacterProfile);
 const getCharacterStats = vi.mocked(GetCharacterStats);
@@ -2251,5 +2261,183 @@ describe("wails World adapter", () => {
       });
       expect(setNetworkSettings).toHaveBeenCalledWith("session-1", validParams, "3");
     });
+  });
+});
+
+describe("desktop bridge repairs and save account identifier", () => {
+  it("forwards SetSaveAccountID as a string and answers with the receipt alone", async () => {
+    setSaveAccountID.mockResolvedValue(
+      saveengine.SetSaveAccountIDResult.createFrom({
+        operationID: "op-1",
+        operationKind: "set_save_account_id",
+        saveSessionID: "session-1",
+        saveRevision: "8",
+        changedScopes: ["save.session"],
+      }),
+    );
+
+    // A value above 2^53: it must reach the bridge as the exact string it is.
+    await expect(
+      wailsDesktopBridge.setSaveAccountID("session-1", "76561198000000001", "7"),
+    ).resolves.toEqual({
+      operationID: "op-1",
+      operationKind: "set_save_account_id",
+      saveSessionID: "session-1",
+      saveRevision: "8",
+      changedScopes: ["save.session"],
+    });
+    expect(setSaveAccountID).toHaveBeenCalledWith("session-1", "76561198000000001", "7");
+  });
+
+  it("carries a GetRepairPlan result and its rejections through unchanged", async () => {
+    getRepairPlan.mockResolvedValue(
+      diagnostics.GetRepairPlanResult.createFrom({
+        saveSessionID: "session-1",
+        saveRevision: "7",
+        characterID: 0,
+        planToken: "token-abc",
+        actions: [
+          {
+            issueIDs: ["issue-1"],
+            scope: "inventory",
+            operation: "set_owned_item_quantity",
+            ownedItemID: "owned-1",
+            targetValue: 99,
+            description: "Clamp the stack to 99.",
+          },
+          // An action the backend sends without a target value or a record: the
+          // absent number stays absent instead of becoming a zero.
+          {
+            issueIDs: ["issue-2", "issue-3"],
+            scope: "character.stats",
+            operation: "set_character_stats",
+            attributes: {
+              vigor: 40,
+              mind: 20,
+              endurance: 25,
+              strength: 30,
+              dexterity: 18,
+              intelligence: 9,
+              faith: 12,
+              arcane: 7,
+            },
+            description: "Repair the statistics block.",
+          },
+        ],
+        rejected: [
+          {
+            issueID: "issue-4",
+            code: "unknown_record",
+            scope: "inventory",
+            reason: "No safe repair.",
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      wailsDesktopBridge.getRepairPlan({
+        saveSessionID: "session-1",
+        characterID: 0,
+        saveRevision: "7",
+        issueIDs: ["issue-1", "issue-2", "issue-3", "issue-4"],
+      }),
+    ).resolves.toEqual({
+      saveSessionID: "session-1",
+      saveRevision: "7",
+      characterID: 0,
+      planToken: "token-abc",
+      actions: [
+        {
+          issueIDs: ["issue-1"],
+          scope: "inventory",
+          operation: "set_owned_item_quantity",
+          ownedItemID: "owned-1",
+          targetValue: 99,
+          description: "Clamp the stack to 99.",
+        },
+        {
+          issueIDs: ["issue-2", "issue-3"],
+          scope: "character.stats",
+          operation: "set_character_stats",
+          ownedItemID: "",
+          targetValue: undefined,
+          // The write payload of the action reaches the port unchanged.
+          attributes: {
+            vigor: 40,
+            mind: 20,
+            endurance: 25,
+            strength: 30,
+            dexterity: 18,
+            intelligence: 9,
+            faith: 12,
+            arcane: 7,
+          },
+          description: "Repair the statistics block.",
+        },
+      ],
+      rejected: [
+        {
+          issueID: "issue-4",
+          code: "unknown_record",
+          scope: "inventory",
+          reason: "No safe repair.",
+        },
+      ],
+    });
+    expect(getRepairPlan).toHaveBeenCalledWith("session-1", 0, "7", [
+      "issue-1",
+      "issue-2",
+      "issue-3",
+      "issue-4",
+    ]);
+  });
+
+  it("reads the no-commit variant of ApplyRepairs as the empty receipt it is", async () => {
+    applyRepairs.mockResolvedValue(
+      diagnostics.ApplyRepairsResult.createFrom({
+        saveSessionID: "session-1",
+        saveRevision: "7",
+        characterID: 0,
+        applied: false,
+        actions: [],
+        rejected: [
+          {
+            issueID: "issue-4",
+            code: "unknown_record",
+            scope: "inventory",
+            reason: "No safe repair.",
+          },
+        ],
+      }),
+    );
+
+    // The backend describes no execution when it commits nothing, so the
+    // result carries no operation identifier, no operation kind and no changed
+    // scopes rather than empty stand-ins for them.
+    await expect(
+      wailsDesktopBridge.applyRepairs({
+        saveSessionID: "session-1",
+        characterID: 0,
+        issueIDs: ["issue-4"],
+        planToken: "token-abc",
+        expectedRevision: "7",
+      }),
+    ).resolves.toStrictEqual({
+      saveSessionID: "session-1",
+      saveRevision: "7",
+      characterID: 0,
+      applied: false,
+      actions: [],
+      rejected: [
+        {
+          issueID: "issue-4",
+          code: "unknown_record",
+          scope: "inventory",
+          reason: "No safe repair.",
+        },
+      ],
+    });
+    expect(applyRepairs).toHaveBeenCalledWith("session-1", 0, ["issue-4"], "token-abc", "7");
   });
 });

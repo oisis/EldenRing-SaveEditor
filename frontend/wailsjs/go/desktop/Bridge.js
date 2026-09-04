@@ -14,6 +14,10 @@ export function ApplyFavoritePreset(arg1, arg2, arg3, arg4) {
   return window['go']['desktop']['Bridge']['ApplyFavoritePreset'](arg1, arg2, arg3, arg4);
 }
 
+export function ApplyRepairs(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['desktop']['Bridge']['ApplyRepairs'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function ClearRecentFiles() {
   return window['go']['desktop']['Bridge']['ClearRecentFiles']();
 }
@@ -164,6 +168,10 @@ export function GetRecoveryJournals() {
 
 export function GetRegions(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetRegions'](arg1, arg2);
+}
+
+export function GetRepairPlan(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['GetRepairPlan'](arg1, arg2, arg3, arg4);
 }
 
 export function GetResource(arg1, arg2) {
@@ -384,6 +392,10 @@ export function SetRegionUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function SetSafetyProfile(arg1) {
   return window['go']['desktop']['Bridge']['SetSafetyProfile'](arg1);
+}
+
+export function SetSaveAccountID(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['SetSaveAccountID'](arg1, arg2, arg3);
 }
 
 export function SetSaveLifecycleSettings(arg1) {

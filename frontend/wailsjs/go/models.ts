@@ -492,6 +492,152 @@ export namespace character {
 
 export namespace diagnostics {
 	
+	export class RepairRejection {
+	    issueID: string;
+	    code: string;
+	    scope: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RepairRejection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.issueID = source["issueID"];
+	        this.code = source["code"];
+	        this.scope = source["scope"];
+	        this.reason = source["reason"];
+	    }
+	}
+	export class RepairAction {
+	    issueIDs: string[];
+	    scope: string;
+	    operation: string;
+	    ownedItemID?: string;
+	    targetValue?: number;
+	    attributes?: saveengine.CharacterAttributes;
+	    description: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RepairAction(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.issueIDs = source["issueIDs"];
+	        this.scope = source["scope"];
+	        this.operation = source["operation"];
+	        this.ownedItemID = source["ownedItemID"];
+	        this.targetValue = source["targetValue"];
+	        this.attributes = this.convertValues(source["attributes"], saveengine.CharacterAttributes);
+	        this.description = source["description"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ApplyRepairsResult {
+	    operationID?: string;
+	    operationKind?: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes?: string[];
+	    characterID: number;
+	    applied: boolean;
+	    actions: RepairAction[];
+	    rejected: RepairRejection[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyRepairsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
+	        this.applied = source["applied"];
+	        this.actions = this.convertValues(source["actions"], RepairAction);
+	        this.rejected = this.convertValues(source["rejected"], RepairRejection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetRepairPlanResult {
+	    saveSessionID: string;
+	    saveRevision: string;
+	    characterID: number;
+	    planToken: string;
+	    actions: RepairAction[];
+	    rejected: RepairRejection[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetRepairPlanResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.characterID = source["characterID"];
+	        this.planToken = source["planToken"];
+	        this.actions = this.convertValues(source["actions"], RepairAction);
+	        this.rejected = this.convertValues(source["rejected"], RepairRejection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class SaveValidationIssue {
 	    id: string;
 	    code: string;
@@ -578,6 +724,8 @@ export namespace diagnostics {
 		    return a;
 		}
 	}
+	
+	
 	
 
 }
@@ -2970,6 +3118,26 @@ export namespace saveengine {
 	        this.ownedItemID = source["ownedItemID"];
 	        this.characterID = source["characterID"];
 	        this.quantity = source["quantity"];
+	    }
+	}
+	export class SetSaveAccountIDResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SetSaveAccountIDResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
 	    }
 	}
 

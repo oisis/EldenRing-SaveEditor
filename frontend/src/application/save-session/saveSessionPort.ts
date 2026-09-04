@@ -240,6 +240,24 @@ export type SaveSessionPort = {
   getSaveLifecycleSettings: () => Promise<SaveLifecycleSettings>;
   setSaveLifecycleSettings: (backupRetention: number) => Promise<SaveLifecycleSettings>;
   /**
+   * Stores the save owner identifier of one session.
+   *
+   * `accountID` is the backend's canonical decimal representation of a uint64
+   * and stays a string end to end: turning it into a JavaScript number would
+   * silently lose the precision of a real Steam identifier. Which platform
+   * accepts it, which fields it reaches and how it is validated are the
+   * backend's contract; nothing above this port parses, pads or normalises it.
+   *
+   * The backend exposes no getter for the stored identifier, so this port
+   * cannot read one back either. The result is the mutation receipt only: the
+   * identifier is never echoed, cached or logged.
+   */
+  setSaveAccountID: (
+    saveSessionID: string,
+    accountID: string,
+    expectedRevision: string,
+  ) => Promise<MutationReceipt>;
+  /**
    * Subscribes to committed backend mutations and returns the unsubscribe
    * function. The port carries the typed event; the host mechanism behind it
    * belongs to the infrastructure adapter alone.

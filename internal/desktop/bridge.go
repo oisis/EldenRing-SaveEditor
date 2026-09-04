@@ -329,6 +329,19 @@ func (b *Bridge) ExportRecoveryJournal(journalID, target string) error {
 	return bridgeError(savesession.ExportRecoveryJournal(b.saveEngine, journalID, target))
 }
 
+// SetSaveAccountID delegates to the SetSaveAccountID endpoint and returns its
+// result and error unchanged. accountID stays the string it is: it carries the
+// canonical decimal representation of a uint64, which no layer of this bridge
+// parses, normalises, echoes back or turns into a number.
+func (b *Bridge) SetSaveAccountID(
+	saveSessionID string,
+	accountID string,
+	expectedRevision string,
+) (savesession.SetSaveAccountIDResult, error) {
+	return bridged(savesession.SetSaveAccountID(
+		b.saveEngine, saveSessionID, accountID, expectedRevision))
+}
+
 // GetSaveValidationReport delegates to the GetSaveValidationReport endpoint and
 // returns its result and error unchanged. The session, the slot and the scope
 // are forwarded exactly as received: which scopes exist, how a scope is judged,
@@ -341,6 +354,35 @@ func (b *Bridge) GetSaveValidationReport(
 ) (diagnostics.GetSaveValidationReportResult, error) {
 	return bridged(diagnostics.GetSaveValidationReport(
 		b.saveEngine, b.gameCatalog, saveSessionID, characterID, scope))
+}
+
+// GetRepairPlan delegates to the GetRepairPlan endpoint and returns its result
+// and error unchanged. Which finding earns an action, which one is rejected and
+// what seals the plan token are the endpoint's contract; the bridge derives,
+// filters and reorders nothing.
+func (b *Bridge) GetRepairPlan(
+	saveSessionID string,
+	characterID int,
+	saveRevision string,
+	issueIDs []string,
+) (diagnostics.GetRepairPlanResult, error) {
+	return bridged(diagnostics.GetRepairPlan(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, saveRevision, issueIDs))
+}
+
+// ApplyRepairs delegates to the ApplyRepairs endpoint and returns its result and
+// error unchanged. The plan token, the selected findings and the expected
+// revision are forwarded verbatim, so the endpoint alone decides whether the
+// selection still describes this save version.
+func (b *Bridge) ApplyRepairs(
+	saveSessionID string,
+	characterID int,
+	issueIDs []string,
+	planToken string,
+	expectedRevision string,
+) (diagnostics.ApplyRepairsResult, error) {
+	return bridged(diagnostics.ApplyRepairs(
+		b.saveEngine, b.gameCatalog, saveSessionID, characterID, issueIDs, planToken, expectedRevision))
 }
 
 // GetSaveCharacters delegates to the GetSaveCharacters endpoint and returns

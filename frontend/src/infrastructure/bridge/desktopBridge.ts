@@ -6,6 +6,7 @@ import {
   AddItemsToContainers,
   ApplyAppearancePreset,
   ApplyFavoritePreset,
+  ApplyRepairs,
   ClearRecentFiles,
   CloseSave,
   DeleteFavoritePreset,
@@ -44,6 +45,7 @@ import {
   GetRecoveryJournal,
   GetRecoveryJournals,
   GetRegions,
+  GetRepairPlan,
   GetResource,
   GetResourcePresentationSummaries,
   GetResources,
@@ -99,6 +101,7 @@ import {
   SetQuestStep,
   SetRegionUnlocked,
   SetSafetyProfile,
+  SetSaveAccountID,
   SetSpectralSteedAttire,
   SetSummoningPoolActivated,
   SetTutorialUnlocked,
@@ -136,13 +139,18 @@ import type {
 } from "../../application/catalog/catalogPort";
 import { type ChangedScope, changedScopes } from "../../application/changedScopes";
 import type {
+  CharacterAttributes,
   CharacterPort,
   CharacterProfile,
   CharacterStats,
   SaveCharacters,
 } from "../../application/character/characterPort";
 import type {
+  ApplyRepairsResult,
   DiagnosticsPort,
+  RepairAction,
+  RepairPlan,
+  RepairRejection,
   SaveValidationReport,
 } from "../../application/diagnostics/diagnosticsPort";
 import type {
@@ -452,6 +460,100 @@ function toSaveValidationReport(
     })),
     errorCount: result.errorCount,
     warningCount: result.warningCount,
+  };
+}
+
+/**
+ * Projects one planned action. Every member is copied as the backend reported
+ * it: no operation is renamed, no target value is recomputed and no description
+ * is rewritten. `targetValue` and `ownedItemID` are omitted by the backend for
+ * an operation that carries neither, so the absent number stays `undefined`
+ * rather than becoming a zero the backend never sent.
+ */
+function toRepairAction(action: {
+  issueIDs: string[];
+  scope: string;
+  operation: string;
+  ownedItemID?: string;
+  targetValue?: number;
+  attributes?: CharacterAttributes;
+  description: string;
+}): RepairAction {
+  return {
+    issueIDs: [...action.issueIDs],
+    scope: action.scope,
+    operation: action.operation,
+    ownedItemID: action.ownedItemID ?? "",
+    targetValue: action.targetValue,
+    // The statistics payload of the action is carried through untouched: it is
+    // the backend's own derived block, never a value recomputed here.
+    attributes: action.attributes,
+    description: action.description,
+  };
+}
+
+function toRepairRejection(rejection: {
+  issueID: string;
+  code: string;
+  scope: string;
+  reason: string;
+}): RepairRejection {
+  return {
+    issueID: rejection.issueID,
+    code: rejection.code,
+    scope: rejection.scope,
+    reason: rejection.reason,
+  };
+}
+
+function toRepairPlan(result: Awaited<ReturnType<typeof GetRepairPlan>>): RepairPlan {
+  return {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    planToken: result.planToken,
+    actions: result.actions.map(toRepairAction),
+    rejected: result.rejected.map(toRepairRejection),
+  };
+}
+
+/**
+ * Projects the two success variants of ApplyRepairs.
+ *
+ * `applied` is the backend's own discriminator and the only thing branched on:
+ * a committed transaction must carry a whole receipt and goes through the same
+ * strict receipt projection as any other mutation, while a result that applied
+ * nothing describes no execution and therefore gains no operation identifier,
+ * operation kind or changed scopes. A payload that claims a commit without a
+ * complete receipt is an unknown contract and fails as a bridge failure.
+ */
+function toApplyRepairsResult(
+  result: Awaited<ReturnType<typeof ApplyRepairs>>,
+): ApplyRepairsResult {
+  const outcome = {
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    characterID: result.characterID,
+    actions: result.actions.map(toRepairAction),
+    rejected: result.rejected.map(toRepairRejection),
+  };
+  if (!result.applied) {
+    return { ...outcome, applied: false };
+  }
+  const { operationID, operationKind, changedScopes } = result;
+  if (operationID === undefined || operationKind === undefined || changedScopes === undefined) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return {
+    ...toMutationReceipt({
+      operationID,
+      operationKind,
+      saveSessionID: result.saveSessionID,
+      saveRevision: result.saveRevision,
+      changedScopes,
+    }),
+    ...outcome,
+    applied: true,
   };
 }
 
@@ -1519,6 +1621,13 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   setSaveLifecycleSettings: async (backupRetention) =>
     toSaveLifecycleSettings(await callBridge(() => SetSaveLifecycleSettings(backupRetention))),
 
+  // The identifier is forwarded as the string it is and is never echoed back:
+  // the result of the call is the mutation receipt alone.
+  setSaveAccountID: async (saveSessionID, accountID, expectedRevision) =>
+    toMutationReceipt(
+      await callBridge(() => SetSaveAccountID(saveSessionID, accountID, expectedRevision)),
+    ),
+
   /**
    * Subscribes to the backend's committed mutations.
    *
@@ -1542,6 +1651,23 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   getSaveValidationReport: async ({ saveSessionID, characterID, scope }) =>
     toSaveValidationReport(
       await callBridge(() => GetSaveValidationReport(saveSessionID, characterID, scope)),
+    ),
+
+  // The selected findings reach the backend in the caller's order and the plan
+  // comes back untouched: which of them earns an action and which one is
+  // rejected is decided there and nowhere else.
+  getRepairPlan: async ({ saveSessionID, characterID, saveRevision, issueIDs }) =>
+    toRepairPlan(
+      await callBridge(() =>
+        GetRepairPlan(saveSessionID, characterID, saveRevision, [...issueIDs]),
+      ),
+    ),
+
+  applyRepairs: async ({ saveSessionID, characterID, issueIDs, planToken, expectedRevision }) =>
+    toApplyRepairsResult(
+      await callBridge(() =>
+        ApplyRepairs(saveSessionID, characterID, [...issueIDs], planToken, expectedRevision),
+      ),
     ),
 
   getSaveCharacters: async (saveSessionID): Promise<SaveCharacters> => {

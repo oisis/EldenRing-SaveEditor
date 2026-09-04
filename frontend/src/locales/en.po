@@ -13,20 +13,54 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: action.scope
+#. placeholder {0}: rejection.scope
+#. placeholder {1}: action.operation
+#. placeholder {1}: rejection.code
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "{0} · {1}"
+msgstr "{0} · {1}"
+
+#. placeholder {0}: issue.severity
+#. placeholder {1}: issue.scope
+#. placeholder {2}: issue.code
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "{0} · {1} · {2}"
+msgstr "{0} · {1} · {2}"
+
 #. placeholder {0}: validation.unresolvedRecords
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{0} record(s) could not be resolved."
 msgstr "{0} record(s) could not be resolved."
+
+#. placeholder {0}: totals.uncheckedScopes
+#. placeholder {1}: totals.unresolvedRecords
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "{0} scope(s) could not be checked and {1} record(s) stayed unresolved, so this save is not confirmed clean."
+msgstr "{0} scope(s) could not be checked and {1} record(s) stayed unresolved, so this save is not confirmed clean."
 
 #. placeholder {0}: validation.uncheckedScopes
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
 msgstr "{0} scope(s) could not be checked, so this save is not confirmed clean."
 
+#. placeholder {0}: scope.scope
+#. placeholder {1}: scope.recordsChecked
+#. placeholder {2}: scope.unresolvedRecords
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "{0}: {1} record(s) checked, {2} unresolved."
+msgstr "{0}: {1} record(s) checked, {2} unresolved."
+
 #. placeholder {0}: displayName(item.name)
 #: src/features/world/WorldPanel.tsx
 msgid "{0}: apply step"
 msgstr "{0}: apply step"
+
+#. placeholder {0}: scope.scope
+#. placeholder {1}: scope.reason
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "{0}: not checked. {1}"
+msgstr "{0}: not checked. {1}"
 
 #. placeholder {0}: displayName(item.name)
 #: src/features/world/WorldPanel.tsx
@@ -54,6 +88,10 @@ msgstr "A locked position is one this character has not unlocked yet; the backen
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "About & Updates"
+msgstr "About & Updates"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Activated"
@@ -134,6 +172,10 @@ msgstr "All operations"
 msgid "Already equipped"
 msgstr "Already equipped"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Always create a remote backup"
+msgstr "Always create a remote backup"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Ammunition"
 msgstr "Ammunition"
@@ -142,18 +184,14 @@ msgstr "Ammunition"
 msgid "Appearance Presets"
 msgstr "Appearance Presets"
 
-#: src/features/app-shell/AppShell.tsx
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Application"
 msgstr "Application"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application information"
 msgstr "Application information"
-
-#: src/features/app-shell/AppShell.tsx
-msgid "Application settings"
-msgstr "Application settings"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Application settings and tools"
@@ -171,6 +209,10 @@ msgstr "Apply changes"
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Apply curated tuning profiles to specific matchmaking roles without affecting other parameters."
 msgstr "Apply curated tuning profiles to specific matchmaking roles without affecting other parameters."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Apply planned repairs"
+msgstr "Apply planned repairs"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Apply to Character"
@@ -220,7 +262,7 @@ msgstr "Ashes of War"
 msgid "Attributes"
 msgstr "Attributes"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Automatic backups kept"
 msgstr "Automatic backups kept"
 
@@ -233,6 +275,10 @@ msgstr "Backend"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Backup: {0}."
 msgstr "Backup: {0}."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Backups"
+msgstr "Backups"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "ban risk"
@@ -285,6 +331,10 @@ msgstr "Boss arena"
 msgid "Bosses"
 msgstr "Bosses"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Both settings are unavailable until the backend stores them. The current Save and Review Changes flow is unaffected."
+msgstr "Both settings are unavailable until the backend stores them. The current Save and Review Changes flow is unaffected."
+
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -330,7 +380,7 @@ msgstr "Changes"
 msgid "Changing the starting class is a destructive reset: all eight attributes and Rune Level will be reset to the base values of the selected class."
 msgstr "Changing the starting class is a destructive reset: all eight attributes and Rune Level will be reset to the base values of the selected class."
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Chaos Mode"
 msgstr "Chaos Mode"
 
@@ -391,6 +441,10 @@ msgstr "Collapse all"
 #: src/features/world/WorldPanel.tsx
 msgid "Colosseums"
 msgstr "Colosseums"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Configuration"
+msgstr "Configuration"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Confirm Body Type Change"
@@ -463,8 +517,13 @@ msgid "Cut content"
 msgstr "Cut content"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Dark"
 msgstr "Dark"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Debug Mode"
+msgstr "Debug Mode"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Defeated"
@@ -477,6 +536,14 @@ msgstr "Delay between matchmaking search retries."
 #: src/features/character/CharacterPanel.tsx
 msgid "Delete"
 msgstr "Delete"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Deployment"
+msgstr "Deployment"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Deployment will be added in a later stage of this rebuild."
+msgstr "Deployment will be added in a later stage of this rebuild."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -515,6 +582,7 @@ msgid "Download span interval for visitor list updates."
 msgstr "Download span interval for visitor list updates."
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Elden Ring"
 msgstr "Elden Ring"
 
@@ -527,7 +595,7 @@ msgstr "Empty"
 msgid "Endurance"
 msgstr "Endurance"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "English"
 msgstr "English"
 
@@ -545,11 +613,17 @@ msgstr "Equipment and quick slots"
 msgid "Error code: {0}"
 msgstr "Error code: {0}"
 
+#. placeholder {0}: totals.errorCount
+#. placeholder {1}: totals.warningCount
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Errors: {0}. Warnings: {1}."
+msgstr "Errors: {0}. Warnings: {1}."
+
 #: src/features/world/WorldPanel.tsx
 msgid "Expand all"
 msgstr "Expand all"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Expanded Limits"
 msgstr "Expanded Limits"
 
@@ -561,6 +635,10 @@ msgstr "Exploration"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Export"
 msgstr "Export"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Export diagnostic report"
+msgstr "Export diagnostic report"
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Failed to apply network settings."
@@ -774,7 +852,7 @@ msgstr "Items sections"
 msgid "Items: {total}"
 msgstr "Items: {total}"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Language"
 msgstr "Language"
 
@@ -796,6 +874,7 @@ msgid "Legs"
 msgstr "Legs"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Light"
 msgstr "Light"
 
@@ -1145,6 +1224,10 @@ msgstr "Not matched"
 msgid "Not owned"
 msgstr "Not owned"
 
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Not repaired"
+msgstr "Not repaired"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Not revealed"
 msgstr "Not revealed"
@@ -1165,6 +1248,10 @@ msgstr "Number of break-in areas queried per invasion search cycle."
 msgid "Only the items the backend accepts for this slot are offered here."
 msgstr "Only the items the backend accepts for this slot are offered here."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Open a PC save to set its Steam ID."
+msgstr "Open a PC save to set its Steam ID."
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Open a save and select a character slot to edit its equipment."
 msgstr "Open a save and select a character slot to edit its equipment."
@@ -1172,6 +1259,10 @@ msgstr "Open a save and select a character slot to edit its equipment."
 #: src/features/world/WorldPanel.tsx
 msgid "Open a save and select a character slot to see its World progress."
 msgstr "Open a save and select a character slot to see its World progress."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Open a save and select a character to scan it for problems."
+msgstr "Open a save and select a character to scan it for problems."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
@@ -1181,6 +1272,14 @@ msgstr "Open a save from Home to see its character slots."
 msgid "Open a save to view and edit network tuning parameters."
 msgstr "Open a save to view and edit network tuning parameters."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Open configuration directory"
+msgstr "Open configuration directory"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Open log directory"
+msgstr "Open log directory"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Open Save"
 msgstr "Open Save"
@@ -1188,6 +1287,10 @@ msgstr "Open Save"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Opening save…"
 msgstr "Opening save…"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Opening the configuration directory, Debug Mode and the diagnostic report export are not available in this build yet."
+msgstr "Opening the configuration directory, Debug Mode and the diagnostic report export are not available in this build yet."
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Operation history"
@@ -1235,11 +1338,15 @@ msgstr "Percentage rate for searching all areas for co-op blue summons."
 msgid "Percentage rate for searching all areas vs blue summons."
 msgstr "Percentage rate for searching all areas vs blue summons."
 
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Planned repairs"
+msgstr "Planned repairs"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Platform"
 msgstr "Platform"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Polish"
 msgstr "Polish"
 
@@ -1287,6 +1394,10 @@ msgstr "Preset roles"
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Presets for this role are unavailable or incomplete."
 msgstr "Presets for this role are unavailable or incomplete."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Preview repair plan"
+msgstr "Preview repair plan"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1396,6 +1507,10 @@ msgstr "Reds / Invader"
 msgid "Regions"
 msgstr "Regions"
 
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Rejected repairs"
+msgstr "Rejected repairs"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Reload Search Max"
 msgstr "Reload Search Max"
@@ -1421,6 +1536,14 @@ msgstr "Remove {name} from favorites"
 #: src/features/world/WorldPanel.tsx
 msgid "Remove Fog of War"
 msgstr "Remove Fog of War"
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Repair plan"
+msgstr "Repair plan"
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Reported problems"
+msgstr "Reported problems"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Request Interval"
@@ -1515,11 +1638,11 @@ msgstr "Rune Level"
 msgid "Runes Held"
 msgstr "Runes Held"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Safe"
 msgstr "Safe"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Safety profile"
 msgstr "Safety profile"
 
@@ -1541,6 +1664,22 @@ msgstr "Save As"
 #: src/features/character/CharacterPanel.tsx
 msgid "Save Attributes"
 msgstr "Save Attributes"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Save behavior"
+msgstr "Save behavior"
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Save integrity"
+msgstr "Save integrity"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Save Manager"
+msgstr "Save Manager"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Save Manager will be added in a later stage of this rebuild."
+msgstr "Save Manager will be added in a later stage of this rebuild."
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Save or discard the current changes before continuing."
@@ -1574,6 +1713,14 @@ msgstr "Saved to {0}."
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge found operation journals from an earlier session."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Scan for problems"
+msgstr "Scan for problems"
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "Scanning…"
+msgstr "Scanning…"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Search"
@@ -1689,6 +1836,10 @@ msgstr "Set not visited"
 msgid "Set revealed"
 msgstr "Set revealed"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Set Steam ID"
+msgstr "Set Steam ID"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Set unlocked"
 msgstr "Set unlocked"
@@ -1697,7 +1848,11 @@ msgstr "Set unlocked"
 msgid "Set visited"
 msgstr "Set visited"
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
+msgid "Settings"
+msgstr "Settings"
+
+#: src/features/tools/ToolsPanel.tsx
 msgid "Show Item ID"
 msgstr "Show Item ID"
 
@@ -1732,6 +1887,10 @@ msgstr "Signs Total Count"
 #: src/features/world/WorldPanel.tsx
 msgid "Sites of Grace"
 msgstr "Sites of Grace"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Skip Review Changes for normal operations"
+msgstr "Skip Review Changes for normal operations"
 
 #. placeholder {0}: slot.favoriteSlotID + 1
 #: src/features/character/CharacterPanel.tsx
@@ -1847,6 +2006,10 @@ msgstr "Status: legacy"
 msgid "Status: resolved"
 msgstr "Status: resolved"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Steam ID"
+msgstr "Steam ID"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Storage"
@@ -1940,6 +2103,14 @@ msgstr "Target Class"
 msgid "Target position"
 msgstr "Target position"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Templates"
+msgstr "Templates"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Templates will be added in a later stage of this rebuild."
+msgstr "Templates will be added in a later stage of this rebuild."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The application backend could not be reached."
 msgstr "The application backend could not be reached."
@@ -1951,6 +2122,38 @@ msgstr "The application backend encountered an internal error."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The automatic backup limit was reached. Future saves remove the oldest backup."
 msgstr "The automatic backup limit was reached. Future saves remove the oldest backup."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The backend applied nothing, so this save is unchanged."
+msgstr "The backend applied nothing, so this save is unchanged."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The backend does not expose this action yet."
+msgstr "The backend does not expose this action yet."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The backend does not report the stored Steam ID, so this field stays empty."
+msgstr "The backend does not report the stored Steam ID, so this field stays empty."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The backend planned no repair for this selection."
+msgstr "The backend planned no repair for this selection."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The backend reported no problems and checked every scope."
+msgstr "The backend reported no problems and checked every scope."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The backend reported no problems, but its coverage is incomplete."
+msgstr "The backend reported no problems, but its coverage is incomplete."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The backend sets the Steam ID for PC saves only."
+msgstr "The backend sets the Steam ID for PC saves only."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The backup name pattern is fixed in this build: the backend defines no public grammar for it yet."
+msgstr "The backup name pattern is fixed in this build: the backend defines no public grammar for it yet."
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -1964,6 +2167,26 @@ msgstr "The change was not applied."
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
 msgstr "The file chooser could not be opened. No file was selected and nothing was loaded."
 
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The planned repairs could not be applied."
+msgstr "The planned repairs could not be applied."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The planned repairs were applied."
+msgstr "The planned repairs were applied."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The repair plan could not be built."
+msgstr "The repair plan could not be built."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The repair plan describes another save state, so it was discarded. Scan the save again."
+msgstr "The repair plan describes another save state, so it was discarded. Scan the save again."
+
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The repairs were applied, but this screen could not be refreshed. Reopen the save to see its current state."
+msgstr "The repairs were applied, but this screen could not be refreshed. Reopen the save to see its current state."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The request was rejected because some input was invalid."
 msgstr "The request was rejected because some input was invalid."
@@ -1972,7 +2195,7 @@ msgstr "The request was rejected because some input was invalid."
 msgid "The requested operation could not be completed."
 msgstr "The requested operation could not be completed."
 
-#: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "The safety profile is unavailable."
 msgstr "The safety profile is unavailable."
 
@@ -1988,6 +2211,10 @@ msgstr "The save revision supplied by the request was invalid."
 msgid "The save session is no longer available."
 msgstr "The save session is no longer available."
 
+#: src/features/tools/SaveIntegrityCard.tsx
+msgid "The save validation report is unavailable."
+msgstr "The save validation report is unavailable."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The save was not opened for editing."
 msgstr "The save was not opened for editing."
@@ -2000,7 +2227,20 @@ msgstr "The selected resource has no item details."
 msgid "The session changed after validation. Validate the current revision again."
 msgstr "The session changed after validation. Validate the current revision again."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "The Steam ID was rejected and nothing was changed."
+msgstr "The Steam ID was rejected and nothing was changed."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The Steam ID was stored, but this screen could not be refreshed. Reopen the save to see its current state."
+msgstr "The Steam ID was stored, but this screen could not be refreshed. Reopen the save to see its current state."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The Steam ID was stored."
+msgstr "The Steam ID was stored."
+
 #: src/features/app-shell/AppShell.tsx
+#: src/features/tools/ToolsPanel.tsx
 msgid "Theme"
 msgstr "Theme"
 
@@ -2053,6 +2293,10 @@ msgstr "Timeout duration for visitor connections."
 #: src/features/app-shell/AppShell.tsx
 msgid "Tools"
 msgstr "Tools"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Tools sections"
+msgstr "Tools sections"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Tutorials"

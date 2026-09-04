@@ -3,13 +3,13 @@
 import {inventory} from '../models';
 import {saveengine} from '../models';
 import {appearance} from '../models';
+import {diagnostics} from '../models';
 import {application} from '../models';
 import {world} from '../models';
 import {equipment} from '../models';
 import {schema} from '../models';
 import {catalog} from '../models';
 import {network} from '../models';
-import {diagnostics} from '../models';
 import {character} from '../models';
 import {gamecatalog} from '../models';
 
@@ -18,6 +18,8 @@ export function AddItemsToContainers(arg1:string,arg2:number,arg3:Array<inventor
 export function ApplyAppearancePreset(arg1:string,arg2:number,arg3:string,arg4:string):Promise<appearance.ApplyAppearancePresetResult>;
 
 export function ApplyFavoritePreset(arg1:string,arg2:number,arg3:number,arg4:string):Promise<saveengine.ApplyFavoritePresetResult>;
+
+export function ApplyRepairs(arg1:string,arg2:number,arg3:Array<string>,arg4:string,arg5:string):Promise<diagnostics.ApplyRepairsResult>;
 
 export function ClearRecentFiles():Promise<void>;
 
@@ -94,6 +96,8 @@ export function GetRecoveryJournal(arg1:string):Promise<saveengine.RecoveryJourn
 export function GetRecoveryJournals():Promise<Array<saveengine.RecoveryJournalSummary>>;
 
 export function GetRegions(arg1:string,arg2:number):Promise<world.GetRegionsResult>;
+
+export function GetRepairPlan(arg1:string,arg2:number,arg3:string,arg4:Array<string>):Promise<diagnostics.GetRepairPlanResult>;
 
 export function GetResource(arg1:string,arg2:string):Promise<catalog.GetResourceResult>;
 
@@ -204,6 +208,8 @@ export function SetQuickItems(arg1:string,arg2:number,arg3:Array<any>,arg4:strin
 export function SetRegionUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetRegionUnlockedResult>;
 
 export function SetSafetyProfile(arg1:string):Promise<application.SafetyProfileResult>;
+
+export function SetSaveAccountID(arg1:string,arg2:string,arg3:string):Promise<saveengine.SetSaveAccountIDResult>;
 
 export function SetSaveLifecycleSettings(arg1:number):Promise<saveengine.SaveLifecycleSettings>;
 
