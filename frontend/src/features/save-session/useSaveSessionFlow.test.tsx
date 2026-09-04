@@ -11,9 +11,11 @@ import {
   makeCharacterPort,
   makeDiagnosticsPort,
   makeSaveSessionPort,
+  makeSettingsPort,
   stubCleanValidationReport,
   stubSaveCharacters,
   stubSaveSession,
+  stubHostSettings,
   TestProviders,
 } from "../../test/renderWithProviders";
 import { useSaveSessionFlow } from "./useSaveSessionFlow";
@@ -28,6 +30,7 @@ function setup(overrides: Partial<Ports> = {}) {
       saveSessionPort={overrides.saveSessionPort ?? makeSaveSessionPort()}
       characterPort={overrides.characterPort ?? makeCharacterPort()}
       diagnosticsPort={overrides.diagnosticsPort ?? makeDiagnosticsPort()}
+      settingsPort={overrides.settingsPort ?? makeSettingsPort()}
     >
       {children}
     </TestProviders>
@@ -898,6 +901,100 @@ describe("useSaveSessionFlow", () => {
     expect(recordRecentFile).toHaveBeenCalledWith(dirty.saveSessionID);
     expect(result.current.recentFiles[0]?.path).toBe(clean.sourcePath);
     expect(result.current.history?.operations).toEqual([]);
+  });
+
+  it("skips only the normal-risk Save review after validation when the host setting allows it", async () => {
+    const dirty = { ...stubSaveSession, saveRevision: "1", unsavedChanges: true };
+    const clean = { ...dirty, saveRevision: "2", unsavedChanges: false, eventSequence: "1" };
+    let current = dirty;
+    const validateReviewChanges = vi.fn(() =>
+      Promise.resolve({
+        saveSessionID: dirty.saveSessionID,
+        saveRevision: dirty.saveRevision,
+        validationToken: "validation-1",
+        valid: true,
+        warningCount: 0,
+        banRiskCount: 0,
+        criticalCount: 0,
+        stages: [],
+        issues: [],
+      }),
+    );
+    const save = vi.fn(() => {
+      current = clean;
+      return Promise.resolve({
+        operationID: "operation-save",
+        operationKind: "save",
+        saveSessionID: dirty.saveSessionID,
+        saveRevision: clean.saveRevision,
+        changedScopes: ["save.session", "diagnostics.report"] as const,
+        target: dirty.sourcePath,
+        warnings: [],
+        retentionNoticeRequired: false,
+      });
+    });
+    const { wrapper } = setup({
+      settingsPort: makeSettingsPort({
+        getHostSettings: () =>
+          Promise.resolve({ ...stubHostSettings, skipReviewForNormalRisk: true }),
+      }),
+      saveSessionPort: makeSaveSessionPort({
+        loadSave: () => Promise.resolve(dirty),
+        getLoadedSave: () => Promise.resolve(current),
+        validateReviewChanges,
+        save,
+      }),
+      characterPort: makeCharacterPort({
+        getSaveCharacters: (saveSessionID) =>
+          Promise.resolve({ ...stubSaveCharacters, saveSessionID, saveRevision: "1" }),
+      }),
+      diagnosticsPort: makeDiagnosticsPort({
+        getSaveValidationReport: ({ saveSessionID, characterID }) =>
+          Promise.resolve({
+            ...stubCleanValidationReport,
+            saveSessionID,
+            saveRevision: "1",
+            characterID,
+          }),
+      }),
+    });
+
+    const { result } = renderHook(() => useSaveSessionFlow(), { wrapper });
+    act(() => result.current.openSave());
+    await waitFor(() => expect(result.current.session).toEqual(dirty));
+    act(() => result.current.save());
+
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    expect(validateReviewChanges).toHaveBeenCalledWith(dirty.saveSessionID, dirty.saveRevision);
+    expect(result.current.reviewOpen).toBe(false);
+    await waitFor(() => expect(result.current.session).toEqual(clean));
+  });
+
+  it("releases a deployment staging file after attempting to open it", async () => {
+    const stagedPath = "/private/tmp/saveforge-download-1/downloaded.sl2";
+    const releaseDeploymentStaging = vi.fn(() => Promise.resolve());
+    const recordRecentFile = vi.fn(() => Promise.resolve([]));
+    const loadSave = vi.fn(() =>
+      Promise.resolve({
+        ...stubSaveSession,
+        sourcePath: stagedPath,
+        sourceKind: "temporary" as const,
+      }),
+    );
+    const { wrapper } = setup({
+      saveSessionPort: makeSaveSessionPort({
+        loadSave,
+        recordRecentFile,
+        releaseDeploymentStaging,
+      }),
+    });
+    const { result } = renderHook(() => useSaveSessionFlow(), { wrapper });
+
+    act(() => result.current.openStagedFile(stagedPath));
+
+    await waitFor(() => expect(releaseDeploymentStaging).toHaveBeenCalledWith(stagedPath));
+    expect(loadSave).toHaveBeenCalledWith(stagedPath, "", "temporary");
+    expect(recordRecentFile).not.toHaveBeenCalled();
   });
 
   it("discards through the backend before continuing a dirty close request", async () => {

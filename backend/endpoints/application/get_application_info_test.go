@@ -1,6 +1,7 @@
 package application_test
 
 import (
+	"runtime"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
@@ -18,6 +19,9 @@ func TestGetApplicationInfoReturnsTheSuppliedVersion(t *testing.T) {
 	}
 	if result.ApplicationVersion != version {
 		t.Fatalf("applicationVersion = %q, want %q", result.ApplicationVersion, version)
+	}
+	if result.Build == "" || result.Platform != runtime.GOOS+"/"+runtime.GOARCH {
+		t.Fatalf("build/platform = %q/%q", result.Build, result.Platform)
 	}
 }
 

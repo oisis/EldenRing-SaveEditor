@@ -9,8 +9,12 @@ package desktop
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"sync"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
+	deploymentdomain "github.com/oisis/EldenRing-SaveForge/backend/deployment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
@@ -24,6 +28,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -56,6 +61,39 @@ type Bridge struct {
 	// bridge holds no dialog implementation of its own.
 	chooseSaveFile   SaveFileChooser
 	chooseSaveTarget SaveTargetChooser
+	// chooseDocument is the host's native open dialog for a Build Template
+	// document. It is a separate port from chooseSaveFile, because a template is
+	// not a save and the two dialogs offer different filters.
+	chooseDocument DocumentChooser
+
+	// hostSettings owns the two Save behavior preferences. Like
+	// safetyProfiles it is host state that lives outside every save session.
+	hostSettings *hostsettings.Store
+	// buildTemplates is the process-wide Build Templates library supplied by the
+	// composition root. The bridge never builds a replacement store per call: a
+	// second store would give the library a second directory and a second index.
+	buildTemplates *buildtemplates.Store
+	// deploymentStore and deploymentService own the deployment targets, the
+	// trusted SSH host keys and the target-side backups. Save Manager is a second
+	// presentation of the same two, never a second model.
+	deploymentStore   *deploymentdomain.Store
+	deploymentService *deploymentdomain.Service
+
+	// openHostURL hands one approved address to the host's default browser or
+	// file manager. A test replaces it; nothing here accepts an address the
+	// frontend supplied, only an identifier the backend resolves.
+	openHostURL func(ctx context.Context, url string)
+
+	// operations carries the cancel function of every long deployment operation
+	// that is still running, keyed by the operation identifier the caller stated.
+	// It is guarded by operationsMutex and holds no save state.
+	operationsMutex sync.Mutex
+	operations      map[string]context.CancelFunc
+
+	// stagedDownloads contains only directories created by DownloadFromTarget.
+	// A cleanup request can therefore never remove an arbitrary frontend path.
+	stagedDownloadsMutex sync.Mutex
+	stagedDownloads      map[string]string
 
 	// emitEvent delivers a backend event to the frontend. A nil value selects the
 	// Wails runtime; only a test replaces it, so the bridge stays exercisable
@@ -92,6 +130,53 @@ func NewBridge(
 		chooseSaveFile, chooseSaveTarget...)
 }
 
+// Dependencies is the full set of collaborators the bridge delegates to. It
+// exists so the composition root can state every store once instead of growing
+// another positional constructor parameter for each new one.
+//
+// Every member is optional in the sense that the bridge never builds a
+// replacement for it: a missing store makes the endpoints that need it report a
+// plain "not available" failure, which is honest, rather than silently creating
+// a second directory or a second source of truth.
+type Dependencies struct {
+	ApplicationVersion string
+	SaveEngine         *saveengine.Engine
+	GameCatalog        *gamecatalog.Catalog
+	SafetyProfiles     *safetyprofile.Store
+	HostSettings       *hostsettings.Store
+	BuildTemplates     *buildtemplates.Store
+	DeploymentStore    *deploymentdomain.Store
+	ChooseSaveFile     SaveFileChooser
+	ChooseSaveTarget   SaveTargetChooser
+	ChooseDocument     DocumentChooser
+}
+
+// NewBridgeWithDependencies is the constructor the composition root uses.
+func NewBridgeWithDependencies(dependencies Dependencies) *Bridge {
+	bridge := &Bridge{
+		applicationVersion: dependencies.ApplicationVersion,
+		saveEngine:         dependencies.SaveEngine,
+		gameCatalog:        dependencies.GameCatalog,
+		safetyProfiles:     dependencies.SafetyProfiles,
+		hostSettings:       dependencies.HostSettings,
+		buildTemplates:     dependencies.BuildTemplates,
+		deploymentStore:    dependencies.DeploymentStore,
+		chooseSaveFile:     dependencies.ChooseSaveFile,
+		chooseSaveTarget:   dependencies.ChooseSaveTarget,
+		chooseDocument:     dependencies.ChooseDocument,
+		operations:         map[string]context.CancelFunc{},
+		stagedDownloads:    map[string]string{},
+	}
+	if dependencies.DeploymentStore != nil {
+		bridge.deploymentService = deploymentdomain.NewService(
+			dependencies.DeploymentStore, dependencies.HostSettings, bridge.publishDeploymentProgress)
+	}
+	if bridge.saveEngine != nil {
+		bridge.saveEngine.SetSessionChangedSink(bridge.publishSessionChanged)
+	}
+	return bridge
+}
+
 // NewBridgeWithSettings is NewBridge for a composition root that owns a
 // persistent application settings store. The store is injected rather than
 // created here, so the host directory has one owner and the bridge stays
@@ -104,23 +189,20 @@ func NewBridgeWithSettings(
 	chooseSaveFile SaveFileChooser,
 	chooseSaveTarget ...SaveTargetChooser,
 ) *Bridge {
-	bridge := &Bridge{
-		applicationVersion: applicationVersion,
-		saveEngine:         saveEngine,
-		gameCatalog:        gameCatalog,
-		safetyProfiles:     safetyProfiles,
-		chooseSaveFile:     chooseSaveFile,
+	dependencies := Dependencies{
+		ApplicationVersion: applicationVersion,
+		SaveEngine:         saveEngine,
+		GameCatalog:        gameCatalog,
+		SafetyProfiles:     safetyProfiles,
+		ChooseSaveFile:     chooseSaveFile,
 	}
 	if len(chooseSaveTarget) > 0 {
-		bridge.chooseSaveTarget = chooseSaveTarget[0]
+		dependencies.ChooseSaveTarget = chooseSaveTarget[0]
 	}
 	// The bridge is the only host-aware layer, so it is the one that subscribes
 	// to SaveEngine's committed mutations and turns them into Wails events. The
 	// engine never learns what a window is.
-	if saveEngine != nil {
-		saveEngine.SetSessionChangedSink(bridge.publishSessionChanged)
-	}
-	return bridge
+	return NewBridgeWithDependencies(dependencies)
 }
 
 // SelectSaveTarget opens the native Save As dialog after Review Changes has
@@ -147,6 +229,47 @@ func (b *Bridge) Startup(ctx context.Context) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
 	b.hostContext = ctx
+}
+
+// Shutdown removes download staging directories that were not consumed or
+// explicitly discarded before the application exited.
+func (b *Bridge) Shutdown(context.Context) {
+	b.stagedDownloadsMutex.Lock()
+	directories := make([]string, 0, len(b.stagedDownloads))
+	for _, directory := range b.stagedDownloads {
+		directories = append(directories, directory)
+	}
+	b.stagedDownloads = map[string]string{}
+	b.stagedDownloadsMutex.Unlock()
+	for _, directory := range directories {
+		_ = os.RemoveAll(directory)
+	}
+}
+
+func (b *Bridge) trackStagedDownload(localPath string) {
+	b.stagedDownloadsMutex.Lock()
+	defer b.stagedDownloadsMutex.Unlock()
+	b.stagedDownloads[localPath] = filepath.Dir(localPath)
+}
+
+// ReleaseDeploymentStaging removes exactly one directory previously created
+// by DownloadFromTarget. Unknown paths are rejected.
+func (b *Bridge) ReleaseDeploymentStaging(localPath string) error {
+	b.stagedDownloadsMutex.Lock()
+	directory, exists := b.stagedDownloads[localPath]
+	b.stagedDownloadsMutex.Unlock()
+	if !exists {
+		return bridgeError(errors.New("the deployment staging file is not managed by this process"))
+	}
+	if err := os.RemoveAll(directory); err != nil {
+		return bridgeError(err)
+	}
+	b.stagedDownloadsMutex.Lock()
+	if b.stagedDownloads[localPath] == directory {
+		delete(b.stagedDownloads, localPath)
+	}
+	b.stagedDownloadsMutex.Unlock()
+	return nil
 }
 
 // BeforeClose intercepts only a window close that would abandon unsaved work.

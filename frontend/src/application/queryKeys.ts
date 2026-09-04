@@ -49,6 +49,59 @@ export const queryKeys = {
    */
   safetyProfile: () => ["settings", "safety-profile"] as const,
   /**
+   * The persistent host settings share the `settings` prefix with the Safety
+   * Profile: both are host state that survives closing a save.
+   */
+  hostSettings: () => ["settings", "host"] as const,
+  /**
+   * The approved project links are a property of the build, so they get one
+   * stable key that no session or revision takes part in.
+   */
+  projectLinks: () => ["about", "project-links"] as const,
+  /**
+   * One page of the Build Templates library. The library is local host state
+   * rather than save state, so its keys live outside the `save-session` prefix
+   * and closing a save leaves them cached. Every argument that selects a
+   * different page takes part in the key.
+   */
+  buildTemplates: (search: string, tags: readonly string[], page: number, pageSize: number) =>
+    ["templates", "library", search, tags.slice(), page, pageSize] as const,
+  /**
+   * One template preview. It is a question about one exact save state, so the
+   * session, the slot and the revision all take part in the key and an answer
+   * produced for an earlier revision can never be served for a later one. The
+   * overrides participate because they select a different plan.
+   */
+  buildTemplatePreview: (
+    saveSessionID: string,
+    characterID: CharacterKey,
+    saveRevision: string,
+    templateID: string,
+    overrides: string,
+  ) =>
+    [
+      "save-session",
+      saveSessionID,
+      "character",
+      characterID,
+      "template-preview",
+      templateID,
+      overrides,
+      saveRevision,
+    ] as const,
+  /**
+   * The deployment targets are host configuration: one stable key outside every
+   * session prefix.
+   */
+  deploymentTargets: () => ["deployment", "targets"] as const,
+  /**
+   * The confirmed game state of one target. It is deliberately its own key: a
+   * refetch of the status must not invalidate the target list.
+   */
+  deploymentGameStatus: (targetID: string) => ["deployment", "game-status", targetID] as const,
+  /** The backup library of one target, shared by Deployment and Save Manager. */
+  targetBackups: (targetID: string) => ["deployment", "backups", targetID] as const,
+  /**
    * The catalog is global: it belongs to no save session, so its keys live
    * outside the `save-session` prefix and closing a save leaves them cached.
    * All seven backend arguments take part in the key, because every one of them

@@ -62,8 +62,18 @@ import type {
   SaveSession,
   SaveSessionPort,
 } from "../application/save-session/saveSessionPort";
+import { AboutPortProvider } from "../application/about/aboutClient";
+import type { AboutPort } from "../application/about/aboutPort";
+import { DeploymentPortProvider } from "../application/deployment/deploymentClient";
+import type { DeploymentPort, DeploymentTargets } from "../application/deployment/deploymentPort";
 import { SettingsPortProvider } from "../application/settings/settingsClient";
-import type { SafetyProfileSettings, SettingsPort } from "../application/settings/settingsPort";
+import type {
+  HostSettings,
+  SafetyProfileSettings,
+  SettingsPort,
+} from "../application/settings/settingsPort";
+import { TemplatePortProvider } from "../application/templates/templateClient";
+import type { TemplatePort } from "../application/templates/templatePort";
 import { NetworkPortProvider } from "../application/network/networkClient";
 import type {
   NetworkPort,
@@ -85,6 +95,8 @@ import { activateLocale, i18n, type Locale } from "../i18n/i18n";
  */
 export const stubApplicationInfo: ApplicationInfo = {
   version: "2.0.0-test",
+  build: "test-build",
+  platform: "test/test",
   schemas: [{ name: "game_catalog", minimumVersion: 1, currentVersion: 16 }],
   capabilities: ["catalog_read"],
 };
@@ -536,10 +548,134 @@ export const stubSafetyProfile: SafetyProfileSettings = {
   defaultProfile: "safe",
 };
 
+/** The product defaults of the persistent host settings. */
+export const stubHostSettings: HostSettings = {
+  skipReviewForNormalRisk: false,
+  remoteBackupPolicy: "ask",
+  availableRemoteBackupPolicies: ["ask", "always"],
+  defaultRemoteBackupPolicy: "ask",
+  configurationDirectoryExists: true,
+  logDirectoryExists: false,
+};
+
 export function makeSettingsPort(overrides: Partial<SettingsPort> = {}): SettingsPort {
   return {
     getSafetyProfile: () => Promise.resolve(stubSafetyProfile),
     setSafetyProfile: (safetyProfile) => Promise.resolve({ ...stubSafetyProfile, safetyProfile }),
+    getHostSettings: () => Promise.resolve(stubHostSettings),
+    setHostSettings: (settings) => Promise.resolve({ ...stubHostSettings, ...settings }),
+    openHostLocation: () => Promise.resolve(),
+    exportDiagnosticReport: () => Promise.resolve({ exported: true, recordCount: 0 }),
+    ...overrides,
+  };
+}
+
+export function makeAboutPort(overrides: Partial<AboutPort> = {}): AboutPort {
+  return {
+    getProjectLinks: () =>
+      Promise.resolve([
+        { id: "repository", url: "https://github.com/oisis/EldenRing-SaveEditor" },
+        { id: "releases", url: "https://github.com/oisis/EldenRing-SaveEditor/releases" },
+        { id: "sponsor_coffee", url: "https://buymeacoffee.com/oisisk" },
+        {
+          id: "sponsor_bitcoin",
+          url: "https://www.blockonomics.co/#/search?q=18FqJhKioiuxH859LU2pcpas2h46MGr9a2",
+        },
+      ]),
+    openProjectLink: () => Promise.resolve(),
+    checkForUpdates: () =>
+      Promise.resolve({
+        status: "current",
+        currentVersion: "2.0.0",
+        latestVersion: "2.0.0",
+        comparisonPossible: true,
+      }),
+    ...overrides,
+  };
+}
+
+export function makeTemplatePort(overrides: Partial<TemplatePort> = {}): TemplatePort {
+  return {
+    getBuildTemplates: () =>
+      Promise.resolve({ templates: [], total: 0, page: 0, pageSize: 50 }),
+    getBuildTemplatePreview: ({ saveSessionID, characterID, templateID }) =>
+      Promise.resolve({
+        templateID,
+        templateRevision: "1",
+        characterID,
+        saveSessionID,
+        saveRevision: "0",
+        executable: true,
+        plan: {},
+        blockingIssues: [],
+      }),
+    applyBuildTemplate: ({ saveSessionID }) =>
+      Promise.resolve({
+        operationID: "operation-1",
+        operationKind: "apply_build_template",
+        saveSessionID,
+        saveRevision: "1",
+        changedScopes: ["save.session"],
+      }),
+    createBuildTemplate: () => Promise.resolve({ templateID: "template-1" }),
+    updateBuildTemplate: ({ templateID }) => Promise.resolve({ templateID }),
+    deleteBuildTemplate: ({ templateID }) => Promise.resolve({ templateID }),
+    importBuildTemplate: () => Promise.resolve({ templateID: "template-1" }),
+    ...overrides,
+  };
+}
+
+/** The empty deployment configuration a host starts from. */
+export const stubDeploymentTargets: DeploymentTargets = {
+  targets: [],
+  availableKinds: ["local", "ssh"],
+};
+
+export function makeDeploymentPort(overrides: Partial<DeploymentPort> = {}): DeploymentPort {
+  const emptyBackups = (targetID: string) => ({
+    targetID,
+    backups: [],
+    transferSupported: true,
+  });
+  const blocked = (targetID: string) => ({
+    operationID: "operation-1",
+    targetID,
+    completed: false,
+    blocked: "game_status_unknown",
+    targetState: "unchanged" as const,
+    gameStatus: "unknown",
+    stages: [],
+  });
+  return {
+    subscribeDeploymentProgress: () => () => undefined,
+    getDeploymentTargets: () => Promise.resolve(stubDeploymentTargets),
+    createDeploymentTarget: () => Promise.resolve(stubDeploymentTargets),
+    updateDeploymentTarget: () => Promise.resolve(stubDeploymentTargets),
+    deleteDeploymentTarget: () => Promise.resolve(stubDeploymentTargets),
+    testDeploymentTarget: (targetID) =>
+      Promise.resolve({
+        targetID,
+        reachable: true,
+        hostKeyTrusted: false,
+        gameStatus: "unknown",
+        saveExists: false,
+      }),
+    forgetDeploymentHostKey: () => Promise.resolve(stubDeploymentTargets),
+    getDeploymentGameStatus: () => Promise.resolve("unknown"),
+    launchTargetGame: () =>
+      Promise.resolve({ configured: true, executed: true, exitCode: 0 }),
+    closeTargetGame: () => Promise.resolve({ configured: true, executed: true, exitCode: 0 }),
+    deployToTarget: ({ targetID }) => Promise.resolve(blocked(targetID)),
+    downloadFromTarget: ({ targetID }) => Promise.resolve(blocked(targetID)),
+    cancelDeploymentOperation: () => Promise.resolve(),
+    getTargetBackups: (targetID) => Promise.resolve(emptyBackups(targetID)),
+    createTargetBackup: ({ targetID }) => Promise.resolve(emptyBackups(targetID)),
+    activateTargetBackup: ({ targetID }) =>
+      Promise.resolve({ operation: blocked(targetID), backups: emptyBackups(targetID) }),
+    clearActiveTargetBackup: (targetID) => Promise.resolve(emptyBackups(targetID)),
+    updateTargetBackup: ({ targetID }) => Promise.resolve(emptyBackups(targetID)),
+    deleteTargetBackup: ({ targetID }) => Promise.resolve(emptyBackups(targetID)),
+    downloadTargetBackup: () => Promise.resolve({ target: "/tmp/backup.sl2" }),
     ...overrides,
   };
 }
@@ -926,6 +1062,7 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
     subscribeApplicationCloseRequested: () => () => {},
     quitApplication: () => Promise.resolve(),
     loadSave: () => Promise.resolve(stubSaveSession),
+    releaseDeploymentStaging: () => Promise.resolve(),
     getLoadedSave: () => Promise.resolve(stubSaveSession),
     closeSave: () => Promise.resolve(),
     getOperationHistory: (saveSessionID) =>
@@ -1292,6 +1429,9 @@ export function TestProviders({
   networkPort,
   catalogPort,
   settingsPort,
+  aboutPort,
+  templatePort,
+  deploymentPort,
   showItemID,
 }: {
   children: ReactNode;
@@ -1308,6 +1448,9 @@ export function TestProviders({
   networkPort?: NetworkPort;
   catalogPort?: CatalogPort;
   settingsPort?: SettingsPort;
+  aboutPort?: AboutPort;
+  templatePort?: TemplatePort;
+  deploymentPort?: DeploymentPort;
   showItemID?: boolean;
 }) {
   return (
@@ -1325,7 +1468,15 @@ export function TestProviders({
                           <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
                             <WorldPortProvider port={worldPort ?? makeWorldPort()}>
                               <NetworkPortProvider port={networkPort ?? makeNetworkPort()}>
-                                {children}
+                                <AboutPortProvider port={aboutPort ?? makeAboutPort()}>
+                                  <TemplatePortProvider port={templatePort ?? makeTemplatePort()}>
+                                    <DeploymentPortProvider
+                                      port={deploymentPort ?? makeDeploymentPort()}
+                                    >
+                                      {children}
+                                    </DeploymentPortProvider>
+                                  </TemplatePortProvider>
+                                </AboutPortProvider>
                               </NetworkPortProvider>
                             </WorldPortProvider>
                           </EquipmentPortProvider>
@@ -1358,6 +1509,9 @@ export async function renderApp(
     networkPort?: NetworkPort;
     catalogPort?: CatalogPort;
     settingsPort?: SettingsPort;
+    aboutPort?: AboutPort;
+    templatePort?: TemplatePort;
+    deploymentPort?: DeploymentPort;
     showItemID?: boolean;
     locale?: Locale;
     queryClient?: QueryClient;
@@ -1381,6 +1535,9 @@ export async function renderApp(
         networkPort={options.networkPort}
         catalogPort={options.catalogPort}
         settingsPort={options.settingsPort}
+        aboutPort={options.aboutPort}
+        templatePort={options.templatePort}
+        deploymentPort={options.deploymentPort}
         showItemID={options.showItemID}
       >
         {ui}

@@ -182,6 +182,8 @@ describe("wails application info adapter", () => {
     getApplicationInfo.mockResolvedValue(
       application.GetApplicationInfoResult.createFrom({
         applicationVersion: "2.0.0",
+        build: "abcdef",
+        platform: "darwin/arm64",
         supportedSchemas: [{ name: "game_catalog", minimumVersion: 1, currentVersion: 16 }],
         capabilities: ["catalog_read"],
       }),
@@ -189,6 +191,8 @@ describe("wails application info adapter", () => {
 
     await expect(wailsDesktopBridge.getApplicationInfo()).resolves.toEqual({
       version: "2.0.0",
+      build: "abcdef",
+      platform: "darwin/arm64",
       schemas: [{ name: "game_catalog", minimumVersion: 1, currentVersion: 16 }],
       capabilities: ["catalog_read"],
     });
@@ -199,6 +203,8 @@ describe("wails application info adapter", () => {
     getApplicationInfo.mockResolvedValue(
       application.GetApplicationInfoResult.createFrom({
         applicationVersion: "  2.0.0-rc.1+local  ",
+        build: "local-build",
+        platform: "linux/amd64",
         supportedSchemas: [
           { name: "game_catalog", minimumVersion: 1, currentVersion: 16 },
           { name: "future_schema", minimumVersion: 3, currentVersion: 4 },

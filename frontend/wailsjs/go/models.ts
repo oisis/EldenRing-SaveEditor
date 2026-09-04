@@ -99,6 +99,42 @@ export namespace appearance {
 
 export namespace application {
 	
+	export class CheckForUpdatesResult {
+	    status: string;
+	    currentVersion: string;
+	    latestVersion?: string;
+	    releaseURL?: string;
+	    publishedAt?: string;
+	    comparisonPossible: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CheckForUpdatesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.releaseURL = source["releaseURL"];
+	        this.publishedAt = source["publishedAt"];
+	        this.comparisonPossible = source["comparisonPossible"];
+	    }
+	}
+	export class DiagnosticReportResult {
+	    exported: boolean;
+	    recordCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DiagnosticReportResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.exported = source["exported"];
+	        this.recordCount = source["recordCount"];
+	    }
+	}
 	export class SupportedSchema {
 	    name: string;
 	    minimumVersion: number;
@@ -117,6 +153,8 @@ export namespace application {
 	}
 	export class GetApplicationInfoResult {
 	    applicationVersion: string;
+	    build: string;
+	    platform: string;
 	    supportedSchemas: SupportedSchema[];
 	    capabilities: string[];
 	
@@ -127,6 +165,8 @@ export namespace application {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.applicationVersion = source["applicationVersion"];
+	        this.build = source["build"];
+	        this.platform = source["platform"];
 	        this.supportedSchemas = this.convertValues(source["supportedSchemas"], SupportedSchema);
 	        this.capabilities = source["capabilities"];
 	    }
@@ -149,6 +189,73 @@ export namespace application {
 		    return a;
 		}
 	}
+	export class ProjectLink {
+	    id: string;
+	    url: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProjectLink(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.url = source["url"];
+	    }
+	}
+	export class GetProjectLinksResult {
+	    links: ProjectLink[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetProjectLinksResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.links = this.convertValues(source["links"], ProjectLink);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class HostSettingsResult {
+	    skipReviewForNormalRisk: boolean;
+	    remoteBackupPolicy: string;
+	    availableRemoteBackupPolicies: string[];
+	    defaultRemoteBackupPolicy: string;
+	    configurationDirectoryExists: boolean;
+	    logDirectoryExists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new HostSettingsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.skipReviewForNormalRisk = source["skipReviewForNormalRisk"];
+	        this.remoteBackupPolicy = source["remoteBackupPolicy"];
+	        this.availableRemoteBackupPolicies = source["availableRemoteBackupPolicies"];
+	        this.defaultRemoteBackupPolicy = source["defaultRemoteBackupPolicy"];
+	        this.configurationDirectoryExists = source["configurationDirectoryExists"];
+	        this.logDirectoryExists = source["logDirectoryExists"];
+	    }
+	}
+	
 	export class SafetyProfileResult {
 	    safetyProfile: string;
 	    availableProfiles: string[];
@@ -165,6 +272,728 @@ export namespace application {
 	        this.defaultProfile = source["defaultProfile"];
 	    }
 	}
+
+}
+
+export namespace buildtemplates {
+	
+	export class WeaponLevelOverride {
+	    useTemplateLevels: boolean;
+	    standardOverride?: number;
+	    somberOverride?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WeaponLevelOverride(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.useTemplateLevels = source["useTemplateLevels"];
+	        this.standardOverride = source["standardOverride"];
+	        this.somberOverride = source["somberOverride"];
+	    }
+	}
+	export class LayoutApplyOptions {
+	    mode: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new LayoutApplyOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mode = source["mode"];
+	    }
+	}
+	export class ItemApplyOptions {
+	    mode: string;
+	    preserveExtraItems?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemApplyOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mode = source["mode"];
+	        this.preserveExtraItems = source["preserveExtraItems"];
+	    }
+	}
+	export class ApplyOptions {
+	    items?: ItemApplyOptions;
+	    inventoryLayout?: LayoutApplyOptions;
+	    storageLayout?: LayoutApplyOptions;
+	    weaponLevelOverride?: WeaponLevelOverride;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.items = this.convertValues(source["items"], ItemApplyOptions);
+	        this.inventoryLayout = this.convertValues(source["inventoryLayout"], LayoutApplyOptions);
+	        this.storageLayout = this.convertValues(source["storageLayout"], LayoutApplyOptions);
+	        this.weaponLevelOverride = this.convertValues(source["weaponLevelOverride"], WeaponLevelOverride);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class StorageLayoutSection {
+	    entries: LayoutEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new StorageLayoutSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entries = this.convertValues(source["entries"], LayoutEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class LayoutEntry {
+	    entryRef: string;
+	    position: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new LayoutEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entryRef = source["entryRef"];
+	        this.position = source["position"];
+	    }
+	}
+	export class InventoryLayoutSection {
+	    entries: LayoutEntry[];
+	
+	    static createFrom(source: any = {}) {
+	        return new InventoryLayoutSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entries = this.convertValues(source["entries"], LayoutEntry);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TemplateItemEntryV2 {
+	    entryID: string;
+	    itemID: number;
+	    name?: string;
+	    category: string;
+	    quantity: number;
+	    location: string;
+	    upgradeKind?: string;
+	    upgradeLevel?: number;
+	    infusionName?: string;
+	    ashOfWarItemID?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateItemEntryV2(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entryID = source["entryID"];
+	        this.itemID = source["itemID"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.quantity = source["quantity"];
+	        this.location = source["location"];
+	        this.upgradeKind = source["upgradeKind"];
+	        this.upgradeLevel = source["upgradeLevel"];
+	        this.infusionName = source["infusionName"];
+	        this.ashOfWarItemID = source["ashOfWarItemID"];
+	    }
+	}
+	export class ItemsSection {
+	    entries: TemplateItemEntryV2[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemsSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.entries = this.convertValues(source["entries"], TemplateItemEntryV2);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SpellSlotRef {
+	    baseItemID: number;
+	    name?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpellSlotRef(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.baseItemID = source["baseItemID"];
+	        this.name = source["name"];
+	    }
+	}
+	export class SpellsSection {
+	    spell1?: SpellSlotRef;
+	    spell2?: SpellSlotRef;
+	    spell3?: SpellSlotRef;
+	    spell4?: SpellSlotRef;
+	    spell5?: SpellSlotRef;
+	    spell6?: SpellSlotRef;
+	    spell7?: SpellSlotRef;
+	    spell8?: SpellSlotRef;
+	    spell9?: SpellSlotRef;
+	    spell10?: SpellSlotRef;
+	    spell11?: SpellSlotRef;
+	    spell12?: SpellSlotRef;
+	    spell13?: SpellSlotRef;
+	    spell14?: SpellSlotRef;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpellsSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.spell1 = this.convertValues(source["spell1"], SpellSlotRef);
+	        this.spell2 = this.convertValues(source["spell2"], SpellSlotRef);
+	        this.spell3 = this.convertValues(source["spell3"], SpellSlotRef);
+	        this.spell4 = this.convertValues(source["spell4"], SpellSlotRef);
+	        this.spell5 = this.convertValues(source["spell5"], SpellSlotRef);
+	        this.spell6 = this.convertValues(source["spell6"], SpellSlotRef);
+	        this.spell7 = this.convertValues(source["spell7"], SpellSlotRef);
+	        this.spell8 = this.convertValues(source["spell8"], SpellSlotRef);
+	        this.spell9 = this.convertValues(source["spell9"], SpellSlotRef);
+	        this.spell10 = this.convertValues(source["spell10"], SpellSlotRef);
+	        this.spell11 = this.convertValues(source["spell11"], SpellSlotRef);
+	        this.spell12 = this.convertValues(source["spell12"], SpellSlotRef);
+	        this.spell13 = this.convertValues(source["spell13"], SpellSlotRef);
+	        this.spell14 = this.convertValues(source["spell14"], SpellSlotRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class EquipmentItemRef {
+	    baseItemID: number;
+	    name?: string;
+	    upgrade?: number;
+	    infusionName?: string;
+	    aowItemID?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EquipmentItemRef(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.baseItemID = source["baseItemID"];
+	        this.name = source["name"];
+	        this.upgrade = source["upgrade"];
+	        this.infusionName = source["infusionName"];
+	        this.aowItemID = source["aowItemID"];
+	    }
+	}
+	export class EquipmentSection {
+	    weaponLeftHand1?: EquipmentItemRef;
+	    weaponRightHand1?: EquipmentItemRef;
+	    weaponLeftHand2?: EquipmentItemRef;
+	    weaponRightHand2?: EquipmentItemRef;
+	    weaponLeftHand3?: EquipmentItemRef;
+	    weaponRightHand3?: EquipmentItemRef;
+	    arrows1?: EquipmentItemRef;
+	    bolts1?: EquipmentItemRef;
+	    arrows2?: EquipmentItemRef;
+	    bolts2?: EquipmentItemRef;
+	    armorHead?: EquipmentItemRef;
+	    armorChest?: EquipmentItemRef;
+	    armorArms?: EquipmentItemRef;
+	    armorLegs?: EquipmentItemRef;
+	    talisman1?: EquipmentItemRef;
+	    talisman2?: EquipmentItemRef;
+	    talisman3?: EquipmentItemRef;
+	    talisman4?: EquipmentItemRef;
+	    talisman5?: EquipmentItemRef;
+	
+	    static createFrom(source: any = {}) {
+	        return new EquipmentSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.weaponLeftHand1 = this.convertValues(source["weaponLeftHand1"], EquipmentItemRef);
+	        this.weaponRightHand1 = this.convertValues(source["weaponRightHand1"], EquipmentItemRef);
+	        this.weaponLeftHand2 = this.convertValues(source["weaponLeftHand2"], EquipmentItemRef);
+	        this.weaponRightHand2 = this.convertValues(source["weaponRightHand2"], EquipmentItemRef);
+	        this.weaponLeftHand3 = this.convertValues(source["weaponLeftHand3"], EquipmentItemRef);
+	        this.weaponRightHand3 = this.convertValues(source["weaponRightHand3"], EquipmentItemRef);
+	        this.arrows1 = this.convertValues(source["arrows1"], EquipmentItemRef);
+	        this.bolts1 = this.convertValues(source["bolts1"], EquipmentItemRef);
+	        this.arrows2 = this.convertValues(source["arrows2"], EquipmentItemRef);
+	        this.bolts2 = this.convertValues(source["bolts2"], EquipmentItemRef);
+	        this.armorHead = this.convertValues(source["armorHead"], EquipmentItemRef);
+	        this.armorChest = this.convertValues(source["armorChest"], EquipmentItemRef);
+	        this.armorArms = this.convertValues(source["armorArms"], EquipmentItemRef);
+	        this.armorLegs = this.convertValues(source["armorLegs"], EquipmentItemRef);
+	        this.talisman1 = this.convertValues(source["talisman1"], EquipmentItemRef);
+	        this.talisman2 = this.convertValues(source["talisman2"], EquipmentItemRef);
+	        this.talisman3 = this.convertValues(source["talisman3"], EquipmentItemRef);
+	        this.talisman4 = this.convertValues(source["talisman4"], EquipmentItemRef);
+	        this.talisman5 = this.convertValues(source["talisman5"], EquipmentItemRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class StatsSection {
+	    vigor?: number;
+	    mind?: number;
+	    endurance?: number;
+	    strength?: number;
+	    dexterity?: number;
+	    intelligence?: number;
+	    faith?: number;
+	    arcane?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new StatsSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.vigor = source["vigor"];
+	        this.mind = source["mind"];
+	        this.endurance = source["endurance"];
+	        this.strength = source["strength"];
+	        this.dexterity = source["dexterity"];
+	        this.intelligence = source["intelligence"];
+	        this.faith = source["faith"];
+	        this.arcane = source["arcane"];
+	    }
+	}
+	export class ProfileSection {
+	    name?: string;
+	    level?: number;
+	    runes?: number;
+	    soulMemory?: number;
+	    class?: string;
+	    clearCount?: number;
+	    scadutreeBlessing?: number;
+	    shadowRealmBlessing?: number;
+	    talismanSlots?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProfileSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.level = source["level"];
+	        this.runes = source["runes"];
+	        this.soulMemory = source["soulMemory"];
+	        this.class = source["class"];
+	        this.clearCount = source["clearCount"];
+	        this.scadutreeBlessing = source["scadutreeBlessing"];
+	        this.shadowRealmBlessing = source["shadowRealmBlessing"];
+	        this.talismanSlots = source["talismanSlots"];
+	    }
+	}
+	export class TemplateItem {
+	    baseItemID: number;
+	    name?: string;
+	    category?: string;
+	    quantity: number;
+	    upgrade?: number;
+	    infusionName?: string;
+	    aowItemID?: number;
+	    container: string;
+	    position: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.baseItemID = source["baseItemID"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.quantity = source["quantity"];
+	        this.upgrade = source["upgrade"];
+	        this.infusionName = source["infusionName"];
+	        this.aowItemID = source["aowItemID"];
+	        this.container = source["container"];
+	        this.position = source["position"];
+	    }
+	}
+	export class InventoryWorkspaceSection {
+	    inventoryItems: TemplateItem[];
+	    storageItems: TemplateItem[];
+	
+	    static createFrom(source: any = {}) {
+	        return new InventoryWorkspaceSection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.inventoryItems = this.convertValues(source["inventoryItems"], TemplateItem);
+	        this.storageItems = this.convertValues(source["storageItems"], TemplateItem);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TemplateSections {
+	    "inventory.workspace"?: InventoryWorkspaceSection;
+	    profile?: ProfileSection;
+	    stats?: StatsSection;
+	    equipment?: EquipmentSection;
+	    spells?: SpellsSection;
+	    items?: ItemsSection;
+	    inventoryLayout?: InventoryLayoutSection;
+	    storageLayout?: StorageLayoutSection;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateSections(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this["inventory.workspace"] = this.convertValues(source["inventory.workspace"], InventoryWorkspaceSection);
+	        this.profile = this.convertValues(source["profile"], ProfileSection);
+	        this.stats = this.convertValues(source["stats"], StatsSection);
+	        this.equipment = this.convertValues(source["equipment"], EquipmentSection);
+	        this.spells = this.convertValues(source["spells"], SpellsSection);
+	        this.items = this.convertValues(source["items"], ItemsSection);
+	        this.inventoryLayout = this.convertValues(source["inventoryLayout"], InventoryLayoutSection);
+	        this.storageLayout = this.convertValues(source["storageLayout"], StorageLayoutSection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SectionSelection {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new SectionSelection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+	export class TemplateSelection {
+	    profile?: SectionSelection;
+	    stats?: SectionSelection;
+	    "inventory.workspace"?: SectionSelection;
+	    equipment?: SectionSelection;
+	    spells?: SectionSelection;
+	    items?: SectionSelection;
+	    inventoryLayout?: SectionSelection;
+	    storageLayout?: SectionSelection;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateSelection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.profile = this.convertValues(source["profile"], SectionSelection);
+	        this.stats = this.convertValues(source["stats"], SectionSelection);
+	        this["inventory.workspace"] = this.convertValues(source["inventory.workspace"], SectionSelection);
+	        this.equipment = this.convertValues(source["equipment"], SectionSelection);
+	        this.spells = this.convertValues(source["spells"], SectionSelection);
+	        this.items = this.convertValues(source["items"], SectionSelection);
+	        this.inventoryLayout = this.convertValues(source["inventoryLayout"], SectionSelection);
+	        this.storageLayout = this.convertValues(source["storageLayout"], SectionSelection);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TemplateDocMetadata {
+	    name?: string;
+	    description?: string;
+	    author?: string;
+	    tags?: string[];
+	    sourceCharacterIndex?: number;
+	    sourceCharacterName?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateDocMetadata(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.author = source["author"];
+	        this.tags = source["tags"];
+	        this.sourceCharacterIndex = source["sourceCharacterIndex"];
+	        this.sourceCharacterName = source["sourceCharacterName"];
+	    }
+	}
+	export class BuildTemplate {
+	    schema: string;
+	    version: number;
+	    createdAt: string;
+	    appVersion?: string;
+	    metadata?: TemplateDocMetadata;
+	    selection?: TemplateSelection;
+	    sections: TemplateSections;
+	    applyOptions?: ApplyOptions;
+	
+	    static createFrom(source: any = {}) {
+	        return new BuildTemplate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.schema = source["schema"];
+	        this.version = source["version"];
+	        this.createdAt = source["createdAt"];
+	        this.appVersion = source["appVersion"];
+	        this.metadata = this.convertValues(source["metadata"], TemplateDocMetadata);
+	        this.selection = this.convertValues(source["selection"], TemplateSelection);
+	        this.sections = this.convertValues(source["sections"], TemplateSections);
+	        this.applyOptions = this.convertValues(source["applyOptions"], ApplyOptions);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	export class TemplateMetadata {
+	    templateID: string;
+	    name: string;
+	    description?: string;
+	    tags?: string[];
+	    createdAt: string;
+	    updatedAt: string;
+	    schemaVersion?: number;
+	    selectedSections?: string[];
+	    inventoryItems: number;
+	    storageItems: number;
+	    warnings: number;
+	    templateRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateMetadata(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.tags = source["tags"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.schemaVersion = source["schemaVersion"];
+	        this.selectedSections = source["selectedSections"];
+	        this.inventoryItems = source["inventoryItems"];
+	        this.storageItems = source["storageItems"];
+	        this.warnings = source["warnings"];
+	        this.templateRevision = source["templateRevision"];
+	    }
+	}
+	export class TemplateMetadataUpdate {
+	    name: string;
+	    description?: string;
+	    tags?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new TemplateMetadataUpdate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.tags = source["tags"];
+	    }
+	}
+	
+	
 
 }
 
@@ -486,6 +1315,399 @@ export namespace character {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace deployment {
+	
+	export class BackupRecord {
+	    id: string;
+	    targetID: string;
+	    fileName: string;
+	    createdAt: string;
+	    manual: boolean;
+	    active: boolean;
+	    tags?: string[];
+	    description?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BackupRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.targetID = source["targetID"];
+	        this.fileName = source["fileName"];
+	        this.createdAt = source["createdAt"];
+	        this.manual = source["manual"];
+	        this.active = source["active"];
+	        this.tags = source["tags"];
+	        this.description = source["description"];
+	    }
+	}
+	export class GetTargetBackupsResult {
+	    targetID: string;
+	    backups: BackupRecord[];
+	    transferSupported: boolean;
+	    unsupportedReason?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetTargetBackupsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetID = source["targetID"];
+	        this.backups = this.convertValues(source["backups"], BackupRecord);
+	        this.transferSupported = source["transferSupported"];
+	        this.unsupportedReason = source["unsupportedReason"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CommandOutcome {
+	    configured: boolean;
+	    executed: boolean;
+	    exitCode: number;
+	    detail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CommandOutcome(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.configured = source["configured"];
+	        this.executed = source["executed"];
+	        this.exitCode = source["exitCode"];
+	        this.detail = source["detail"];
+	    }
+	}
+	export class Stage {
+	    stage: string;
+	    completed: boolean;
+	    detail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Stage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.stage = source["stage"];
+	        this.completed = source["completed"];
+	        this.detail = source["detail"];
+	    }
+	}
+	export class OperationResult {
+	    operationID: string;
+	    targetID: string;
+	    completed: boolean;
+	    blocked?: string;
+	    failure?: string;
+	    targetState: string;
+	    gameStatus: string;
+	    stages: Stage[];
+	    backupID?: string;
+	    localPath?: string;
+	    stop?: CommandOutcome;
+	    launch?: CommandOutcome;
+	
+	    static createFrom(source: any = {}) {
+	        return new OperationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.targetID = source["targetID"];
+	        this.completed = source["completed"];
+	        this.blocked = source["blocked"];
+	        this.failure = source["failure"];
+	        this.targetState = source["targetState"];
+	        this.gameStatus = source["gameStatus"];
+	        this.stages = this.convertValues(source["stages"], Stage);
+	        this.backupID = source["backupID"];
+	        this.localPath = source["localPath"];
+	        this.stop = this.convertValues(source["stop"], CommandOutcome);
+	        this.launch = this.convertValues(source["launch"], CommandOutcome);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ActivateTargetBackupResult {
+	    operation: OperationResult;
+	    backups: GetTargetBackupsResult;
+	
+	    static createFrom(source: any = {}) {
+	        return new ActivateTargetBackupResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operation = this.convertValues(source["operation"], OperationResult);
+	        this.backups = this.convertValues(source["backups"], GetTargetBackupsResult);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class DeployRequest {
+	    operationID: string;
+	    targetID: string;
+	    saveSessionID: string;
+	    expectedRevision: string;
+	    validationToken: string;
+	    confirmWarnings?: boolean;
+	    confirmBanRisk?: boolean;
+	    launchAfter?: boolean;
+	    continueWithUnknownGameStatus?: boolean;
+	    confirmRemoteBackup?: boolean;
+	    confirmStopGame?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeployRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.targetID = source["targetID"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.expectedRevision = source["expectedRevision"];
+	        this.validationToken = source["validationToken"];
+	        this.confirmWarnings = source["confirmWarnings"];
+	        this.confirmBanRisk = source["confirmBanRisk"];
+	        this.launchAfter = source["launchAfter"];
+	        this.continueWithUnknownGameStatus = source["continueWithUnknownGameStatus"];
+	        this.confirmRemoteBackup = source["confirmRemoteBackup"];
+	        this.confirmStopGame = source["confirmStopGame"];
+	    }
+	}
+	export class DownloadRequest {
+	    operationID: string;
+	    targetID: string;
+	    closeGameFirst?: boolean;
+	    continueWithUnknownGameStatus?: boolean;
+	    confirmStopGame?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DownloadRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.targetID = source["targetID"];
+	        this.closeGameFirst = source["closeGameFirst"];
+	        this.continueWithUnknownGameStatus = source["continueWithUnknownGameStatus"];
+	        this.confirmStopGame = source["confirmStopGame"];
+	    }
+	}
+	export class DownloadTargetBackupResult {
+	    targetID: string;
+	    backupID: string;
+	    target: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DownloadTargetBackupResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetID = source["targetID"];
+	        this.backupID = source["backupID"];
+	        this.target = source["target"];
+	    }
+	}
+	export class GetDeploymentGameStatusResult {
+	    targetID: string;
+	    gameStatus: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetDeploymentGameStatusResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetID = source["targetID"];
+	        this.gameStatus = source["gameStatus"];
+	    }
+	}
+	export class TargetEntry {
+	    id: string;
+	    name: string;
+	    kind: string;
+	    savePath: string;
+	    startCommand?: string;
+	    stopCommand?: string;
+	    host?: string;
+	    port?: number;
+	    user?: string;
+	    keyPath?: string;
+	    hostKeyTrusted: boolean;
+	    hostKeyFingerprint?: string;
+	    transferSupported: boolean;
+	    unsupportedReason?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TargetEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.kind = source["kind"];
+	        this.savePath = source["savePath"];
+	        this.startCommand = source["startCommand"];
+	        this.stopCommand = source["stopCommand"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.user = source["user"];
+	        this.keyPath = source["keyPath"];
+	        this.hostKeyTrusted = source["hostKeyTrusted"];
+	        this.hostKeyFingerprint = source["hostKeyFingerprint"];
+	        this.transferSupported = source["transferSupported"];
+	        this.unsupportedReason = source["unsupportedReason"];
+	    }
+	}
+	export class GetDeploymentTargetsResult {
+	    targets: TargetEntry[];
+	    availableKinds: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetDeploymentTargetsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targets = this.convertValues(source["targets"], TargetEntry);
+	        this.availableKinds = source["availableKinds"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	export class TargetInput {
+	    targetID?: string;
+	    name: string;
+	    kind: string;
+	    savePath: string;
+	    startCommand?: string;
+	    stopCommand?: string;
+	    host?: string;
+	    port?: number;
+	    user?: string;
+	    keyPath?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TargetInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetID = source["targetID"];
+	        this.name = source["name"];
+	        this.kind = source["kind"];
+	        this.savePath = source["savePath"];
+	        this.startCommand = source["startCommand"];
+	        this.stopCommand = source["stopCommand"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.user = source["user"];
+	        this.keyPath = source["keyPath"];
+	    }
+	}
+	export class TestTargetResult {
+	    targetID: string;
+	    reachable: boolean;
+	    hostKeyTrusted: boolean;
+	    gameStatus: string;
+	    saveExists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new TestTargetResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetID = source["targetID"];
+	        this.reachable = source["reachable"];
+	        this.hostKeyTrusted = source["hostKeyTrusted"];
+	        this.gameStatus = source["gameStatus"];
+	        this.saveExists = source["saveExists"];
+	    }
 	}
 
 }
@@ -6116,6 +7338,578 @@ export namespace schema {
 	
 	
 	
+
+}
+
+export namespace templates {
+	
+	export class ApplyBuildTemplateRequest {
+	    saveSessionID: string;
+	    characterID: number;
+	    templateID: string;
+	    selection?: buildtemplates.TemplateSelection;
+	    options?: buildtemplates.ApplyOptions;
+	    expectedRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyBuildTemplateRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.templateID = source["templateID"];
+	        this.selection = this.convertValues(source["selection"], buildtemplates.TemplateSelection);
+	        this.options = this.convertValues(source["options"], buildtemplates.ApplyOptions);
+	        this.expectedRevision = source["expectedRevision"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SpellSlotChange {
+	    slotNumber: number;
+	    current?: buildtemplates.SpellSlotRef;
+	    target?: buildtemplates.SpellSlotRef;
+	    changed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpellSlotChange(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slotNumber = source["slotNumber"];
+	        this.current = this.convertValues(source["current"], buildtemplates.SpellSlotRef);
+	        this.target = this.convertValues(source["target"], buildtemplates.SpellSlotRef);
+	        this.changed = source["changed"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SpellsPreviewPlan {
+	    slots?: SpellSlotChange[];
+	    usedMemorySlots: number;
+	    availableMemorySlots: number;
+	    equippedSpells?: buildtemplates.SpellSlotRef[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SpellsPreviewPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slots = this.convertValues(source["slots"], SpellSlotChange);
+	        this.usedMemorySlots = source["usedMemorySlots"];
+	        this.availableMemorySlots = source["availableMemorySlots"];
+	        this.equippedSpells = this.convertValues(source["equippedSpells"], buildtemplates.SpellSlotRef);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class StatsPreviewPlan {
+	    vigor?: Uint32FieldChange;
+	    mind?: Uint32FieldChange;
+	    endurance?: Uint32FieldChange;
+	    strength?: Uint32FieldChange;
+	    dexterity?: Uint32FieldChange;
+	    intelligence?: Uint32FieldChange;
+	    faith?: Uint32FieldChange;
+	    arcane?: Uint32FieldChange;
+	    resultLevel: number;
+	    resultSoulMemory: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new StatsPreviewPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.vigor = this.convertValues(source["vigor"], Uint32FieldChange);
+	        this.mind = this.convertValues(source["mind"], Uint32FieldChange);
+	        this.endurance = this.convertValues(source["endurance"], Uint32FieldChange);
+	        this.strength = this.convertValues(source["strength"], Uint32FieldChange);
+	        this.dexterity = this.convertValues(source["dexterity"], Uint32FieldChange);
+	        this.intelligence = this.convertValues(source["intelligence"], Uint32FieldChange);
+	        this.faith = this.convertValues(source["faith"], Uint32FieldChange);
+	        this.arcane = this.convertValues(source["arcane"], Uint32FieldChange);
+	        this.resultLevel = source["resultLevel"];
+	        this.resultSoulMemory = source["resultSoulMemory"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Uint32FieldChange {
+	    current: number;
+	    target: number;
+	    changed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Uint32FieldChange(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.current = source["current"];
+	        this.target = source["target"];
+	        this.changed = source["changed"];
+	    }
+	}
+	export class StringFieldChange {
+	    current: string;
+	    target: string;
+	    changed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new StringFieldChange(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.current = source["current"];
+	        this.target = source["target"];
+	        this.changed = source["changed"];
+	    }
+	}
+	export class ProfilePreviewPlan {
+	    name?: StringFieldChange;
+	    level?: Uint32FieldChange;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProfilePreviewPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = this.convertValues(source["name"], StringFieldChange);
+	        this.level = this.convertValues(source["level"], Uint32FieldChange);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class BuildTemplatePreviewPlan {
+	    profile?: ProfilePreviewPlan;
+	    stats?: StatsPreviewPlan;
+	    spells?: SpellsPreviewPlan;
+	
+	    static createFrom(source: any = {}) {
+	        return new BuildTemplatePreviewPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.profile = this.convertValues(source["profile"], ProfilePreviewPlan);
+	        this.stats = this.convertValues(source["stats"], StatsPreviewPlan);
+	        this.spells = this.convertValues(source["spells"], SpellsPreviewPlan);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ApplyBuildTemplateResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    templateID: string;
+	    templateRevision: string;
+	    characterID: number;
+	    plan: BuildTemplatePreviewPlan;
+	
+	    static createFrom(source: any = {}) {
+	        return new ApplyBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.templateID = source["templateID"];
+	        this.templateRevision = source["templateRevision"];
+	        this.characterID = source["characterID"];
+	        this.plan = this.convertValues(source["plan"], BuildTemplatePreviewPlan);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class BuildTemplatePreviewIssue {
+	    code: string;
+	    section?: string;
+	    field?: string;
+	    message: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BuildTemplatePreviewIssue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.section = source["section"];
+	        this.field = source["field"];
+	        this.message = source["message"];
+	    }
+	}
+	
+	export class CreateBuildTemplateResult {
+	    templateID: string;
+	    templateRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	        this.templateRevision = source["templateRevision"];
+	    }
+	}
+	export class DeleteBuildTemplateResult {
+	    templateID: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	    }
+	}
+	export class GetBuildTemplatePreviewRequest {
+	    saveSessionID: string;
+	    characterID: number;
+	    templateID: string;
+	    selection?: buildtemplates.TemplateSelection;
+	    options?: buildtemplates.ApplyOptions;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBuildTemplatePreviewRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveSessionID = source["saveSessionID"];
+	        this.characterID = source["characterID"];
+	        this.templateID = source["templateID"];
+	        this.selection = this.convertValues(source["selection"], buildtemplates.TemplateSelection);
+	        this.options = this.convertValues(source["options"], buildtemplates.ApplyOptions);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetBuildTemplatePreviewResult {
+	    templateID: string;
+	    templateRevision: string;
+	    characterID: number;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    executable: boolean;
+	    plan: BuildTemplatePreviewPlan;
+	    blockingIssues?: BuildTemplatePreviewIssue[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBuildTemplatePreviewResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	        this.templateRevision = source["templateRevision"];
+	        this.characterID = source["characterID"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.executable = source["executable"];
+	        this.plan = this.convertValues(source["plan"], BuildTemplatePreviewPlan);
+	        this.blockingIssues = this.convertValues(source["blockingIssues"], BuildTemplatePreviewIssue);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetBuildTemplateResult {
+	    template?: buildtemplates.BuildTemplate;
+	    templateRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.template = this.convertValues(source["template"], buildtemplates.BuildTemplate);
+	        this.templateRevision = source["templateRevision"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class GetBuildTemplatesResult {
+	    templates: buildtemplates.TemplateMetadata[];
+	    total: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GetBuildTemplatesResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templates = this.convertValues(source["templates"], buildtemplates.TemplateMetadata);
+	        this.total = source["total"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ImportBuildTemplateResult {
+	    templateID: string;
+	    templateRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImportBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	        this.templateRevision = source["templateRevision"];
+	    }
+	}
+	
+	
+	
+	
+	
+	
+	export class UpdateBuildTemplateRequest {
+	    templateRevision: string;
+	    metadata?: buildtemplates.TemplateMetadataUpdate;
+	    content?: buildtemplates.BuildTemplate;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateBuildTemplateRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateRevision = source["templateRevision"];
+	        this.metadata = this.convertValues(source["metadata"], buildtemplates.TemplateMetadataUpdate);
+	        this.content = this.convertValues(source["content"], buildtemplates.BuildTemplate);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class UpdateBuildTemplateResult {
+	    templateID: string;
+	    templateRevision: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateBuildTemplateResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.templateID = source["templateID"];
+	        this.templateRevision = source["templateRevision"];
+	    }
+	}
 
 }
 

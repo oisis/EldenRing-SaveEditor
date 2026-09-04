@@ -3,18 +3,37 @@
 // on `window.go`.
 
 import {
+  ActivateTargetBackup,
   AddItemsToContainers,
   ApplyAppearancePreset,
+  ApplyBuildTemplate,
   ApplyFavoritePreset,
   ApplyRepairs,
+  CancelDeploymentOperation,
+  CheckForUpdates,
+  ClearActiveTargetBackup,
   ClearRecentFiles,
   CloseSave,
+  CloseTargetGame,
+  CreateBuildTemplate,
+  CreateDeploymentTarget,
+  CreateTargetBackup,
+  DeleteBuildTemplate,
+  DeleteDeploymentTarget,
   DeleteFavoritePreset,
+  DeleteTargetBackup,
+  DeployToTarget,
   DiscardChanges,
   DiscardRecoveryJournal,
+  DownloadFromTarget,
+  DownloadTargetBackup,
+  ExportDiagnosticReport,
   ExportRecoveryJournal,
+  ForgetDeploymentHostKey,
   GetAppearancePresets,
   GetBellBearings,
+  GetBuildTemplatePreview,
+  GetBuildTemplates,
   GetBosses,
   GetApplicationInfo,
   GetCharacterLoadout,
@@ -22,12 +41,15 @@ import {
   GetCharacterStats,
   GetColosseums,
   GetCookbooks,
+  GetDeploymentGameStatus,
+  GetDeploymentTargets,
   GetEquipment,
   GetEquipmentCandidates,
   GetEquippedSpells,
   GetFavoritePresets,
   GetGestures,
   GetGraces,
+  GetHostSettings,
   GetInventory,
   GetItemDatabase,
   GetItemVariants,
@@ -39,6 +61,7 @@ import {
   GetOwnedItems,
   GetPhysickMixture,
   GetPouchItems,
+  GetProjectLinks,
   GetQuests,
   GetQuickItems,
   GetRecentFiles,
@@ -56,14 +79,20 @@ import {
   GetSpectralSteedAttires,
   GetStorage,
   GetSummoningPools,
+  GetTargetBackups,
   GetTutorials,
   GetWhetblades,
   GetWorldMutationCapabilities,
+  ImportBuildTemplate,
+  LaunchTargetGame,
   LoadSave,
   LockAllSpectralSteedAttires,
   MoveOwnedItemsToInventory,
   MoveOwnedItemsToStorage,
+  OpenHostLocation,
+  OpenProjectLink,
   QuitApplication,
+  ReleaseDeploymentStaging,
   RecordRecentFile,
   RedoLastOperation,
   RemoveOwnedItems,
@@ -85,6 +114,7 @@ import {
   SetEquippedSpells,
   SetEquippedTalismans,
   SetFavoritePreset,
+  SetHostSettings,
   SetOwnedItemQuantity,
   SetPhysickMixture,
   SetPouchItems,
@@ -107,10 +137,20 @@ import {
   SetTutorialUnlocked,
   SetWhetbladeUnlocked,
   SetSaveLifecycleSettings,
+  TestDeploymentTarget,
   UndoLastOperation,
+  UpdateBuildTemplate,
+  UpdateDeploymentTarget,
+  UpdateTargetBackup,
   ValidateReviewChanges,
 } from "../../../wailsjs/go/desktop/Bridge";
-import { saveengine, type schema } from "../../../wailsjs/go/models";
+import {
+  type application,
+  type deployment,
+  saveengine,
+  type schema,
+  templates,
+} from "../../../wailsjs/go/models";
 import { EventsOn } from "../../../wailsjs/runtime/runtime";
 import type {
   AppearancePort,
@@ -201,7 +241,32 @@ import type {
   SaveSession,
   SaveSessionPort,
 } from "../../application/save-session/saveSessionPort";
-import type { SafetyProfileSettings, SettingsPort } from "../../application/settings/settingsPort";
+import type { AboutPort, ProjectLink, UpdateCheck } from "../../application/about/aboutPort";
+import type {
+  CommandOutcome,
+  DeploymentOperationResult,
+  DeploymentPort,
+  DeploymentTarget,
+  DeploymentProgress,
+  DeploymentTargets,
+  TargetBackup,
+  TargetBackups,
+  TargetTestResult,
+} from "../../application/deployment/deploymentPort";
+import type {
+  HostSettings,
+  HostSettingsPort,
+  SafetyProfileSettings,
+  SettingsPort,
+} from "../../application/settings/settingsPort";
+import type {
+  BuildTemplateOverrides,
+  BuildTemplatePage,
+  BuildTemplatePlan,
+  BuildTemplatePreview,
+  TemplateMutationReceipt,
+  TemplatePort,
+} from "../../application/templates/templatePort";
 import type {
   SpectralSteedAttireStatus,
   WorldBellBearings,
@@ -1473,6 +1538,254 @@ function toSafetyProfileSettings(
   };
 }
 
+
+/**
+ * Projects the frontend's override shape onto the backend apply options.
+ *
+ * Only the four confirmed option groups exist here. An override the backend
+ * does not define is not invented, and an unset value stays unset rather than
+ * being sent as a default the user never chose.
+ */
+function toApplyOptions(overrides: BuildTemplateOverrides | undefined) {
+  if (overrides === undefined) return undefined;
+  const options: Record<string, unknown> = {};
+  if (overrides.itemsMode !== undefined) {
+    options.items = {
+      mode: overrides.itemsMode,
+      preserveExtraItems: overrides.preserveExtraItems ?? false,
+    };
+  }
+  if (overrides.inventoryLayoutMode !== undefined) {
+    options.inventoryLayout = { mode: overrides.inventoryLayoutMode };
+  }
+  if (overrides.storageLayoutMode !== undefined) {
+    options.storageLayout = { mode: overrides.storageLayoutMode };
+  }
+  if (
+    overrides.useTemplateWeaponLevels !== undefined ||
+    overrides.standardUpgradeOverride !== undefined ||
+    overrides.somberUpgradeOverride !== undefined
+  ) {
+    options.weaponLevelOverride = {
+      useTemplateLevels: overrides.useTemplateWeaponLevels ?? true,
+      standardOverride: overrides.standardUpgradeOverride,
+      somberOverride: overrides.somberUpgradeOverride,
+    };
+  }
+  return Object.keys(options).length === 0 ? undefined : options;
+}
+
+/** Projects the generated template index onto the application port shape. */
+function toBuildTemplatePage(
+  result: Awaited<ReturnType<typeof GetBuildTemplates>>,
+): BuildTemplatePage {
+  return {
+    templates: result.templates.map((template) => ({
+      templateID: template.templateID,
+      name: template.name,
+      description: template.description,
+      tags: [...(template.tags ?? [])],
+      createdAt: template.createdAt,
+      updatedAt: template.updatedAt,
+      schemaVersion: template.schemaVersion,
+      selectedSections: [...(template.selectedSections ?? [])],
+      inventoryItems: template.inventoryItems,
+      storageItems: template.storageItems,
+      warnings: template.warnings,
+      templateRevision: template.templateRevision,
+    })),
+    total: result.total,
+    page: result.page,
+    pageSize: result.pageSize,
+  };
+}
+
+/**
+ * Projects the generated preview plan onto the application port shape.
+ *
+ * The eight statistics are flattened into an ordered list of named changes, so
+ * the interface renders exactly the fields the backend reported and never
+ * assumes a fixed set of its own.
+ */
+function toBuildTemplatePlan(
+  plan: Awaited<ReturnType<typeof GetBuildTemplatePreview>>["plan"],
+): BuildTemplatePlan {
+  const statistics = plan.stats;
+  const fields =
+    statistics === undefined
+      ? []
+      : (
+          [
+            ["vigor", statistics.vigor],
+            ["mind", statistics.mind],
+            ["endurance", statistics.endurance],
+            ["strength", statistics.strength],
+            ["dexterity", statistics.dexterity],
+            ["intelligence", statistics.intelligence],
+            ["faith", statistics.faith],
+            ["arcane", statistics.arcane],
+          ] as const
+        )
+          .filter(([, change]) => change !== undefined)
+          .map(([field, change]) => ({
+            field,
+            change: {
+              current: (change as { current: number }).current,
+              target: (change as { target: number }).target,
+              changed: (change as { changed: boolean }).changed,
+            },
+          }));
+
+  return {
+    profile:
+      plan.profile === undefined
+        ? undefined
+        : {
+            name: plan.profile.name,
+            level: plan.profile.level,
+          },
+    stats:
+      statistics === undefined
+        ? undefined
+        : {
+            fields,
+            resultLevel: statistics.resultLevel,
+            resultSoulMemory: statistics.resultSoulMemory,
+          },
+    spells:
+      plan.spells === undefined
+        ? undefined
+        : {
+            changedSlots: (plan.spells.slots ?? []).filter((slot) => slot.changed).length,
+            usedMemorySlots: plan.spells.usedMemorySlots,
+            availableMemorySlots: plan.spells.availableMemorySlots,
+          },
+  };
+}
+
+function toBuildTemplatePreview(
+  result: Awaited<ReturnType<typeof GetBuildTemplatePreview>>,
+): BuildTemplatePreview {
+  return {
+    templateID: result.templateID,
+    templateRevision: result.templateRevision,
+    characterID: result.characterID,
+    saveSessionID: result.saveSessionID,
+    saveRevision: result.saveRevision,
+    executable: result.executable,
+    plan: toBuildTemplatePlan(result.plan),
+    blockingIssues: (result.blockingIssues ?? []).map((issue) => ({
+      code: issue.code,
+      section: issue.section,
+      field: issue.field,
+      message: issue.message,
+    })),
+  };
+}
+
+/** Projects the generated host settings onto the application port shape. */
+function toHostSettings(result: application.HostSettingsResult): HostSettings {
+  return {
+    skipReviewForNormalRisk: result.skipReviewForNormalRisk,
+    remoteBackupPolicy: result.remoteBackupPolicy,
+    availableRemoteBackupPolicies: [...result.availableRemoteBackupPolicies],
+    defaultRemoteBackupPolicy: result.defaultRemoteBackupPolicy,
+    configurationDirectoryExists: result.configurationDirectoryExists,
+    logDirectoryExists: result.logDirectoryExists,
+  };
+}
+
+function toDeploymentTarget(target: deployment.TargetEntry): DeploymentTarget {
+  return {
+    id: target.id,
+    name: target.name,
+    kind: target.kind,
+    savePath: target.savePath,
+    startCommand: target.startCommand,
+    stopCommand: target.stopCommand,
+    host: target.host,
+    port: target.port,
+    user: target.user,
+    keyPath: target.keyPath,
+    hostKeyTrusted: target.hostKeyTrusted,
+    hostKeyFingerprint: target.hostKeyFingerprint,
+    transferSupported: target.transferSupported,
+    unsupportedReason: target.unsupportedReason,
+  };
+}
+
+function toDeploymentTargets(result: deployment.GetDeploymentTargetsResult): DeploymentTargets {
+  return {
+    targets: result.targets.map(toDeploymentTarget),
+    availableKinds: [...result.availableKinds],
+  };
+}
+
+function toCommandOutcome(outcome: deployment.CommandOutcome): CommandOutcome {
+  return {
+    configured: outcome.configured,
+    executed: outcome.executed,
+    exitCode: outcome.exitCode,
+    detail: outcome.detail,
+  };
+}
+
+function toDeploymentTargetState(
+  value: string,
+): DeploymentOperationResult["targetState"] {
+  switch (value) {
+    case "unchanged":
+    case "replaced_verified":
+    case "replaced_unverified":
+      return value;
+    default:
+      throw new AppErrorException(bridgeCallFailed());
+  }
+}
+
+function toOperationResult(result: deployment.OperationResult): DeploymentOperationResult {
+  return {
+    operationID: result.operationID,
+    targetID: result.targetID,
+    completed: result.completed,
+    blocked: result.blocked,
+    failure: result.failure,
+    targetState: toDeploymentTargetState(result.targetState),
+    gameStatus: result.gameStatus,
+    stages: (result.stages ?? []).map((stage) => ({
+      stage: stage.stage,
+      completed: stage.completed,
+      detail: stage.detail,
+    })),
+    backupID: result.backupID,
+    localPath: result.localPath,
+    stop: result.stop === undefined ? undefined : toCommandOutcome(result.stop),
+    launch: result.launch === undefined ? undefined : toCommandOutcome(result.launch),
+  };
+}
+
+function toTargetBackup(backup: deployment.BackupRecord): TargetBackup {
+  return {
+    id: backup.id,
+    targetID: backup.targetID,
+    fileName: backup.fileName,
+    createdAt: backup.createdAt,
+    manual: backup.manual,
+    active: backup.active,
+    tags: [...(backup.tags ?? [])],
+    description: backup.description,
+  };
+}
+
+function toTargetBackups(result: deployment.GetTargetBackupsResult): TargetBackups {
+  return {
+    targetID: result.targetID,
+    backups: (result.backups ?? []).map(toTargetBackup),
+    transferSupported: result.transferSupported,
+    unsupportedReason: result.unsupportedReason,
+  };
+}
+
 /**
  * The single adapter behind every application port. A second, parallel
  * adaptation layer would give the generated bindings a second way into the
@@ -1489,12 +1802,18 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   WorldPort &
   NetworkPort &
   SettingsPort &
+  HostSettingsPort &
+  AboutPort &
+  TemplatePort &
+  DeploymentPort &
   CatalogPort = {
   getApplicationInfo: async (): Promise<ApplicationInfo> => {
     const result = await callBridge(GetApplicationInfo);
 
     return {
       version: result.applicationVersion,
+      build: result.build,
+      platform: result.platform,
       schemas: result.supportedSchemas.map((schema) => ({
         name: schema.name,
         minimumVersion: schema.minimumVersion,
@@ -1523,6 +1842,10 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // kind: a session must never claim an origin nobody stated.
   loadSave: async (source, expectedPlatform, sourceKind) =>
     toSaveSession(await callBridge(() => LoadSave(source, expectedPlatform, sourceKind))),
+
+  releaseDeploymentStaging: async (localPath) => {
+    await callBridge(() => ReleaseDeploymentStaging(localPath));
+  },
 
   getLoadedSave: async (saveSessionID) =>
     toSaveSession(await callBridge(() => GetLoadedSave(saveSessionID))),
@@ -2339,4 +2662,243 @@ export const wailsDesktopBridge: ApplicationInfoPort &
         SetNetworkSettings(saveSessionID, networkSettings, expectedRevision),
       ),
     ),
+
+  getHostSettings: async () => toHostSettings(await callBridge(GetHostSettings)),
+
+  setHostSettings: async ({ skipReviewForNormalRisk, remoteBackupPolicy }) =>
+    toHostSettings(
+      await callBridge(() =>
+        SetHostSettings(skipReviewForNormalRisk, remoteBackupPolicy),
+      ),
+    ),
+
+  // The identifier is the whole argument. There is deliberately no way to state
+  // a path here: the backend resolves the location from its own state directory.
+  openHostLocation: async (location) => {
+    await callBridge(() => OpenHostLocation(location));
+  },
+
+  // A cancelled Save As dialog is an ordinary outcome: the backend writes
+  // nothing and reports no records, which is what `exported: false` states.
+  exportDiagnosticReport: async (saveSessionID) => {
+    const result = await callBridge(() => ExportDiagnosticReport(saveSessionID ?? ""));
+    return { exported: result.exported, recordCount: result.recordCount };
+  },
+
+  getProjectLinks: async () => {
+    const result = await callBridge(GetProjectLinks);
+    return result.links.map((link): ProjectLink => ({ id: link.id, url: link.url }));
+  },
+
+  openProjectLink: async (linkID) => {
+    await callBridge(() => OpenProjectLink(linkID));
+  },
+
+  checkForUpdates: async (): Promise<UpdateCheck> => {
+    const result = await callBridge(CheckForUpdates);
+    return {
+      status: result.status,
+      currentVersion: result.currentVersion,
+      latestVersion: result.latestVersion,
+      releaseURL: result.releaseURL,
+      publishedAt: result.publishedAt,
+      comparisonPossible: result.comparisonPossible,
+    };
+  },
+
+  getBuildTemplates: async ({ search, tags, page, pageSize }) =>
+    toBuildTemplatePage(
+      await callBridge(() => GetBuildTemplates(search, [...tags], page, pageSize)),
+    ),
+
+  getBuildTemplatePreview: async ({ saveSessionID, characterID, templateID, overrides }) =>
+    toBuildTemplatePreview(
+      await callBridge(() =>
+        GetBuildTemplatePreview(
+          new templates.GetBuildTemplatePreviewRequest({
+            saveSessionID,
+            characterID,
+            templateID,
+            options: toApplyOptions(overrides),
+          }),
+        ),
+      ),
+    ),
+
+  // The result is the shared save mutation receipt, carried through unchanged
+  // so applying a template refreshes the session exactly like every other save
+  // mutation.
+  applyBuildTemplate: async ({
+    saveSessionID,
+    characterID,
+    templateID,
+    expectedRevision,
+    overrides,
+  }): Promise<TemplateMutationReceipt> => {
+    const result = await callBridge(() =>
+      ApplyBuildTemplate(
+        new templates.ApplyBuildTemplateRequest({
+          saveSessionID,
+          characterID,
+          templateID,
+          expectedRevision,
+          options: toApplyOptions(overrides),
+        }),
+      ),
+    );
+    return toMutationReceipt(result);
+  },
+
+  createBuildTemplate: async ({ saveSessionID, sourceCharacterID, name, description, tags }) => {
+    const result = await callBridge(() =>
+      CreateBuildTemplate(
+        saveSessionID,
+        sourceCharacterID,
+        name,
+        description ?? "",
+        tags === undefined ? [] : [...tags],
+      ),
+    );
+    return { templateID: result.templateID };
+  },
+
+  updateBuildTemplate: async ({ templateID, templateRevision, name, description, tags }) => {
+    const result = await callBridge(() =>
+      UpdateBuildTemplate(
+        templateID,
+        new templates.UpdateBuildTemplateRequest({
+          templateRevision,
+          metadata: { name, description, tags: tags === undefined ? undefined : [...tags] },
+        }),
+      ),
+    );
+    return { templateID: result.templateID };
+  },
+
+  deleteBuildTemplate: async ({ templateID, templateRevision }) => {
+    const result = await callBridge(() => DeleteBuildTemplate(templateID, templateRevision));
+    return { templateID: result.templateID };
+  },
+
+  // Cancelling the document dialog is the backend's empty identifier, so it
+  // survives the boundary as an undefined value rather than becoming an error.
+  importBuildTemplate: async () => {
+    const result = await callBridge(ImportBuildTemplate);
+    return { templateID: result.templateID === "" ? undefined : result.templateID };
+  },
+
+  // The host event carries the backend's own progress shape. It is projected
+  // field by field, so a malformed emission cannot leak an unexpected object
+  // into the interface.
+  subscribeDeploymentProgress: (listener) =>
+    EventsOn("deployment.progress", (progress: DeploymentProgress) =>
+      listener({
+        operationID: progress.operationID,
+        targetID: progress.targetID,
+        stage: progress.stage,
+        percent: progress.percent,
+        elapsedMS: progress.elapsedMS,
+        finished: progress.finished,
+      }),
+    ),
+
+  getDeploymentTargets: async () => toDeploymentTargets(await callBridge(GetDeploymentTargets)),
+
+  createDeploymentTarget: async (input) =>
+    toDeploymentTargets(
+      await callBridge(() => CreateDeploymentTarget(input as deployment.TargetInput)),
+    ),
+
+  updateDeploymentTarget: async (input) =>
+    toDeploymentTargets(
+      await callBridge(() => UpdateDeploymentTarget(input as deployment.TargetInput)),
+    ),
+
+  deleteDeploymentTarget: async (targetID) =>
+    toDeploymentTargets(await callBridge(() => DeleteDeploymentTarget(targetID))),
+
+  testDeploymentTarget: async (targetID): Promise<TargetTestResult> => {
+    const result = await callBridge(() => TestDeploymentTarget(targetID));
+    return {
+      targetID: result.targetID,
+      reachable: result.reachable,
+      hostKeyTrusted: result.hostKeyTrusted,
+      gameStatus: result.gameStatus,
+      saveExists: result.saveExists,
+    };
+  },
+
+  forgetDeploymentHostKey: async (targetID) =>
+    toDeploymentTargets(await callBridge(() => ForgetDeploymentHostKey(targetID))),
+
+  getDeploymentGameStatus: async (targetID) => {
+    const result = await callBridge(() => GetDeploymentGameStatus(targetID));
+    return result.gameStatus;
+  },
+
+  launchTargetGame: async (targetID) =>
+    toCommandOutcome(await callBridge(() => LaunchTargetGame(targetID))),
+
+  closeTargetGame: async (targetID) =>
+    toCommandOutcome(await callBridge(() => CloseTargetGame(targetID))),
+
+  deployToTarget: async (request) =>
+    toOperationResult(
+      await callBridge(() => DeployToTarget(request as unknown as deployment.DeployRequest)),
+    ),
+
+  downloadFromTarget: async (request) =>
+    toOperationResult(
+      await callBridge(() => DownloadFromTarget(request as unknown as deployment.DownloadRequest)),
+    ),
+
+  cancelDeploymentOperation: async (operationID) => {
+    await callBridge(() => CancelDeploymentOperation(operationID));
+  },
+
+  getTargetBackups: async (targetID) =>
+    toTargetBackups(await callBridge(() => GetTargetBackups(targetID))),
+
+  createTargetBackup: async ({ targetID, tags, description }) =>
+    toTargetBackups(await callBridge(() => CreateTargetBackup(targetID, [...tags], description))),
+
+  activateTargetBackup: async ({
+    operationID,
+    targetID,
+    backupID,
+    continueWithUnknownGameStatus,
+    confirmRemoteBackup,
+  }) => {
+    const result = await callBridge(() =>
+      ActivateTargetBackup(
+        operationID,
+        targetID,
+        backupID,
+        continueWithUnknownGameStatus ?? false,
+        confirmRemoteBackup ?? false,
+      ),
+    );
+    return {
+      operation: toOperationResult(result.operation),
+      backups: toTargetBackups(result.backups),
+    };
+  },
+
+  clearActiveTargetBackup: async (targetID) =>
+    toTargetBackups(await callBridge(() => ClearActiveTargetBackup(targetID))),
+
+  updateTargetBackup: async ({ targetID, backupID, tags, description }) =>
+    toTargetBackups(
+      await callBridge(() => UpdateTargetBackup(targetID, backupID, [...tags], description)),
+    ),
+
+  deleteTargetBackup: async ({ targetID, backupID }) =>
+    toTargetBackups(await callBridge(() => DeleteTargetBackup(targetID, backupID))),
+
+  // Cancelling the Save As dialog writes nothing and reports an empty target,
+  // which the port carries as an undefined destination rather than an error.
+  downloadTargetBackup: async ({ targetID, backupID }) => {
+    const result = await callBridge(() => DownloadTargetBackup(targetID, backupID, ""));
+    return { target: result.target === "" ? undefined : result.target };
+  },
 };

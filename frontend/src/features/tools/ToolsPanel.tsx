@@ -1,9 +1,15 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { type ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useItemPreferences } from "../../application/preferences/itemPreferences";
 import type { MutationReceipt } from "../../application/save-session/saveSessionPort";
 import { useSetSaveAccountID } from "../../application/save-session/useSetSaveAccountID";
 import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
+import {
+  useExportDiagnosticReport,
+  useHostSettings,
+  useOpenHostLocation,
+  useSetHostSettings,
+} from "../../application/settings/useHostSettings";
 import type { Locale } from "../../i18n/i18n";
 import { locales } from "../../i18n/i18n";
 import { Button } from "../../ui/components/Button/Button";
@@ -14,9 +20,11 @@ import { Select } from "../../ui/components/Select/Select";
 import { alert, message } from "../../ui/patterns/panel.css";
 import type { ThemeName } from "../../ui/tokens/themes.css";
 import { themeNames } from "../../ui/tokens/themes.css";
-import { ApplicationInfoPanel } from "../application-info/ApplicationInfoPanel";
-import { placeholder } from "../app-shell/AppShell.css";
+import { AboutTab } from "./AboutTab";
+import { DeploymentTab } from "./DeploymentTab";
 import { SaveIntegrityCard } from "./SaveIntegrityCard";
+import { SaveManagerTab } from "./SaveManagerTab";
+import { TemplatesTab } from "./TemplatesTab";
 import {
   fieldWithAction,
   sections,
@@ -45,6 +53,13 @@ export type ToolsPanelProps = {
   backupRetention?: number | undefined;
   onBackupRetentionChange: (retention: number) => void;
   /**
+   * Loads a file SaveForge itself staged, such as a save downloaded from a
+   * deployment target, as a temporary session.
+   */
+  onOpenStagedFile: (path: string) => void;
+  /** Loads a durable local file the user saved, such as a downloaded backup. */
+  onOpenLocalFile: (path: string) => void;
+  /**
    * The shared save-mutation path. It is required: no control of this panel may
    * commit a mutation the session is never told about.
    */
@@ -57,10 +72,7 @@ export type ToolsPanelProps = {
  *
  * It owns the horizontal subtab selection and nothing else: switching a subtab
  * is presentation state, so it touches neither the open session nor any other
- * module. Only `Settings` and the existing `Application Info` are implemented
- * here; the three remaining subtabs say plainly that they are not, because a
- * screen that pretends to offer a feature is worse than one that does not offer
- * it yet.
+ * module. Each of the five subtabs is a module of its own below this file.
  */
 export function ToolsPanel({
   theme,
@@ -73,6 +85,8 @@ export function ToolsPanel({
   characterID,
   backupRetention,
   onBackupRetentionChange,
+  onOpenStagedFile,
+  onOpenLocalFile,
   applyMutationReceipt,
   sessionBusy = false,
 }: ToolsPanelProps) {
@@ -120,34 +134,30 @@ export function ToolsPanel({
       )}
 
       {subtab === "templates" && (
-        <UnavailableSubtab title={t`Templates`}>
-          <Trans>Templates will be added in a later stage of this rebuild.</Trans>
-        </UnavailableSubtab>
+        <TemplatesTab
+          saveSessionID={saveSessionID}
+          saveRevision={saveRevision}
+          characterID={characterID}
+          applyMutationReceipt={applyMutationReceipt}
+          sessionBusy={sessionBusy}
+        />
       )}
 
       {subtab === "deployment" && (
-        <UnavailableSubtab title={t`Deployment`}>
-          <Trans>Deployment will be added in a later stage of this rebuild.</Trans>
-        </UnavailableSubtab>
+        <DeploymentTab
+          saveSessionID={saveSessionID}
+          saveRevision={saveRevision}
+          sessionBusy={sessionBusy}
+          onDownloadedSave={onOpenStagedFile}
+        />
       )}
 
       {subtab === "save-manager" && (
-        <UnavailableSubtab title={t`Save Manager`}>
-          <Trans>Save Manager will be added in a later stage of this rebuild.</Trans>
-        </UnavailableSubtab>
+        <SaveManagerTab onOpenDownloadedBackup={onOpenLocalFile} />
       )}
 
-      {subtab === "about" && <ApplicationInfoPanel />}
+      {subtab === "about" && <AboutTab />}
     </div>
-  );
-}
-
-function UnavailableSubtab({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <Card aria-label={title} className={placeholder}>
-      <h2>{title}</h2>
-      <p className={message}>{children}</p>
-    </Card>
   );
 }
 
@@ -164,11 +174,36 @@ function SettingsTab({
   onBackupRetentionChange,
   applyMutationReceipt,
   sessionBusy,
-}: Omit<ToolsPanelProps, "sessionBusy"> & { sessionBusy: boolean }) {
+}: Omit<ToolsPanelProps, "sessionBusy" | "onOpenStagedFile" | "onOpenLocalFile"> & {
+  sessionBusy: boolean;
+}) {
   const { t } = useLingui();
   const preferences = useItemPreferences();
   const safetyProfile = useSafetyProfile();
   const setSafetyProfile = useSetSafetyProfile();
+  const hostSettings = useHostSettings();
+  const setHostSettings = useSetHostSettings();
+  const openHostLocation = useOpenHostLocation();
+  const exportReport = useExportDiagnosticReport();
+
+  /**
+   * Every host setting is stored as one complete value, so a change to one is
+   * sent together with the other value the backend already holds. Sending a
+   * patch would need a second, implicit source of truth for the fields it left
+   * out.
+   */
+  const storeHostSettings = (patch: {
+    skipReviewForNormalRisk?: boolean;
+    remoteBackupPolicy?: string;
+  }) => {
+    const current = hostSettings.data;
+    if (current === undefined) return;
+    setHostSettings.mutate({
+      skipReviewForNormalRisk: patch.skipReviewForNormalRisk ?? current.skipReviewForNormalRisk,
+      remoteBackupPolicy: patch.remoteBackupPolicy ?? current.remoteBackupPolicy,
+    });
+  };
+  const hostSettingsReady = hostSettings.data !== undefined && !setHostSettings.isPending;
 
   const [retentionDraft, setRetentionDraft] = useState(String(backupRetention ?? 10));
   useEffect(() => {
@@ -320,23 +355,40 @@ function SettingsTab({
         </h2>
         <ul className={settingList}>
           <li className={settingItem}>
-            <Button disabled title={t`The backend does not expose this action yet.`}>
+            {/* The directory is never named here: the frontend asks the backend
+                to open a known location by identifier, so no path of the user's
+                is rendered or sent. */}
+            <Button
+              disabled={
+                hostSettings.data?.configurationDirectoryExists !== true ||
+                openHostLocation.isPending
+              }
+              onClick={() => openHostLocation.mutate("configuration")}
+            >
               <Trans>Open configuration directory</Trans>
             </Button>
           </li>
           <li className={settingItem}>
-            <Checkbox id="tools-debug-mode" checked={false} disabled readOnly />
+            <Checkbox
+              id="tools-debug-mode"
+              checked={false}
+              disabled
+              onChange={() => undefined}
+            />
             <label htmlFor="tools-debug-mode">
               <Trans>Debug Mode</Trans>
             </label>
           </li>
           <li className={settingItem}>
-            <Button disabled title={t`The backend does not expose this action yet.`}>
+            <Button disabled>
               <Trans>Open log directory</Trans>
             </Button>
           </li>
           <li className={settingItem}>
-            <Button disabled title={t`The backend does not expose this action yet.`}>
+            <Button
+              disabled={exportReport.isPending}
+              onClick={() => exportReport.mutate(saveSessionID)}
+            >
               <Trans>Export diagnostic report</Trans>
             </Button>
           </li>
@@ -351,17 +403,28 @@ function SettingsTab({
             </label>
           </li>
         </ul>
-        {/* Three of the five entries stay disabled on purpose. There is no
-            confirmed runtime for opening a host directory or exporting a
-            report, and SetDiagnosticMode is a contract definition without a
-            handler; a `file://` link or any other browser workaround would be
-            a made-up implementation of a missing contract. */}
         <p className={message}>
           <Trans>
-            Opening the configuration directory, Debug Mode and the diagnostic report export
-            are not available in this build yet.
+            Debug Mode and local application logs remain unavailable until their diagnostic
+            contract is defined.
           </Trans>
         </p>
+        <p className={message}>
+          {/* What the report may carry is stated plainly, because the user is
+              the one who decides where it goes. */}
+          <Trans>
+            The diagnostic report carries the application version, the platform, the settings
+            above and the current session's diagnostic records. It never carries save data,
+            file paths or SSH keys.
+          </Trans>
+        </p>
+        {openHostLocation.isError || exportReport.isError ? (
+          <p role="alert" className={alert}>
+            {/* The transport's own text never reaches the user: it carries
+                bridge internals and host paths. */}
+            <Trans>The action could not be completed.</Trans>
+          </p>
+        ) : null}
       </Card>
 
       <Card aria-label={t`Save behavior`} className={sections}>
@@ -370,27 +433,51 @@ function SettingsTab({
         </h2>
         <div className={settingsRow}>
           <span className={settingItem}>
-            <Checkbox id="tools-skip-review" checked={false} disabled readOnly />
+            <Checkbox
+              id="tools-skip-review"
+              checked={hostSettings.data?.skipReviewForNormalRisk ?? false}
+              disabled={!hostSettingsReady}
+              onChange={(event) =>
+                storeHostSettings({ skipReviewForNormalRisk: event.currentTarget.checked })
+              }
+            />
             <label htmlFor="tools-skip-review">
               <Trans>Skip Review Changes for normal operations</Trans>
             </label>
           </span>
           <span className={settingItem}>
-            <Checkbox id="tools-remote-backup" checked={false} disabled readOnly />
+            <Checkbox
+              id="tools-remote-backup"
+              checked={hostSettings.data?.remoteBackupPolicy === "always"}
+              disabled={!hostSettingsReady}
+              onChange={(event) =>
+                storeHostSettings({
+                  remoteBackupPolicy: event.currentTarget.checked ? "always" : "ask",
+                })
+              }
+            />
             <label htmlFor="tools-remote-backup">
               <Trans>Always create a remote backup</Trans>
             </label>
           </span>
         </div>
-        {/* Neither setting has a persistent backend contract, so neither is
-            stored locally either: a switch kept only in the browser would
-            change the Save flow on evidence the backend never confirmed. */}
+        {/* Both settings are stored by the backend. Neither weakens the two
+            rules they sit next to: validation always runs before a save or a
+            deployment, and an existing target save is always backed up before
+            it is replaced. */}
         <p className={message}>
           <Trans>
-            Both settings are unavailable until the backend stores them. The current Save and
-            Review Changes flow is unaffected.
+            Validation always runs. Skipping Review Changes only hides the modal for an
+            operation the completed validation reported with no warning and no ban risk, and the
+            remote backup setting only chooses whether the mandatory backup is confirmed each
+            time.
           </Trans>
         </p>
+        {hostSettings.isError || setHostSettings.isError ? (
+          <p role="alert" className={alert}>
+            <Trans>The save behavior settings are unavailable.</Trans>
+          </p>
+        ) : null}
       </Card>
 
       <SaveIntegrityCard

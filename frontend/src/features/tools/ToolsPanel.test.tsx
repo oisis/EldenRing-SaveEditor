@@ -18,6 +18,8 @@ const baseProps = {
   locale: "en" as const,
   onLocaleChange: () => {},
   onBackupRetentionChange: () => {},
+  onOpenStagedFile: () => {},
+  onOpenLocalFile: () => {},
   // The shared save-mutation path is required; a test that does not mutate
   // supplies an explicit no-op rather than leaving the panel without one.
   applyMutationReceipt: () => Promise.resolve(),
@@ -101,17 +103,30 @@ describe("ToolsPanel", () => {
     expect(screen.getByLabelText("Show Item ID")).toBeInstanceOf(HTMLInputElement);
     expect(screen.getByLabelText("Automatic backups kept")).toHaveValue(12);
 
-    // The three settings without a backend contract are visible and inert.
+    // Only settings backed by a real host contract are enabled. Debug Mode and
+    // local logs remain explicit placeholders until their semantics exist.
+    await waitFor(() =>
+      expect(screen.getByLabelText("Skip Review Changes for normal operations")).toBeEnabled(),
+    );
     expect(screen.getByLabelText("Debug Mode")).toBeDisabled();
-    expect(screen.getByLabelText("Skip Review Changes for normal operations")).toBeDisabled();
-    expect(screen.getByLabelText("Always create a remote backup")).toBeDisabled();
+    expect(screen.getByLabelText("Debug Mode")).not.toBeChecked();
+    expect(screen.getByLabelText("Always create a remote backup")).toBeEnabled();
+    // The stored policy is "ask", so the "always" switch is off rather than
+    // defaulted on.
+    expect(screen.getByLabelText("Always create a remote backup")).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Open log directory" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Open configuration directory" })).toBeEnabled();
 
     await userEvent.click(within(navigation).getByRole("button", { name: "Templates" }));
-    expect(screen.getByRole("region", { name: "Templates" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Build Templates" })).toBeVisible();
     expect(screen.queryByLabelText("Theme")).toBeNull();
 
-    // The one working panel that used to live under Tools is still reachable.
+    await userEvent.click(within(navigation).getByRole("button", { name: "Deployment" }));
+    expect(screen.getByRole("region", { name: "Deployment targets" })).toBeVisible();
+
+    await userEvent.click(within(navigation).getByRole("button", { name: "Save Manager" }));
+    expect(screen.getByRole("region", { name: "Save Manager" })).toBeVisible();
+
     await userEvent.click(within(navigation).getByRole("button", { name: "About & Updates" }));
     expect(await screen.findByText("2.0.0-test")).toBeVisible();
   });

@@ -189,6 +189,8 @@ export type SaveSessionPort = {
     expectedPlatform: string,
     sourceKind: SaveSourceKind,
   ) => Promise<SaveSession>;
+  /** Removes one temporary file created by DownloadFromTarget. */
+  releaseDeploymentStaging: (localPath: string) => Promise<void>;
   getLoadedSave: (saveSessionID: string) => Promise<SaveSession>;
   closeSave: (saveSessionID: string) => Promise<void>;
   getOperationHistory: (saveSessionID: string) => Promise<OperationHistory>;

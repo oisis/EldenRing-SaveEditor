@@ -11,9 +11,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
+	"github.com/oisis/EldenRing-SaveForge/backend/deployment"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 	"github.com/oisis/EldenRing-SaveForge/backend/safetyprofile"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 	"github.com/oisis/EldenRing-SaveForge/internal/catalogassets"
@@ -45,6 +48,15 @@ func main() {
 	// the other host state and deliberately outside SaveEngine and every save
 	// snapshot.
 	safetyProfiles := safetyprofile.NewStore(stateDirectory)
+	// The two Save behavior preferences live beside the Safety Profile: they are
+	// host settings, so they stay outside SaveEngine and every save snapshot.
+	hostSettings := hostsettings.NewStore(stateDirectory)
+	// The Build Templates library and the deployment configuration each get one
+	// process-wide store rooted in the same host state directory. Creating either
+	// one per call would give the library a second index and the deployment
+	// configuration a second set of targets and trusted host keys.
+	buildTemplateStore := buildtemplates.NewStore(filepath.Join(stateDirectory, "templates"))
+	deploymentStore := deployment.NewStore(stateDirectory)
 	// The single process-wide GameCatalog, built from the embedded catalog data
 	// the backend already ships. A failure here is a build or data defect, not a
 	// user condition: the application stops instead of starting with a partial
@@ -60,14 +72,18 @@ func main() {
 	// The native dialog is injected rather than reached for inside the bridge, so
 	// the host capability has one owner and the bridge stays testable without a
 	// real window.
-	bridge := desktop.NewBridgeWithSettings(
-		applicationVersion,
-		saveEngine,
-		gameCatalog,
-		safetyProfiles,
-		desktop.NewWailsSaveFileChooser(),
-		desktop.NewWailsSaveTargetChooser(),
-	)
+	bridge := desktop.NewBridgeWithDependencies(desktop.Dependencies{
+		ApplicationVersion: applicationVersion,
+		SaveEngine:         saveEngine,
+		GameCatalog:        gameCatalog,
+		SafetyProfiles:     safetyProfiles,
+		HostSettings:       hostSettings,
+		BuildTemplates:     buildTemplateStore,
+		DeploymentStore:    deploymentStore,
+		ChooseSaveFile:     desktop.NewWailsSaveFileChooser(),
+		ChooseSaveTarget:   desktop.NewWailsSaveTargetChooser(),
+		ChooseDocument:     desktop.NewWailsDocumentChooser(),
+	})
 
 	err = wails.Run(&options.App{
 		Title:     "Elden Ring SaveForge",
@@ -83,6 +99,7 @@ func main() {
 		// nothing in the application stores it in a package-level variable.
 		OnStartup:     bridge.Startup,
 		OnBeforeClose: bridge.BeforeClose,
+		OnShutdown:    bridge.Shutdown,
 		Bind:          []any{bridge},
 	})
 	if err != nil {

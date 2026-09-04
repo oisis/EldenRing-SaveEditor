@@ -18,6 +18,8 @@ export type SchemaSupport = {
 
 export type ApplicationInfo = {
   version: string;
+  build: string;
+  platform: string;
   schemas: readonly SchemaSupport[];
   capabilities: readonly string[];
 };

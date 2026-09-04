@@ -12,6 +12,7 @@ import {
 import { type AppError, toAppError } from "../../application/errors/appError";
 import { queryKeys } from "../../application/queryKeys";
 import { useSaveSessionPort } from "../../application/save-session/saveSessionClient";
+import { useHostSettings } from "../../application/settings/useHostSettings";
 import type {
   MutationReceipt,
   OperationHistory,
@@ -49,6 +50,13 @@ export type SaveSessionFailure =
 export type PendingSessionAction =
   | { kind: "open-dialog" }
   | { kind: "open-recent"; path: string }
+  /**
+   * A file the application itself staged, such as a save downloaded from a
+   * deployment target. It is loaded as a temporary session, so Save stays
+   * unavailable for it until an explicit Save As, exactly as section 9 of the
+   * deployment specification requires.
+   */
+  | { kind: "open-temporary"; path: string }
   | { kind: "restore-recovery"; journalID: string }
   | { kind: "close" }
   | { kind: "quit" };
@@ -82,10 +90,14 @@ export type SaveSessionFlow = {
   applyMutationReceipt: (receipt: MutationReceipt) => Promise<SaveSession>;
   openSave: () => void;
   openRecent: (path: string) => void;
+  /** Opens a file the application staged, as a temporary session. */
+  openStagedFile: (path: string) => void;
   closeSave: () => void;
   retryClose: () => void;
   openReview: () => void;
   closeReview: () => void;
+  save: () => void;
+  saveAs: () => void;
   saveReviewed: (saveAs: boolean, confirmWarnings: boolean, confirmBanRisk: boolean) => void;
   undo: () => void;
   redo: () => void;
@@ -112,6 +124,7 @@ const staleValidationReport = Symbol("stale validation report");
  */
 export function useSaveSessionFlow(): SaveSessionFlow {
   const port = useSaveSessionPort();
+  const hostSettings = useHostSettings();
   const characterPort = useCharacterPort();
   const diagnosticsPort = useDiagnosticsPort();
   const queryClient = useQueryClient();
@@ -253,10 +266,12 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         return;
       }
       setSession(candidate);
-      try {
-        setRecentFiles(await port.recordRecentFile(candidate.saveSessionID));
-      } catch (reason) {
-        setLifecycleError(toAppError(reason));
+      if (candidate.sourceKind === "local") {
+        try {
+          setRecentFiles(await port.recordRecentFile(candidate.saveSessionID));
+        } catch (reason) {
+          setLifecycleError(toAppError(reason));
+        }
       }
       if (replaced !== undefined && replaced !== candidate.saveSessionID) await retire(replaced);
     },
@@ -264,11 +279,11 @@ export function useSaveSessionFlow(): SaveSessionFlow {
   );
 
   const openPath = useCallback(
-    async (source: string) => {
+    async (source: string, sourceKind: "local" | "temporary" = "local") => {
       const replaced = session?.saveSessionID;
       let candidate: SaveSession;
       try {
-        candidate = await loadSave({ source, expectedPlatform: "", sourceKind: "local" });
+        candidate = await loadSave({ source, expectedPlatform: "", sourceKind });
       } catch (reason) {
         setFailure("load_failed");
         setAppError(toAppError(reason));
@@ -277,6 +292,17 @@ export function useSaveSessionFlow(): SaveSessionFlow {
       await acceptCandidate(candidate, replaced);
     },
     [acceptCandidate, loadSave, session?.saveSessionID],
+  );
+
+  const releaseStagedFile = useCallback(
+    async (path: string) => {
+      try {
+        await port.releaseDeploymentStaging(path);
+      } catch (reason) {
+        setLifecycleError(toAppError(reason));
+      }
+    },
+    [port],
   );
 
   const executeAction = useCallback(
@@ -312,6 +338,14 @@ export function useSaveSessionFlow(): SaveSessionFlow {
           await openPath(action.path);
           return;
         }
+        if (action.kind === "open-temporary") {
+          try {
+            await openPath(action.path, "temporary");
+          } finally {
+            await releaseStagedFile(action.path);
+          }
+          return;
+        }
         let source: string;
         try {
           source = await port.selectSaveFile();
@@ -329,7 +363,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         setOpening(false);
       }
     },
-    [acceptCandidate, openPath, port, refreshHostState, retire, session],
+    [acceptCandidate, openPath, port, refreshHostState, releaseStagedFile, retire, session],
   );
 
   const cleanupPending = unclosedSessionID !== undefined;
@@ -337,7 +371,13 @@ export function useSaveSessionFlow(): SaveSessionFlow {
 
   const requestAction = useCallback(
     (action: PendingSessionAction) => {
-      if (isBusy) return;
+      const discardIncomingStaging = () => {
+        if (action.kind === "open-temporary") void releaseStagedFile(action.path);
+      };
+      if (isBusy) {
+        discardIncomingStaging();
+        return;
+      }
       if (cleanupPending) {
         if (
           action.kind === "close" &&
@@ -345,16 +385,32 @@ export function useSaveSessionFlow(): SaveSessionFlow {
           unclosedSessionID === session.saveSessionID
         ) {
           void executeAction(action);
+        } else {
+          discardIncomingStaging();
         }
         return;
       }
       if (session?.unsavedChanges) {
+        if (
+          pendingSessionAction?.kind === "open-temporary" &&
+          (action.kind !== "open-temporary" || pendingSessionAction.path !== action.path)
+        ) {
+          void releaseStagedFile(pendingSessionAction.path);
+        }
         setPendingSessionAction(action);
         return;
       }
       void executeAction(action);
     },
-    [cleanupPending, executeAction, isBusy, session, unclosedSessionID],
+    [
+      cleanupPending,
+      executeAction,
+      isBusy,
+      pendingSessionAction,
+      releaseStagedFile,
+      session,
+      unclosedSessionID,
+    ],
   );
 
   useEffect(
@@ -425,18 +481,14 @@ export function useSaveSessionFlow(): SaveSessionFlow {
       .finally(() => setLifecycleBusy(false));
   }, [lifecycleBusy, port, session]);
 
-  const saveReviewed = useCallback(
-    (saveAs: boolean, confirmWarnings: boolean, confirmBanRisk: boolean) => {
-      if (
-        session === undefined ||
-        lifecycleBusy ||
-        reviewValidation?.valid !== true ||
-        reviewValidation.validationToken === undefined ||
-        reviewValidation.saveSessionID !== session.saveSessionID ||
-        reviewValidation.saveRevision !== session.saveRevision
-      )
-        return;
-      const validationToken = reviewValidation.validationToken;
+  const commitValidatedSave = useCallback(
+    (
+      currentSession: SaveSession,
+      validationToken: string,
+      saveAs: boolean,
+      confirmWarnings: boolean,
+      confirmBanRisk: boolean,
+    ) => {
       setLifecycleBusy(true);
       setLifecycleError(undefined);
       setLifecycleMessage(undefined);
@@ -445,11 +497,11 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         try {
           let result: SaveLifecycleResult;
           if (saveAs) {
-            const target = await port.selectSaveTarget(fileNameFromPath(session.sourcePath));
+            const target = await port.selectSaveTarget(fileNameFromPath(currentSession.sourcePath));
             if (target === "") return;
             result = await port.saveAs(
-              session.saveSessionID,
-              session.saveRevision,
+              currentSession.saveSessionID,
+              currentSession.saveRevision,
               validationToken,
               confirmWarnings,
               confirmBanRisk,
@@ -457,8 +509,8 @@ export function useSaveSessionFlow(): SaveSessionFlow {
             );
           } else {
             result = await port.save(
-              session.saveSessionID,
-              session.saveRevision,
+              currentSession.saveSessionID,
+              currentSession.saveRevision,
               validationToken,
               confirmWarnings,
               confirmBanRisk,
@@ -491,9 +543,81 @@ export function useSaveSessionFlow(): SaveSessionFlow {
       port,
       refreshAfterMutation,
       refreshHostState,
-      reviewValidation,
-      session,
     ],
+  );
+
+  const saveReviewed = useCallback(
+    (saveAs: boolean, confirmWarnings: boolean, confirmBanRisk: boolean) => {
+      if (
+        session === undefined ||
+        lifecycleBusy ||
+        reviewValidation?.valid !== true ||
+        reviewValidation.validationToken === undefined ||
+        reviewValidation.saveSessionID !== session.saveSessionID ||
+        reviewValidation.saveRevision !== session.saveRevision
+      )
+        return;
+      commitValidatedSave(
+        session,
+        reviewValidation.validationToken,
+        saveAs,
+        confirmWarnings,
+        confirmBanRisk,
+      );
+    },
+    [commitValidatedSave, lifecycleBusy, reviewValidation, session],
+  );
+
+  const requestSave = useCallback(
+    (saveAs: boolean) => {
+      if (session === undefined || lifecycleBusy) return;
+      const currentSession = session;
+      setLifecycleBusy(true);
+      setReviewValidation(undefined);
+      setLifecycleError(undefined);
+      setLifecycleMessage(undefined);
+      void (async () => {
+        let delegatedToSave = false;
+        try {
+          const [nextHistory, validationResult] = await Promise.all([
+            port.getOperationHistory(currentSession.saveSessionID),
+            port.validateReviewChanges(
+              currentSession.saveSessionID,
+              currentSession.saveRevision,
+            ),
+          ]);
+          setHistory(nextHistory);
+          setReviewValidation(validationResult);
+          const normalRisk =
+            validationResult.warningCount === 0 &&
+            validationResult.banRiskCount === 0 &&
+            validationResult.criticalCount === 0;
+          if (
+            validationResult.valid &&
+            validationResult.validationToken !== undefined &&
+            normalRisk &&
+            hostSettings.data?.skipReviewForNormalRisk === true
+          ) {
+            delegatedToSave = true;
+            setLifecycleBusy(false);
+            commitValidatedSave(
+              currentSession,
+              validationResult.validationToken,
+              saveAs,
+              false,
+              false,
+            );
+            return;
+          }
+          setReviewOpen(true);
+        } catch (reason) {
+          setLifecycleError(toAppError(reason));
+        } finally {
+          if (!delegatedToSave) setLifecycleBusy(false);
+        }
+      })();
+    },
+    [commitValidatedSave, hostSettings.data?.skipReviewForNormalRisk, lifecycleBusy, port, session],
   );
 
   const discardPendingChanges = useCallback(() => {
@@ -520,6 +644,13 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     setAppError(undefined);
     void retire(unclosedSessionID);
   }, [isBusy, retire, unclosedSessionID]);
+
+  const cancelPendingAction = useCallback(() => {
+    if (pendingSessionAction?.kind === "open-temporary") {
+      void releaseStagedFile(pendingSessionAction.path);
+    }
+    setPendingSessionAction(undefined);
+  }, [pendingSessionAction, releaseStagedFile]);
 
   const blockedReason: SaveSessionBlockedReason | undefined =
     session === undefined && failure === "no_active_character" ? "no_active_character" : undefined;
@@ -566,18 +697,21 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     lifecycleSettings,
     openSave: () => requestAction({ kind: "open-dialog" }),
     openRecent: (path) => requestAction({ kind: "open-recent", path }),
+    openStagedFile: (path: string) => requestAction({ kind: "open-temporary", path }),
     closeSave: () => requestAction({ kind: "close" }),
     retryClose,
     openReview,
     closeReview: () => setReviewOpen(false),
+    save: () => requestSave(false),
+    saveAs: () => requestSave(true),
     saveReviewed,
     undo: () => void runHistoryMutation(port.undoLastOperation),
     redo: () => void runHistoryMutation(port.redoLastOperation),
     revertOperation: (operationID) =>
       void runHistoryMutation((id, revision) => port.revertOperation(id, operationID, revision)),
     discardPendingChanges,
-    savePendingChanges: openReview,
-    cancelPendingAction: () => setPendingSessionAction(undefined),
+    savePendingChanges: () => requestSave(false),
+    cancelPendingAction,
     removeRecent: (path) =>
       void port
         .removeRecentFile(path)

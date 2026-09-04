@@ -65,3 +65,31 @@ func NewWailsSaveTargetChooser() SaveTargetChooser {
 		})
 	}
 }
+
+// DocumentChooser asks the host to let the user pick one existing JSON document,
+// which is how a Build Template is imported. Cancelling is an empty path and a
+// nil error, exactly like the save dialogs above.
+//
+// It is a separate port from SaveFileChooser because it offers different
+// filters and reaches a different backend contract; sharing one chooser would
+// have made the save dialog offer template files and the other way round.
+type DocumentChooser func(ctx context.Context) (string, error)
+
+// templateFileFilters are the extensions the template import offers. Build
+// Templates are JSON documents, and the "all files" entry stays available so an
+// unusual extension never makes a valid document unselectable.
+var templateFileFilters = []runtime.FileFilter{
+	{DisplayName: "Build Templates (*.json)", Pattern: "*.json"},
+	{DisplayName: "All files (*.*)", Pattern: "*.*"},
+}
+
+// NewWailsDocumentChooser is the production template chooser.
+func NewWailsDocumentChooser() DocumentChooser {
+	return func(ctx context.Context) (string, error) {
+		return runtime.OpenFileDialog(ctx, runtime.OpenDialogOptions{
+			Title:           "Import Build Template",
+			Filters:         templateFileFilters,
+			ResolvesAliases: true,
+		})
+	}
+}

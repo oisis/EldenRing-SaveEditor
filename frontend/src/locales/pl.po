@@ -85,6 +85,14 @@ msgstr "Dopasowane kroki: {matched} z {0}"
 msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
 msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała; backend podaje, ile jest dostępnych."
 
+#: src/features/tools/AboutTab.tsx
+msgid "A newer release is available:"
+msgstr "Dostępne jest nowsze wydanie:"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "A risk filter is not offered: the backend reports no risk level for a template."
+msgstr "Filtr ryzyka nie jest dostępny: backend nie zgłasza poziomu ryzyka szablonu."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
@@ -93,11 +101,18 @@ msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zo
 msgid "About & Updates"
 msgstr "Informacje i aktualizacje"
 
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
+msgid "Actions"
+msgstr "Akcje"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Activated"
 msgstr "Aktywowany"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/tools/SaveManagerTab.tsx
 #: src/features/world/WorldPanel.tsx
 msgid "Active"
 msgstr "Aktywny"
@@ -114,6 +129,10 @@ msgstr "Dodaj"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add {name} to favorites"
 msgstr "Dodaj {name} do ulubionych"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Add a target"
+msgstr "Dodaj cel"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add items"
@@ -168,9 +187,17 @@ msgstr "Wszystkie poziomy"
 msgid "All operations"
 msgstr "Wszystkie operacje"
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "All tags"
+msgstr "Wszystkie tagi"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Already equipped"
 msgstr "Już założone"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Always back up without asking"
+msgstr "Zawsze twórz backup bez pytania"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Always create a remote backup"
@@ -188,6 +215,10 @@ msgstr "Presety wyglądu"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Application"
 msgstr "Aplikacja"
+
+#: src/features/tools/AboutTab.tsx
+msgid "Application Info"
+msgstr "Informacje o aplikacji"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 msgid "Application information"
@@ -213,6 +244,10 @@ msgstr "Zastosuj profile dostrajania do określonych ról matchmakingu bez modyf
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Apply planned repairs"
 msgstr "Zastosuj zaplanowane naprawy"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Apply template"
+msgstr "Zastosuj szablon"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Apply to Character"
@@ -262,9 +297,25 @@ msgstr "Prochy Wojny"
 msgid "Attributes"
 msgstr "Atrybuty"
 
+#: src/features/tools/AboutTab.tsx
+msgid "Author"
+msgstr "Autor"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Automatic"
+msgstr "Automatyczny"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Automatic backups kept"
 msgstr "Liczba zachowanych automatycznych backupów"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Back up and continue"
+msgstr "Utwórz backup i kontynuuj"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Back up the target and activate"
+msgstr "Utwórz backup celu i aktywuj"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
 #: src/i18n/i18n.test.tsx
@@ -288,6 +339,7 @@ msgstr "ryzyko bana"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/tools/DeploymentTab.tsx
 msgid "Ban risk"
 msgstr "Ryzyko bana"
 
@@ -305,6 +357,10 @@ msgstr "Baza: {0}"
 #: src/features/world/WorldPanel.tsx
 msgid "Bell Bearings"
 msgstr "Bell Bearings"
+
+#: src/features/tools/AboutTab.tsx
+msgid "Bitcoin"
+msgstr "Bitcoin"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Blue matchmaking"
@@ -331,14 +387,33 @@ msgstr "Arena bossa"
 msgid "Bosses"
 msgstr "Bossowie"
 
-#: src/features/tools/ToolsPanel.tsx
-msgid "Both settings are unavailable until the backend stores them. The current Save and Review Changes flow is unaffected."
-msgstr "Obie opcje są niedostępne, dopóki backend ich nie przechowuje. Obecny przebieg Save i Review Changes pozostaje bez zmian."
+#: src/features/tools/AboutTab.tsx
+msgid "Both destinations are opened in your default browser."
+msgstr "Oba adresy otwierają się w domyślnej przeglądarce."
+
+#: src/features/tools/AboutTab.tsx
+msgid "Build"
+msgstr "Kompilacja"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Build Templates"
+msgstr "Szablony buildów"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Building the preview…"
+msgstr "Tworzenie podglądu…"
+
+#: src/features/tools/AboutTab.tsx
+msgid "Buy me a coffee"
+msgstr "Postaw mi kawę"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -351,6 +426,7 @@ msgid "Candidate pages"
 msgstr "Strony kandydatów"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Capabilities"
 msgstr "Możliwości"
 
@@ -401,6 +477,10 @@ msgstr "Profil i wygląd postaci"
 msgid "Characters"
 msgstr "Postacie"
 
+#: src/features/tools/AboutTab.tsx
+msgid "Check for updates"
+msgstr "Sprawdź aktualizacje"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Chest"
 msgstr "Korpus"
@@ -418,6 +498,10 @@ msgstr "Wyczyść"
 msgid "Clear selection"
 msgstr "Wyczyść zaznaczenie"
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Clear the active mark"
+msgstr "Usuń oznaczenie aktywnego"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Clear this slot"
 msgstr "Wyczyść ten slot"
@@ -427,8 +511,22 @@ msgstr "Wyczyść ten slot"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
 msgid "Close"
 msgstr "Zamknij"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Close & Download"
+msgstr "Zamknij i pobierz"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Close Game"
+msgstr "Zamknij grę"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Close preview"
+msgstr "Zamknij podgląd"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Close Save"
@@ -478,6 +576,14 @@ msgstr "Konsola"
 msgid "Container"
 msgstr "Kontener"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Continue anyway"
+msgstr "Kontynuuj mimo to"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Continuing while the game is running can corrupt the target save."
+msgstr "Kontynuowanie przy działającej grze może uszkodzić save celu."
+
 #: src/features/world/WorldPanel.tsx
 msgid "Cookbooks"
 msgstr "Księgi kucharskie"
@@ -487,8 +593,29 @@ msgid "Cooldown between Blue Cipher Ring host search attempts."
 msgstr "Czas odnowienia między próbami wyszukiwania hosta przez Błękitny Pierścień Szyfru."
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Could not read application information from the backend."
 msgstr "Nie udało się odczytać informacji o aplikacji z backendu."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Create a backup of the target save?"
+msgstr "Utworzyć backup save'a celu?"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Create a manual backup"
+msgstr "Utwórz ręczny backup"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Create a template from the active character"
+msgstr "Utwórz szablon z aktywnej postaci"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Create from the active character"
+msgstr "Utwórz z aktywnej postaci"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Created"
+msgstr "Utworzono"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "critical"
@@ -525,6 +652,10 @@ msgstr "Ciemny"
 msgid "Debug Mode"
 msgstr "Tryb debugowania"
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Debug Mode and local application logs remain unavailable until their diagnostic contract is defined."
+msgstr "Tryb debugowania i lokalne logi aplikacji pozostają niedostępne do czasu zdefiniowania ich kontraktu diagnostycznego."
+
 #: src/features/world/WorldPanel.tsx
 msgid "Defeated"
 msgstr "Pokonany"
@@ -534,16 +665,56 @@ msgid "Delay between matchmaking search retries."
 msgstr "Opóźnienie między kolejnymi próbami wyszukiwania w matchmakingu."
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
 msgid "Delete"
 msgstr "Usuń"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Delete the backup"
+msgstr "Usuń backup"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Delete the target"
+msgstr "Usuń cel"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Delete the template"
+msgstr "Usuń szablon"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Delete this backup?"
+msgstr "Usunąć ten backup?"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Delete this target?"
+msgstr "Usunąć ten cel?"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Delete this template?"
+msgstr "Usunąć ten szablon?"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Deploy & Launch"
+msgstr "Wdróż i uruchom"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Deploy these changes"
+msgstr "Wdróż te zmiany"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Deployment"
 msgstr "Deployment"
 
-#: src/features/tools/ToolsPanel.tsx
-msgid "Deployment will be added in a later stage of this rebuild."
-msgstr "Deployment zostanie dodany na późniejszym etapie tej przebudowy."
+#: src/features/tools/DeploymentTab.tsx
+msgid "Deployment targets"
+msgstr "Cele wdrożenia"
+
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
+msgid "Description"
+msgstr "Opis"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -573,6 +744,16 @@ msgstr "Odrzuć"
 msgid "DLC"
 msgstr "DLC"
 
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+msgid "done"
+msgstr "wykonano"
+
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Download"
+msgstr "Pobierz"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Download span interval for sign requests."
 msgstr "Interwał pobierania dla zapytań o znaki przywołania."
@@ -580,6 +761,24 @@ msgstr "Interwał pobierania dla zapytań o znaki przywołania."
 #: src/features/advanced/networkMetadata.ts
 msgid "Download span interval for visitor list updates."
 msgstr "Interwał pobierania aktualizacji listy gości."
+
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
+msgid "Edit"
+msgstr "Edytuj"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Edit template"
+msgstr "Edytuj szablon"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Edit the backup"
+msgstr "Edytuj backup"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Edit the target"
+msgstr "Edytuj cel"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/tools/ToolsPanel.tsx
@@ -667,6 +866,7 @@ msgid "Favorites only"
 msgstr "Tylko ulubione"
 
 #: src/features/save-session/SaveSessionPanel.tsx
+#: src/features/tools/SaveManagerTab.tsx
 msgid "File"
 msgstr "Plik"
 
@@ -678,6 +878,10 @@ msgstr "Popraw nieprawidłowe wartości pól przed zastosowaniem zmian."
 msgid "Fog of War"
 msgstr "Mgła wojny"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Forget the approved host key"
+msgstr "Zapomnij zatwierdzony klucz hosta"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Format"
 msgstr "Format"
@@ -685,6 +889,10 @@ msgstr "Format"
 #: src/features/character/CharacterPanel.tsx
 msgid "FP"
 msgstr "FP"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Game state"
+msgstr "Stan gry"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/world/WorldPanel.tsx
@@ -715,6 +923,14 @@ msgstr "Głowa"
 #: src/features/app-shell/AppShell.tsx
 msgid "Home"
 msgstr "Główna"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Host"
+msgstr "Host"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Host key"
+msgstr "Klucz hosta"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "How frequently the game refreshes the summon sign list."
@@ -755,6 +971,10 @@ msgstr "Tożsamość i postęp"
 #: src/features/character/CharacterPanel.tsx
 msgid "Identity and Progression"
 msgstr "Tożsamość i postęp"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Import a template file"
+msgstr "Importuj plik szablonu"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Inactive slot"
@@ -809,6 +1029,10 @@ msgstr "Karty ekwipunku"
 msgid "Inventory items"
 msgstr "Przedmioty w ekwipunku"
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Inventory layout"
+msgstr "Układ ekwipunku"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Inventory, Storage and Item Database"
 msgstr "Ekwipunek, skrzynia i baza przedmiotów"
@@ -841,6 +1065,7 @@ msgid "Item results"
 msgstr "Wyniki wyszukiwania przedmiotów"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/tools/TemplatesTab.tsx
 msgid "Items"
 msgstr "Przedmioty"
 
@@ -852,6 +1077,10 @@ msgstr "Sekcje przedmiotów"
 msgid "Items: {total}"
 msgstr "Przedmioty: {total}"
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Kind"
+msgstr "Rodzaj"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Language"
 msgstr "Język"
@@ -859,6 +1088,10 @@ msgstr "Język"
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "Later"
 msgstr "Później"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Launch"
+msgstr "Uruchom"
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Left hand"
@@ -872,6 +1105,10 @@ msgstr "Lewa ręka {0}"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Legs"
 msgstr "Nogi"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Level"
+msgstr "Poziom"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/tools/ToolsPanel.tsx
@@ -891,6 +1128,7 @@ msgid "Loading appearance presets…"
 msgstr "Wczytywanie presetów wyglądu…"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Loading application information…"
 msgstr "Wczytywanie informacji o aplikacji…"
 
@@ -960,6 +1198,10 @@ msgstr "Wczytywanie wariantów…"
 msgid "Loading…"
 msgstr "Wczytywanie…"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Local filesystem"
+msgstr "Lokalny system plików"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Location"
 msgstr "Lokalizacja"
@@ -971,6 +1213,14 @@ msgstr "Zablokuj wszystkie stroje Spectral Steed"
 #: src/features/world/WorldPanel.tsx
 msgid "Locked"
 msgstr "Zablokowane"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Make this backup the target save?"
+msgstr "Ustawić ten backup jako save celu?"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Manual"
+msgstr "Ręczny"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Manual sort order"
@@ -1098,6 +1348,8 @@ msgstr "Przesuń w górę"
 #: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/TemplatesTab.tsx
 msgid "Name"
 msgstr "Nazwa"
 
@@ -1212,6 +1464,10 @@ msgstr "Normalne"
 msgid "Not activated"
 msgstr "Nieaktywowany"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Not approved yet"
+msgstr "Jeszcze niezatwierdzony"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Not defeated"
 msgstr "Niepokonany"
@@ -1223,6 +1479,11 @@ msgstr "Niedopasowany"
 #: src/features/world/WorldPanel.tsx
 msgid "Not owned"
 msgstr "Nieposiadany"
+
+#: src/features/tools/DeploymentTab.tsx
+#: src/features/tools/SaveManagerTab.tsx
+msgid "not performed"
+msgstr "niewykonano"
 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Not repaired"
@@ -1240,9 +1501,17 @@ msgstr "Jeszcze nieodblokowane"
 msgid "Not visited"
 msgstr "Nieodwiedzone"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Nothing on the target was changed."
+msgstr "Nic na celu nie zostało zmienione."
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Number of break-in areas queried per invasion search cycle."
 msgstr "Liczba obszarów inwazji odpytywanych w jednym cyklu wyszukiwania."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Only the configuration is removed. No file on the target is touched."
+msgstr "Usuwana jest wyłącznie konfiguracja. Żaden plik na celu nie jest ruszany."
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Only the items the backend accepts for this slot are offered here."
@@ -1260,6 +1529,10 @@ msgstr "Otwórz save i wybierz slot postaci, aby edytować jej wyposażenie."
 msgid "Open a save and select a character slot to see its World progress."
 msgstr "Otwórz save i wybierz slot postaci, aby zobaczyć jej postęp w świecie."
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Open a save and select a character to preview a template."
+msgstr "Otwórz save i wybierz postać, aby zobaczyć podgląd szablonu."
+
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Open a save and select a character to scan it for problems."
 msgstr "Otwórz save i wybierz postać, aby przeskanować go w poszukiwaniu problemów."
@@ -1267,6 +1540,10 @@ msgstr "Otwórz save i wybierz postać, aby przeskanować go w poszukiwaniu prob
 #: src/features/app-shell/AppShell.tsx
 msgid "Open a save from Home to see its character slots."
 msgstr "Otwórz save na ekranie Główna, aby zobaczyć jego sloty postaci."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Open a save to upload it to this target."
+msgstr "Otwórz save, aby wysłać go na ten cel."
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Open a save to view and edit network tuning parameters."
@@ -1276,21 +1553,33 @@ msgstr "Otwórz plik zapisu, aby wyświetlić i edytować parametry sieciowe."
 msgid "Open configuration directory"
 msgstr "Otwórz katalog konfiguracji"
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Open it in the editor"
+msgstr "Otwórz w edytorze"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Open log directory"
 msgstr "Otwórz katalog logów"
+
+#: src/features/tools/AboutTab.tsx
+msgid "Open releases"
+msgstr "Otwórz wydania"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Open Save"
 msgstr "Otwórz save"
 
+#: src/features/tools/AboutTab.tsx
+msgid "Open the repository"
+msgstr "Otwórz repozytorium"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Opening it in the editor replaces the save you are working on."
+msgstr "Otwarcie w edytorze zastąpi save, nad którym pracujesz."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Opening save…"
 msgstr "Otwieranie save…"
-
-#: src/features/tools/ToolsPanel.tsx
-msgid "Opening the configuration directory, Debug Mode and the diagnostic report export are not available in this build yet."
-msgstr "Otwieranie katalogu konfiguracji, tryb debugowania i eksport raportu diagnostycznego nie są jeszcze dostępne w tej wersji."
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Operation history"
@@ -1300,6 +1589,10 @@ msgstr "Historia operacji"
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "operation(s)"
 msgstr "operacji"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Operations"
+msgstr "Operacje"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Order position"
@@ -1343,12 +1636,17 @@ msgid "Planned repairs"
 msgstr "Zaplanowane naprawy"
 
 #: src/features/save-session/SaveSessionPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Platform"
 msgstr "Platforma"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Polish"
 msgstr "polski"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Port"
+msgstr "Port"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Position"
@@ -1395,6 +1693,10 @@ msgstr "Role presetów"
 msgid "Presets for this role are unavailable or incomplete."
 msgstr "Presety dla tej roli są niedostępne lub niekompletne."
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Preview"
+msgstr "Podgląd"
+
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Preview repair plan"
 msgstr "Pokaż plan naprawy"
@@ -1413,6 +1715,10 @@ msgstr "Poprzednia karta ekwipunku"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Previous storage card"
 msgstr "Poprzednia karta skrzyni"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Private key path"
+msgstr "Ścieżka klucza prywatnego"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Profile"
@@ -1599,6 +1905,10 @@ msgstr "Przejrzyj zmiany i zweryfikuj je przed zapisem"
 msgid "Review changes, then choose a new target"
 msgstr "Przejrzyj zmiany, a następnie wybierz nowy plik docelowy"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Review the changes before deploying"
+msgstr "Przejrzyj zmiany przed wdrożeniem"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Review the ordered operation journal and validation before writing."
 msgstr "Przejrzyj uporządkowany dziennik operacji i walidację przed zapisem."
@@ -1673,17 +1983,22 @@ msgstr "Zachowanie zapisu"
 msgid "Save integrity"
 msgstr "Integralność save"
 
+#: src/features/tools/SaveManagerTab.tsx
 #: src/features/tools/ToolsPanel.tsx
 msgid "Save Manager"
 msgstr "Save Manager"
 
-#: src/features/tools/ToolsPanel.tsx
-msgid "Save Manager will be added in a later stage of this rebuild."
-msgstr "Save Manager zostanie dodany na późniejszym etapie tej przebudowy."
-
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Save or discard the current changes before continuing."
 msgstr "Zapisz lub odrzuć bieżące zmiany przed kontynuowaniem."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Save path"
+msgstr "Ścieżka save'a"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Save path on the target"
+msgstr "Ścieżka save'a na celu"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Save Runes"
@@ -1692,6 +2007,14 @@ msgstr "Zapisz runy"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Save session"
 msgstr "Sesja save"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Save the target"
+msgstr "Zapisz cel"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Save the template"
+msgstr "Zapisz szablon"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Save validation"
@@ -1710,9 +2033,17 @@ msgstr "Zapisano"
 msgid "Saved to {0}."
 msgstr "Zapisano do {0}."
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "SaveForge cannot confirm whether the game is running on this target. Continuing while it runs can corrupt the save, so every operation asks first."
+msgstr "SaveForge nie może potwierdzić, czy gra działa na tym celu. Kontynuowanie przy działającej grze może uszkodzić save, dlatego każda operacja pyta o zgodę."
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge znalazł dzienniki operacji z wcześniejszej sesji."
+
+#: src/features/tools/AboutTab.tsx
+msgid "SaveForge never checks for updates on its own and never downloads or installs one."
+msgstr "SaveForge nigdy nie sprawdza aktualizacji samodzielnie i nigdy ich nie pobiera ani nie instaluje."
 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Scan for problems"
@@ -1723,6 +2054,7 @@ msgid "Scanning…"
 msgstr "Skanowanie…"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/tools/TemplatesTab.tsx
 msgid "Search"
 msgstr "Szukaj"
 
@@ -1755,8 +2087,13 @@ msgstr "Szukaj wpisów świata"
 msgid "Seconds before a pending summon request expires."
 msgstr "Sekundy do wygaśnięcia oczekującego żądania przywołania."
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Sections"
+msgstr "Sekcje"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/tools/DeploymentTab.tsx
 #: src/features/world/WorldPanel.tsx
 msgid "Select"
 msgstr "Zaznacz"
@@ -1772,6 +2109,14 @@ msgstr "Zaznacz {0}"
 #: src/features/world/WorldPanel.tsx
 msgid "Select a step"
 msgstr "Wybierz krok"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Select a target"
+msgstr "Wybierz cel"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Select a target to see its backups."
+msgstr "Wybierz cel, aby zobaczyć jego backupy."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Select an active character to view and edit profile data."
@@ -1807,6 +2152,10 @@ msgstr "Podsumowanie sesji i operacje na pliku"
 #: src/features/world/WorldPanel.tsx
 msgid "Set activated"
 msgstr "Ustaw aktywowany"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Set active"
+msgstr "Ustaw jako aktywny"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Set defeated"
@@ -1968,6 +2317,10 @@ msgstr "Zaklęcie {0} · {1} Memory Slots"
 msgid "Spell {0} · active"
 msgstr "Zaklęcie {0} · aktywne"
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Spell slots changed"
+msgstr "Zmienione sloty zaklęć"
+
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spells"
@@ -1977,14 +2330,34 @@ msgstr "Zaklęcia"
 msgid "Spirit Ashes"
 msgstr "Prochy duchów"
 
+#: src/features/tools/AboutTab.tsx
+msgid "Sponsor this project"
+msgstr "Wesprzyj ten projekt"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "SSH"
+msgstr "SSH"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "SSH uses key authentication only. SaveForge stores the path of the key and never its contents, and it never puts that path into a log or a diagnostic report."
+msgstr "SSH używa wyłącznie uwierzytelniania kluczem. SaveForge przechowuje ścieżkę klucza, nigdy jego zawartość, i nigdy nie umieszcza tej ścieżki w logu ani w raporcie diagnostycznym."
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Stacks"
 msgstr "Stakuje się"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Stage"
+msgstr "Etap"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Stamina (SP)"
 msgstr "Kondycja (SP)"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Start command"
+msgstr "Polecenie uruchomienia"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Starting Class"
@@ -2010,6 +2383,18 @@ msgstr "Status: rozstrzygnięty"
 msgid "Steam ID"
 msgstr "Steam ID"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Stop command"
+msgstr "Polecenie zatrzymania"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Stop the game and continue"
+msgstr "Zatrzymaj grę i kontynuuj"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Stop the game on the target?"
+msgstr "Zatrzymać grę na celu?"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Storage"
@@ -2022,6 +2407,14 @@ msgstr "Karty skrzyni"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Storage items"
 msgstr "Przedmioty w skrzyni"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Storage layout"
+msgstr "Układ magazynu"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Store the backup details"
+msgstr "Zapisz dane backupu"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Strength"
@@ -2058,6 +2451,7 @@ msgid "Super marchant"
 msgstr "Super marchant"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Supported schemas"
 msgstr "Wspierane schematy"
 
@@ -2075,6 +2469,20 @@ msgstr "Przełączenie typu sylwetki zastosuje kompletny domyślny preset wyglą
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Table"
 msgstr "Tabela"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Tag"
+msgstr "Tag"
+
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
+msgid "Tags"
+msgstr "Tagi"
+
+#: src/features/tools/SaveManagerTab.tsx
+#: src/features/tools/TemplatesTab.tsx
+msgid "Tags, separated by commas"
+msgstr "Tagi, rozdzielone przecinkami"
 
 #. placeholder {0}: index + 1
 #: src/features/equipment/EquipmentPanel.tsx
@@ -2095,21 +2503,41 @@ msgstr "Sloty talizmanów: {0}"
 msgid "Talismans"
 msgstr "Talizmany"
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Target"
+msgstr "Cel"
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "Target backups"
+msgstr "Backupy celu"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Target Class"
 msgstr "Klasa docelowa"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Target operations"
+msgstr "Operacje celu"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Target position"
 msgstr "Pozycja docelowa"
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Template preview"
+msgstr "Podgląd szablonu"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Templates"
 msgstr "Szablony"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Test the target"
+msgstr "Przetestuj cel"
+
 #: src/features/tools/ToolsPanel.tsx
-msgid "Templates will be added in a later stage of this rebuild."
-msgstr "Szablony zostaną dodane na późniejszym etapie tej przebudowy."
+msgid "The action could not be completed."
+msgstr "Nie udało się wykonać tej akcji."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The application backend could not be reached."
@@ -2126,10 +2554,6 @@ msgstr "Osiągnięto limit automatycznych kopii zapasowych. Kolejne zapisy będ�
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The backend applied nothing, so this save is unchanged."
 msgstr "Backend niczego nie zastosował, więc ten save pozostaje bez zmian."
-
-#: src/features/tools/ToolsPanel.tsx
-msgid "The backend does not expose this action yet."
-msgstr "Backend nie udostępnia jeszcze tej akcji."
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "The backend does not report the stored Steam ID, so this field stays empty."
@@ -2151,9 +2575,29 @@ msgstr "Backend nie zgłosił problemów, ale jego pokrycie jest niepełne."
 msgid "The backend sets the Steam ID for PC saves only."
 msgstr "Backend ustawia Steam ID wyłącznie dla save'ów PC."
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The backup details were not stored."
+msgstr "Dane backupu nie zostały zapisane."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The backup file is removed from the target. This cannot be undone."
+msgstr "Plik backupu zostanie usunięty z celu. Tej operacji nie można cofnąć."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The backup library could not be read."
+msgstr "Nie udało się odczytać biblioteki backupów."
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "The backup name pattern is fixed in this build: the backend defines no public grammar for it yet."
 msgstr "Wzorzec nazwy backupu jest stały w tej wersji: backend nie definiuje jeszcze publicznej gramatyki tego wzorca."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The backup was not activated and the target was left unchanged."
+msgstr "Backup nie został aktywowany, a cel pozostał bez zmian."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The backup was saved"
+msgstr "Backup został zapisany"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -2163,9 +2607,53 @@ msgstr "Wzorzec nazwy backupu jest stały w tej wersji: backend nie definiuje je
 msgid "The change was not applied."
 msgstr "Zmiana nie została zastosowana."
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The current target save is backed up first, then replaced with this backup."
+msgstr "Najpierw powstaje backup bieżącego save'a celu, a dopiero potem jest on zastępowany tym backupem."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The deployment configuration could not be read."
+msgstr "Nie udało się odczytać konfiguracji wdrożenia."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The deployment failed and the target was left unchanged."
+msgstr "Wdrożenie nie powiodło się, a cel pozostał bez zmian."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The diagnostic report carries the application version, the platform, the settings above and the current session's diagnostic records. It never carries save data, file paths or SSH keys."
+msgstr "Raport diagnostyczny zawiera wersję aplikacji, platformę, powyższe ustawienia oraz rekordy diagnostyczne bieżącej sesji. Nigdy nie zawiera danych save'a, ścieżek plików ani kluczy SSH."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The download failed and the target was left unchanged."
+msgstr "Pobieranie nie powiodło się, a cel pozostał bez zmian."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The file chooser could not be opened. No file was selected and nothing was loaded."
 msgstr "Nie udało się otworzyć okna wyboru pliku. Nie wybrano pliku i niczego nie wczytano."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The game is running on this target"
+msgstr "Gra działa na tym celu"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The game state cannot be confirmed"
+msgstr "Nie można potwierdzić stanu gry"
+
+#: src/features/tools/AboutTab.tsx
+msgid "The link could not be opened."
+msgstr "Nie udało się otworzyć odnośnika."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The operation cannot continue while the game is running. Refusing cancels it."
+msgstr "Operacja nie może być kontynuowana przy działającej grze. Odmowa ją anuluje."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The operation finished."
+msgstr "Operacja zakończona."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The operation stopped and the target was left unchanged."
+msgstr "Operacja została przerwana, a cel pozostał bez zmian."
 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The planned repairs could not be applied."
@@ -2174,6 +2662,14 @@ msgstr "Nie udało się zastosować zaplanowanych napraw."
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The planned repairs were applied."
 msgstr "Zaplanowane naprawy zostały zastosowane."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The preview could not be built."
+msgstr "Nie udało się zbudować podglądu."
+
+#: src/features/tools/AboutTab.tsx
+msgid "The project has published no stable release yet."
+msgstr "Projekt nie opublikował jeszcze stabilnego wydania."
 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The repair plan could not be built."
@@ -2199,9 +2695,25 @@ msgstr "Nie udało się ukończyć żądanej operacji."
 msgid "The safety profile is unavailable."
 msgstr "Profil bezpieczeństwa jest niedostępny."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "The save behavior settings are unavailable."
+msgstr "Ustawienia zachowania zapisu są niedostępne."
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The save changed before the operation could be applied."
 msgstr "Stan save zmienił się przed zastosowaniem operacji."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The save could not be validated, so nothing was deployed."
+msgstr "Nie udało się zwalidować save'a, więc nic nie zostało wdrożone."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The save did not pass validation, so nothing was deployed."
+msgstr "Save nie przeszedł walidacji, więc nic nie zostało wdrożone."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The save passed validation. Deploying replaces the target save."
+msgstr "Save przeszedł walidację. Wdrożenie zastąpi save celu."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The save revision supplied by the request was invalid."
@@ -2239,10 +2751,70 @@ msgstr "Steam ID zostało zapisane, ale tego ekranu nie udało się odświeżyć
 msgid "The Steam ID was stored."
 msgstr "Steam ID zostało zapisane."
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "The target already has a save. It is always backed up before it is replaced; this only asks whether to go on."
+msgstr "Cel ma już save. Zawsze powstaje jego backup przed zastąpieniem; to pytanie dotyczy wyłącznie kontynuowania operacji."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The target save was replaced and verified, but a later operation step failed."
+msgstr "Save na targecie został zastąpiony i zweryfikowany, ale późniejszy krok operacji nie powiódł się."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The target save was replaced and verified, but the game could not be launched."
+msgstr "Save na targecie został zastąpiony i zweryfikowany, ale nie udało się uruchomić gry."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The target save was replaced, but its final verification failed. Do not use this target until it has been inspected."
+msgstr "Save na targecie został zastąpiony, ale jego końcowa weryfikacja nie powiodła się. Nie używaj tego targetu, dopóki nie zostanie sprawdzony."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The target was rejected. Check the required fields and try again."
+msgstr "Cel został odrzucony. Sprawdź wymagane pola i spróbuj ponownie."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The target was replaced and verified, but the active-backup metadata could not be updated."
+msgstr "Target został zastąpiony i zweryfikowany, ale nie udało się zaktualizować metadanych aktywnego backupu."
+
+#: src/features/tools/SaveManagerTab.tsx
+msgid "The target was replaced with this backup, but final verification failed. Do not use it until it has been inspected."
+msgstr "Target został zastąpiony tym backupem, ale końcowa weryfikacja nie powiodła się. Nie używaj go, dopóki nie zostanie sprawdzony."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template is removed from this computer's library. No save is changed."
+msgstr "Szablon zostanie usunięty z biblioteki na tym komputerze. Żaden save nie zostanie zmieniony."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template library could not be read."
+msgstr "Nie udało się odczytać biblioteki szablonów."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template was applied, but this screen could not be refreshed. Reopen the save to see its current state."
+msgstr "Szablon został zastosowany, ale nie udało się odświeżyć tego ekranu. Otwórz save ponownie, aby zobaczyć jego aktualny stan."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template was not applied and nothing was changed."
+msgstr "Szablon nie został zastosowany i nic nie zostało zmienione."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template was not deleted."
+msgstr "Szablon nie został usunięty."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "The template was not stored."
+msgstr "Szablon nie został zapisany."
+
+#: src/features/tools/AboutTab.tsx
+msgid "The update check could not be completed."
+msgstr "Nie udało się sprawdzić aktualizacji."
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/tools/ToolsPanel.tsx
 msgid "Theme"
 msgstr "Motyw"
+
+#: src/features/tools/AboutTab.tsx
+msgid "This build carries no comparable version, so the newest release cannot be compared with it."
+msgstr "Ta kompilacja nie ma porównywalnego numeru wersji, więc nie można jej porównać z najnowszym wydaniem."
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "This character slot is empty, so it has no equipment to show."
@@ -2259,6 +2831,10 @@ msgstr "Ta funkcja zostanie dodana w przyszłej aktualizacji."
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
 msgstr "Tego dziennika nie można automatycznie odtworzyć. Możesz go wyeksportować albo usunąć."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "This library has no templates yet."
+msgstr "Ta biblioteka nie ma jeszcze szablonów."
 
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
@@ -2282,6 +2858,10 @@ msgstr "Ten save nie ma aktywnej postaci, więc nie można go edytować. Nie zos
 msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
 msgstr "Ten save otwarto z liczbą błędów {0} i ostrzeżeń {1} zgłoszonych przez backend."
 
+#: src/features/tools/SaveManagerTab.tsx
+msgid "This target has no backups yet."
+msgstr "Ten cel nie ma jeszcze backupów."
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Timeout before a single matchmaking attempt is abandoned."
 msgstr "Limit czasu przed porzuceniem pojedynczej próby matchmakingu."
@@ -2301,6 +2881,10 @@ msgstr "Sekcje narzędzi"
 #: src/features/world/WorldPanel.tsx
 msgid "Tutorials"
 msgstr "Samouczki"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Type"
+msgstr "Typ"
 
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
@@ -2389,6 +2973,10 @@ msgstr "Cofnij"
 msgid "Undo the last operation"
 msgstr "Cofnij ostatnią operację"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "unknown"
+msgstr "nieznany"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Unknown"
 msgstr "Nieznany"
@@ -2406,14 +2994,42 @@ msgstr "Odblokowania"
 msgid "Unsaved changes"
 msgstr "Niezapisane zmiany"
 
+#: src/features/tools/TemplatesTab.tsx
+msgid "Updated"
+msgstr "Zaktualizowano"
+
+#: src/features/tools/AboutTab.tsx
+msgid "Updates"
+msgstr "Aktualizacje"
+
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Upgradeable"
 msgstr "Można ulepszać"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Upload"
+msgstr "Wyślij"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Upload and broadcast intervals when placing a summon sign."
 msgstr "Interwały wysyłania i rozgłaszania podczas umieszczania znaku przywołania."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Upload and Download are blocked while the game runs. Use Close Game, Deploy & Launch or Close & Download instead."
+msgstr "Wysyłanie i pobieranie są zablokowane przy działającej grze. Użyj Zamknij grę, Wdróż i uruchom albo Zamknij i pobierz."
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Use the template's own option"
+msgstr "Użyj opcji z szablonu"
+
+#: src/features/tools/TemplatesTab.tsx
+msgid "Use the template's own weapon upgrade levels"
+msgstr "Użyj poziomów ulepszenia broni z szablonu"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "User"
+msgstr "Użytkownik"
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Validate again"
@@ -2426,6 +3042,10 @@ msgstr "Walidowanie…"
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Validation"
 msgstr "Walidacja"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Validation always runs. Skipping Review Changes only hides the modal for an operation the completed validation reported with no warning and no ban risk, and the remote backup setting only chooses whether the mandatory backup is confirmed each time."
+msgstr "Walidacja wykonuje się zawsze. Pominięcie Review Changes ukrywa modal wyłącznie dla operacji, którą zakończona walidacja zgłosiła bez ostrzeżeń i bez ban risk, a ustawienie zdalnego backupu decyduje tylko o tym, czy obowiązkowy backup jest za każdym razem potwierdzany."
 
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Validation passed."
@@ -2448,6 +3068,7 @@ msgid "Variants"
 msgstr "Warianty"
 
 #: src/features/application-info/ApplicationInfoPanel.tsx
+#: src/features/tools/AboutTab.tsx
 msgid "Version"
 msgstr "Wersja"
 
@@ -2504,6 +3125,10 @@ msgstr "Ostrzeżenie"
 msgid "warning(s)"
 msgstr "ostrzeżeń"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Warnings"
+msgstr "Ostrzeżenia"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
 msgstr "Bronie"
@@ -2533,6 +3158,10 @@ msgstr "Sekcje świata"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Yes"
 msgstr "Tak"
+
+#: src/features/tools/AboutTab.tsx
+msgid "You are running the latest release."
+msgstr "Korzystasz z najnowszego wydania."
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "You have unsaved changes in your draft."

@@ -89,3 +89,57 @@ export const actionsBar = style({
   flexWrap: "wrap",
   gap: tokens.space.sm,
 });
+
+/**
+ * The About & Updates grid: two cards per row, and every card in a row as tall
+ * as the tallest one. `align-items: stretch` on a grid row is what section
+ * 4.10.5 asks for, without any measurement in JavaScript.
+ */
+export const cardGrid = style({
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+  alignItems: "stretch",
+  gap: tokens.space.md,
+});
+
+/** One About card: its footer actions sit at the bottom of the stretched card. */
+export const gridCard = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: tokens.space.sm,
+  minWidth: 0,
+});
+
+/** The action row a stretched card pins to its bottom edge. */
+export const cardActions = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: tokens.space.sm,
+  marginTop: "auto",
+});
+
+/** The two-column form of the target and template editors. */
+export const formGrid = style({
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: tokens.space.md,
+});
+
+/** The stage list a finished long operation reports. */
+export const stageList = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: tokens.space.xs,
+  margin: 0,
+  padding: 0,
+  listStyle: "none",
+  color: tokens.color.textMuted,
+  fontSize: tokens.fontSize.sm,
+});
+
+/** A row of badges, used for template tags and backup tags. */
+export const badgeRow = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: tokens.space.xs,
+});

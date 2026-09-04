@@ -322,6 +322,8 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               characterID={selectedCharacterID}
               backupRetention={flow.lifecycleSettings?.backupRetention}
               onBackupRetentionChange={flow.setBackupRetention}
+              onOpenStagedFile={flow.openStagedFile}
+              onOpenLocalFile={flow.openRecent}
               applyMutationReceipt={flow.applyMutationReceipt}
               sessionBusy={flow.isBusy}
             />

@@ -62,6 +62,8 @@ type SupportedSchema struct {
 
 type GetApplicationInfoResult struct {
 	ApplicationVersion string            `json:"applicationVersion"`
+	Build              string            `json:"build"`
+	Platform           string            `json:"platform"`
 	SupportedSchemas   []SupportedSchema `json:"supportedSchemas"`
 	Capabilities       []string          `json:"capabilities"`
 }
@@ -70,6 +72,8 @@ type GetApplicationInfoResult struct {
 | Field | Type | Meaning |
 |---|---|---|
 | `applicationVersion` | `string` | Exactly the version the backend caller supplied. It is never trimmed, normalised, or replaced by a fallback. |
+| `build` | `string` | The VCS revision from Go build metadata, otherwise the module version, otherwise `development`. |
+| `platform` | `string` | The runtime `GOOS/GOARCH` pair. |
 | `supportedSchemas` | array of `SupportedSchema` | The schemas the backend can read. Today it holds exactly one entry, for the GameCatalog schema. |
 | `capabilities` | array of `string` | The capabilities the backend declares. Today it holds exactly one value, `catalog_read`. |
 
@@ -94,12 +98,14 @@ save reading, save writing, or any mutating capability through this endpoint.
 
 1. The backend caller passes the application version it owns.
 2. The getter rejects an empty version.
-3. The getter builds the single `game_catalog` schema entry from
+3. The getter reads the build identity from Go build metadata and the platform
+   from the Go runtime; neither value comes from the frontend.
+4. The getter builds the single `game_catalog` schema entry from
    `schema.MinimumSchemaVersion` and `schema.CurrentSchemaVersion`.
-4. The getter builds the single `catalog_read` capability.
-5. The getter returns the typed result. Both slices are non-nil and are built
+5. The getter builds the single `catalog_read` capability.
+6. The getter returns the typed result. Both slices are non-nil and are built
    per call, so mutating one result never affects another call.
-6. The getter modifies nothing.
+7. The getter modifies nothing.
 
 ## Validation and errors
 

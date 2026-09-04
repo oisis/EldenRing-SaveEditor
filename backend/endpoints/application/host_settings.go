@@ -1,0 +1,117 @@
+/*
+Endpoint: GetHostSettings
+EndpointID: get_host_settings
+Purpose: Returns the persistent host application settings and the host directories the Settings screen can open.
+How it works: The runtime handler reads the injected host settings store and reports its values together with the configuration and log directories the composition root owns. It reads no save and mutates nothing.
+Supported resource types: —.
+Input variables: none.
+GameCatalog variables read: none.
+Save variables read: none; host settings are not save state.
+Implementation status: implemented
+
+Endpoint: SetHostSettings
+EndpointID: set_host_settings
+Purpose: Stores the persistent host application settings and returns the settings now in effect.
+How it works: The runtime handler validates the stated remote backup policy, writes the complete settings value atomically through the host settings store and returns the stored state. It touches no save session.
+Supported resource types: —.
+Input variables: skipReviewForNormalRisk, remoteBackupPolicy.
+GameCatalog variables read: none.
+Save variables processed: none; host settings never enter a save, a snapshot or a recovery journal.
+Implementation status: implemented
+*/
+package application
+
+import (
+	"errors"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
+)
+
+// GetHostSettingsEndpointID is the stable backend identifier of GetHostSettings.
+const GetHostSettingsEndpointID = "get_host_settings"
+
+// SetHostSettingsEndpointID is the stable backend identifier of SetHostSettings.
+const SetHostSettingsEndpointID = "set_host_settings"
+
+// GetHostSettingsDefinition describes the public getter contract.
+var GetHostSettingsDefinition = contract.MustDefine(contract.Definition{
+	Name:                       "GetHostSettings",
+	ID:                         GetHostSettingsEndpointID,
+	Kind:                       contract.Getter,
+	SupportedResourceTypes:     "—",
+	SupportedResourceVariables: nil,
+	Description:                "Returns the persistent host application settings and the host directories the Settings screen can open.",
+})
+
+// SetHostSettingsDefinition describes the public mutation contract.
+var SetHostSettingsDefinition = contract.MustDefine(contract.Definition{
+	Name:                       "SetHostSettings",
+	ID:                         SetHostSettingsEndpointID,
+	Kind:                       contract.Mutation,
+	SupportedResourceTypes:     "—",
+	SupportedResourceVariables: []string{"skipReviewForNormalRisk", "remoteBackupPolicy"},
+	Description:                "Stores the persistent host application settings and returns the settings now in effect.",
+})
+
+// HostSettingsResult reports the stored settings, the closed policy vocabulary
+// and the two host directories the Settings screen offers to open.
+//
+// The directories are reported so the frontend can state whether the action is
+// available at all; the frontend never sends a directory back and never builds
+// one of its own. A host running without a state directory reports both as
+// empty, which is a truthful "not available", not a hidden failure.
+type HostSettingsResult struct {
+	SkipReviewForNormalRisk       bool     `json:"skipReviewForNormalRisk"`
+	RemoteBackupPolicy            string   `json:"remoteBackupPolicy"`
+	AvailableRemoteBackupPolicies []string `json:"availableRemoteBackupPolicies"`
+	DefaultRemoteBackupPolicy     string   `json:"defaultRemoteBackupPolicy"`
+	ConfigurationDirectoryExists  bool     `json:"configurationDirectoryExists"`
+	LogDirectoryExists            bool     `json:"logDirectoryExists"`
+}
+
+// GetHostSettings reports the stored host settings.
+func GetHostSettings(store *hostsettings.Store) (HostSettingsResult, error) {
+	if store == nil {
+		return HostSettingsResult{}, errors.New("host settings store is required")
+	}
+	settings, err := store.Get()
+	if err != nil {
+		return HostSettingsResult{}, err
+	}
+	return hostSettingsResult(store, settings), nil
+}
+
+// SetHostSettings stores a complete settings value and reports what is now in
+// effect. It stores the whole value rather than a patch: a partial write would
+// need a second, implicit source of truth for the fields it left out.
+func SetHostSettings(
+	store *hostsettings.Store,
+	skipReviewForNormalRisk bool,
+	remoteBackupPolicy string,
+) (HostSettingsResult, error) {
+	if store == nil {
+		return HostSettingsResult{}, errors.New("host settings store is required")
+	}
+	settings, err := store.Set(skipReviewForNormalRisk, remoteBackupPolicy)
+	if err != nil {
+		return HostSettingsResult{}, err
+	}
+	return hostSettingsResult(store, settings), nil
+}
+
+func hostSettingsResult(store *hostsettings.Store, settings hostsettings.Settings) HostSettingsResult {
+	policies := hostsettings.RemoteBackupPolicies()
+	available := make([]string, 0, len(policies))
+	for _, policy := range policies {
+		available = append(available, string(policy))
+	}
+	return HostSettingsResult{
+		SkipReviewForNormalRisk:       settings.SkipReviewForNormalRisk,
+		RemoteBackupPolicy:            string(settings.RemoteBackupPolicy),
+		AvailableRemoteBackupPolicies: available,
+		DefaultRemoteBackupPolicy:     string(hostsettings.DefaultRemoteBackupPolicy),
+		ConfigurationDirectoryExists:  store.Directory() != "",
+		LogDirectoryExists:            false,
+	}
+}

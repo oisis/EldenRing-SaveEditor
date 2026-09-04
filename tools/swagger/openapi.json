@@ -10403,6 +10403,14 @@
             "type": "string",
             "description": "Returned exactly as supplied by the backend caller."
           },
+          "build": {
+            "type": "string",
+            "description": "Build identity from Go build metadata, or development when unavailable."
+          },
+          "platform": {
+            "type": "string",
+            "description": "Runtime platform in GOOS/GOARCH form."
+          },
           "supportedSchemas": {
             "type": "array",
             "items": {
@@ -10416,7 +10424,7 @@
             }
           }
         },
-        "required": ["applicationVersion", "supportedSchemas", "capabilities"]
+        "required": ["applicationVersion", "build", "platform", "supportedSchemas", "capabilities"]
       },
       "DataSource": {
         "type": "object",

@@ -80,14 +80,14 @@ export function SaveSessionContent({
               <Trans>Open Save</Trans>
             </Button>
             <Button
-              onClick={flow.openReview}
+              onClick={flow.save}
               disabled={!hasSession || flow.isBusy || session?.sourceKind !== "local"}
               title={t`Review and save changes`}
             >
               <Trans>Save</Trans>
             </Button>
             <Button
-              onClick={flow.openReview}
+              onClick={flow.saveAs}
               disabled={!hasSession || flow.isBusy}
               title={t`Review changes, then choose a new target`}
             >

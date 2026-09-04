@@ -1,8 +1,8 @@
 /*
 Endpoint: GetApplicationInfo
 EndpointID: get_application_info
-Purpose: Returns the application version, supported schema versions, and basic backend capability information.
-How it works: The runtime handler validates the application version supplied by its backend caller and returns it together with the compile-time GameCatalog schema version range and the capabilities the backend currently declares. It reads no catalog instance, no manifest and no save.
+Purpose: Returns the application version, build identity, runtime platform, supported schema versions, and basic backend capability information.
+How it works: The runtime handler validates the application version supplied by its backend caller and returns it together with Go build/runtime metadata, the compile-time GameCatalog schema version range and the capabilities the backend currently declares. It reads no catalog instance, no manifest and no save.
 Supported resource types: —.
 Input variables: none.
 GameCatalog variables read: only the MinimumSchemaVersion and CurrentSchemaVersion constants.
@@ -13,6 +13,8 @@ package application
 
 import (
 	"errors"
+	"runtime"
+	"runtime/debug"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -36,7 +38,7 @@ var GetApplicationInfoDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: nil,
-	Description:                "Returns the application version, supported schema versions, and basic backend capability information.",
+	Description:                "Returns the application version, build identity, runtime platform, supported schema versions, and basic backend capability information.",
 })
 
 // SupportedSchema reports one schema the backend can read and the version range
@@ -50,6 +52,8 @@ type SupportedSchema struct {
 // GetApplicationInfoResult is the typed result of GetApplicationInfo.
 type GetApplicationInfoResult struct {
 	ApplicationVersion string            `json:"applicationVersion"`
+	Build              string            `json:"build"`
+	Platform           string            `json:"platform"`
 	SupportedSchemas   []SupportedSchema `json:"supportedSchemas"`
 	Capabilities       []string          `json:"capabilities"`
 }
@@ -72,6 +76,8 @@ func GetApplicationInfo(applicationVersion string) (GetApplicationInfoResult, er
 	// affect another call.
 	return GetApplicationInfoResult{
 		ApplicationVersion: applicationVersion,
+		Build:              applicationBuildIdentity(),
+		Platform:           runtime.GOOS + "/" + runtime.GOARCH,
 		SupportedSchemas: []SupportedSchema{{
 			Name:           gameCatalogSchemaName,
 			MinimumVersion: schema.MinimumSchemaVersion,
@@ -79,4 +85,18 @@ func GetApplicationInfo(applicationVersion string) (GetApplicationInfoResult, er
 		}},
 		Capabilities: []string{catalogReadCapability},
 	}, nil
+}
+
+func applicationBuildIdentity() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" && setting.Value != "" {
+				return setting.Value
+			}
+		}
+		if info.Main.Version != "" && info.Main.Version != "(devel)" {
+			return info.Main.Version
+		}
+	}
+	return "development"
 }

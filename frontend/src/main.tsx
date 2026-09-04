@@ -3,10 +3,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { AboutPortProvider } from "./application/about/aboutClient";
 import { AppearancePortProvider } from "./application/appearance/appearanceClient";
 import { ApplicationInfoPortProvider } from "./application/application-info/applicationInfoClient";
 import { CatalogPortProvider } from "./application/catalog/catalogClient";
 import { CharacterPortProvider } from "./application/character/characterClient";
+import { DeploymentPortProvider } from "./application/deployment/deploymentClient";
 import { DiagnosticsPortProvider } from "./application/diagnostics/diagnosticsClient";
 import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
 import { FavoritesPortProvider } from "./application/favorites/favoritesClient";
@@ -15,6 +17,7 @@ import { ItemPreferencesProvider } from "./application/preferences/itemPreferenc
 import { NetworkPortProvider } from "./application/network/networkClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { SettingsPortProvider } from "./application/settings/settingsClient";
+import { TemplatePortProvider } from "./application/templates/templateClient";
 import { WorldPortProvider } from "./application/world/worldClient";
 import { activateLocale, defaultLocale, i18n } from "./i18n/i18n";
 import { wailsDesktopBridge } from "./infrastructure/bridge/desktopBridge";
@@ -55,7 +58,17 @@ createRoot(container).render(
                             <EquipmentPortProvider port={wailsDesktopBridge}>
                               <WorldPortProvider port={wailsDesktopBridge}>
                                 <NetworkPortProvider port={wailsDesktopBridge}>
-                                  <App />
+                                  {/* Templates, Deployment and About are Tools
+                                      modules. Their ports sit here, above the
+                                      screen that uses them, so nothing below
+                                      reaches the adapter as a global. */}
+                                  <TemplatePortProvider port={wailsDesktopBridge}>
+                                    <DeploymentPortProvider port={wailsDesktopBridge}>
+                                      <AboutPortProvider port={wailsDesktopBridge}>
+                                        <App />
+                                      </AboutPortProvider>
+                                    </DeploymentPortProvider>
+                                  </TemplatePortProvider>
                                 </NetworkPortProvider>
                               </WorldPortProvider>
                             </EquipmentPortProvider>
