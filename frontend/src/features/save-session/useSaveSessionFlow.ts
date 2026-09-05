@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { matchesQueryKeyPattern, queryKeyPatternsForScopes } from "../../application/changedScopes";
 import { useCharacterPort } from "../../application/character/characterClient";
 import { saveCharactersQuery } from "../../application/character/useSaveCharacters";
@@ -81,6 +81,13 @@ export type SaveSessionFlow = {
   recoveryJournals: readonly RecoveryJournal[];
   lifecycleSettings: SaveLifecycleSettings | undefined;
   /**
+   * The real outcome of the last backup-settings write, for the pattern it was
+   * written with. It is the operation's own state, never a difference between
+   * a draft and the stored value: a value that comes back unchanged is not
+   * evidence of a rejection.
+   */
+  backupSettingsStatus: BackupSettingsStatus | undefined;
+  /**
    * The single post-mutation step of the whole application: it notes the
    * mutation against the `session.changed` stream, maps the receipt's
    * `changedScopes` onto query keys, refreshes the session and re-reads the
@@ -110,9 +117,19 @@ export type SaveSessionFlow = {
   restoreRecovery: (journalID: string) => void;
   discardRecovery: (journalID: string) => void;
   exportRecovery: (journalID: string) => void;
-  setBackupRetention: (retention: number) => void;
+  /**
+   * Stores the complete local backup policy. The backend validates the pattern
+   * and answers with the value now in effect, including the rendered example.
+   */
+  setBackupSettings: (settings: { backupRetention: number; backupNamePattern: string }) => void;
   isBusy: boolean;
   sessionSync: SessionChangedSync;
+};
+
+/** One backup-settings write, identified by the pattern it carried. */
+export type BackupSettingsStatus = {
+  pattern: string;
+  state: "pending" | "success" | "error";
 };
 
 const staleValidationReport = Symbol("stale validation report");
@@ -148,6 +165,11 @@ export function useSaveSessionFlow(): SaveSessionFlow {
   const [recentFiles, setRecentFiles] = useState<readonly RecentFile[]>([]);
   const [recoveryJournals, setRecoveryJournals] = useState<readonly RecoveryJournal[]>([]);
   const [lifecycleSettings, setLifecycleSettings] = useState<SaveLifecycleSettings>();
+  const [backupSettingsStatus, setBackupSettingsStatus] = useState<BackupSettingsStatus>();
+  // Only the newest write may report anything. A slow answer to an older draft
+  // must neither overwrite the settings nor raise an error for a pattern the
+  // user has already replaced.
+  const backupSettingsAttempt = useRef(0);
 
   const acceptSessionRefresh = useCallback((refreshed: SaveSession) => {
     setSession((current) =>
@@ -695,6 +717,7 @@ export function useSaveSessionFlow(): SaveSessionFlow {
     recentFiles,
     recoveryJournals,
     lifecycleSettings,
+    backupSettingsStatus,
     openSave: () => requestAction({ kind: "open-dialog" }),
     openRecent: (path) => requestAction({ kind: "open-recent", path }),
     openStagedFile: (path: string) => requestAction({ kind: "open-temporary", path }),
@@ -738,11 +761,23 @@ export function useSaveSessionFlow(): SaveSessionFlow {
         }
       })();
     },
-    setBackupRetention: (retention) =>
+    setBackupSettings: ({ backupRetention, backupNamePattern }) => {
+      const attempt = (backupSettingsAttempt.current += 1);
+      const current = () => attempt === backupSettingsAttempt.current;
+      setBackupSettingsStatus({ pattern: backupNamePattern, state: "pending" });
       void port
-        .setSaveLifecycleSettings(retention)
-        .then(setLifecycleSettings)
-        .catch((reason) => setLifecycleError(toAppError(reason))),
+        .setSaveLifecycleSettings(backupRetention, backupNamePattern)
+        .then((settings) => {
+          if (!current()) return;
+          setLifecycleSettings(settings);
+          setBackupSettingsStatus({ pattern: backupNamePattern, state: "success" });
+        })
+        .catch((reason) => {
+          if (!current()) return;
+          setBackupSettingsStatus({ pattern: backupNamePattern, state: "error" });
+          setLifecycleError(toAppError(reason));
+        });
+    },
     isBusy,
     sessionSync,
   };

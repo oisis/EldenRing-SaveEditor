@@ -11,8 +11,10 @@ package deployment
 import (
 	"errors"
 	"fmt"
+	"net"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -70,11 +72,17 @@ type Target struct {
 	Kind Kind   `json:"kind"`
 	// SavePath is the absolute path of the save file on the target system.
 	SavePath string `json:"savePath"`
-	// StartCommand and StopCommand are the user's own explicitly configured
-	// commands. The backend runs them as configured and never assembles one by
-	// concatenating a path or a name into a shell string.
+	// StartCommand, StopCommand and StatusCommand are the user's own explicitly
+	// configured commands. The backend runs them as configured and never
+	// assembles one by concatenating a path or a name into a shell string.
 	StartCommand string `json:"startCommand,omitempty"`
 	StopCommand  string `json:"stopCommand,omitempty"`
+	// StatusCommand is the only way this application learns whether the game is
+	// running on a target. Its contract is the exit code and nothing else: 0
+	// means running, 1 means stopped, and every other outcome — no command,
+	// another exit code, a timeout or a transport fault — is unknown. A target
+	// configured before this field existed simply reports unknown.
+	StatusCommand string `json:"statusCommand,omitempty"`
 
 	// Host, Port, User and KeyPath apply to an SSH target only.
 	Host    string `json:"host,omitempty"`
@@ -83,13 +91,16 @@ type Target struct {
 	KeyPath string `json:"keyPath,omitempty"`
 }
 
-// Address is the "host:port" the trusted host key is remembered under.
+// Address is the "host:port" the trusted host key is remembered under and the
+// address the transport dials. It is built with net.JoinHostPort so an IPv6
+// literal is bracketed: a fingerprint must be remembered under exactly the
+// address the connection used, and "::1:22" is not that address.
 func (target Target) Address() string {
 	port := target.Port
 	if port == 0 {
 		port = defaultSSHPort
 	}
-	return fmt.Sprintf("%s:%d", target.Host, port)
+	return net.JoinHostPort(target.Host, strconv.Itoa(port))
 }
 
 // BackupDirectory is the directory on the target the backups of its save live
@@ -131,6 +142,9 @@ func (target Target) Validate() error {
 		return err
 	}
 	if err := validateCommand("stop command", target.StopCommand); err != nil {
+		return err
+	}
+	if err := validateCommand("status command", target.StatusCommand); err != nil {
 		return err
 	}
 	if target.Kind != KindSSH {

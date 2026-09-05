@@ -436,7 +436,17 @@ export function DeploymentTab({
 
           {result !== undefined ? (
             <>
-              {result.targetState === "replaced_unverified" ? (
+              {result.targetState === "replacement_undetermined" ? (
+                <p role="alert" className={alert}>
+                  {/* Neither claim may be made here. The operation is not
+                      retried and the game is not started from this state. */}
+                  <Trans>
+                    The replacement was sent to the target and its result could not be
+                    established. The target save may or may not have been replaced. Inspect the
+                    target before you deploy again or start the game.
+                  </Trans>
+                </p>
+              ) : result.targetState === "replaced_unverified" ? (
                 <p role="alert" className={alert}>
                   <Trans>
                     The target save was replaced, but its final verification failed. Do not use
@@ -612,6 +622,62 @@ export function DeploymentTab({
         }}
       />
 
+      {/* Trust On First Use. The fingerprint shown is the one the backend
+          observed during the handshake it refused; approving sends exactly that
+          value back, and the backend accepts nothing else. */}
+      <Dialog
+        open={targetMutations.test.data?.hostKeyPending === true}
+        onOpenChange={(open) => {
+          if (!open) targetMutations.test.reset();
+        }}
+        title={t`Approve the SSH host key?`}
+        description={t`SaveForge has never connected to this host before. The connection was refused until you approve the key it presented.`}
+        closeLabel={t`Cancel`}
+      >
+        <p className={message}>
+          <Badge mono>{targetMutations.test.data?.observedFingerprint ?? ""}</Badge>
+        </p>
+        <Button
+          tone="accent"
+          disabled={
+            targetMutations.trustHostKey.isPending ||
+            targetMutations.test.data?.observedFingerprint === undefined
+          }
+          onClick={() => {
+            const observation = targetMutations.test.data;
+            if (observation?.observedFingerprint === undefined) return;
+            targetMutations.trustHostKey.mutate(
+              {
+                targetID: observation.targetID,
+                fingerprint: observation.observedFingerprint,
+              },
+              { onSuccess: () => targetMutations.test.reset() },
+            );
+          }}
+        >
+          <Trans>Approve this host key</Trans>
+        </Button>
+      </Dialog>
+
+      <Dialog
+        open={targetMutations.test.data?.hostKeyChanged === true}
+        onOpenChange={(open) => {
+          if (!open) targetMutations.test.reset();
+        }}
+        title={t`The SSH host key changed`}
+        description={t`This host presented a different key than the one approved for it. The connection was refused and nothing on the target was touched.`}
+        closeLabel={t`Close`}
+      >
+        {/* There is deliberately no approve button here: a changed key is
+            forgotten as a separate, explicit decision first. */}
+        <p className={message}>
+          <Trans>
+            If you replaced the machine or reinstalled its operating system, forget the approved
+            host key first and then test the target again.
+          </Trans>
+        </p>
+      </Dialog>
+
       <Dialog
         open={pendingDelete !== undefined}
         onOpenChange={(open) => {
@@ -758,6 +824,16 @@ function TargetFormFields({
             onChange={(event) => update({ stopCommand: event.currentTarget.value })}
           />
         </span>
+        <span className={settingField}>
+          <label htmlFor={`${prefix}-status`}>
+            <Trans>Status command</Trans>
+          </label>
+          <Input
+            id={`${prefix}-status`}
+            value={draft.statusCommand ?? ""}
+            onChange={(event) => update({ statusCommand: event.currentTarget.value })}
+          />
+        </span>
         {draft.kind === "ssh" ? (
           <>
             <span className={settingField}>
@@ -806,6 +882,17 @@ function TargetFormFields({
           </>
         ) : null}
       </div>
+      <p className={message}>
+        {/* The convention is the contract, so it is stated where the command is
+            typed rather than only in the documentation. */}
+        <Trans>
+          The status command is the only way SaveForge learns whether the game runs on this
+          target. Its exit code is the whole answer: 0 means the game is running, 1 means it is
+          not, and anything else — no command, another exit code, a timeout or a connection
+          problem — leaves the state unknown. SaveForge never guesses it from a process name or
+          from the start command.
+        </Trans>
+      </p>
       {draft.kind === "ssh" ? (
         <p className={message}>
           <Trans>

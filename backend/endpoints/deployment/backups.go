@@ -184,15 +184,11 @@ func GetTargetBackups(store *deployment.Store, targetID string) (GetTargetBackup
 	if backups == nil {
 		backups = []BackupEntry{}
 	}
-	result := GetTargetBackupsResult{
+	return GetTargetBackupsResult{
 		TargetID:          targetID,
 		Backups:           backups,
-		TransferSupported: target.Kind == deployment.KindLocal,
-	}
-	if !result.TransferSupported {
-		result.UnsupportedReason = deployment.ErrSSHTransportUnavailable.Error()
-	}
-	return result, nil
+		TransferSupported: deployment.TransferSupported(target.Kind),
+	}, nil
 }
 
 // CreateTargetBackup creates one manual backup and reports the library.

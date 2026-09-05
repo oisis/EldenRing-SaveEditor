@@ -275,7 +275,7 @@ export function SetSafetyProfile(arg1:string):Promise<application.SafetyProfileR
 
 export function SetSaveAccountID(arg1:string,arg2:string,arg3:string):Promise<saveengine.SetSaveAccountIDResult>;
 
-export function SetSaveLifecycleSettings(arg1:number):Promise<saveengine.SaveLifecycleSettings>;
+export function SetSaveLifecycleSettings(arg1:number,arg2:string):Promise<saveengine.SaveLifecycleSettings>;
 
 export function SetSpectralSteedAttire(arg1:string,arg2:number,arg3:string,arg4:string):Promise<world.SetSpectralSteedAttireResult>;
 
@@ -286,6 +286,8 @@ export function SetTutorialUnlocked(arg1:string,arg2:number,arg3:string,arg4:str
 export function SetWhetbladeUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetWhetbladeUnlockedResult>;
 
 export function TestDeploymentTarget(arg1:string):Promise<deployment.TestTargetResult>;
+
+export function TrustDeploymentHostKey(arg1:string,arg2:string):Promise<deployment.GetDeploymentTargetsResult>;
 
 export function UndoLastOperation(arg1:string,arg2:string):Promise<saveengine.HistoryMutationResult>;
 

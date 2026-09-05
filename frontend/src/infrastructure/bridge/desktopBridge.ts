@@ -138,6 +138,7 @@ import {
   SetWhetbladeUnlocked,
   SetSaveLifecycleSettings,
   TestDeploymentTarget,
+  TrustDeploymentHostKey,
   UndoLastOperation,
   UpdateBuildTemplate,
   UpdateDeploymentTarget,
@@ -491,6 +492,8 @@ function toSaveLifecycleSettings(
   return {
     backupRetention: result.backupRetention,
     retentionNoticeShown: result.retentionNoticeShown,
+    backupNamePattern: result.backupNamePattern ?? "",
+    backupNameExample: result.backupNameExample ?? "",
   };
 }
 
@@ -1703,6 +1706,7 @@ function toDeploymentTarget(target: deployment.TargetEntry): DeploymentTarget {
     savePath: target.savePath,
     startCommand: target.startCommand,
     stopCommand: target.stopCommand,
+    statusCommand: target.statusCommand,
     host: target.host,
     port: target.port,
     user: target.user,
@@ -1737,6 +1741,7 @@ function toDeploymentTargetState(
     case "unchanged":
     case "replaced_verified":
     case "replaced_unverified":
+    case "replacement_undetermined":
       return value;
     default:
       throw new AppErrorException(bridgeCallFailed());
@@ -1941,8 +1946,10 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   getSaveLifecycleSettings: async () =>
     toSaveLifecycleSettings(await callBridge(GetSaveLifecycleSettings)),
 
-  setSaveLifecycleSettings: async (backupRetention) =>
-    toSaveLifecycleSettings(await callBridge(() => SetSaveLifecycleSettings(backupRetention))),
+  setSaveLifecycleSettings: async (backupRetention, backupNamePattern) =>
+    toSaveLifecycleSettings(
+      await callBridge(() => SetSaveLifecycleSettings(backupRetention, backupNamePattern)),
+    ),
 
   // The identifier is forwarded as the string it is and is never echoed back:
   // the result of the call is the mutation receipt alone.
@@ -2825,8 +2832,14 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       hostKeyTrusted: result.hostKeyTrusted,
       gameStatus: result.gameStatus,
       saveExists: result.saveExists,
+      hostKeyPending: result.hostKeyPending,
+      hostKeyChanged: result.hostKeyChanged,
+      observedFingerprint: result.observedFingerprint,
     };
   },
+
+  trustDeploymentHostKey: async ({ targetID, fingerprint }) =>
+    toDeploymentTargets(await callBridge(() => TrustDeploymentHostKey(targetID, fingerprint))),
 
   forgetDeploymentHostKey: async (targetID) =>
     toDeploymentTargets(await callBridge(() => ForgetDeploymentHostKey(targetID))),

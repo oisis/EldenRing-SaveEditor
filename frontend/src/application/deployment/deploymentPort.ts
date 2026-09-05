@@ -15,6 +15,11 @@ export type DeploymentTarget = {
   savePath: string;
   startCommand?: string | undefined;
   stopCommand?: string | undefined;
+  /**
+   * The command that states whether the game runs. Its contract is the exit
+   * code: 0 running, 1 stopped, anything else unknown.
+   */
+  statusCommand?: string | undefined;
   host?: string | undefined;
   port?: number | undefined;
   user?: string | undefined;
@@ -44,6 +49,7 @@ export type DeploymentTargetInput = {
   savePath: string;
   startCommand?: string | undefined;
   stopCommand?: string | undefined;
+  statusCommand?: string | undefined;
   host?: string | undefined;
   port?: number | undefined;
   user?: string | undefined;
@@ -57,6 +63,15 @@ export type TargetTestResult = {
   /** "running", "stopped" or "unknown", carried verbatim. */
   gameStatus: string;
   saveExists: boolean;
+  /**
+   * The handshake presented a host key this configuration has never approved.
+   * The connection was refused and `observedFingerprint` is what the host
+   * actually presented; approving it is an explicit user decision.
+   */
+  hostKeyPending: boolean;
+  /** The host presented a different key than the approved one. Nothing may be approved from here. */
+  hostKeyChanged: boolean;
+  observedFingerprint?: string | undefined;
 };
 
 export type CommandOutcome = {
@@ -79,7 +94,10 @@ export type OperationStage = {
  * decision: "game_running", "game_status_unknown",
  * "remote_backup_confirmation_required", "stop_game_confirmation_required" or
  * "cancelled". `targetState`, not `blocked`, is authoritative about whether
- * the irreversible replacement point was crossed.
+ * the irreversible replacement point was crossed, and it has three answers
+ * rather than two: "replacement_undetermined" means the replacement was
+ * requested and its result was never established, which is neither "the target
+ * is unchanged" nor "the target was replaced".
  */
 export type DeploymentOperationResult = {
   operationID: string;
@@ -89,7 +107,11 @@ export type DeploymentOperationResult = {
   /** Stable failure code for an operation that stopped after it had started. */
   failure?: string | undefined;
   /** The backend's authoritative outcome of the target replacement. */
-  targetState: "unchanged" | "replaced_verified" | "replaced_unverified";
+  targetState:
+    | "unchanged"
+    | "replaced_verified"
+    | "replaced_unverified"
+    | "replacement_undetermined";
   gameStatus: string;
   stages: readonly OperationStage[];
   backupID?: string | undefined;
@@ -164,6 +186,15 @@ export type DeploymentPort = {
   updateDeploymentTarget: (input: DeploymentTargetInput) => Promise<DeploymentTargets>;
   deleteDeploymentTarget: (targetID: string) => Promise<DeploymentTargets>;
   testDeploymentTarget: (targetID: string) => Promise<TargetTestResult>;
+  /**
+   * Approves the fingerprint the last handshake with this target presented.
+   * The backend accepts only that value, so this call cannot approve an
+   * invented key or a key belonging to another host.
+   */
+  trustDeploymentHostKey: (request: {
+    targetID: string;
+    fingerprint: string;
+  }) => Promise<DeploymentTargets>;
   forgetDeploymentHostKey: (targetID: string) => Promise<DeploymentTargets>;
 
   getDeploymentGameStatus: (targetID: string) => Promise<string>;

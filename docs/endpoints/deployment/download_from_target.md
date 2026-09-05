@@ -78,7 +78,7 @@ next request.
 | `blocked` | Meaning | Resolved by |
 |---|---|---|
 | `game_running` | plain `Upload` and `Download` are refused while the game runs | nothing — there is no Continue Anyway; use `Deploy & Launch` or `Close & Download` |
-| `game_status_unknown` | the backend cannot confirm the game state | `continueWithUnknownGameStatus` |
+| `game_status_unknown` | the backend cannot confirm the game state, before or after the stop command | `continueWithUnknownGameStatus`; confirming the stop is not a confirmation for this |
 | `remote_backup_confirmation_required` | the target already has a save and the policy is `ask` | `confirmRemoteBackup`; refusing cancels the operation, it can never continue without the backup |
 | `stop_game_confirmation_required` | the running game has to be stopped first | `confirmStopGame`; refusing cancels the operation |
 | `cancelled` | the operation was cancelled before the replacement point | starting it again |

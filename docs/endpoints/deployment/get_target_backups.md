@@ -57,6 +57,11 @@ type GetTargetBackupsResult struct {
 `manual` marks a backup the user asked for. Manual backups are exempt from
 automatic retention and the pruning path cannot even see them.
 
+`fileName` follows the backup name pattern of the Save Lifecycle settings, which
+is the single owner of that setting: a target backup and a local automatic
+backup are named by the same grammar. `transferSupported` is `true` for both
+supported target kinds and `unsupportedReason` is empty.
+
 ## Errors
 
 | Condition | Result |

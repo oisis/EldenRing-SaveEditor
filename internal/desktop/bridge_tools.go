@@ -322,6 +322,19 @@ func (b *Bridge) TestDeploymentTarget(
 	return bridged(deploymentendpoints.TestDeploymentTarget(ctx, b.deploymentService, targetID))
 }
 
+// TrustDeploymentHostKey delegates to the TrustDeploymentHostKey endpoint.
+//
+// The fingerprint the frontend passes is the one TestDeploymentTarget reported
+// as observed. The backend accepts it only if a handshake with that target's
+// address actually presented it, so approving an invented value is impossible
+// however the call is made.
+func (b *Bridge) TrustDeploymentHostKey(
+	targetID string, fingerprint string,
+) (deploymentendpoints.GetDeploymentTargetsResult, error) {
+	return bridged(deploymentendpoints.TrustDeploymentHostKey(
+		b.deploymentStore, targetID, fingerprint))
+}
+
 // ForgetDeploymentHostKey delegates to the ForgetDeploymentHostKey endpoint.
 func (b *Bridge) ForgetDeploymentHostKey(
 	targetID string,

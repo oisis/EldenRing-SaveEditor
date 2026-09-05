@@ -253,6 +253,14 @@ msgstr "Apply template"
 msgid "Apply to Character"
 msgstr "Apply to Character"
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Approve the SSH host key?"
+msgstr "Approve the SSH host key?"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "Approve this host key"
+msgstr "Approve this host key"
+
 #: src/features/character/CharacterPanel.tsx
 msgid "Arcane"
 msgstr "Arcane"
@@ -321,6 +329,10 @@ msgstr "Back up the target and activate"
 #: src/i18n/i18n.test.tsx
 msgid "Backend"
 msgstr "Backend"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Backup name pattern"
+msgstr "Backup name pattern"
 
 #. placeholder {0}: flow.lastSaveResult.backupPath
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -451,6 +463,10 @@ msgstr "Change Class..."
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Changes"
 msgstr "Changes"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Changing the pattern renames nothing: existing backups keep their names and stay usable."
+msgstr "Changing the pattern renames nothing: existing backups keep their names and stay usable."
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Changing the starting class is a destructive reset: all eight attributes and Rune Level will be reset to the base values of the selected class."
@@ -818,6 +834,10 @@ msgstr "Error code: {0}"
 msgid "Errors: {0}. Warnings: {1}."
 msgstr "Errors: {0}. Warnings: {1}."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "Example"
+msgstr "Example"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Expand all"
 msgstr "Expand all"
@@ -971,6 +991,10 @@ msgstr "Identity & Progression"
 #: src/features/character/CharacterPanel.tsx
 msgid "Identity and Progression"
 msgstr "Identity and Progression"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "If you replaced the machine or reinstalled its operating system, forget the approved host key first and then test the target again."
+msgstr "If you replaced the machine or reinstalled its operating system, forget the approved host key first and then test the target again."
 
 #: src/features/tools/TemplatesTab.tsx
 msgid "Import a template file"
@@ -2041,6 +2065,10 @@ msgstr "SaveForge cannot confirm whether the game is running on this target. Con
 msgid "SaveForge found operation journals from an earlier session."
 msgstr "SaveForge found operation journals from an earlier session."
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "SaveForge has never connected to this host before. The connection was refused until you approve the key it presented."
+msgstr "SaveForge has never connected to this host before. The connection was refused until you approve the key it presented."
+
 #: src/features/tools/AboutTab.tsx
 msgid "SaveForge never checks for updates on its own and never downloads or installs one."
 msgstr "SaveForge never checks for updates on its own and never downloads or installs one."
@@ -2367,6 +2395,10 @@ msgstr "Starting Class"
 msgid "State how much of each item goes to Inventory and to Storage."
 msgstr "State how much of each item goes to Inventory and to Storage."
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "Status command"
+msgstr "Status command"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Status: conflict"
 msgstr "Status: conflict"
@@ -2415,6 +2447,10 @@ msgstr "Storage layout"
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Store the backup details"
 msgstr "Store the backup details"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Storing the backup name pattern…"
+msgstr "Storing the backup name pattern…"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Strength"
@@ -2588,8 +2624,8 @@ msgid "The backup library could not be read."
 msgstr "The backup library could not be read."
 
 #: src/features/tools/ToolsPanel.tsx
-msgid "The backup name pattern is fixed in this build: the backend defines no public grammar for it yet."
-msgstr "The backup name pattern is fixed in this build: the backend defines no public grammar for it yet."
+msgid "The backup name pattern was stored."
+msgstr "The backup name pattern was stored."
 
 #: src/features/tools/SaveManagerTab.tsx
 msgid "The backup was not activated and the target was left unchanged."
@@ -2655,6 +2691,10 @@ msgstr "The operation finished."
 msgid "The operation stopped and the target was left unchanged."
 msgstr "The operation stopped and the target was left unchanged."
 
+#: src/features/tools/ToolsPanel.tsx
+msgid "The pattern uses exactly two tokens, each once: {filenameToken} is the name of the save being replaced and {timestampToken} is the moment the backup was taken. The backend appends _bak and adds a counter when two backups fall in the same second. Leaving the field empty restores the default pattern."
+msgstr "The pattern uses exactly two tokens, each once: {filenameToken} is the name of the save being replaced and {timestampToken} is the moment the backup was taken. The backend appends _bak and adds a counter when two backups fall in the same second. Leaving the field empty restores the default pattern."
+
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The planned repairs could not be applied."
 msgstr "The planned repairs could not be applied."
@@ -2682,6 +2722,10 @@ msgstr "The repair plan describes another save state, so it was discarded. Scan 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "The repairs were applied, but this screen could not be refreshed. Reopen the save to see its current state."
 msgstr "The repairs were applied, but this screen could not be refreshed. Reopen the save to see its current state."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The replacement was sent to the target and its result could not be established. The target save may or may not have been replaced. Inspect the target before you deploy again or start the game."
+msgstr "The replacement was sent to the target and its result could not be established. The target save may or may not have been replaced. Inspect the target before you deploy again or start the game."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "The request was rejected because some input was invalid."
@@ -2738,6 +2782,14 @@ msgstr "The selected resource has no item details."
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "The session changed after validation. Validate the current revision again."
 msgstr "The session changed after validation. Validate the current revision again."
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The SSH host key changed"
+msgstr "The SSH host key changed"
+
+#: src/features/tools/DeploymentTab.tsx
+msgid "The status command is the only way SaveForge learns whether the game runs on this target. Its exit code is the whole answer: 0 means the game is running, 1 means it is not, and anything else — no command, another exit code, a timeout or a connection problem — leaves the state unknown. SaveForge never guesses it from a process name or from the start command."
+msgstr "The status command is the only way SaveForge learns whether the game runs on this target. Its exit code is the whole answer: 0 means the game is running, 1 means it is not, and anything else — no command, another exit code, a timeout or a connection problem — leaves the state unknown. SaveForge never guesses it from a process name or from the start command."
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "The Steam ID was rejected and nothing was changed."
@@ -2828,6 +2880,10 @@ msgstr "This character slot is empty, so it has no World progress to show."
 msgid "This feature will be added in a future update."
 msgstr "This feature will be added in a future update."
 
+#: src/features/tools/DeploymentTab.tsx
+msgid "This host presented a different key than the one approved for it. The connection was refused and nothing on the target was touched."
+msgstr "This host presented a different key than the one approved for it. The connection was refused and nothing on the target was touched."
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
 msgstr "This journal cannot be replayed automatically. You can export or discard it."
@@ -2839,6 +2895,10 @@ msgstr "This library has no templates yet."
 #: src/i18n/i18n.test.tsx
 msgid "This message is intentionally left untranslated in Polish."
 msgstr "This message is intentionally left untranslated in Polish."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "This pattern was not accepted, so the previous one is still in use. It must contain {filenameToken} and {timestampToken} exactly once and may not contain a path separator."
+msgstr "This pattern was not accepted, so the previous one is still in use. It must contain {filenameToken} and {timestampToken} exactly once and may not contain a path separator."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "This save could not be checked, so it is not confirmed clean. The session is still open."

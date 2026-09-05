@@ -2,13 +2,17 @@
 
 ## Overview
 
-`TrustDeploymentHostKey` is the internal storage operation for an SSH host key
-fingerprint approved for one target's address. It is deliberately not exposed
-until the SSH handshake can supply the fingerprint that was actually observed.
+`TrustDeploymentHostKey` stores the SSH host key fingerprint the user approved
+for one target's address. It is the second half of Trust On First Use; the first
+half is the handshake `TestDeploymentTarget` performs, which records what the
+host actually presented and refuses the connection until the user decides.
 
-It must not be called with a manually entered value: that would only label an
-arbitrary string as trusted, not implement Trust On First Use. There is no
-equivalent of `InsecureIgnoreHostKey` anywhere in the module.
+The approval is bound to that observation. The store accepts a fingerprint only
+when a handshake with the target's exact host and port presented it in this
+process, so a caller cannot approve an invented value, cannot approve a value
+observed for a different host, and cannot approve anything at all for a target
+that was never contacted. There is no equivalent of `InsecureIgnoreHostKey`
+anywhere in the module.
 
 | | |
 |---|---|
@@ -16,7 +20,7 @@ equivalent of `InsecureIgnoreHostKey` anywhere in the module.
 | Kind | Mutation |
 | Domain | `deployment` |
 | Implementation status | implemented |
-| Transport status | not exposed — the current SSH driver cannot observe a remote fingerprint, so no caller may submit one as if it had been observed |
+| Transport status | desktop bridge only — a Wails method of `desktop.Bridge`; deliberately not an HTTP route of the local explorer and therefore absent from OpenAPI and Scalar |
 | Implementation source | [../../../backend/endpoints/deployment](../../../backend/endpoints/deployment) |
 | Domain source | [../../../backend/deployment](../../../backend/deployment) |
 | Save access | none |
@@ -45,6 +49,8 @@ GetDeploymentTargetsResult
 | `targetID` names no target | `unknown deployment target …` |
 | the target is not an SSH target | `only an SSH target has a host key` |
 | the address or the fingerprint is empty | `trusting a host key needs the address and the fingerprint` |
+| no handshake with this address ever observed a key | `this host key was never observed; test the target first and approve what it presented` |
+| the fingerprint is not the one the host presented | `this is not the host key the target presented` |
 
 ## Local verification
 

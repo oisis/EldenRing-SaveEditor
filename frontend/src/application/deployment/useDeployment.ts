@@ -84,13 +84,23 @@ export function useDeploymentTargetMutations() {
     mutationFn: (targetID) => port.forgetDeploymentHostKey(targetID),
     onSuccess: accept,
   });
+  // The fingerprint always comes from what a handshake reported, never from a
+  // value this screen composed; the backend refuses anything else anyway.
+  const trustHostKey = useMutation<
+    DeploymentTargets,
+    Error,
+    { targetID: string; fingerprint: string }
+  >({
+    mutationFn: (request) => port.trustDeploymentHostKey(request),
+    onSuccess: accept,
+  });
   const test = useMutation<TargetTestResult, Error, string>({
     mutationFn: (targetID) => port.testDeploymentTarget(targetID),
     onSuccess: (result) =>
       queryClient.setQueryData(queryKeys.deploymentGameStatus(result.targetID), result.gameStatus),
   });
 
-  return { create, update, remove, forgetHostKey, test };
+  return { create, update, remove, forgetHostKey, trustHostKey, test };
 }
 
 /**

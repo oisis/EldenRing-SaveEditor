@@ -14,7 +14,7 @@ EndpointID: create_deployment_target
 Purpose: Stores a new deployment target.
 How it works: The runtime handler validates the complete target, assigns the identifier itself and persists the configuration atomically.
 Supported resource types: —.
-Input variables: name, kind, savePath, startCommand, stopCommand, host, port, user, keyPath.
+Input variables: name, kind, savePath, startCommand, stopCommand, statusCommand, host, port, user, keyPath.
 GameCatalog variables read: none.
 Save variables processed: none.
 Implementation status: implemented
@@ -24,7 +24,7 @@ EndpointID: update_deployment_target
 Purpose: Replaces the configuration of one deployment target.
 How it works: The runtime handler validates the complete target and persists it. Moving an SSH target to another address drops the host key approved for the previous one.
 Supported resource types: —.
-Input variables: targetID, name, kind, savePath, startCommand, stopCommand, host, port, user, keyPath.
+Input variables: targetID, name, kind, savePath, startCommand, stopCommand, statusCommand, host, port, user, keyPath.
 GameCatalog variables read: none.
 Save variables processed: none.
 Implementation status: implemented
@@ -42,7 +42,7 @@ Implementation status: implemented
 Endpoint: TestDeploymentTarget
 EndpointID: test_deployment_target
 Purpose: Verifies that one target is reachable and its save location usable.
-How it works: The runtime handler asks the target's driver to prove the save directory exists and is writable, then reports the confirmed game status and whether a save is already present. It writes no save and leaves the target unchanged.
+How it works: The runtime handler asks the target's driver to prove the save directory exists and is writable, then reports the confirmed game status and whether a save is already present. For an SSH target this is also the handshake that observes the host key: an unapproved or changed key refuses the connection and is reported as a pending or changed host key together with the fingerprint the host actually presented. It writes no save and leaves the target unchanged.
 Supported resource types: —.
 Input variables: targetID.
 GameCatalog variables read: none.
@@ -52,7 +52,7 @@ Implementation status: implemented
 Endpoint: TrustDeploymentHostKey
 EndpointID: trust_deployment_host_key
 Purpose: Records the SSH host key fingerprint the user approved for one target.
-How it works: The runtime handler stores the fingerprint against the target's address. Nothing in the connection path ever records a fingerprint on its own.
+How it works: The runtime handler stores the fingerprint against the target's address, and only when a handshake with that exact address actually presented it. A fingerprint no connection observed is refused, so an approval can never be given for an invented value or for a different host. Nothing in the connection path ever records an approval on its own.
 Supported resource types: —.
 Input variables: targetID, fingerprint.
 GameCatalog variables read: none.
@@ -103,7 +103,7 @@ var (
 		ID:                         CreateDeploymentTargetEndpointID,
 		Kind:                       contract.Mutation,
 		SupportedResourceTypes:     "—",
-		SupportedResourceVariables: []string{"name", "kind", "savePath", "startCommand", "stopCommand", "host", "port", "user", "keyPath"},
+		SupportedResourceVariables: []string{"name", "kind", "savePath", "startCommand", "stopCommand", "statusCommand", "host", "port", "user", "keyPath"},
 		Description:                "Stores a new deployment target.",
 	})
 	UpdateDeploymentTargetDefinition = contract.MustDefine(contract.Definition{
@@ -111,7 +111,7 @@ var (
 		ID:                         UpdateDeploymentTargetEndpointID,
 		Kind:                       contract.Mutation,
 		SupportedResourceTypes:     "—",
-		SupportedResourceVariables: []string{"targetID", "name", "kind", "savePath", "startCommand", "stopCommand", "host", "port", "user", "keyPath"},
+		SupportedResourceVariables: []string{"targetID", "name", "kind", "savePath", "startCommand", "stopCommand", "statusCommand", "host", "port", "user", "keyPath"},
 		Description:                "Replaces the configuration of one deployment target.",
 	})
 	DeleteDeploymentTargetDefinition = contract.MustDefine(contract.Definition{
@@ -162,7 +162,8 @@ type TargetEntry struct {
 	HostKeyFingerprint string `json:"hostKeyFingerprint,omitempty"`
 	// TransferSupported is false while a target kind has no safe transfer
 	// implementation in this build. The interface disables the operations rather
-	// than offering an action that must fail.
+	// than offering an action that must fail. Both supported kinds now have one,
+	// so it is true for every stored target.
 	TransferSupported bool `json:"transferSupported"`
 	// UnsupportedReason explains a false TransferSupported in one safe sentence.
 	UnsupportedReason string `json:"unsupportedReason,omitempty"`
@@ -184,10 +185,13 @@ type TargetInput struct {
 	SavePath     string `json:"savePath"`
 	StartCommand string `json:"startCommand,omitempty"`
 	StopCommand  string `json:"stopCommand,omitempty"`
-	Host         string `json:"host,omitempty"`
-	Port         int    `json:"port,omitempty"`
-	User         string `json:"user,omitempty"`
-	KeyPath      string `json:"keyPath,omitempty"`
+	// StatusCommand states whether the game is running. Its contract is the exit
+	// code: 0 running, 1 stopped, anything else unknown.
+	StatusCommand string `json:"statusCommand,omitempty"`
+	Host          string `json:"host,omitempty"`
+	Port          int    `json:"port,omitempty"`
+	User          string `json:"user,omitempty"`
+	KeyPath       string `json:"keyPath,omitempty"`
 }
 
 func (input TargetInput) target() (deployment.Target, error) {
@@ -196,16 +200,17 @@ func (input TargetInput) target() (deployment.Target, error) {
 		return deployment.Target{}, err
 	}
 	return deployment.Target{
-		ID:           input.TargetID,
-		Name:         input.Name,
-		Kind:         kind,
-		SavePath:     input.SavePath,
-		StartCommand: input.StartCommand,
-		StopCommand:  input.StopCommand,
-		Host:         input.Host,
-		Port:         input.Port,
-		User:         input.User,
-		KeyPath:      input.KeyPath,
+		ID:            input.TargetID,
+		Name:          input.Name,
+		Kind:          kind,
+		SavePath:      input.SavePath,
+		StartCommand:  input.StartCommand,
+		StopCommand:   input.StopCommand,
+		StatusCommand: input.StatusCommand,
+		Host:          input.Host,
+		Port:          input.Port,
+		User:          input.User,
+		KeyPath:       input.KeyPath,
 	}, nil
 }
 
@@ -220,9 +225,9 @@ func GetDeploymentTargets(store *deployment.Store) (GetDeploymentTargetsResult, 
 	}
 	entries := make([]TargetEntry, 0, len(targets))
 	for _, target := range targets {
-		entry := TargetEntry{Target: target, TransferSupported: target.Kind == deployment.KindLocal}
-		if !entry.TransferSupported {
-			entry.UnsupportedReason = deployment.ErrSSHTransportUnavailable.Error()
+		entry := TargetEntry{
+			Target:            target,
+			TransferSupported: deployment.TransferSupported(target.Kind),
 		}
 		if target.Kind == deployment.KindSSH {
 			fingerprint, trusted, keyErr := store.TrustedHostKey(target.Address())

@@ -42,8 +42,12 @@ type Engine struct {
 	// guarded by mutex beside the sessions and loaded lazily from stateDirectory.
 	lifecycleSettings       SaveLifecycleSettings
 	lifecycleSettingsLoaded bool
-	recentFiles             []RecentFile
-	recentFilesLoaded       bool
+	// backupIndex records which local backup files this application created, so
+	// retention never has to guess a file's owner from its name.
+	backupIndex       map[string][]backupIndexEntry
+	backupIndexLoaded bool
+	recentFiles       []RecentFile
+	recentFilesLoaded bool
 
 	// eventMutex guards the session.changed outbox and its sink. It is a separate
 	// lock from mutex on purpose: the outbox is drained after mutex is released,

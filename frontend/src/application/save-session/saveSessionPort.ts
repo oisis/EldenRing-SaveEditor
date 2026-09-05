@@ -158,6 +158,14 @@ export type RecoveryJournal = {
 export type SaveLifecycleSettings = {
   backupRetention: number;
   retentionNoticeShown: boolean;
+  /**
+   * The backup name pattern in effect. It accepts exactly `{filename}` and
+   * `{timestamp}`, each once, plus safe literal text. The backend owns the
+   * grammar and its validation; the frontend only carries the value.
+   */
+  backupNamePattern: string;
+  /** What that pattern produces for a sample save, rendered by the backend. */
+  backupNameExample: string;
 };
 
 export type SaveSessionPort = {
@@ -240,7 +248,10 @@ export type SaveSessionPort = {
   discardRecoveryJournal: (journalID: string) => Promise<void>;
   exportRecoveryJournal: (journalID: string, target: string) => Promise<void>;
   getSaveLifecycleSettings: () => Promise<SaveLifecycleSettings>;
-  setSaveLifecycleSettings: (backupRetention: number) => Promise<SaveLifecycleSettings>;
+  setSaveLifecycleSettings: (
+    backupRetention: number,
+    backupNamePattern: string,
+  ) => Promise<SaveLifecycleSettings>;
   /**
    * Stores the save owner identifier of one session.
    *

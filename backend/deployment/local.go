@@ -136,18 +136,21 @@ func (driver *localDriver) replace(ctx context.Context, localPath, targetPath st
 		return ReplacementResult{}, err
 	}
 	if err := os.Rename(staged, targetPath); err != nil {
+		// A local rename either happens or reports why it did not; there is no
+		// answer that can be lost, so this stays a certain negative.
 		return ReplacementResult{}, fmt.Errorf("cannot replace the target save: %w", err)
 	}
 	// Past the replacement point the operation always finishes its verification
 	// and reports the real state rather than aborting half way.
 	written, err := fileDigest(targetPath)
 	if err != nil {
-		return ReplacementResult{Committed: true}, err
+		return ReplacementResult{Outcome: ReplacementPerformed}, err
 	}
 	if written != expected {
-		return ReplacementResult{Committed: true}, errors.New("the replaced target save does not match the prepared save")
+		return ReplacementResult{Outcome: ReplacementPerformed},
+			errors.New("the replaced target save does not match the prepared save")
 	}
-	return ReplacementResult{Committed: true, Verified: true}, nil
+	return ReplacementResult{Outcome: ReplacementPerformed, Verified: true}, nil
 }
 
 func (driver *localDriver) CopyToLocal(ctx context.Context, targetPath, localPath string) error {
@@ -202,16 +205,22 @@ func (driver *localDriver) runCommand(
 	return CommandOutcome{Configured: true}, fmt.Errorf("the %s could not be run", field)
 }
 
-// GameStatus reports what the backend can actually confirm.
+// GameStatus runs the target's configured status command and maps its exit code
+// onto the three states.
 //
-// Identifying the game process needs a contract that does not exist: the target
-// configuration carries a start and a stop command and nothing that names a
-// process, and deployment.md defines none. Guessing from a process list or from
-// the save's modification time would be a heuristic inventing a state, so the
-// driver states the truth — unknown — and the interface applies the explicit
-// warning and confirmation that section 4 defines for exactly this case.
-func (driver *localDriver) GameStatus(context.Context) (GameStatus, error) {
-	return GameUnknown, nil
+// A target that configures no status command reports unknown, exactly as it did
+// before the command existed. The driver never guesses from a process list, a
+// process name or the save's modification time: a heuristic cannot create a
+// hard state, so the interface keeps the explicit warning and confirmation that
+// section 4 defines for the unknown case.
+func (driver *localDriver) GameStatus(ctx context.Context) (GameStatus, error) {
+	// The status command gets a clock of its own, exactly as it does over SSH: a
+	// command that never returns is an unknown state, not an operation that
+	// hangs. exec.CommandContext kills the process when that clock runs out.
+	bounded, cancel := context.WithTimeout(ctx, statusCommandTimeout)
+	defer cancel()
+	outcome, err := driver.runCommand(bounded, driver.target.StatusCommand, "status command")
+	return interpretGameStatus(outcome, err)
 }
 
 // WaitForStableSave waits until the size and modification time of the target

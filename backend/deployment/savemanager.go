@@ -107,15 +107,10 @@ func (service *Service) ActivateBackup(
 	// the same single irreversible point and the same final verification.
 	replacement, err := driver.ReplaceOnTarget(ctx, backupPath, target.SavePath)
 	if err != nil {
-		if replacement.Committed {
-			result.TargetState = TargetStateReplacedUnverified
-			result.Failure = FailureVerification
-			result.Stages = append(result.Stages, Stage{Stage: StageReplace, Completed: true}, Stage{Stage: StageVerify, Detail: "the replaced target could not be verified"})
-		} else {
-			result.Failure = FailureReplacement
-			result.Stages = append(result.Stages, Stage{Stage: StageReplace, Detail: "the target was not replaced"})
-		}
-		return service.finish(started, request, result), nil
+		// The activation shares the whole replacement contract with an upload,
+		// including the undetermined outcome and the active-backup mark that is
+		// never set for one.
+		return service.finish(started, request, applyReplacementFailure(result, replacement)), nil
 	}
 	result.TargetState = TargetStateReplacedVerified
 	result.Stages = append(result.Stages,

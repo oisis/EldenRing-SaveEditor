@@ -59,15 +59,29 @@ func TestTargetEndpointsReportCapabilitiesAndTrustState(t *testing.T) {
 	if ssh.ID == "" {
 		t.Fatalf("targets = %+v, want the SSH target", both.Targets)
 	}
-	// The interface disables the operations from this flag instead of assuming
-	// what a target kind can do.
-	if ssh.TransferSupported || ssh.UnsupportedReason == "" {
-		t.Fatalf("ssh entry = %+v, want it reported as unsupported with a reason", ssh)
+	// The interface enables the operations from this flag instead of assuming
+	// what a target kind can do. Both kinds now have a transport that stages,
+	// verifies and atomically replaces.
+	if !ssh.TransferSupported || ssh.UnsupportedReason != "" {
+		t.Fatalf("ssh entry = %+v, want it reported as usable with no unsupported reason", ssh)
 	}
 	if ssh.HostKeyTrusted {
 		t.Fatal("a new SSH target already reports an approved host key")
 	}
 
+	// Trust On First Use is bound to a real observation: a fingerprint no
+	// handshake presented can never be approved, whatever the caller states.
+	if _, err := TrustDeploymentHostKey(store, ssh.ID, "SHA256:invented"); err == nil {
+		t.Fatal("TrustDeploymentHostKey accepted a fingerprint no connection observed")
+	}
+	address := deployment.Target{Kind: deployment.KindSSH, Host: "192.0.2.1", Port: 22}.Address()
+	if err := store.ObserveHostKey(address, "SHA256:abc"); err != nil {
+		t.Fatalf("ObserveHostKey: %v", err)
+	}
+	// Even with an observation, only the observed value is accepted.
+	if _, err := TrustDeploymentHostKey(store, ssh.ID, "SHA256:another"); err == nil {
+		t.Fatal("TrustDeploymentHostKey accepted a fingerprint the host did not present")
+	}
 	trusted, err := TrustDeploymentHostKey(store, ssh.ID, "SHA256:abc")
 	if err != nil {
 		t.Fatalf("TrustDeploymentHostKey: %v", err)
@@ -139,8 +153,8 @@ func TestGetTargetBackupsReportsTheCapabilityOfItsTarget(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTargetBackups: %v", err)
 	}
-	if result.TransferSupported || result.UnsupportedReason == "" {
-		t.Fatalf("result = %+v, want the unsupported statement", result)
+	if !result.TransferSupported || result.UnsupportedReason != "" {
+		t.Fatalf("result = %+v, want a usable target with no unsupported statement", result)
 	}
 	if result.Backups == nil || len(result.Backups) != 0 {
 		t.Fatalf("backups = %+v, want an empty list rather than a null", result.Backups)

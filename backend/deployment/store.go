@@ -53,6 +53,10 @@ type Store struct {
 	directory string
 	state     storeFile
 	loaded    bool
+	// observed is what an SSH handshake actually presented, per address. It is
+	// deliberately in memory only: it is evidence of one connection attempt, not
+	// a decision, and it must never outlive the process as if it were trust.
+	observed map[string]string
 }
 
 // NewStore returns a store backed by directory.
@@ -172,6 +176,7 @@ func (store *Store) UpdateTarget(target Target) (Target, error) {
 	if previousTarget.Kind == KindSSH &&
 		(target.Kind != KindSSH || previousTarget.Address() != target.Address()) {
 		delete(store.state.TrustedHostKeys, previousTarget.Address())
+		delete(store.observed, previousTarget.Address())
 	}
 	if err := store.persistLocked(); err != nil {
 		store.state.Targets[index] = previousTarget
@@ -205,6 +210,7 @@ func (store *Store) DeleteTarget(targetID string) error {
 	store.state.Targets = append(store.state.Targets[:index:index], store.state.Targets[index+1:]...)
 	if removed.Kind == KindSSH {
 		delete(store.state.TrustedHostKeys, removed.Address())
+		delete(store.observed, removed.Address())
 	}
 	delete(store.state.Backups, targetID)
 	if err := store.persistLocked(); err != nil {
@@ -233,10 +239,44 @@ func (store *Store) TrustedHostKey(address string) (string, bool, error) {
 	return fingerprint, known, nil
 }
 
-// TrustHostKey remembers one fingerprint for one address. It is only ever
-// called from an explicit user approval: nothing in the connection path trusts
-// a key on its own, which is what makes the trust decision Trust On First Use
-// rather than trust on every use.
+// ObserveHostKey records the fingerprint one handshake with an address actually
+// presented. The transport calls it before it decides anything, so an approval
+// can later be bound to a real observation.
+func (store *Store) ObserveHostKey(address string, fingerprint string) error {
+	if store == nil {
+		return errors.New("deployment store is not available")
+	}
+	if strings.TrimSpace(address) == "" || strings.TrimSpace(fingerprint) == "" {
+		return errors.New("recording a host key needs the address and the fingerprint")
+	}
+	store.mutex.Lock()
+	defer store.mutex.Unlock()
+	if store.observed == nil {
+		store.observed = map[string]string{}
+	}
+	store.observed[address] = fingerprint
+	return nil
+}
+
+// ObservedHostKey reports the fingerprint the last handshake with an address
+// presented, if this process made one.
+func (store *Store) ObservedHostKey(address string) (string, bool) {
+	if store == nil {
+		return "", false
+	}
+	store.mutex.Lock()
+	defer store.mutex.Unlock()
+	fingerprint, seen := store.observed[address]
+	return fingerprint, seen
+}
+
+// TrustHostKey remembers one fingerprint for one address.
+//
+// It is only ever called from an explicit user approval, and it accepts only
+// the fingerprint a handshake with that exact address actually presented. That
+// is what makes this Trust On First Use rather than trust in whatever value a
+// caller states: a frontend cannot approve an invented key, and approving one
+// host never approves another.
 func (store *Store) TrustHostKey(address string, fingerprint string) error {
 	if store == nil {
 		return errors.New("deployment store is not available")
@@ -246,6 +286,14 @@ func (store *Store) TrustHostKey(address string, fingerprint string) error {
 	}
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
+	observed, seen := store.observed[address]
+	if !seen {
+		return errors.New(
+			"this host key was never observed; test the target first and approve what it presented")
+	}
+	if observed != fingerprint {
+		return errors.New("this is not the host key the target presented")
+	}
 	if err := store.loadLocked(); err != nil {
 		return err
 	}

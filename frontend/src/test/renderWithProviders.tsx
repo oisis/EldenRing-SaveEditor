@@ -659,7 +659,10 @@ export function makeDeploymentPort(overrides: Partial<DeploymentPort> = {}): Dep
         hostKeyTrusted: false,
         gameStatus: "unknown",
         saveExists: false,
+        hostKeyPending: false,
+        hostKeyChanged: false,
       }),
+    trustDeploymentHostKey: () => Promise.resolve(stubDeploymentTargets),
     forgetDeploymentHostKey: () => Promise.resolve(stubDeploymentTargets),
     getDeploymentGameStatus: () => Promise.resolve("unknown"),
     launchTargetGame: () =>
@@ -1129,7 +1132,12 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
     discardRecoveryJournal: () => Promise.resolve(),
     exportRecoveryJournal: () => Promise.resolve(),
     getSaveLifecycleSettings: () =>
-      Promise.resolve({ backupRetention: 10, retentionNoticeShown: false }),
+      Promise.resolve({
+        backupRetention: 10,
+        retentionNoticeShown: false,
+        backupNamePattern: "{filename}.{timestamp}",
+        backupNameExample: "ER0000.sl2.20260824202530_bak",
+      }),
     setSaveAccountID: (saveSessionID) =>
       Promise.resolve({
         operationID: "operation-set_save_account_id",
@@ -1138,8 +1146,13 @@ export function makeSaveSessionPort(overrides: Partial<SaveSessionPort> = {}): S
         saveRevision: "1",
         changedScopes: ["save.session"],
       }),
-    setSaveLifecycleSettings: (backupRetention) =>
-      Promise.resolve({ backupRetention, retentionNoticeShown: false }),
+    setSaveLifecycleSettings: (backupRetention, backupNamePattern) =>
+      Promise.resolve({
+        backupRetention,
+        retentionNoticeShown: false,
+        backupNamePattern: backupNamePattern === "" ? "{filename}.{timestamp}" : backupNamePattern,
+        backupNameExample: "ER0000.sl2.20260824202530_bak",
+      }),
     // No event ever arrives through the default stub, and unsubscribing is a
     // no-op: a test that cares about events injects its own subscription.
     subscribeSessionChanged: () => () => {},

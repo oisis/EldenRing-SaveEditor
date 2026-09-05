@@ -23,7 +23,7 @@ const baseProps = {
   onThemeChange: () => {},
   locale: "en" as const,
   onLocaleChange: () => {},
-  onBackupRetentionChange: () => {},
+  onBackupSettingsChange: () => {},
   onOpenStagedFile: () => {},
   onOpenLocalFile: () => {},
   applyMutationReceipt: () => Promise.resolve(),
@@ -129,6 +129,139 @@ describe("Tools workspaces", () => {
     await waitFor(() =>
       expect(applyMutationReceipt).toHaveBeenCalledWith(
         expect.objectContaining({ saveSessionID: "session-1", saveRevision: "8" }),
+      ),
+    );
+  });
+
+  it("approves only the host key fingerprint the backend observed", async () => {
+    const sshTarget = {
+      id: "target-1",
+      name: "Steam Deck",
+      kind: "ssh",
+      savePath: "/home/deck/ER0000.sl2",
+      host: "192.0.2.1",
+      port: 22,
+      user: "deck",
+      keyPath: "/home/user/.ssh/id_ed25519",
+      hostKeyTrusted: false,
+      transferSupported: true,
+    };
+    const trustDeploymentHostKey = vi.fn(() =>
+      Promise.resolve({
+        targets: [{ ...sshTarget, hostKeyTrusted: true, hostKeyFingerprint: "SHA256:observed" }],
+        availableKinds: ["local", "ssh"],
+      }),
+    );
+
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      deploymentPort: makeDeploymentPort({
+        getDeploymentTargets: () =>
+          Promise.resolve({ targets: [sshTarget], availableKinds: ["local", "ssh"] }),
+        testDeploymentTarget: (targetID: string) =>
+          Promise.resolve({
+            targetID,
+            reachable: false,
+            hostKeyTrusted: false,
+            gameStatus: "unknown",
+            saveExists: false,
+            hostKeyPending: true,
+            hostKeyChanged: false,
+            observedFingerprint: "SHA256:observed",
+          }),
+        trustDeploymentHostKey,
+      }),
+    });
+
+    await openSubtab("Deployment");
+    await userEvent.click(await screen.findByRole("button", { name: "Select" }));
+    await userEvent.click(screen.getByRole("button", { name: "Test the target" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Approve the SSH host key?" });
+    // The fingerprint is shown, never typed: there is no input for it.
+    expect(within(dialog).getByText("SHA256:observed")).toBeVisible();
+    expect(within(dialog).queryByRole("textbox")).toBeNull();
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Approve this host key" }));
+    await waitFor(() =>
+      expect(trustDeploymentHostKey).toHaveBeenCalledWith({
+        targetID: "target-1",
+        fingerprint: "SHA256:observed",
+      }),
+    );
+  });
+
+  it("offers no approval for a changed host key", async () => {
+    const sshTarget = {
+      id: "target-1",
+      name: "Steam Deck",
+      kind: "ssh",
+      savePath: "/home/deck/ER0000.sl2",
+      host: "192.0.2.1",
+      port: 22,
+      user: "deck",
+      keyPath: "/home/user/.ssh/id_ed25519",
+      hostKeyTrusted: true,
+      hostKeyFingerprint: "SHA256:approved",
+      transferSupported: true,
+    };
+    const trustDeploymentHostKey = vi.fn();
+
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      deploymentPort: makeDeploymentPort({
+        getDeploymentTargets: () =>
+          Promise.resolve({ targets: [sshTarget], availableKinds: ["local", "ssh"] }),
+        testDeploymentTarget: (targetID: string) =>
+          Promise.resolve({
+            targetID,
+            reachable: false,
+            hostKeyTrusted: true,
+            gameStatus: "unknown",
+            saveExists: false,
+            hostKeyPending: false,
+            hostKeyChanged: true,
+            observedFingerprint: "SHA256:different",
+          }),
+        trustDeploymentHostKey,
+      }),
+    });
+
+    await openSubtab("Deployment");
+    await userEvent.click(await screen.findByRole("button", { name: "Select" }));
+    await userEvent.click(screen.getByRole("button", { name: "Test the target" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "The SSH host key changed" });
+    expect(within(dialog).queryByRole("button", { name: "Approve this host key" })).toBeNull();
+    expect(trustDeploymentHostKey).not.toHaveBeenCalled();
+  });
+
+  it("sends the configured status command with the rest of the target", async () => {
+    const createDeploymentTarget = vi.fn(() =>
+      Promise.resolve({ targets: [], availableKinds: ["local", "ssh"] }),
+    );
+
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      deploymentPort: makeDeploymentPort({
+        getDeploymentTargets: () =>
+          Promise.resolve({ targets: [], availableKinds: ["local", "ssh"] }),
+        createDeploymentTarget,
+      }),
+    });
+
+    await openSubtab("Deployment");
+    await userEvent.click(await screen.findByRole("button", { name: "Add a target" }));
+    await userEvent.type(screen.getByLabelText("Name"), "Steam Deck");
+    await userEvent.type(screen.getByLabelText("Save path on the target"), "/home/deck/ER0000.sl2");
+    await userEvent.type(screen.getByLabelText("Status command"), "pgrep eldenring");
+    await userEvent.click(screen.getByRole("button", { name: "Save the target" }));
+
+    await waitFor(() =>
+      expect(createDeploymentTarget).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Steam Deck",
+          kind: "local",
+          savePath: "/home/deck/ER0000.sl2",
+          statusCommand: "pgrep eldenring",
+        }),
       ),
     );
   });

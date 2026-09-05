@@ -41,12 +41,29 @@ func TestSaveLifecycleEndpointBoundary(t *testing.T) {
 	if err := ClearRecentFiles(engine); err != nil {
 		t.Fatalf("ClearRecentFiles: %v", err)
 	}
-	settings, err := SetSaveLifecycleSettings(engine, 5)
-	if err != nil || settings.BackupRetention != 5 {
+	// An empty pattern means the default one, and the reported example is what
+	// the pattern in effect actually produces.
+	settings, err := SetSaveLifecycleSettings(engine, 5, "")
+	if err != nil || settings.BackupRetention != 5 ||
+		settings.BackupNamePattern != "{filename}.{timestamp}" ||
+		settings.BackupNameExample == "" {
 		t.Fatalf("SetSaveLifecycleSettings = %+v, %v", settings, err)
 	}
 	if settings, err = GetSaveLifecycleSettings(engine); err != nil || settings.BackupRetention != 5 {
 		t.Fatalf("GetSaveLifecycleSettings = %+v, %v", settings, err)
+	}
+	custom, err := SetSaveLifecycleSettings(engine, 5, "{timestamp}-{filename}")
+	if err != nil || custom.BackupNameExample != "20260824202530-ER0000.sl2_bak" {
+		t.Fatalf("SetSaveLifecycleSettings with a custom pattern = %+v, %v", custom, err)
+	}
+	// The backend owns the validation rules: an unsafe pattern is refused rather
+	// than sanitised, and the stored one is left as it was.
+	if _, err := SetSaveLifecycleSettings(engine, 5, "../{filename}.{timestamp}"); err == nil {
+		t.Fatal("SetSaveLifecycleSettings accepted a pattern that escapes the directory")
+	}
+	if stored, err := GetSaveLifecycleSettings(engine); err != nil ||
+		stored.BackupNamePattern != "{timestamp}-{filename}" {
+		t.Fatalf("settings after the refusal = %+v, %v", stored, err)
 	}
 	if journals, err := GetRecoveryJournals(engine); err != nil || len(journals) != 0 {
 		t.Fatalf("GetRecoveryJournals = %+v, %v", journals, err)
@@ -87,7 +104,7 @@ func TestSaveLifecycleEndpointsRejectMissingEngine(t *testing.T) {
 		{"DiscardRecoveryJournal", func() error { return DiscardRecoveryJournal(nil, "journal") }},
 		{"ExportRecoveryJournal", func() error { return ExportRecoveryJournal(nil, "journal", "target") }},
 		{"GetSaveLifecycleSettings", func() error { _, err := GetSaveLifecycleSettings(nil); return err }},
-		{"SetSaveLifecycleSettings", func() error { _, err := SetSaveLifecycleSettings(nil, 10); return err }},
+		{"SetSaveLifecycleSettings", func() error { _, err := SetSaveLifecycleSettings(nil, 10, ""); return err }},
 	}
 	for _, check := range checks {
 		t.Run(check.name, func(t *testing.T) {

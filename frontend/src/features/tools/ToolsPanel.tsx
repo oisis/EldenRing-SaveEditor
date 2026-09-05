@@ -1,7 +1,8 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useItemPreferences } from "../../application/preferences/itemPreferences";
 import type { MutationReceipt } from "../../application/save-session/saveSessionPort";
+import type { BackupSettingsStatus } from "../save-session/useSaveSessionFlow";
 import { useSetSaveAccountID } from "../../application/save-session/useSetSaveAccountID";
 import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
 import {
@@ -51,7 +52,24 @@ export type ToolsPanelProps = {
   platform?: string | undefined;
   characterID?: number | undefined;
   backupRetention?: number | undefined;
-  onBackupRetentionChange: (retention: number) => void;
+  /** The backup name pattern the backend holds, carried verbatim. */
+  backupNamePattern?: string | undefined;
+  /** What that pattern produces for a sample save, rendered by the backend. */
+  backupNameExample?: string | undefined;
+  /**
+   * The real outcome of the last backup-settings write, carried from the save
+   * session flow. This panel renders that outcome; it never infers one from a
+   * difference between what was typed and what the backend holds.
+   */
+  backupSettingsStatus?: BackupSettingsStatus | undefined;
+  /**
+   * Stores the complete local backup policy. Both values are sent together
+   * because the backend owns one setting, not two independent ones.
+   */
+  onBackupSettingsChange: (settings: {
+    backupRetention: number;
+    backupNamePattern: string;
+  }) => void;
   /**
    * Loads a file SaveForge itself staged, such as a save downloaded from a
    * deployment target, as a temporary session.
@@ -84,7 +102,10 @@ export function ToolsPanel({
   platform,
   characterID,
   backupRetention,
-  onBackupRetentionChange,
+  backupNamePattern,
+  backupNameExample,
+  backupSettingsStatus,
+  onBackupSettingsChange,
   onOpenStagedFile,
   onOpenLocalFile,
   applyMutationReceipt,
@@ -127,7 +148,10 @@ export function ToolsPanel({
           platform={platform}
           characterID={characterID}
           backupRetention={backupRetention}
-          onBackupRetentionChange={onBackupRetentionChange}
+          backupNamePattern={backupNamePattern}
+          backupNameExample={backupNameExample}
+          backupSettingsStatus={backupSettingsStatus}
+          onBackupSettingsChange={onBackupSettingsChange}
           applyMutationReceipt={applyMutationReceipt}
           sessionBusy={sessionBusy}
         />
@@ -161,6 +185,43 @@ export function ToolsPanel({
   );
 }
 
+// The backend's backup name tokens. They are protocol, not prose: they are
+// never translated and never spelled out as literal braces inside a
+// translatable message, where a brace would be ICU syntax.
+const filenameToken = "{filename}";
+const timestampToken = "{timestamp}";
+
+/**
+ * One settings field the user edits and the backend answers for.
+ *
+ * The stored value is adopted only while nothing is waiting to be sent. An
+ * answer belongs to the request it was made for, so confirming an earlier
+ * write must not overwrite an edit the user has typed since and not submitted.
+ */
+function useSettingDraft(stored: string | undefined) {
+  const [draft, setDraft] = useState(stored ?? "");
+  const unsent = useRef(false);
+  useEffect(() => {
+    if (stored !== undefined && !unsent.current) {
+      setDraft(stored);
+    }
+  }, [stored]);
+  return {
+    draft,
+    edit: (value: string) => {
+      unsent.current = true;
+      setDraft(value);
+    },
+    submitted: () => {
+      unsent.current = false;
+    },
+    reset: (value: string) => {
+      unsent.current = false;
+      setDraft(value);
+    },
+  };
+}
+
 function SettingsTab({
   theme,
   onThemeChange,
@@ -171,7 +232,10 @@ function SettingsTab({
   platform,
   characterID,
   backupRetention,
-  onBackupRetentionChange,
+  backupNamePattern,
+  backupNameExample,
+  backupSettingsStatus,
+  onBackupSettingsChange,
   applyMutationReceipt,
   sessionBusy,
 }: Omit<ToolsPanelProps, "sessionBusy" | "onOpenStagedFile" | "onOpenLocalFile"> & {
@@ -205,12 +269,29 @@ function SettingsTab({
   };
   const hostSettingsReady = hostSettings.data !== undefined && !setHostSettings.isPending;
 
-  const [retentionDraft, setRetentionDraft] = useState(String(backupRetention ?? 10));
-  useEffect(() => {
-    if (backupRetention !== undefined) {
-      setRetentionDraft(String(backupRetention));
-    }
-  }, [backupRetention]);
+  const retention = useSettingDraft(
+    backupRetention === undefined ? undefined : String(backupRetention),
+  );
+  const retentionDraft = retention.draft;
+  const pattern = useSettingDraft(backupNamePattern);
+  const patternDraft = pattern.draft;
+  // The state of the write itself decides what is shown, and only while it still
+  // describes the pattern on screen. A slow answer to a pattern the user has
+  // already replaced says nothing about the current draft, and a value the
+  // backend legitimately stores unchanged is not a rejection.
+  const patternWrite =
+    backupSettingsStatus?.pattern === patternDraft ? backupSettingsStatus.state : undefined;
+  const patternRejected = patternWrite === "error";
+
+  // The backend owns one setting, so both values always travel together. Only
+  // the field whose own value is being sent hands authority back to the
+  // backend's answer; the other keeps whatever the user has typed and not sent.
+  const storeBackupSettings = (retentionValue: number, patternValue: string) => {
+    onBackupSettingsChange({
+      backupRetention: retentionValue,
+      backupNamePattern: patternValue,
+    });
+  };
 
   const themeLabels: Record<ThemeName, string> = {
     light: t`Light`,
@@ -325,26 +406,77 @@ function SettingsTab({
             max={1000}
             step={1}
             value={retentionDraft}
-            onChange={(event) => setRetentionDraft(event.currentTarget.value)}
+            onChange={(event) => retention.edit(event.currentTarget.value)}
             onBlur={() => {
-              const retention = Number(retentionDraft);
-              if (Number.isInteger(retention) && retention >= 1 && retention <= 1000) {
-                onBackupRetentionChange(retention);
+              const value = Number(retentionDraft);
+              if (Number.isInteger(value) && value >= 1 && value <= 1000) {
+                retention.submitted();
+                pattern.submitted();
+                storeBackupSettings(value, patternDraft);
               } else {
-                setRetentionDraft(String(backupRetention ?? 10));
+                retention.reset(String(backupRetention ?? 10));
               }
             }}
             disabled={sessionBusy}
           />
         </span>
-        {/* The backup name pattern is deliberately not offered. The backend
-            states that the pattern stays fixed until a public grammar for it
-            exists, and inventing tokens here would be a frontend rule replacing
-            a contract that has not been agreed. */}
+        {/* The pattern is validated by the backend alone. This field sends what
+            was typed and renders what came back: a rejected pattern simply does
+            not become the stored one, and no rule is duplicated here. */}
+        <span className={settingField}>
+          <label htmlFor="tools-backup-pattern">
+            <Trans>Backup name pattern</Trans>
+          </label>
+          <Input
+            id="tools-backup-pattern"
+            value={patternDraft}
+            onChange={(event) => pattern.edit(event.currentTarget.value)}
+            onBlur={() => {
+              pattern.submitted();
+              storeBackupSettings(backupRetention ?? 10, patternDraft);
+            }}
+            disabled={sessionBusy || backupNamePattern === undefined}
+          />
+        </span>
+        <p className={message}>
+          {/* The two tokens reach the message as values rather than as literal
+              braces: braces in a translatable string are ICU syntax, and the
+              tokens are backend vocabulary that is never translated. */}
+          <Trans>
+            The pattern uses exactly two tokens, each once: {filenameToken} is the name of the
+            save being replaced and {timestampToken} is the moment the backup was taken. The
+            backend appends _bak and adds a counter when two backups fall in the same second.
+            Leaving the field empty restores the default pattern.
+          </Trans>
+        </p>
+        <p className={message}>
+          <Trans>Example</Trans>: <code>{backupNameExample ?? ""}</code>
+        </p>
+        {patternWrite === "pending" ? (
+          <p role="status" className={message}>
+            <Trans>Storing the backup name pattern…</Trans>
+          </p>
+        ) : null}
+        {patternWrite === "success" ? (
+          <p role="status" className={message}>
+            <Trans>The backup name pattern was stored.</Trans>
+          </p>
+        ) : null}
+        {patternRejected ? (
+          <p role="alert" className={alert}>
+            {/* The backend's own wording is not rendered: it can name a host
+                path. What matters here is that nothing was stored. */}
+            <Trans>
+              This pattern was not accepted, so the previous one is still in use. It must
+              contain {filenameToken} and {timestampToken} exactly once and may not contain a
+              path separator.
+            </Trans>
+          </p>
+        ) : null}
         <p className={message}>
           <Trans>
-            The backup name pattern is fixed in this build: the backend defines no public
-            grammar for it yet.
+            Changing the pattern renames nothing: existing backups keep their names and stay
+            usable.
           </Trans>
         </p>
       </Card>

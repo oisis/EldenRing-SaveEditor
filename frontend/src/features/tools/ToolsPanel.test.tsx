@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type {
   RepairPlan,
@@ -10,6 +11,7 @@ import {
   makeSaveSessionPort,
   renderApp,
 } from "../../test/renderWithProviders";
+import type { BackupSettingsStatus } from "../save-session/useSaveSessionFlow";
 import { ToolsPanel } from "./ToolsPanel";
 
 const baseProps = {
@@ -17,7 +19,7 @@ const baseProps = {
   onThemeChange: () => {},
   locale: "en" as const,
   onLocaleChange: () => {},
-  onBackupRetentionChange: () => {},
+  onBackupSettingsChange: () => {},
   onOpenStagedFile: () => {},
   onOpenLocalFile: () => {},
   // The shared save-mutation path is required; a test that does not mutate
@@ -83,6 +85,171 @@ const plan: RepairPlan = {
 };
 
 describe("ToolsPanel", () => {
+  it("edits the backup name pattern and sends the whole backup policy", async () => {
+    const onBackupSettingsChange = vi.fn();
+    await renderApp(
+      <ToolsPanel
+        {...baseProps}
+        backupRetention={12}
+        backupNamePattern="{filename}.{timestamp}"
+        backupNameExample="ER0000.sl2.20260824202530_bak"
+        onBackupSettingsChange={onBackupSettingsChange}
+      />,
+    );
+
+    // The example comes from the backend; the frontend renders no name of its own.
+    expect(screen.getByText("ER0000.sl2.20260824202530_bak")).toBeVisible();
+
+    const pattern = screen.getByLabelText("Backup name pattern");
+    expect(pattern).toHaveValue("{filename}.{timestamp}");
+    // The value is pasted rather than typed: user-event reads "{" as the start
+    // of a key descriptor, and the tokens are literal braces.
+    await userEvent.clear(pattern);
+    await userEvent.click(pattern);
+    await userEvent.paste("saveforge-{timestamp}-{filename}");
+    await userEvent.tab();
+
+    // The retention limit travels with it: the backend owns one setting.
+    await waitFor(() =>
+      expect(onBackupSettingsChange).toHaveBeenCalledWith({
+        backupRetention: 12,
+        backupNamePattern: "saveforge-{timestamp}-{filename}",
+      }),
+    );
+  });
+
+  /**
+   * Drives the panel exactly as the save session flow does: a write goes to
+   * pending, and the backend's own answer decides whether it becomes success or
+   * error. Nothing here compares a draft with a stored value.
+   */
+  function BackupSettingsHarness({
+    answer,
+  }: {
+    answer: (pattern: string) => Promise<string>;
+  }) {
+    const [stored, setStored] = useState("{filename}.{timestamp}");
+    const [status, setStatus] = useState<BackupSettingsStatus>();
+    return (
+      <>
+      <span data-testid="stored-pattern">{stored}</span>
+      <ToolsPanel
+        {...baseProps}
+        backupRetention={10}
+        backupNamePattern={stored}
+        backupNameExample="ER0000.sl2.20260824202530_bak"
+        backupSettingsStatus={status}
+        onBackupSettingsChange={({ backupNamePattern }) => {
+          setStatus({ pattern: backupNamePattern, state: "pending" });
+          void answer(backupNamePattern)
+            .then((accepted) => {
+              setStored(accepted);
+              setStatus({ pattern: backupNamePattern, state: "success" });
+            })
+            .catch(() => setStatus({ pattern: backupNamePattern, state: "error" }));
+        }}
+      />
+      </>
+    );
+  }
+
+  async function submitPattern(pattern: string) {
+    const field = screen.getByLabelText("Backup name pattern");
+    await userEvent.clear(field);
+    await userEvent.click(field);
+    await userEvent.paste(pattern);
+    await userEvent.tab();
+  }
+
+  it("does not call a delayed but accepted pattern a rejection", async () => {
+    // The backend accepted the pattern and answered late. The old screen read
+    // "the stored value still differs from my draft" as a refusal; only the
+    // operation's own outcome may say that.
+    let settle = (_: string) => {};
+    await renderApp(
+      <BackupSettingsHarness
+        answer={(pattern) =>
+          new Promise<string>((resolve) => {
+            settle = () => resolve(pattern);
+          })
+        }
+      />,
+    );
+
+    await submitPattern("saveforge-{timestamp}-{filename}");
+    // While the answer is outstanding the screen states exactly that, and never
+    // a rejection.
+    expect(await screen.findByText("Storing the backup name pattern…")).toBeVisible();
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    settle("");
+    expect(await screen.findByText("The backup name pattern was stored.")).toBeVisible();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("keeps an unsent edit when the answer to the previous one arrives", async () => {
+    let settle = (_: string) => {};
+    await renderApp(
+      <BackupSettingsHarness
+        answer={(pattern) =>
+          new Promise<string>((resolve) => {
+            settle = () => resolve(pattern);
+          })
+        }
+      />,
+    );
+
+    await submitPattern("pattern-a-{timestamp}-{filename}");
+    const field = screen.getByLabelText("Backup name pattern");
+    // The answer to A is still outstanding while B is typed and not submitted.
+    await userEvent.clear(field);
+    await userEvent.click(field);
+    await userEvent.paste("pattern-b-{timestamp}-{filename}");
+
+    settle("");
+    // The backend confirmed A and the stored example follows it, but the field
+    // still belongs to the user.
+    await waitFor(() => expect(screen.getByTestId("stored-pattern")).toHaveTextContent(
+      "pattern-a-{timestamp}-{filename}",
+    ));
+    expect(field).toHaveValue("pattern-b-{timestamp}-{filename}");
+  });
+
+  it("states that a rejected pattern was not stored", async () => {
+    await renderApp(
+      <BackupSettingsHarness answer={() => Promise.reject(new Error("refused"))} />,
+    );
+
+    await submitPattern("../{filename}.{timestamp}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This pattern was not accepted",
+    );
+
+    // The answer belongs to the pattern it was written with: once the user types
+    // another one, that refusal no longer describes what is on screen.
+    const field = screen.getByLabelText("Backup name pattern");
+    await userEvent.click(field);
+    await userEvent.paste("x");
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+  });
+
+  it("reports the outcome of an empty pattern, which restores the default", async () => {
+    // An empty pattern is a legitimate value the backend answers with the
+    // default. It is a success, not a refusal, even though what comes back is
+    // not what was typed.
+    await renderApp(
+      <BackupSettingsHarness answer={() => Promise.resolve("{filename}.{timestamp}")} />,
+    );
+
+    const field = screen.getByLabelText("Backup name pattern");
+    await userEvent.clear(field);
+    await userEvent.tab();
+
+    expect(await screen.findByText("The backup name pattern was stored.")).toBeVisible();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("navigates the subtabs and keeps the existing settings on Settings", async () => {
     await renderApp(<ToolsPanel {...baseProps} backupRetention={12} />);
 

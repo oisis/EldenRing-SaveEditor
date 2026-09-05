@@ -1592,6 +1592,7 @@ export namespace deployment {
 	    savePath: string;
 	    startCommand?: string;
 	    stopCommand?: string;
+	    statusCommand?: string;
 	    host?: string;
 	    port?: number;
 	    user?: string;
@@ -1613,6 +1614,7 @@ export namespace deployment {
 	        this.savePath = source["savePath"];
 	        this.startCommand = source["startCommand"];
 	        this.stopCommand = source["stopCommand"];
+	        this.statusCommand = source["statusCommand"];
 	        this.host = source["host"];
 	        this.port = source["port"];
 	        this.user = source["user"];
@@ -1666,6 +1668,7 @@ export namespace deployment {
 	    savePath: string;
 	    startCommand?: string;
 	    stopCommand?: string;
+	    statusCommand?: string;
 	    host?: string;
 	    port?: number;
 	    user?: string;
@@ -1683,6 +1686,7 @@ export namespace deployment {
 	        this.savePath = source["savePath"];
 	        this.startCommand = source["startCommand"];
 	        this.stopCommand = source["stopCommand"];
+	        this.statusCommand = source["statusCommand"];
 	        this.host = source["host"];
 	        this.port = source["port"];
 	        this.user = source["user"];
@@ -1695,6 +1699,9 @@ export namespace deployment {
 	    hostKeyTrusted: boolean;
 	    gameStatus: string;
 	    saveExists: boolean;
+	    hostKeyPending: boolean;
+	    hostKeyChanged: boolean;
+	    observedFingerprint?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new TestTargetResult(source);
@@ -1707,6 +1714,9 @@ export namespace deployment {
 	        this.hostKeyTrusted = source["hostKeyTrusted"];
 	        this.gameStatus = source["gameStatus"];
 	        this.saveExists = source["saveExists"];
+	        this.hostKeyPending = source["hostKeyPending"];
+	        this.hostKeyChanged = source["hostKeyChanged"];
+	        this.observedFingerprint = source["observedFingerprint"];
 	    }
 	}
 
@@ -4073,6 +4083,8 @@ export namespace saveengine {
 	export class SaveLifecycleSettings {
 	    backupRetention: number;
 	    retentionNoticeShown: boolean;
+	    backupNamePattern?: string;
+	    backupNameExample?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new SaveLifecycleSettings(source);
@@ -4082,6 +4094,8 @@ export namespace saveengine {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.backupRetention = source["backupRetention"];
 	        this.retentionNoticeShown = source["retentionNoticeShown"];
+	        this.backupNamePattern = source["backupNamePattern"];
+	        this.backupNameExample = source["backupNameExample"];
 	    }
 	}
 	export class SessionInfo {

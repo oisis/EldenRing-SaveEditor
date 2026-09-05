@@ -5,6 +5,9 @@
 `UpdateDeploymentTarget` replaces the configuration of one target and returns
 the whole library.
 
+The input is the same complete `TargetInput` `CreateDeploymentTarget` takes,
+including `statusCommand` and its exit-code contract.
+
 Moving an SSH target to another host or port drops the fingerprint approved for
 its previous address, so a reconfigured target is never silently trusted on the
 strength of a decision the user made about a different machine.
@@ -42,7 +45,7 @@ GetDeploymentTargetsResult
 | the deployment store is not wired | `deployment store is required` |
 | `kind` is not `local` or `ssh` | `unknown deployment target kind …` |
 | `name` or `savePath` is empty | `a deployment target needs a name` / `… needs the save path on the target system` |
-| a start or stop command contains a newline or a NUL byte | `the … must be a single command line` — one configured command may never become several |
+| a start, stop or status command contains a newline or a NUL byte | `the … must be a single command line` — one configured command may never become several |
 | an SSH target states no host, user or key path | the matching `an SSH target needs …` message |
 | an SSH port is outside 0–65535 | `an SSH port must be between 0 and 65535` |
 

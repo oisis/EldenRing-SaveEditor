@@ -168,8 +168,13 @@ func NewBridgeWithDependencies(dependencies Dependencies) *Bridge {
 		stagedDownloads:    map[string]string{},
 	}
 	if dependencies.DeploymentStore != nil {
+		// The backup name pattern has one owner, the Save Lifecycle settings, and
+		// deployment reads it from there instead of holding a second copy.
+		engine := bridge.saveEngine
 		bridge.deploymentService = deploymentdomain.NewService(
-			dependencies.DeploymentStore, dependencies.HostSettings, bridge.publishDeploymentProgress)
+			dependencies.DeploymentStore, dependencies.HostSettings,
+			bridge.publishDeploymentProgress,
+			func() string { return engine.BackupNamePattern() })
 	}
 	if bridge.saveEngine != nil {
 		bridge.saveEngine.SetSessionChangedSink(bridge.publishSessionChanged)
@@ -428,8 +433,11 @@ func (b *Bridge) GetSaveLifecycleSettings() (savesession.GetSaveLifecycleSetting
 	return bridged(savesession.GetSaveLifecycleSettings(b.saveEngine))
 }
 
-func (b *Bridge) SetSaveLifecycleSettings(backupRetention int) (savesession.SetSaveLifecycleSettingsResult, error) {
-	return bridged(savesession.SetSaveLifecycleSettings(b.saveEngine, backupRetention))
+func (b *Bridge) SetSaveLifecycleSettings(
+	backupRetention int, backupNamePattern string,
+) (savesession.SetSaveLifecycleSettingsResult, error) {
+	return bridged(savesession.SetSaveLifecycleSettings(
+		b.saveEngine, backupRetention, backupNamePattern))
 }
 
 func (b *Bridge) GetRecoveryJournals() (savesession.GetRecoveryJournalsResult, error) {

@@ -47,10 +47,16 @@ type GetDeploymentTargetsResult struct {
 }
 ```
 
-`transferSupported` is `false` for an SSH target in this build. The reason
-string states exactly why, and the interface disables the operations instead of
-offering an action that must fail. See
+`transferSupported` states whether this build can move a save to and from that
+kind of target. Both supported kinds now have a driver that stages, verifies and
+atomically replaces, so it is `true` for every stored target and
+`unsupportedReason` is empty. The field stays in the contract because the
+interface enables its operations from the backend's statement rather than from
+an assumption about a target kind. See
 [`../../../backend/deployment/driver.go`](../../../backend/deployment/driver.go).
+
+The embedded `deployment.Target` also carries `statusCommand`, the configured
+command whose exit code is the only source of the target's game state.
 
 ## Errors
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+	"github.com/oisis/EldenRing-SaveForge/backend/backupname"
 )
 
 const (
@@ -16,12 +17,23 @@ const (
 	maximumRecentFiles     = 10
 )
 
-// SaveLifecycleSettings contains the agreed configurable retention policy.
-// Backup naming remains the fixed canonical product pattern until a public
-// custom-pattern grammar is specified.
+// SaveLifecycleSettings contains the configurable local backup policy: how many
+// automatic backups are kept and what they are called.
+//
+// It is the single owner of the backup name pattern. Deployment target backups
+// read the same value through the composition root rather than keeping a second
+// copy of it in the host settings.
 type SaveLifecycleSettings struct {
 	BackupRetention      int  `json:"backupRetention"`
 	RetentionNoticeShown bool `json:"retentionNoticeShown"`
+	// BackupNamePattern accepts exactly {filename} and {timestamp}, each once,
+	// plus safe literal text. A configuration written before this setting existed
+	// carries none and keeps the default name.
+	BackupNamePattern string `json:"backupNamePattern,omitempty"`
+	// BackupNameExample is derived, never configured: it is what the pattern now
+	// in effect produces for a sample save, so the Settings screen can show the
+	// real name without reimplementing the grammar.
+	BackupNameExample string `json:"backupNameExample,omitempty"`
 }
 
 type lifecycleSettingsFile struct {
@@ -30,7 +42,18 @@ type lifecycleSettingsFile struct {
 }
 
 func defaultSaveLifecycleSettings() SaveLifecycleSettings {
-	return SaveLifecycleSettings{BackupRetention: defaultBackupRetention}
+	return SaveLifecycleSettings{
+		BackupRetention:   defaultBackupRetention,
+		BackupNamePattern: backupname.Default,
+	}
+}
+
+// reported fills in the derived example. The stored value is never trusted for
+// it: the example always states what the pattern in effect produces today.
+func reported(settings SaveLifecycleSettings) SaveLifecycleSettings {
+	settings.BackupNamePattern = backupname.Normalise(settings.BackupNamePattern)
+	settings.BackupNameExample = backupname.Example(settings.BackupNamePattern)
+	return settings
 }
 
 func (engine *Engine) lifecycleSettingsPath() string {
@@ -65,6 +88,10 @@ func (engine *Engine) loadLifecycleSettingsLocked() error {
 	if err := validateBackupRetention(stored.Settings.BackupRetention); err != nil {
 		return err
 	}
+	stored.Settings.BackupNamePattern = backupname.Normalise(stored.Settings.BackupNamePattern)
+	if err := backupname.Validate(stored.Settings.BackupNamePattern); err != nil {
+		return fmt.Errorf("save lifecycle settings are invalid: %w", err)
+	}
 	engine.lifecycleSettings = stored.Settings
 	engine.lifecycleSettingsLoaded = true
 	return nil
@@ -98,13 +125,24 @@ func (engine *Engine) GetSaveLifecycleSettings() (SaveLifecycleSettings, error) 
 	if err := engine.loadLifecycleSettingsLocked(); err != nil {
 		return SaveLifecycleSettings{}, err
 	}
-	return engine.lifecycleSettings, nil
+	return reported(engine.lifecycleSettings), nil
 }
 
+// SetSaveLifecycleSettings stores the complete local backup policy.
+//
+// The backend is the source of the validation rules: an empty pattern means the
+// default, and anything the grammar refuses is rejected here rather than
+// sanitised into something that would name a file somewhere else. Changing the
+// pattern renames nothing: existing backups keep their names and stay usable.
 func (engine *Engine) SetSaveLifecycleSettings(
 	backupRetention int,
+	backupNamePattern string,
 ) (SaveLifecycleSettings, error) {
 	if err := validateBackupRetention(backupRetention); err != nil {
+		return SaveLifecycleSettings{}, err
+	}
+	pattern := backupname.Normalise(backupNamePattern)
+	if err := backupname.Validate(pattern); err != nil {
 		return SaveLifecycleSettings{}, err
 	}
 	engine.mutex.Lock()
@@ -114,11 +152,26 @@ func (engine *Engine) SetSaveLifecycleSettings(
 	}
 	previous := engine.lifecycleSettings
 	engine.lifecycleSettings.BackupRetention = backupRetention
+	engine.lifecycleSettings.BackupNamePattern = pattern
 	if err := engine.persistLifecycleSettingsLocked(); err != nil {
 		engine.lifecycleSettings = previous
 		return SaveLifecycleSettings{}, err
 	}
-	return engine.lifecycleSettings, nil
+	return reported(engine.lifecycleSettings), nil
+}
+
+// BackupNamePattern reports the pattern now in effect. The deployment package
+// reads the setting through this method instead of holding its own copy.
+func (engine *Engine) BackupNamePattern() string {
+	if engine == nil {
+		return backupname.Default
+	}
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	if err := engine.loadLifecycleSettingsLocked(); err != nil {
+		return backupname.Default
+	}
+	return backupname.Normalise(engine.lifecycleSettings.BackupNamePattern)
 }
 
 // RecentFile is one host-local entry shown on Home. Path is carried exactly as

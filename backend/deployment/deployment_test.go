@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 )
@@ -29,7 +30,7 @@ func newTestService(t *testing.T) (*Service, *Store, Target, string) {
 		t.Fatalf("CreateTarget: %v", err)
 	}
 	settings := hostsettings.NewStore(state)
-	return NewService(store, settings, nil), store, target, savePath
+	return NewService(store, settings, nil, nil), store, target, savePath
 }
 
 func writeFile(t *testing.T, path string, content string) {
@@ -167,7 +168,7 @@ func TestAlwaysPolicySkipsTheQuestionButNeverTheBackup(t *testing.T) {
 	if _, err := settings.Set(false, string(hostsettings.RemoteBackupAlways)); err != nil {
 		t.Fatalf("Set host settings: %v", err)
 	}
-	service := NewService(store, settings, nil)
+	service := NewService(store, settings, nil, nil)
 
 	writeFile(t, savePath, "the existing target save")
 	prepared := filepath.Join(t.TempDir(), "prepared.sl2")
@@ -263,41 +264,6 @@ func TestActivateAnUnknownBackupIsRefused(t *testing.T) {
 	}
 }
 
-// TestSSHTargetsFailClosed states the honest limit of this build: an SSH target
-// can be configured, but no operation on it silently
-// falls back to an unsafe path.
-func TestSSHTargetsFailClosed(t *testing.T) {
-	state := t.TempDir()
-	store := NewStore(state)
-	target, err := store.CreateTarget(Target{
-		Name:     "Remote",
-		Kind:     KindSSH,
-		SavePath: "/home/deck/ER0000.sl2",
-		Host:     "192.0.2.1",
-		Port:     22,
-		User:     "deck",
-		KeyPath:  "/home/user/.ssh/id_ed25519",
-	})
-	if err != nil {
-		t.Fatalf("CreateTarget: %v", err)
-	}
-	service := NewService(store, hostsettings.NewStore(state), nil)
-
-	// No connection is attempted: the driver refuses before reaching a network.
-	if _, err := service.TestTarget(context.Background(), target.ID); err == nil {
-		t.Fatal("TestTarget on an SSH target reported success")
-	}
-	if _, err := service.Upload(context.Background(), OperationRequest{
-		OperationID:                   "operation-1",
-		TargetID:                      target.ID,
-		PreparedPath:                  filepath.Join(t.TempDir(), "prepared.sl2"),
-		ContinueWithUnknownGameStatus: true,
-		ConfirmRemoteBackup:           true,
-	}, false); err == nil {
-		t.Fatal("Upload to an SSH target reported success")
-	}
-}
-
 // TestSSHTargetValidationRefusesPasswordOnlyConfiguration keeps the key-only
 // rule at the configuration boundary, where it is cheapest to enforce.
 func TestSSHTargetValidationRefusesPasswordOnlyConfiguration(t *testing.T) {
@@ -349,6 +315,13 @@ func TestHostKeyTrustIsExplicitAndDroppedWhenTheAddressChanges(t *testing.T) {
 	if _, trusted, err := store.TrustedHostKey(target.Address()); err != nil || trusted {
 		t.Fatalf("a fresh target already trusts a host key (trusted=%v, err=%v)", trusted, err)
 	}
+	// Approval is bound to a real handshake, so the observation comes first.
+	if err := store.TrustHostKey(target.Address(), "SHA256:abc"); err == nil {
+		t.Fatal("a fingerprint no handshake observed was approved")
+	}
+	if err := store.ObserveHostKey(target.Address(), "SHA256:abc"); err != nil {
+		t.Fatalf("ObserveHostKey: %v", err)
+	}
 	if err := store.TrustHostKey(target.Address(), "SHA256:abc"); err != nil {
 		t.Fatalf("TrustHostKey: %v", err)
 	}
@@ -368,4 +341,232 @@ func TestHostKeyTrustIsExplicitAndDroppedWhenTheAddressChanges(t *testing.T) {
 	if _, trusted, err := store.TrustedHostKey(target.Address()); err != nil || trusted {
 		t.Fatal("the fingerprint of the previous address survived the move")
 	}
+}
+
+// TestGameStatusCommandGatesTheOperations is the whole effect of the configured
+// status command: a confirmed running game blocks a plain Upload outright, a
+// confirmed stopped game needs no confirmation at all, and any other outcome
+// stays unknown and asks.
+func TestGameStatusCommandGatesTheOperations(t *testing.T) {
+	for _, testCase := range []struct {
+		name    string
+		command string
+		blocked string
+	}{
+		{"exit zero blocks the upload", "exit 0", BlockedGameRunning},
+		{"exit one runs it without a question", "exit 1", ""},
+		{"another exit code asks first", "exit 7", BlockedGameStatusUnknown},
+		{"no command at all asks first", "", BlockedGameStatusUnknown},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			state := t.TempDir()
+			targetDirectory := t.TempDir()
+			savePath := filepath.Join(targetDirectory, "ER0000.sl2")
+			store := NewStore(state)
+			target, err := store.CreateTarget(Target{
+				Name: "t", Kind: KindLocal, SavePath: savePath, StatusCommand: testCase.command,
+			})
+			if err != nil {
+				t.Fatalf("CreateTarget: %v", err)
+			}
+			settings := hostsettings.NewStore(state)
+			if _, err := settings.Set(false, string(hostsettings.RemoteBackupAlways)); err != nil {
+				t.Fatalf("Set host settings: %v", err)
+			}
+			service := NewService(store, settings, nil, nil)
+			writeFile(t, savePath, "the existing target save")
+			prepared := filepath.Join(t.TempDir(), "prepared.sl2")
+			writeFile(t, prepared, "the prepared save")
+
+			result, err := service.Upload(context.Background(), OperationRequest{
+				OperationID:  "operation-1",
+				TargetID:     target.ID,
+				PreparedPath: prepared,
+			}, false)
+			if err != nil {
+				t.Fatalf("Upload: %v", err)
+			}
+			if result.Blocked != testCase.blocked {
+				t.Fatalf("blocked = %q, want %q (result %+v)", result.Blocked, testCase.blocked, result)
+			}
+			if testCase.blocked == "" {
+				if !result.Completed || result.GameStatus != GameStopped {
+					t.Fatalf("result = %+v, want a completed upload against a stopped game", result)
+				}
+				return
+			}
+			if readFile(t, savePath) != "the existing target save" {
+				t.Fatal("a blocked upload changed the target save")
+			}
+		})
+	}
+}
+
+// TestStopThatDoesNotConfirmTheGameStoppedBlocksTheReplacement: the stop
+// command running is not evidence the game stopped. Only a confirmed stopped
+// state lets the replacement continue.
+func TestStopThatDoesNotConfirmTheGameStoppedBlocksTheReplacement(t *testing.T) {
+	state := t.TempDir()
+	targetDirectory := t.TempDir()
+	savePath := filepath.Join(targetDirectory, "ER0000.sl2")
+	store := NewStore(state)
+	target, err := store.CreateTarget(Target{
+		Name: "t", Kind: KindLocal, SavePath: savePath,
+		StatusCommand: "exit 0", StopCommand: "exit 0", StartCommand: "exit 0",
+	})
+	if err != nil {
+		t.Fatalf("CreateTarget: %v", err)
+	}
+	service := NewService(store, hostsettings.NewStore(state), nil, nil)
+	// The wait is driven by the test rather than by a clock: one observation and
+	// no sleep at all.
+	service.stopAttempts = 1
+	service.stopPoll = 0
+	writeFile(t, savePath, "the existing target save")
+	prepared := filepath.Join(t.TempDir(), "prepared.sl2")
+	writeFile(t, prepared, "the prepared save")
+
+	result, err := service.Upload(context.Background(), OperationRequest{
+		OperationID:         "operation-1",
+		TargetID:            target.ID,
+		PreparedPath:        prepared,
+		ConfirmStopGame:     true,
+		ConfirmRemoteBackup: true,
+	}, true)
+	if err != nil {
+		t.Fatalf("Upload: %v", err)
+	}
+	if result.Blocked != BlockedGameRunning || result.TargetState != TargetStateUnchanged {
+		t.Fatalf("result = %+v, want the still-running block and an unchanged target", result)
+	}
+	if readFile(t, savePath) != "the existing target save" {
+		t.Fatal("the target save was replaced although the game never stopped")
+	}
+}
+
+// TestTargetBackupsFollowTheConfiguredNamePattern: the deployment backups and
+// the local Save backups are named by the same setting and the same grammar.
+func TestTargetBackupsFollowTheConfiguredNamePattern(t *testing.T) {
+	state := t.TempDir()
+	targetDirectory := t.TempDir()
+	savePath := filepath.Join(targetDirectory, "ER0000.sl2")
+	store := NewStore(state)
+	target, err := store.CreateTarget(Target{Name: "t", Kind: KindLocal, SavePath: savePath})
+	if err != nil {
+		t.Fatalf("CreateTarget: %v", err)
+	}
+	service := NewService(store, hostsettings.NewStore(state), nil,
+		func() string { return "saveforge-{timestamp}-{filename}" })
+	service.now = func() time.Time { return time.Date(2026, 9, 5, 10, 30, 0, 0, time.UTC) }
+	writeFile(t, savePath, "the existing target save")
+
+	first, err := service.CreateManualBackup(context.Background(), target.ID, nil, "")
+	if err != nil {
+		t.Fatalf("CreateManualBackup: %v", err)
+	}
+	if first.FileName != "saveforge-20260905103000-ER0000.sl2_bak" {
+		t.Fatalf("backup name = %q, want the configured pattern", first.FileName)
+	}
+	// A second backup in the same second collides and takes the next counter,
+	// which still sits before the suffix.
+	second, err := service.CreateManualBackup(context.Background(), target.ID, nil, "")
+	if err != nil {
+		t.Fatalf("CreateManualBackup: %v", err)
+	}
+	if second.FileName != "saveforge-20260905103000-ER0000.sl2_2_bak" {
+		t.Fatalf("second backup name = %q, want the collision counter", second.FileName)
+	}
+	for _, name := range []string{first.FileName, second.FileName} {
+		if _, err := os.Stat(filepath.Join(targetDirectory, name)); err != nil {
+			t.Fatalf("backup %q is missing: %v", name, err)
+		}
+	}
+}
+
+// TestUnknownStateAfterTheStopCommandStillNeedsTheUnknownConfirmation: the
+// sequence running -> stop -> unknown must reach the same gate as an unknown
+// state observed before any stop. Permission to stop the game is not permission
+// to continue against a state this application could not establish.
+func TestUnknownStateAfterTheStopCommandStillNeedsTheUnknownConfirmation(t *testing.T) {
+	setUp := func(t *testing.T) (*Service, Target, string, string) {
+		t.Helper()
+		state := t.TempDir()
+		savePath := filepath.Join(t.TempDir(), "ER0000.sl2")
+		// The status command answers "running" once and never confirms anything
+		// again: exit 0 on the first observation, exit 7 on every later one. That
+		// is the reported sequence — the game is running, the stop command runs,
+		// and the target then reports a state this application cannot interpret.
+		marker := filepath.Join(t.TempDir(), "observed")
+		store := NewStore(state)
+		target, err := store.CreateTarget(Target{
+			Name: "t", Kind: KindLocal, SavePath: savePath,
+			StatusCommand: "if [ -e " + marker + " ]; then exit 7; fi; : > " + marker + "; exit 0",
+			StopCommand:   "exit 0", StartCommand: "exit 0",
+		})
+		if err != nil {
+			t.Fatalf("CreateTarget: %v", err)
+		}
+		service := NewService(store, hostsettings.NewStore(state), nil, nil)
+		service.stopAttempts = 1
+		service.stopPoll = 0
+		writeFile(t, savePath, "the existing target save")
+		prepared := filepath.Join(t.TempDir(), "prepared.sl2")
+		writeFile(t, prepared, "the prepared save")
+		return service, target, savePath, prepared
+	}
+
+	t.Run("upload", func(t *testing.T) {
+		service, target, savePath, prepared := setUp(t)
+		blocked, err := service.Upload(context.Background(), OperationRequest{
+			OperationID: "operation-1", TargetID: target.ID, PreparedPath: prepared,
+			ConfirmStopGame: true, ConfirmRemoteBackup: true,
+		}, true)
+		if err != nil {
+			t.Fatalf("Upload: %v", err)
+		}
+		if blocked.Blocked != BlockedGameStatusUnknown || blocked.TargetState != TargetStateUnchanged {
+			t.Fatalf("result = %+v, want the unknown-state block and an unchanged target", blocked)
+		}
+		if blocked.GameStatus != GameUnknown {
+			t.Fatalf("gameStatus = %q, want the unknown state rather than a confirmed stop", blocked.GameStatus)
+		}
+		if readFile(t, savePath) != "the existing target save" {
+			t.Fatal("a blocked upload changed the target save")
+		}
+	})
+
+	t.Run("upload continues on the explicit confirmation", func(t *testing.T) {
+		// The existing Continue Anyway contract is untouched: this is a gate, not
+		// a new hard block.
+		service, target, _, prepared := setUp(t)
+		allowed, err := service.Upload(context.Background(), OperationRequest{
+			OperationID: "operation-1", TargetID: target.ID, PreparedPath: prepared,
+			ConfirmStopGame: true, ConfirmRemoteBackup: true,
+			ContinueWithUnknownGameStatus: true,
+		}, true)
+		if err != nil {
+			t.Fatalf("Upload: %v", err)
+		}
+		if !allowed.Completed || allowed.TargetState != TargetStateReplacedVerified {
+			t.Fatalf("result = %+v, want the confirmed continuation to replace the target", allowed)
+		}
+	})
+
+	t.Run("download", func(t *testing.T) {
+		service, target, _, _ := setUp(t)
+		staging := filepath.Join(t.TempDir(), "downloaded.sl2")
+		blocked, err := service.Download(context.Background(), OperationRequest{
+			OperationID: "operation-1", TargetID: target.ID, StagingPath: staging,
+			ConfirmStopGame: true,
+		}, true)
+		if err != nil {
+			t.Fatalf("Download: %v", err)
+		}
+		if blocked.Blocked != BlockedGameStatusUnknown || blocked.Completed {
+			t.Fatalf("result = %+v, want the unknown-state block", blocked)
+		}
+		if _, err := os.Stat(staging); !os.IsNotExist(err) {
+			t.Fatal("a blocked download still copied the target save")
+		}
+	})
 }

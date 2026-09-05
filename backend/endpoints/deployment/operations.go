@@ -2,7 +2,7 @@
 Endpoint: GetDeploymentGameStatus
 EndpointID: get_deployment_game_status
 Purpose: Reports the confirmed game state of one deployment target.
-How it works: The runtime handler asks the target's driver what it can prove and returns running, stopped or unknown. It never guesses a state from a heuristic.
+How it works: The runtime handler runs the status command the target explicitly configures and maps its exit code: 0 means running, 1 means stopped, and every other outcome - no configured command, another exit code, a timeout, a transport fault or a command that could not be started - is unknown. It never guesses a state from a process name, from the start command or from the save's modification time.
 Supported resource types: —.
 Input variables: targetID.
 GameCatalog variables read: none.

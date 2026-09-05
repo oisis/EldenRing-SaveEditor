@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"strconv"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/backupname"
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 )
 
@@ -41,11 +41,19 @@ const (
 	TargetStateUnchanged          = "unchanged"
 	TargetStateReplacedVerified   = "replaced_verified"
 	TargetStateReplacedUnverified = "replaced_unverified"
+	// TargetStateReplacementUndetermined is the honest third answer: the
+	// replacement was requested and the answer to it was lost, so this build
+	// cannot say the target was replaced and cannot say it was left alone.
+	TargetStateReplacementUndetermined = "replacement_undetermined"
 
-	FailureReplacement  = "replacement_failed"
-	FailureVerification = "target_verification_failed"
-	FailureLaunch       = "launch_failed"
-	FailureMetadata     = "metadata_update_failed"
+	FailureReplacement = "replacement_failed"
+	// FailureReplacementUndetermined accompanies the undetermined target state.
+	// It is deliberately not FailureReplacement: that code states the target was
+	// not replaced, which is precisely what is unknown here.
+	FailureReplacementUndetermined = "replacement_undetermined"
+	FailureVerification            = "target_verification_failed"
+	FailureLaunch                  = "launch_failed"
+	FailureMetadata                = "metadata_update_failed"
 )
 
 // The stage names an operation reports. They are the steps of section 3 and
@@ -131,17 +139,80 @@ type Service struct {
 	newDriver func(Target) (Driver, error)
 	// now is the clock backup names are derived from.
 	now func() time.Time
+	// backupPattern reports the backup name pattern in effect. The setting is
+	// owned by the Save Lifecycle contract; this package reads it through the
+	// composition root and keeps no second copy of it.
+	backupPattern func() string
+	// stopPoll and stopAttempts bound the wait for a confirmed stop after the
+	// stop command ran. A test replaces them so no wall clock is involved.
+	stopPoll     time.Duration
+	stopAttempts int
 }
 
 // NewService builds the service around one store.
-func NewService(store *Store, settings *hostsettings.Store, progress func(Progress)) *Service {
-	return &Service{
-		store:     store,
-		settings:  settings,
-		progress:  progress,
-		newDriver: NewDriver,
-		now:       func() time.Time { return time.Now().UTC() },
+//
+// backupPattern reports the backup name pattern the Save Lifecycle settings
+// hold. A nil provider means the default pattern, which is what a host that
+// never configured one runs under.
+func NewService(
+	store *Store,
+	settings *hostsettings.Store,
+	progress func(Progress),
+	backupPattern func() string,
+) *Service {
+	if backupPattern == nil {
+		backupPattern = func() string { return backupname.Default }
 	}
+	return &Service{
+		store:    store,
+		settings: settings,
+		progress: progress,
+		// Production always builds the driver through NewDriver with this store as
+		// the host key authority, so no test double can ever reach a real machine
+		// and no connection can bypass the Trust On First Use check.
+		newDriver:     func(target Target) (Driver, error) { return NewDriver(target, store) },
+		now:           func() time.Time { return time.Now().UTC() },
+		backupPattern: backupPattern,
+		stopPoll:      stopConfirmationPoll,
+		stopAttempts:  stopConfirmationAttempts,
+	}
+}
+
+// stopConfirmationPoll and stopConfirmationAttempts bound the wait for the game
+// to actually stop. The wait is finite and cancellable, and running out of it
+// is reported as what it is rather than as a confirmed stop.
+const (
+	stopConfirmationPoll     = 1 * time.Second
+	stopConfirmationAttempts = 15
+)
+
+// waitForStoppedGame polls the confirmed game state after the stop command ran.
+//
+// It stops early on a confirmed stop, gives up after a bounded number of
+// observations, and answers a cancelled context immediately. Its answer is the
+// real state: a target that never confirms anything still reports unknown, and
+// no caller may read that as a stop.
+func (service *Service) waitForStoppedGame(ctx context.Context, driver Driver) (GameStatus, error) {
+	status := GameUnknown
+	for attempt := 0; attempt < service.stopAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return status, err
+		}
+		observed, err := driver.GameStatus(ctx)
+		if err != nil {
+			return status, err
+		}
+		status = observed
+		if status != GameRunning {
+			return status, nil
+		}
+		select {
+		case <-ctx.Done():
+			return status, ctx.Err()
+		case <-time.After(service.stopPoll):
+		}
+	}
+	return status, nil
 }
 
 func (service *Service) driverFor(targetID string) (Target, Driver, error) {
@@ -193,6 +264,18 @@ type TestTargetResult struct {
 	HostKeyTrusted bool       `json:"hostKeyTrusted"`
 	GameStatus     GameStatus `json:"gameStatus"`
 	SaveExists     bool       `json:"saveExists"`
+	// HostKeyPending reports a handshake that presented a key this configuration
+	// has never approved. The connection was refused; the fingerprint below is
+	// what the host actually presented, and approving it is the user's explicit
+	// decision.
+	HostKeyPending bool `json:"hostKeyPending"`
+	// HostKeyChanged reports a host presenting a different key than the approved
+	// one. The connection was refused and nothing may be approved from here: the
+	// user forgets the old key deliberately first.
+	HostKeyChanged bool `json:"hostKeyChanged"`
+	// ObservedFingerprint is the fingerprint the handshake presented, empty when
+	// no handshake happened.
+	ObservedFingerprint string `json:"observedFingerprint,omitempty"`
 }
 
 // TestTarget verifies one target without changing anything on it.
@@ -211,6 +294,16 @@ func (service *Service) TestTarget(ctx context.Context, targetID string) (TestTa
 		result.HostKeyTrusted = trusted
 	}
 	if err := driver.Test(ctx); err != nil {
+		// A refused host key is a state the interface answers, not a failure it
+		// reports as one: the approval dialog needs the observed fingerprint.
+		if errors.Is(err, ErrHostKeyNotApproved) || errors.Is(err, ErrHostKeyChanged) {
+			result.HostKeyPending = errors.Is(err, ErrHostKeyNotApproved)
+			result.HostKeyChanged = errors.Is(err, ErrHostKeyChanged)
+			if observed, seen := service.store.ObservedHostKey(target.Address()); seen {
+				result.ObservedFingerprint = observed
+			}
+			return result, nil
+		}
 		return result, err
 	}
 	result.Reachable = true
@@ -304,7 +397,19 @@ func (service *Service) Upload(
 			return OperationResult{}, stopErr
 		}
 		result.Stop = &outcome
-		result.Stages = append(result.Stages, Stage{Stage: StageStopGame, Completed: true})
+		confirmed, waitErr := service.waitForStoppedGame(ctx, driver)
+		if waitErr != nil {
+			return service.cancelled(started, request, result, waitErr)
+		}
+		result.GameStatus = confirmed
+		if blocked, detail := afterStopCommand(confirmed, request); blocked != "" {
+			result.Blocked = blocked
+			result.Stages = append(result.Stages, Stage{Stage: StageStopGame, Detail: detail})
+			return service.finish(started, request, result), nil
+		}
+		result.Stages = append(result.Stages, Stage{
+			Stage: StageStopGame, Completed: true, Detail: stopDetail(confirmed),
+		})
 		service.report(started, request, StageStabilise, 18)
 		if err := driver.WaitForStableSave(ctx, target.SavePath); err != nil {
 			return service.cancelled(started, request, result, err)
@@ -345,15 +450,9 @@ func (service *Service) Upload(
 	service.report(started, request, StageReplace, 70)
 	replacement, err := driver.ReplaceFromLocal(ctx, request.PreparedPath, target.SavePath)
 	if err != nil {
-		if replacement.Committed {
-			result.TargetState = TargetStateReplacedUnverified
-			result.Failure = FailureVerification
-			result.Stages = append(result.Stages, Stage{Stage: StageReplace, Completed: true}, Stage{Stage: StageVerify, Detail: "the replaced target could not be verified"})
-		} else {
-			result.Failure = FailureReplacement
-			result.Stages = append(result.Stages, Stage{Stage: StageReplace, Detail: "the target was not replaced"})
-		}
-		return service.finish(started, request, result), nil
+		// An undetermined replacement returns from here like any other failure,
+		// so the game is never started on a target whose contents are unknown.
+		return service.finish(started, request, applyReplacementFailure(result, replacement)), nil
 	}
 	result.TargetState = TargetStateReplacedVerified
 	result.Stages = append(result.Stages,
@@ -439,7 +538,19 @@ func (service *Service) Download(
 			return OperationResult{}, stopErr
 		}
 		result.Stop = &outcome
-		result.Stages = append(result.Stages, Stage{Stage: StageStopGame, Completed: true})
+		confirmed, waitErr := service.waitForStoppedGame(ctx, driver)
+		if waitErr != nil {
+			return service.cancelled(started, request, result, waitErr)
+		}
+		result.GameStatus = confirmed
+		if blocked, detail := afterStopCommand(confirmed, request); blocked != "" {
+			result.Blocked = blocked
+			result.Stages = append(result.Stages, Stage{Stage: StageStopGame, Detail: detail})
+			return service.finish(started, request, result), nil
+		}
+		result.Stages = append(result.Stages, Stage{
+			Stage: StageStopGame, Completed: true, Detail: stopDetail(confirmed),
+		})
 	case GameUnknown:
 		if !request.ContinueWithUnknownGameStatus {
 			result.Blocked = BlockedGameStatusUnknown
@@ -509,13 +620,14 @@ func (service *Service) createBackup(
 	ctx context.Context, target Target, driver Driver, manual bool, tags []string, description string,
 ) (BackupRecord, error) {
 	now := service.now()
-	base := path.Base(target.SavePath) + "." + now.Format("20060102150405")
+	pattern := backupname.Normalise(service.backupPattern())
+	sourceName := path.Base(target.SavePath)
 	directory := target.BackupDirectory()
 	fileName := ""
 	for collision := 1; collision <= 1000; collision++ {
-		candidate := base + "_bak"
-		if collision > 1 {
-			candidate = base + "_" + strconv.Itoa(collision) + "_bak"
+		candidate, err := backupname.Candidate(pattern, sourceName, now, collision)
+		if err != nil {
+			return BackupRecord{}, err
 		}
 		taken, err := driver.Exists(ctx, joinTargetPath(target, directory, candidate))
 		if err != nil {
@@ -609,4 +721,64 @@ func joinTargetPath(target Target, directory string, name string) string {
 		return localJoin(directory, name)
 	}
 	return path.Join(directory, name)
+}
+
+// stopDetail states what the wait after the stop command actually established.
+// An unconfirmed stop is never worded as a confirmed one.
+func stopDetail(status GameStatus) string {
+	if status == GameStopped {
+		return ""
+	}
+	return "the game state could not be confirmed after the stop command"
+}
+
+// afterStopCommand turns the state confirmed after the stop command into the
+// block it deserves. It is the one place that mapping exists, so Upload and
+// Download cannot drift apart on it.
+//
+// Permission to stop the game is not permission to continue with a state this
+// application could not establish: an unknown state after the stop command is
+// the same unknown state section 4 warns about before it, and it needs the same
+// explicit confirmation. The confirmation the user already gave still lets the
+// operation continue, which is the existing Continue Anyway contract.
+func afterStopCommand(status GameStatus, request OperationRequest) (blocked string, detail string) {
+	switch status {
+	case GameStopped:
+		return "", ""
+	case GameRunning:
+		// The stop command ran and the game is still confirmed to be running.
+		// Replacing the save now is exactly what section 4 forbids.
+		return BlockedGameRunning, "the game is still running after the stop command"
+	}
+	if !request.ContinueWithUnknownGameStatus {
+		return BlockedGameStatusUnknown, "the game state could not be confirmed after the stop command"
+	}
+	return "", ""
+}
+
+// applyReplacementFailure records what the driver actually established about
+// the irreversible point. The three outcomes are distinct answers and none of
+// them may be reported as another.
+func applyReplacementFailure(result OperationResult, replacement ReplacementResult) OperationResult {
+	switch replacement.Outcome {
+	case ReplacementPerformed:
+		result.TargetState = TargetStateReplacedUnverified
+		result.Failure = FailureVerification
+		result.Stages = append(result.Stages,
+			Stage{Stage: StageReplace, Completed: true},
+			Stage{Stage: StageVerify, Detail: "the replaced target could not be verified"})
+	case ReplacementUndetermined:
+		result.TargetState = TargetStateReplacementUndetermined
+		result.Failure = FailureReplacementUndetermined
+		result.Stages = append(result.Stages, Stage{
+			Stage:  StageReplace,
+			Detail: "the replacement was requested and its result could not be established",
+		})
+	default:
+		result.Failure = FailureReplacement
+		result.Stages = append(result.Stages, Stage{
+			Stage: StageReplace, Detail: "the target was not replaced",
+		})
+	}
+	return result
 }

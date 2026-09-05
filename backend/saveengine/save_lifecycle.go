@@ -7,12 +7,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/apperror"
+	"github.com/oisis/EldenRing-SaveForge/backend/backupname"
 )
 
 // SaveLifecycleResult reports a fully committed Save or Save As. Warnings are
@@ -120,9 +119,17 @@ func (engine *Engine) saveLifecycle(
 			"the save target changed outside SaveForge; use Save As or reload it")
 	}
 	if targetExists {
-		backupPath, err = createAutomaticBackup(target, engine.nowUTC())
+		backupTime := engine.nowUTC()
+		backupPath, err = createAutomaticBackup(
+			target, backupTime, backupname.Normalise(engine.lifecycleSettings.BackupNamePattern))
 		if err != nil {
 			return SaveLifecycleResult{}, fmt.Errorf("cannot create required backup: %w", err)
+		}
+		// The backup is recorded before the target is touched, so retention can
+		// always tell this application's file from somebody else's.
+		if err := engine.recordAutomaticBackupLocked(
+			target, filepath.Base(backupPath), backupTime); err != nil {
+			return SaveLifecycleResult{}, fmt.Errorf("cannot record required backup: %w", err)
 		}
 		if err := verifyTargetFingerprint(backupPath, expectedTargetFingerprint); err != nil {
 			return SaveLifecycleResult{}, fmt.Errorf(
@@ -157,8 +164,15 @@ func (engine *Engine) saveLifecycle(
 	warnings := []string{}
 	retentionNotice := false
 	if targetExists {
-		_, reachedLimit, pruneErr := pruneAutomaticBackups(
-			target, engine.lifecycleSettings.BackupRetention)
+		owned, ownedErr := engine.ownedAutomaticBackupsLocked(target)
+		removedNames, reachedLimit, pruneErr := []string(nil), false, ownedErr
+		if pruneErr == nil {
+			removedNames, reachedLimit, pruneErr = pruneAutomaticBackups(
+				target, engine.lifecycleSettings.BackupRetention, owned)
+		}
+		if pruneErr == nil {
+			pruneErr = engine.forgetAutomaticBackupsLocked(target, removedNames)
+		}
 		if pruneErr != nil {
 			warnings = append(warnings, "The save was written, but old automatic backups could not be pruned.")
 		} else if reachedLimit && !engine.lifecycleSettings.RetentionNoticeShown {
@@ -238,7 +252,11 @@ func regularFileExists(path string) (bool, error) {
 	}
 }
 
-func createAutomaticBackup(target string, now time.Time) (string, error) {
+// createAutomaticBackup writes the backup beside the target under the name the
+// configured pattern renders. The pattern grammar, the suffix and the collision
+// counter all live in one package, so a local backup and a deployment target
+// backup are named by the same rules.
+func createAutomaticBackup(target string, now time.Time, pattern string) (string, error) {
 	source, err := os.Open(target)
 	if err != nil {
 		return "", err
@@ -252,13 +270,14 @@ func createAutomaticBackup(target string, now time.Time) (string, error) {
 		return "", errors.New("backup source is not a regular file")
 	}
 
-	base := target + "." + now.UTC().Format("20060102150405")
+	directory := filepath.Dir(target)
+	sourceName := filepath.Base(target)
 	for collision := 1; collision <= 10000; collision++ {
-		suffix := "_bak"
-		if collision > 1 {
-			suffix = "_" + strconv.Itoa(collision) + "_bak"
+		name, nameErr := backupname.Candidate(pattern, sourceName, now, collision)
+		if nameErr != nil {
+			return "", nameErr
 		}
-		path := base + suffix
+		path := filepath.Join(directory, name)
 		destination, openErr := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, info.Mode().Perm())
 		if errors.Is(openErr, os.ErrExist) {
 			continue
@@ -287,33 +306,58 @@ func createAutomaticBackup(target string, now time.Time) (string, error) {
 }
 
 type automaticBackup struct {
+	name    string
 	path    string
 	modTime time.Time
 }
 
-func pruneAutomaticBackups(target string, retention int) (int, bool, error) {
+// pruneAutomaticBackups removes the automatic backups of one save past the
+// retention limit and reports the file names it removed.
+//
+// owned maps the file name of every backup this application recorded for the
+// save onto its recorded creation time; it may be nil. A file is a candidate
+// only when it is recorded there or when its name is one the fixed 2.0 grammar
+// produced. A file that is neither belongs to somebody else and is never
+// touched, whatever pattern is configured now.
+func pruneAutomaticBackups(
+	target string, retention int, owned map[string]time.Time,
+) ([]string, bool, error) {
 	directory := filepath.Dir(target)
-	base := regexp.QuoteMeta(filepath.Base(target))
-	pattern := regexp.MustCompile("^" + base + `\.[0-9]{14}(?:_[0-9]+)?_bak$`)
+	sourceName := filepath.Base(target)
 	entries, err := os.ReadDir(directory)
 	if err != nil {
-		return 0, false, err
+		return nil, false, err
 	}
 	backups := make([]automaticBackup, 0)
 	for _, entry := range entries {
-		if entry.IsDir() || !pattern.MatchString(entry.Name()) {
+		if entry.IsDir() {
 			continue
+		}
+		recorded, isOwned := owned[entry.Name()]
+		if !isOwned {
+			if _, matches := backupname.MatchesDefault(entry.Name(), sourceName); !matches {
+				continue
+			}
 		}
 		info, err := entry.Info()
 		if err != nil {
-			return 0, false, err
+			return nil, false, err
+		}
+		// The recorded creation time is authoritative when this application wrote
+		// the file; a file only recognised by its name keeps the modification time
+		// it has always been ordered by.
+		when := info.ModTime()
+		if isOwned {
+			when = recorded
 		}
 		backups = append(backups, automaticBackup{
-			path: filepath.Join(directory, entry.Name()), modTime: info.ModTime(),
+			name:    entry.Name(),
+			path:    filepath.Join(directory, entry.Name()),
+			modTime: when,
 		})
 	}
 	if len(backups) <= retention {
-		return 0, len(backups) == retention, nil
+		return nil, len(backups) == retention, nil
 	}
 	sort.SliceStable(backups, func(left, right int) bool {
 		if backups[left].modTime.Equal(backups[right].modTime) {
@@ -321,13 +365,14 @@ func pruneAutomaticBackups(target string, retention int) (int, bool, error) {
 		}
 		return backups[left].modTime.Before(backups[right].modTime)
 	})
-	removeCount := len(backups) - retention
-	for _, backup := range backups[:removeCount] {
+	removed := make([]string, 0, len(backups)-retention)
+	for _, backup := range backups[:len(backups)-retention] {
 		if err := os.Remove(backup.path); err != nil {
-			return 0, false, err
+			return nil, false, err
 		}
+		removed = append(removed, backup.name)
 	}
-	return removeCount, true, nil
+	return removed, true, nil
 }
 
 func verifyWrittenTarget(target string, candidate []byte, platform Platform) error {

@@ -5,12 +5,23 @@
 `GetDeploymentGameStatus` reports the confirmed state of the game on one
 target: `running`, `stopped` or `unknown`.
 
-`unknown` is a first-class answer, not a failure. Identifying the game process
-needs a contract that does not exist — the target configuration carries a start
-and a stop command and nothing that names a process — so the backend states the
-truth instead of guessing from a process list or from the save's modification
-time. The interface then applies the explicit warning and confirmation the
-deployment specification defines for exactly this case.
+The state comes from one place only: the status command the user explicitly
+configured on the target. Its exit code is the whole contract.
+
+| Outcome of the status command | Reported state |
+|---|---|
+| exit code 0 | `running` |
+| exit code 1 | `stopped` |
+| no status command is configured | `unknown` |
+| any other exit code | `unknown` |
+| a timeout, a transport fault, or a command that could not be started | `unknown` |
+
+`unknown` is a first-class answer, not a failure: the interface applies the
+explicit warning and confirmation the deployment specification defines for
+exactly this case. The backend never derives the state from a process name, from
+the start command, from the kind of operating system or from the save's
+modification time, and the mere success of a start or stop command is not
+evidence of a state either.
 
 | | |
 |---|---|
@@ -48,7 +59,7 @@ type GetDeploymentGameStatusResult struct {
 |---|---|
 | the deployment service is not wired | `deployment service is required` |
 | `targetID` names no target | `unknown deployment target …` |
-| the target is an SSH target | the fail-closed transport error |
+| the SSH connection cannot be opened or its host key is not approved | the transport's own refusal |
 
 ## Local verification
 

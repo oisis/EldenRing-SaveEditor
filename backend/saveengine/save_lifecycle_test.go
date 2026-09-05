@@ -100,9 +100,12 @@ func TestAutomaticBackupRetentionRemovesOnlyTheOldestMatchingFiles(t *testing.T)
 		t.Fatalf("write manual backup: %v", err)
 	}
 
-	removed, reached, err := pruneAutomaticBackups(target, 10)
-	if err != nil || removed != 2 || !reached {
-		t.Fatalf("pruneAutomaticBackups = %d, %v, %v; want 2, true, nil", removed, reached, err)
+	// No index entry is supplied: these files are only recognisable by the fixed
+	// 2.0 name grammar, which is exactly the case of a library created before the
+	// pattern became configurable.
+	removed, reached, err := pruneAutomaticBackups(target, 10, nil)
+	if err != nil || len(removed) != 2 || !reached {
+		t.Fatalf("pruneAutomaticBackups = %v, %v, %v; want 2 removed, true, nil", removed, reached, err)
 	}
 	for _, path := range created[:2] {
 		if _, err := os.Stat(path); !os.IsNotExist(err) {
@@ -184,7 +187,7 @@ func TestRecoveryRecentFilesAndExternalSaveConflict(t *testing.T) {
 	if _, err := engine.RecordRecentFile(loaded.SaveSessionID); err != nil {
 		t.Fatalf("RecordRecentFile: %v", err)
 	}
-	if _, err := engine.SetSaveLifecycleSettings(5); err != nil {
+	if _, err := engine.SetSaveLifecycleSettings(5, ""); err != nil {
 		t.Fatalf("SetSaveLifecycleSettings: %v", err)
 	}
 	if _, err := engine.SetCharacterRunes(loaded.SaveSessionID, setRunesTestSlot, 900, "0"); err != nil {

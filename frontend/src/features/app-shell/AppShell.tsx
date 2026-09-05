@@ -321,7 +321,10 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               platform={session?.platform}
               characterID={selectedCharacterID}
               backupRetention={flow.lifecycleSettings?.backupRetention}
-              onBackupRetentionChange={flow.setBackupRetention}
+              backupNamePattern={flow.lifecycleSettings?.backupNamePattern}
+              backupNameExample={flow.lifecycleSettings?.backupNameExample}
+              backupSettingsStatus={flow.backupSettingsStatus}
+              onBackupSettingsChange={flow.setBackupSettings}
               onOpenStagedFile={flow.openStagedFile}
               onOpenLocalFile={flow.openRecent}
               applyMutationReceipt={flow.applyMutationReceipt}

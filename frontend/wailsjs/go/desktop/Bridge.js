@@ -522,8 +522,8 @@ export function SetSaveAccountID(arg1, arg2, arg3) {
   return window['go']['desktop']['Bridge']['SetSaveAccountID'](arg1, arg2, arg3);
 }
 
-export function SetSaveLifecycleSettings(arg1) {
-  return window['go']['desktop']['Bridge']['SetSaveLifecycleSettings'](arg1);
+export function SetSaveLifecycleSettings(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['SetSaveLifecycleSettings'](arg1, arg2);
 }
 
 export function SetSpectralSteedAttire(arg1, arg2, arg3, arg4) {
@@ -544,6 +544,10 @@ export function SetWhetbladeUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function TestDeploymentTarget(arg1) {
   return window['go']['desktop']['Bridge']['TestDeploymentTarget'](arg1);
+}
+
+export function TrustDeploymentHostKey(arg1, arg2) {
+  return window['go']['desktop']['Bridge']['TrustDeploymentHostKey'](arg1, arg2);
 }
 
 export function UndoLastOperation(arg1, arg2) {
