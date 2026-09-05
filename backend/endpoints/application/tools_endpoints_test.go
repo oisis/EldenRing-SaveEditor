@@ -12,6 +12,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
+	"github.com/oisis/EldenRing-SaveForge/backend/projectlinks"
 )
 
 // TestHostSettingsRoundTrip covers the getter and the setter together: the
@@ -121,16 +122,16 @@ func TestProjectLinksAreAClosedAllowlist(t *testing.T) {
 		if !strings.HasPrefix(link.URL, "https://") {
 			t.Fatalf("link %q is not an https address: %q", link.ID, link.URL)
 		}
-		resolved, err := ResolveProjectLink(link.ID)
+		resolved, err := projectlinks.Resolve(link.ID)
 		if err != nil || resolved != link.URL {
-			t.Fatalf("ResolveProjectLink(%q) = %q, %v", link.ID, resolved, err)
+			t.Fatalf("projectlinks.Resolve(%q) = %q, %v", link.ID, resolved, err)
 		}
 	}
-	if _, err := ResolveProjectLink("https://example.com"); err == nil {
-		t.Fatal("ResolveProjectLink accepted an address instead of an identifier")
+	if _, err := projectlinks.Resolve("https://example.com"); err == nil {
+		t.Fatal("projectlinks.Resolve accepted an address instead of an identifier")
 	}
-	if _, err := ResolveProjectLink("unknown"); err == nil {
-		t.Fatal("ResolveProjectLink accepted an unknown identifier")
+	if _, err := projectlinks.Resolve("unknown"); err == nil {
+		t.Fatal("projectlinks.Resolve accepted an unknown identifier")
 	}
 }
 

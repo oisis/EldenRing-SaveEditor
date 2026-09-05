@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const expectedEndpointDefinitionCount = 138
+const expectedEndpointDefinitionCount = 163
 
 // endpointsDir is the parent directory of this package: the root that holds one
 // domain directory per endpoint group.

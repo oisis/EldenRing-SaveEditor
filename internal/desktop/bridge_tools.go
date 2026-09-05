@@ -10,6 +10,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	deploymentendpoints "github.com/oisis/EldenRing-SaveForge/backend/endpoints/deployment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
+	"github.com/oisis/EldenRing-SaveForge/backend/projectlinks"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -150,7 +151,7 @@ func (b *Bridge) OpenHostLocation(location string) error {
 // browser, as an explicit user action. The identifier is resolved by the
 // backend allowlist; an unknown one is refused.
 func (b *Bridge) OpenProjectLink(linkID string) error {
-	url, err := application.ResolveProjectLink(linkID)
+	url, err := projectlinks.Resolve(linkID)
 	if err != nil {
 		return bridgeError(err)
 	}

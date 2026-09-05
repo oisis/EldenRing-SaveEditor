@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/projectlinks"
 )
 
 // CheckForUpdatesEndpointID is the stable backend identifier of CheckForUpdates.
@@ -103,10 +104,15 @@ func CheckForUpdates(
 		address = endpointOverride
 	}
 
+	// The releases page comes from the same allowlist the About screen offers,
+	// so there is one approved address rather than a second literal here. A
+	// failure could only mean the constant left the allowlist, and reporting an
+	// empty URL is then truthful rather than a stale guess.
+	releaseURL, _ := projectlinks.Resolve(projectlinks.Releases)
 	result := CheckForUpdatesResult{
 		Status:         UpdateStatusUnknown,
 		CurrentVersion: applicationVersion,
-		ReleaseURL:     projectLinks[ProjectLinkReleases],
+		ReleaseURL:     releaseURL,
 	}
 
 	requestContext, cancel := context.WithTimeout(ctx, updateCheckTimeout)
