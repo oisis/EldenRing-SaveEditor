@@ -16,6 +16,18 @@ GO_PACKAGES := \
 # Wails CLI pinned to the version the frontend baseline was verified against.
 WAILS := go run github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
 
+# Desktop build target. Supported values: darwin/arm64, windows/amd64,
+# linux/amd64. Selecting a platform does not by itself provide a working
+# cross-compilation toolchain: each target needs its own CGO toolchain and
+# native GUI dependencies, so a foreign target is normally built on its own
+# runner.
+PLATFORM ?= darwin/arm64
+
+# The Linux dependency set is built against WebKit2GTK 4.1, which Wails only
+# selects through this build tag. The tag is Linux-only and must not leak into
+# the macOS or Windows builds.
+WAILS_BUILD_TAGS := $(if $(filter linux/%,$(PLATFORM)),-tags webkit2_41,)
+
 .PHONY: all deps test test-race vet bindings frontend-check frontend-test frontend-build app-build swagger-start swagger-stop swagger-restart viewer-start viewer-stop viewer-restart help
 
 all: test
@@ -54,7 +66,7 @@ frontend-build:
 # tmp/ are not part of the application and must not take part in resolving the
 # module graph.
 app-build:
-	$(WAILS) build -platform darwin/arm64 -clean -m -nosyncgomod \
+	$(WAILS) build -platform $(PLATFORM) $(WAILS_BUILD_TAGS) -clean -m -nosyncgomod \
 		-ldflags "-X main.applicationVersion=$(VERSION)"
 
 swagger-start:
@@ -85,7 +97,9 @@ help:
 	@echo "  make frontend-check    Run Biome and the TypeScript typecheck"
 	@echo "  make frontend-test     Run the frontend Vitest suite"
 	@echo "  make frontend-build    Build the production frontend bundle"
-	@echo "  make app-build         Build the macOS ARM64 app with VERSION"
+	@echo "  make app-build         Build the desktop app with VERSION (PLATFORM=darwin/arm64)"
+	@echo "                         make app-build PLATFORM=windows/amd64"
+	@echo "                         make app-build PLATFORM=linux/amd64"
 	@echo "  make swagger-start     Start Scalar Docs and the local API host"
 	@echo "  make swagger-stop      Stop Scalar Docs and the local API host"
 	@echo "  make swagger-restart   Restart Scalar Docs and the local API host"

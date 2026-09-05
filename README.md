@@ -50,6 +50,21 @@ make test-race
 make vet
 ```
 
+Build the desktop application. `VERSION` in the `Makefile` stays the single
+source of the release version and reaches the binary only through the linker:
+
+```bash
+make app-build                          # darwin/arm64 (default)
+make app-build PLATFORM=windows/amd64
+make app-build PLATFORM=linux/amd64
+```
+
+`PLATFORM` only selects the Wails target. Each target still needs its own CGO
+toolchain and native GUI dependencies, so a foreign target is normally built on
+its own runner: macOS ARM64 on macOS, Windows AMD64 on Windows, and Linux AMD64
+on Linux with `libgtk-3-dev` and `libwebkit2gtk-4.1-dev`. The Linux target adds
+the `webkit2_41` build tag, which is Linux-only.
+
 Open Scalar Docs and its local API host:
 
 ```bash
