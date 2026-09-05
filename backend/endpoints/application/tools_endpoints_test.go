@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 )
 
@@ -19,7 +20,7 @@ import (
 func TestHostSettingsRoundTrip(t *testing.T) {
 	store := hostsettings.NewStore(t.TempDir())
 
-	initial, err := GetHostSettings(store)
+	initial, err := GetHostSettings(store, nil)
 	if err != nil {
 		t.Fatalf("GetHostSettings: %v", err)
 	}
@@ -34,18 +35,18 @@ func TestHostSettingsRoundTrip(t *testing.T) {
 		t.Fatalf("a store with a state directory reports %+v", initial)
 	}
 
-	stored, err := SetHostSettings(store, true, "always")
+	stored, err := SetHostSettings(store, nil, true, "always")
 	if err != nil {
 		t.Fatalf("SetHostSettings: %v", err)
 	}
 	if !stored.SkipReviewForNormalRisk || stored.RemoteBackupPolicy != "always" {
 		t.Fatalf("stored = %+v", stored)
 	}
-	if _, err := SetHostSettings(store, false, "never"); err == nil {
+	if _, err := SetHostSettings(store, nil, false, "never"); err == nil {
 		t.Fatal("SetHostSettings accepted a policy that would disable the mandatory backup")
 	}
 	// The refused write left the stored value alone.
-	after, err := GetHostSettings(store)
+	after, err := GetHostSettings(store, nil)
 	if err != nil {
 		t.Fatalf("GetHostSettings after the refusal: %v", err)
 	}
@@ -64,7 +65,7 @@ func TestExportDiagnosticReportWritesOnlyRedactedData(t *testing.T) {
 	}
 	target := filepath.Join(t.TempDir(), "report.json")
 
-	result, err := ExportDiagnosticReport("2.0.0", store, nil, "", target)
+	result, err := ExportDiagnosticReport("2.0.0", store, nil, nil, "", target)
 	if err != nil {
 		t.Fatalf("ExportDiagnosticReport: %v", err)
 	}
@@ -101,7 +102,7 @@ func TestExportDiagnosticReportWritesOnlyRedactedData(t *testing.T) {
 		t.Fatal("the report carries the host state directory")
 	}
 
-	if _, err := ExportDiagnosticReport("2.0.0", store, nil, "", ""); err == nil {
+	if _, err := ExportDiagnosticReport("2.0.0", store, nil, nil, "", ""); err == nil {
 		t.Fatal("ExportDiagnosticReport accepted an empty target")
 	}
 }
@@ -239,5 +240,71 @@ func TestCheckForUpdatesReportsNoStableRelease(t *testing.T) {
 	}
 	if result.Status != UpdateStatusUnavailable || result.LatestVersion != "" {
 		t.Fatalf("result = %+v, want no stable release", result)
+	}
+}
+
+// The report gained the diagnostic mode state and a bounded slice of the
+// instance-wide records. Both go through the same sanitisation boundary as the
+// console, so an attempt to record a private value must leave no trace in the
+// exported document either.
+func TestExportDiagnosticReportCarriesTheModeAndSafeEventsOnly(t *testing.T) {
+	store := hostsettings.NewStore(t.TempDir())
+	service := diagnostics.NewService(diagnostics.Options{Directory: t.TempDir()})
+	t.Cleanup(service.Close)
+
+	service.SetDebugMode(true)
+	service.Log(diagnostics.Entry{
+		Event: diagnostics.EventOperationFinished, Operation: diagnostics.OperationDeployToTarget,
+		Status: diagnostics.StatusSucceeded, CorrelationID: "0123456789abcdef",
+	})
+	// None of these is part of the closed catalogue, so none of them may reach
+	// the document.
+	private := []string{
+		"/Users/oisis/Documents/ER0000.sl2",
+		"deck@192.168.0.10",
+		"76561198000000000",
+		"~/.ssh/id_ed25519",
+	}
+	for _, value := range private {
+		service.Log(diagnostics.Entry{Event: value})
+		service.Log(diagnostics.Entry{Event: diagnostics.EventApplicationStarted, Version: value})
+		service.Log(diagnostics.Entry{Event: diagnostics.EventOperationStarted, CorrelationID: value})
+		service.Log(diagnostics.Entry{
+			Event:  diagnostics.EventOperationFinished,
+			Status: diagnostics.StatusFailed, Code: value,
+		})
+	}
+
+	target := filepath.Join(t.TempDir(), "report.json")
+	result, err := ExportDiagnosticReport("2.0.0", store, service, nil, "", target)
+	if err != nil {
+		t.Fatalf("ExportDiagnosticReport: %v", err)
+	}
+	// The mode change and the one accepted operation record: nothing that was
+	// rejected was counted or carried.
+	if result.EventCount != 2 {
+		t.Fatalf("eventCount = %d, want 2", result.EventCount)
+	}
+
+	data, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read the report: %v", err)
+	}
+	for _, value := range private {
+		if strings.Contains(string(data), value) {
+			t.Errorf("the report carries the private value %q", value)
+		}
+	}
+	var document map[string]any
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatalf("the report is not valid JSON: %v", err)
+	}
+	mode, ok := document["diagnostics"].(map[string]any)
+	if !ok || mode["enabled"] != true {
+		t.Fatalf("diagnostics = %v, want the enabled mode state", document["diagnostics"])
+	}
+	events, ok := document["events"].([]any)
+	if !ok || len(events) != 2 {
+		t.Fatalf("events = %v, want the two accepted records", document["events"])
 	}
 }

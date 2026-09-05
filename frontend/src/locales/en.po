@@ -158,6 +158,10 @@ msgstr "Advanced subcategories"
 msgid "Aggressive"
 msgstr "Aggressive"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "All"
+msgstr "All"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "All Area Search Rate (Co-op)"
 msgstr "All Area Search Rate (Co-op)"
@@ -664,13 +668,21 @@ msgstr "Cut content"
 msgid "Dark"
 msgstr "Dark"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Debug"
+msgstr "Debug"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Debug Mode"
 msgstr "Debug Mode"
 
 #: src/features/tools/ToolsPanel.tsx
-msgid "Debug Mode and local application logs remain unavailable until their diagnostic contract is defined."
-msgstr "Debug Mode and local application logs remain unavailable until their diagnostic contract is defined."
+msgid "Debug Mode adds detailed step records for this run only. It is always off when the application starts, and turning it off stops new detailed records without deleting the ones already written."
+msgstr "Debug Mode adds detailed step records for this run only. It is always off when the application starts, and turning it off stops new detailed records without deleting the ones already written."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Debug Mode was not changed, so the previous state is still in effect."
+msgstr "Debug Mode was not changed, so the previous state is still in effect."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Defeated"
@@ -822,6 +834,10 @@ msgstr "Equipment"
 #: src/features/app-shell/AppShell.tsx
 msgid "Equipment and quick slots"
 msgstr "Equipment and quick slots"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Error"
+msgstr "Error"
 
 #. placeholder {0}: mutations.error.code
 #: src/features/character/CharacterPanel.tsx
@@ -1008,6 +1024,10 @@ msgstr "Inactive slot"
 msgid "Inactive slots"
 msgstr "Inactive slots"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Info"
+msgstr "Info"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Information from GameCatalog."
 msgstr "Information from GameCatalog."
@@ -1130,6 +1150,7 @@ msgstr "Left hand {0}"
 msgid "Legs"
 msgstr "Legs"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Level"
 msgstr "Level"
@@ -1138,10 +1159,6 @@ msgstr "Level"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Light"
 msgstr "Light"
-
-#: src/features/app-shell/AppShell.tsx
-msgid "Live diagnostic messages are not available in this build yet."
-msgstr "Live diagnostic messages are not available in this build yet."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Load a save and select a character to read the Inventory and the Storage Box."
@@ -1221,6 +1238,10 @@ msgstr "Loading variants…"
 #: src/features/world/WorldPanel.tsx
 msgid "Loading…"
 msgstr "Loading…"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Local diagnostic logging is unavailable, so records are kept in this session only. Nothing else is affected."
+msgstr "Local diagnostic logging is unavailable, so records are kept in this session only. Nothing else is affected."
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Local filesystem"
@@ -1419,6 +1440,10 @@ msgstr "No active character is available."
 #: src/features/character/CharacterPanel.tsx
 msgid "No appearance presets matched your search."
 msgstr "No appearance presets matched your search."
+
+#: src/features/app-shell/AppShell.tsx
+msgid "No diagnostic messages yet."
+msgstr "No diagnostic messages yet."
 
 #: src/features/world/WorldPanel.tsx
 msgid "No entry matches the search."
@@ -2655,9 +2680,17 @@ msgstr "The deployment configuration could not be read."
 msgid "The deployment failed and the target was left unchanged."
 msgstr "The deployment failed and the target was left unchanged."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "The diagnostic messages could not be read."
+msgstr "The diagnostic messages could not be read."
+
 #: src/features/tools/ToolsPanel.tsx
-msgid "The diagnostic report carries the application version, the platform, the settings above and the current session's diagnostic records. It never carries save data, file paths or SSH keys."
-msgstr "The diagnostic report carries the application version, the platform, the settings above and the current session's diagnostic records. It never carries save data, file paths or SSH keys."
+msgid "The diagnostic report carries the application version, the platform, the settings above, the Debug Mode state and the recent diagnostic records of this run and of the current session. It never carries save data, file paths, SSH keys or any file from the log directory."
+msgstr "The diagnostic report carries the application version, the platform, the settings above, the Debug Mode state and the recent diagnostic records of this run and of the current session. It never carries save data, file paths, SSH keys or any file from the log directory."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The diagnostic settings could not be read."
+msgstr "The diagnostic settings could not be read."
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "The download failed and the target was left unchanged."
@@ -3177,6 +3210,7 @@ msgstr "Visitor List Max"
 msgid "Visitor Timeout"
 msgstr "Visitor Timeout"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"
 msgstr "Warning"

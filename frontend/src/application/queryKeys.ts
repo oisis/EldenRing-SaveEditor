@@ -53,6 +53,7 @@ export const queryKeys = {
    * Profile: both are host state that survives closing a save.
    */
   hostSettings: () => ["settings", "host"] as const,
+  diagnosticMode: () => ["settings", "diagnostic-mode"] as const,
   /**
    * The approved project links are a property of the build, so they get one
    * stable key that no session or revision takes part in.

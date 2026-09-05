@@ -42,7 +42,7 @@ var notSaveSessionMutations = map[string]string{
 	"create_build_template":       "writes the local build-template store",
 	"update_build_template":       "writes the local build-template store",
 	"delete_build_template":       "writes the local build-template store",
-	"set_diagnostic_mode":         "contract definition only; it has no runtime handler",
+	"set_diagnostic_mode":         "writes the instance runtime diagnostic state",
 }
 
 var mutationKindPattern = regexp.MustCompile(`Kind:\s*contract\.Mutation\b`)

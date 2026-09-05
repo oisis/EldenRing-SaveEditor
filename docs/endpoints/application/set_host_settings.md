@@ -31,6 +31,7 @@ confirmed each time.
 ```go
 func SetHostSettings(
 	store *hostsettings.Store,
+	diagnosticService *diagnostics.Service,
 	skipReviewForNormalRisk bool,
 	remoteBackupPolicy string,
 ) (HostSettingsResult, error)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/deployment"
+	diagnosticsservice "github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	deploymentendpoints "github.com/oisis/EldenRing-SaveForge/backend/endpoints/deployment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
@@ -27,6 +28,7 @@ const deploymentProgressEvent = "deployment.progress"
 // Emission before the host has started is dropped rather than buffered: the
 // operation's own result still states every stage it performed.
 func (b *Bridge) publishDeploymentProgress(progress deployment.Progress) {
+	b.observeStage(progress)
 	ctx := b.hostContextOrNil()
 	if ctx == nil {
 		return
@@ -53,14 +55,31 @@ func (b *Bridge) operationContext(operationID string) (context.Context, func()) 
 	if b.operations == nil {
 		b.operations = map[string]context.CancelFunc{}
 	}
+	if b.operationCorrelations == nil {
+		b.operationCorrelations = map[string]string{}
+	}
 	b.operations[operationID] = cancel
+	b.operationCorrelations[operationID] = diagnosticsservice.NewCorrelationID()
 	b.operationsMutex.Unlock()
 	return ctx, func() {
 		b.operationsMutex.Lock()
 		delete(b.operations, operationID)
+		delete(b.operationCorrelations, operationID)
 		b.operationsMutex.Unlock()
 		cancel()
 	}
+}
+
+// correlationFor resolves the generated correlation value of one running
+// operation. An unknown identifier yields an empty value rather than being
+// echoed into a record: the caller's own string is never logged.
+func (b *Bridge) correlationFor(operationID string) string {
+	if operationID == "" {
+		return ""
+	}
+	b.operationsMutex.Lock()
+	defer b.operationsMutex.Unlock()
+	return b.operationCorrelations[operationID]
 }
 
 // CancelDeploymentOperation cooperatively cancels one running operation.
@@ -78,7 +97,7 @@ func (b *Bridge) CancelDeploymentOperation(operationID string) error {
 
 // GetHostSettings delegates to the GetHostSettings endpoint.
 func (b *Bridge) GetHostSettings() (application.HostSettingsResult, error) {
-	return bridged(application.GetHostSettings(b.hostSettings))
+	return bridged(application.GetHostSettings(b.hostSettings, b.diagnostics))
 }
 
 // SetHostSettings delegates to the SetHostSettings endpoint.
@@ -86,11 +105,12 @@ func (b *Bridge) SetHostSettings(
 	skipReviewForNormalRisk bool, remoteBackupPolicy string,
 ) (application.HostSettingsResult, error) {
 	return bridged(application.SetHostSettings(
-		b.hostSettings, skipReviewForNormalRisk, remoteBackupPolicy))
+		b.hostSettings, b.diagnostics, skipReviewForNormalRisk, remoteBackupPolicy))
 }
 
-// Host locations are identifiers, not paths. `logs` is retained as a closed
-// value only so an older frontend receives an explicit unavailable result.
+// Host locations are identifiers, not paths. Each one resolves to a directory
+// its own backend owner supplies: the settings store owns the configuration
+// directory and the diagnostic service owns the log directory.
 const (
 	hostLocationConfiguration = "configuration"
 	hostLocationLogs          = "logs"
@@ -111,7 +131,7 @@ func (b *Bridge) OpenHostLocation(location string) error {
 	case hostLocationConfiguration:
 		path = b.hostSettings.Directory()
 	case hostLocationLogs:
-		return bridgeError(errors.New("local application logs are not available in this build"))
+		path = b.diagnostics.Directory()
 	default:
 		return bridgeError(errors.New("unknown host location"))
 	}
@@ -169,7 +189,8 @@ func (b *Bridge) ExportDiagnosticReport(saveSessionID string) (application.Diagn
 		return application.DiagnosticReportResult{Exported: false}, nil
 	}
 	return bridged(application.ExportDiagnosticReport(
-		b.applicationVersion, b.hostSettings, b.saveEngine, saveSessionID, target))
+		b.applicationVersion, b.hostSettings, b.diagnostics, b.saveEngine,
+		saveSessionID, target))
 }
 
 func (b *Bridge) openURL(ctx context.Context, url string) {
@@ -372,8 +393,12 @@ func (b *Bridge) DeployToTarget(
 ) (deploymentendpoints.OperationResult, error) {
 	ctx, release := b.operationContext(request.OperationID)
 	defer release()
-	return bridged(deploymentendpoints.DeployToTarget(
-		ctx, b.deploymentService, b.saveEngine, request))
+	logger := b.beginOperation(
+		diagnosticsservice.OperationDeployToTarget, b.correlationFor(request.OperationID))
+	result, err := deploymentendpoints.DeployToTarget(
+		ctx, b.deploymentService, b.saveEngine, request)
+	logger.finishOperationResult(result, err)
+	return bridged(result, err)
 }
 
 // DownloadFromTarget delegates to the DownloadFromTarget endpoint.
@@ -382,7 +407,10 @@ func (b *Bridge) DownloadFromTarget(
 ) (deploymentendpoints.OperationResult, error) {
 	ctx, release := b.operationContext(request.OperationID)
 	defer release()
+	logger := b.beginOperation(
+		diagnosticsservice.OperationDownloadFromTarget, b.correlationFor(request.OperationID))
 	result, err := deploymentendpoints.DownloadFromTarget(ctx, b.deploymentService, request)
+	logger.finishOperationResult(result, err)
 	if err == nil && result.Completed && result.LocalPath != "" {
 		b.trackStagedDownload(result.LocalPath)
 	}
@@ -416,9 +444,13 @@ func (b *Bridge) ActivateTargetBackup(
 ) (deploymentendpoints.ActivateTargetBackupResult, error) {
 	ctx, release := b.operationContext(operationID)
 	defer release()
-	return bridged(deploymentendpoints.ActivateTargetBackup(
+	logger := b.beginOperation(
+		diagnosticsservice.OperationActivateBackup, b.correlationFor(operationID))
+	result, err := deploymentendpoints.ActivateTargetBackup(
 		ctx, b.deploymentService, b.deploymentStore, operationID, targetID, backupID,
-		continueWithUnknownGameStatus, confirmRemoteBackup))
+		continueWithUnknownGameStatus, confirmRemoteBackup)
+	logger.finishOperationResult(result.Operation, err)
+	return bridged(result, err)
 }
 
 // ClearActiveTargetBackup delegates to the ClearActiveTargetBackup endpoint.

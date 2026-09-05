@@ -158,6 +158,10 @@ msgstr "Podkategorie zaawansowane"
 msgid "Aggressive"
 msgstr "Agresywne"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "All"
+msgstr "Wszystkie"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "All Area Search Rate (Co-op)"
 msgstr "Wskaźnik wyszukiwania wszystkich obszarów (kooperacja)"
@@ -664,13 +668,21 @@ msgstr "Wycięta zawartość"
 msgid "Dark"
 msgstr "Ciemny"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Debug"
+msgstr "Debug"
+
 #: src/features/tools/ToolsPanel.tsx
 msgid "Debug Mode"
 msgstr "Tryb debugowania"
 
 #: src/features/tools/ToolsPanel.tsx
-msgid "Debug Mode and local application logs remain unavailable until their diagnostic contract is defined."
-msgstr "Tryb debugowania i lokalne logi aplikacji pozostają niedostępne do czasu zdefiniowania ich kontraktu diagnostycznego."
+msgid "Debug Mode adds detailed step records for this run only. It is always off when the application starts, and turning it off stops new detailed records without deleting the ones already written."
+msgstr "Debug Mode dodaje szczegółowe wpisy etapów wyłącznie dla tego uruchomienia. Po starcie aplikacji jest zawsze wyłączony, a jego wyłączenie zatrzymuje nowe szczegółowe wpisy, nie usuwając już zapisanych."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Debug Mode was not changed, so the previous state is still in effect."
+msgstr "Debug Mode nie został zmieniony, więc nadal obowiązuje poprzedni stan."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Defeated"
@@ -822,6 +834,10 @@ msgstr "Wyposażenie"
 #: src/features/app-shell/AppShell.tsx
 msgid "Equipment and quick slots"
 msgstr "Wyposażenie i szybkie sloty"
+
+#: src/features/app-shell/AppShell.tsx
+msgid "Error"
+msgstr "Błąd"
 
 #. placeholder {0}: mutations.error.code
 #: src/features/character/CharacterPanel.tsx
@@ -1008,6 +1024,10 @@ msgstr "Nieaktywny slot"
 msgid "Inactive slots"
 msgstr "Nieaktywne sloty"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "Info"
+msgstr "Informacja"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Information from GameCatalog."
 msgstr "Informacje z GameCatalog."
@@ -1130,6 +1150,7 @@ msgstr "Lewa ręka {0}"
 msgid "Legs"
 msgstr "Nogi"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Level"
 msgstr "Poziom"
@@ -1138,10 +1159,6 @@ msgstr "Poziom"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Light"
 msgstr "Jasny"
-
-#: src/features/app-shell/AppShell.tsx
-msgid "Live diagnostic messages are not available in this build yet."
-msgstr "Bieżące komunikaty diagnostyczne nie są jeszcze dostępne w tej wersji."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Load a save and select a character to read the Inventory and the Storage Box."
@@ -1221,6 +1238,10 @@ msgstr "Wczytywanie wariantów…"
 #: src/features/world/WorldPanel.tsx
 msgid "Loading…"
 msgstr "Wczytywanie…"
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "Local diagnostic logging is unavailable, so records are kept in this session only. Nothing else is affected."
+msgstr "Lokalny zapis diagnostyki jest niedostępny, więc wpisy pozostają wyłącznie w tej sesji. Nie wpływa to na nic innego."
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Local filesystem"
@@ -1419,6 +1440,10 @@ msgstr "Brak dostępnej aktywnej postaci."
 #: src/features/character/CharacterPanel.tsx
 msgid "No appearance presets matched your search."
 msgstr "Żaden preset wyglądu nie pasuje do wyszukiwania."
+
+#: src/features/app-shell/AppShell.tsx
+msgid "No diagnostic messages yet."
+msgstr "Brak komunikatów diagnostycznych."
 
 #: src/features/world/WorldPanel.tsx
 msgid "No entry matches the search."
@@ -2655,9 +2680,17 @@ msgstr "Nie udało się odczytać konfiguracji wdrożenia."
 msgid "The deployment failed and the target was left unchanged."
 msgstr "Wdrożenie nie powiodło się, a cel pozostał bez zmian."
 
+#: src/features/app-shell/AppShell.tsx
+msgid "The diagnostic messages could not be read."
+msgstr "Nie udało się odczytać komunikatów diagnostycznych."
+
 #: src/features/tools/ToolsPanel.tsx
-msgid "The diagnostic report carries the application version, the platform, the settings above and the current session's diagnostic records. It never carries save data, file paths or SSH keys."
-msgstr "Raport diagnostyczny zawiera wersję aplikacji, platformę, powyższe ustawienia oraz rekordy diagnostyczne bieżącej sesji. Nigdy nie zawiera danych save'a, ścieżek plików ani kluczy SSH."
+msgid "The diagnostic report carries the application version, the platform, the settings above, the Debug Mode state and the recent diagnostic records of this run and of the current session. It never carries save data, file paths, SSH keys or any file from the log directory."
+msgstr "Raport diagnostyczny zawiera wersję aplikacji, platformę, powyższe ustawienia, stan Debug Mode oraz ostatnie wpisy diagnostyczne tego uruchomienia i bieżącej sesji. Nigdy nie zawiera danych save, ścieżek plików, kluczy SSH ani żadnego pliku z katalogu logów."
+
+#: src/features/tools/ToolsPanel.tsx
+msgid "The diagnostic settings could not be read."
+msgstr "Nie udało się odczytać ustawień diagnostyki."
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "The download failed and the target was left unchanged."
@@ -3177,6 +3210,7 @@ msgstr "Maks. listy gości"
 msgid "Visitor Timeout"
 msgstr "Limit czasu gościa"
 
+#: src/features/app-shell/AppShell.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"
 msgstr "Ostrzeżenie"

@@ -259,3 +259,34 @@ export const consoleLatest = style({
   whiteSpace: "nowrap",
   color: tokens.color.textMuted,
 });
+
+/** One console record per row: time, level and the backend's own message. */
+export const consoleList = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: tokens.space.xs,
+  margin: 0,
+  padding: 0,
+  listStyle: "none",
+  fontFamily: tokens.font.mono,
+  fontSize: tokens.fontSize.sm,
+});
+
+export const consoleRow = style({
+  display: "grid",
+  gridTemplateColumns: "auto auto 1fr",
+  gap: tokens.space.sm,
+  alignItems: "baseline",
+  minWidth: 0,
+});
+
+export const consoleLevel = style({
+  textTransform: "uppercase",
+  color: tokens.color.textMuted,
+});
+
+export const consoleFilter = style({
+  display: "flex",
+  alignItems: "center",
+  gap: tokens.space.sm,
+});

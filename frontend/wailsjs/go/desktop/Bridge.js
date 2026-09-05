@@ -166,6 +166,14 @@ export function GetDeploymentTargets() {
   return window['go']['desktop']['Bridge']['GetDeploymentTargets']();
 }
 
+export function GetDiagnosticEvents(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['GetDiagnosticEvents'](arg1, arg2, arg3);
+}
+
+export function GetDiagnosticMode() {
+  return window['go']['desktop']['Bridge']['GetDiagnosticMode']();
+}
+
 export function GetEquipment(arg1, arg2) {
   return window['go']['desktop']['Bridge']['GetEquipment'](arg1, arg2);
 }
@@ -444,6 +452,10 @@ export function SetColosseumUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function SetCookbookUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['desktop']['Bridge']['SetCookbookUnlocked'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetDiagnosticMode(arg1) {
+  return window['go']['desktop']['Bridge']['SetDiagnosticMode'](arg1);
 }
 
 export function SetEquippedArmaments(arg1, arg2, arg3, arg4) {

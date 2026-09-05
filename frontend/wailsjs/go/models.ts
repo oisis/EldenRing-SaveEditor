@@ -124,6 +124,7 @@ export namespace application {
 	export class DiagnosticReportResult {
 	    exported: boolean;
 	    recordCount: number;
+	    eventCount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new DiagnosticReportResult(source);
@@ -133,6 +134,7 @@ export namespace application {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.exported = source["exported"];
 	        this.recordCount = source["recordCount"];
+	        this.eventCount = source["eventCount"];
 	    }
 	}
 	export class SupportedSchema {
@@ -1956,9 +1958,113 @@ export namespace diagnostics {
 		    return a;
 		}
 	}
+	export class Record {
+	    seq: number;
+	    timestamp: string;
+	    severity: string;
+	    event: string;
+	    message: string;
+	    operation?: string;
+	    stage?: string;
+	    status?: string;
+	    correlationID?: string;
+	    code?: string;
+	    targetState?: string;
+	    durationMS?: number;
+	    count?: number;
+	    enabled?: boolean;
+	    version?: string;
+	    build?: string;
+	    platform?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Record(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.seq = source["seq"];
+	        this.timestamp = source["timestamp"];
+	        this.severity = source["severity"];
+	        this.event = source["event"];
+	        this.message = source["message"];
+	        this.operation = source["operation"];
+	        this.stage = source["stage"];
+	        this.status = source["status"];
+	        this.correlationID = source["correlationID"];
+	        this.code = source["code"];
+	        this.targetState = source["targetState"];
+	        this.durationMS = source["durationMS"];
+	        this.count = source["count"];
+	        this.enabled = source["enabled"];
+	        this.version = source["version"];
+	        this.build = source["build"];
+	        this.platform = source["platform"];
+	    }
+	}
+	export class Page {
+	    records: Record[];
+	    nextCursor: string;
+	    hasMore: boolean;
+	    totalBuffered: number;
+	    cursorExpired: boolean;
+	    oldestAvailableCursor: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Page(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.records = this.convertValues(source["records"], Record);
+	        this.nextCursor = source["nextCursor"];
+	        this.hasMore = source["hasMore"];
+	        this.totalBuffered = source["totalBuffered"];
+	        this.cursorExpired = source["cursorExpired"];
+	        this.oldestAvailableCursor = source["oldestAvailableCursor"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	
 	
+	
+	
+	export class State {
+	    enabled: boolean;
+	    logDirectoryExists: boolean;
+	    localLoggingAvailable: boolean;
+	    droppedRecords: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new State(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.logDirectoryExists = source["logDirectoryExists"];
+	        this.localLoggingAvailable = source["localLoggingAvailable"];
+	        this.droppedRecords = source["droppedRecords"];
+	    }
+	}
 
 }
 

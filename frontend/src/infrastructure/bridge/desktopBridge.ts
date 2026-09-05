@@ -28,6 +28,8 @@ import {
   DownloadFromTarget,
   DownloadTargetBackup,
   ExportDiagnosticReport,
+  GetDiagnosticEvents,
+  GetDiagnosticMode,
   ExportRecoveryJournal,
   ForgetDeploymentHostKey,
   GetAppearancePresets,
@@ -114,6 +116,7 @@ import {
   SetEquippedSpells,
   SetEquippedTalismans,
   SetFavoritePreset,
+  SetDiagnosticMode,
   SetHostSettings,
   SetOwnedItemQuantity,
   SetPhysickMixture,
@@ -148,6 +151,7 @@ import {
 import {
   type application,
   type deployment,
+  type diagnostics,
   saveengine,
   type schema,
   templates,
@@ -255,6 +259,8 @@ import type {
   TargetTestResult,
 } from "../../application/deployment/deploymentPort";
 import type {
+  DiagnosticEvent,
+  DiagnosticMode,
   HostSettings,
   HostSettingsPort,
   SafetyProfileSettings,
@@ -1541,7 +1547,6 @@ function toSafetyProfileSettings(
   };
 }
 
-
 /**
  * Projects the frontend's override shape onto the backend apply options.
  *
@@ -1683,6 +1688,36 @@ function toBuildTemplatePreview(
       field: issue.field,
       message: issue.message,
     })),
+  };
+}
+
+/** Projects the generated diagnostic state onto the application port shape. */
+function toDiagnosticMode(result: diagnostics.State): DiagnosticMode {
+  return {
+    enabled: result.enabled,
+    logDirectoryExists: result.logDirectoryExists,
+    localLoggingAvailable: result.localLoggingAvailable,
+    droppedRecords: result.droppedRecords,
+  };
+}
+
+/**
+ * Projects one generated diagnostic record onto the port shape. Only the fields
+ * the console renders are carried across; the correlation value and the numeric
+ * measurements stay in the backend record and in the exported report.
+ */
+function toDiagnosticEvent(record: diagnostics.Record): DiagnosticEvent {
+  return {
+    seq: record.seq,
+    timestamp: record.timestamp,
+    severity: record.severity,
+    event: record.event,
+    message: record.message,
+    operation: record.operation,
+    stage: record.stage,
+    status: record.status,
+    code: record.code,
+    targetState: record.targetState,
   };
 }
 
@@ -2366,7 +2401,6 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       await callBridge(() => GetSpectralSteedAttires(saveSessionID, characterID)),
     ),
 
-
   // The capability contract is read as reported and validated as a closed
   // vocabulary: an operation kind or a risk level this build does not know is an
   // unknown contract, so the whole answer is refused rather than partially
@@ -2472,7 +2506,6 @@ export const wailsDesktopBridge: ApplicationInfoPort &
         LockAllSpectralSteedAttires(saveSessionID, characterID, expectedRevision),
       ),
     ),
-
 
   // The value reaches the bridge exactly as received: which profiles exist and
   // how an unknown one is rejected are the backend's contract.
@@ -2689,7 +2722,27 @@ export const wailsDesktopBridge: ApplicationInfoPort &
   // nothing and reports no records, which is what `exported: false` states.
   exportDiagnosticReport: async (saveSessionID) => {
     const result = await callBridge(() => ExportDiagnosticReport(saveSessionID ?? ""));
-    return { exported: result.exported, recordCount: result.recordCount };
+    return {
+      exported: result.exported,
+      recordCount: result.recordCount,
+      eventCount: result.eventCount,
+    };
+  },
+
+  getDiagnosticMode: async () => toDiagnosticMode(await callBridge(GetDiagnosticMode)),
+
+  setDiagnosticMode: async (enabled) =>
+    toDiagnosticMode(await callBridge(() => SetDiagnosticMode(enabled))),
+
+  getDiagnosticEvents: async ({ cursor, limit, severity }) => {
+    const page = await callBridge(() => GetDiagnosticEvents(cursor, limit, severity));
+    return {
+      records: page.records.map(toDiagnosticEvent),
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      totalBuffered: page.totalBuffered,
+      cursorExpired: page.cursorExpired,
+    };
   },
 
   getProjectLinks: async () => {

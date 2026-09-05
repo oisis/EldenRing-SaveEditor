@@ -15,6 +15,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	deploymentdomain "github.com/oisis/EldenRing-SaveForge/backend/deployment"
+	diagnosticsservice "github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
@@ -78,6 +79,10 @@ type Bridge struct {
 	// presentation of the same two, never a second model.
 	deploymentStore   *deploymentdomain.Store
 	deploymentService *deploymentdomain.Service
+	// diagnostics is the single process-wide diagnostic service: it owns the
+	// Debug Mode flag, the safe record buffer the console reads and the local
+	// JSONL sink. The bridge keeps no second flag and no second buffer.
+	diagnostics *diagnosticsservice.Service
 
 	// openHostURL hands one approved address to the host's default browser or
 	// file manager. A test replaces it; nothing here accepts an address the
@@ -89,6 +94,11 @@ type Bridge struct {
 	// It is guarded by operationsMutex and holds no save state.
 	operationsMutex sync.Mutex
 	operations      map[string]context.CancelFunc
+	// operationCorrelations maps the caller's operation identifier onto the
+	// generated correlation value its diagnostic records carry. The caller's own
+	// identifier never reaches a record: only this generated value does.
+	operationCorrelations map[string]string
+	operationTimings      map[string]*diagnosticTiming
 
 	// stagedDownloads contains only directories created by DownloadFromTarget.
 	// A cleanup request can therefore never remove an arbitrary frontend path.
@@ -146,6 +156,7 @@ type Dependencies struct {
 	HostSettings       *hostsettings.Store
 	BuildTemplates     *buildtemplates.Store
 	DeploymentStore    *deploymentdomain.Store
+	Diagnostics        *diagnosticsservice.Service
 	ChooseSaveFile     SaveFileChooser
 	ChooseSaveTarget   SaveTargetChooser
 	ChooseDocument     DocumentChooser
@@ -154,18 +165,20 @@ type Dependencies struct {
 // NewBridgeWithDependencies is the constructor the composition root uses.
 func NewBridgeWithDependencies(dependencies Dependencies) *Bridge {
 	bridge := &Bridge{
-		applicationVersion: dependencies.ApplicationVersion,
-		saveEngine:         dependencies.SaveEngine,
-		gameCatalog:        dependencies.GameCatalog,
-		safetyProfiles:     dependencies.SafetyProfiles,
-		hostSettings:       dependencies.HostSettings,
-		buildTemplates:     dependencies.BuildTemplates,
-		deploymentStore:    dependencies.DeploymentStore,
-		chooseSaveFile:     dependencies.ChooseSaveFile,
-		chooseSaveTarget:   dependencies.ChooseSaveTarget,
-		chooseDocument:     dependencies.ChooseDocument,
-		operations:         map[string]context.CancelFunc{},
-		stagedDownloads:    map[string]string{},
+		applicationVersion:    dependencies.ApplicationVersion,
+		saveEngine:            dependencies.SaveEngine,
+		gameCatalog:           dependencies.GameCatalog,
+		safetyProfiles:        dependencies.SafetyProfiles,
+		hostSettings:          dependencies.HostSettings,
+		buildTemplates:        dependencies.BuildTemplates,
+		deploymentStore:       dependencies.DeploymentStore,
+		diagnostics:           dependencies.Diagnostics,
+		chooseSaveFile:        dependencies.ChooseSaveFile,
+		chooseSaveTarget:      dependencies.ChooseSaveTarget,
+		chooseDocument:        dependencies.ChooseDocument,
+		operations:            map[string]context.CancelFunc{},
+		operationCorrelations: map[string]string{},
+		stagedDownloads:       map[string]string{},
 	}
 	if dependencies.DeploymentStore != nil {
 		// The backup name pattern has one owner, the Save Lifecycle settings, and
@@ -249,6 +262,9 @@ func (b *Bridge) Shutdown(context.Context) {
 	for _, directory := range directories {
 		_ = os.RemoveAll(directory)
 	}
+	// The logger is stopped last and with its own bounded wait, so a stuck disk
+	// delays the exit by a known amount instead of holding it open.
+	b.diagnostics.Close()
 }
 
 func (b *Bridge) trackStagedDownload(localPath string) {
@@ -354,7 +370,9 @@ func (b *Bridge) LoadSave(
 	expectedPlatform string,
 	sourceKind string,
 ) (savesession.LoadSaveResult, error) {
-	return bridged(savesession.LoadSave(b.saveEngine, source, expectedPlatform, sourceKind))
+	return loggedSaveOperation(b, diagnosticsservice.OperationOpenSave, func() (savesession.LoadSaveResult, error) {
+		return savesession.LoadSave(b.saveEngine, source, expectedPlatform, sourceKind)
+	})
 }
 
 // GetLoadedSave delegates to the GetLoadedSave endpoint and returns its result
@@ -398,9 +416,11 @@ func (b *Bridge) Save(
 	saveSessionID, expectedRevision, validationToken string,
 	confirmWarnings, confirmBanRisk bool,
 ) (savesession.SaveResult, error) {
-	return bridged(savesession.Save(
-		b.saveEngine, saveSessionID, expectedRevision, validationToken,
-		confirmWarnings, confirmBanRisk))
+	return loggedSaveOperation(b, diagnosticsservice.OperationSave, func() (savesession.SaveResult, error) {
+		return savesession.Save(
+			b.saveEngine, saveSessionID, expectedRevision, validationToken,
+			confirmWarnings, confirmBanRisk)
+	})
 }
 
 func (b *Bridge) SaveAs(
@@ -408,9 +428,11 @@ func (b *Bridge) SaveAs(
 	confirmWarnings, confirmBanRisk bool,
 	target string,
 ) (savesession.SaveAsResult, error) {
-	return bridged(savesession.SaveAs(
-		b.saveEngine, saveSessionID, expectedRevision, validationToken,
-		confirmWarnings, confirmBanRisk, target))
+	return loggedSaveOperation(b, diagnosticsservice.OperationSaveAs, func() (savesession.SaveAsResult, error) {
+		return savesession.SaveAs(
+			b.saveEngine, saveSessionID, expectedRevision, validationToken,
+			confirmWarnings, confirmBanRisk, target)
+	})
 }
 
 func (b *Bridge) GetRecentFiles() (savesession.GetRecentFilesResult, error) {
@@ -512,8 +534,15 @@ func (b *Bridge) ApplyRepairs(
 	planToken string,
 	expectedRevision string,
 ) (diagnostics.ApplyRepairsResult, error) {
-	return bridged(diagnostics.ApplyRepairs(
-		b.saveEngine, b.gameCatalog, saveSessionID, characterID, issueIDs, planToken, expectedRevision))
+	logger := b.beginOperation(diagnosticsservice.OperationApplyRepairs, "")
+	result, err := diagnostics.ApplyRepairs(b.saveEngine, b.gameCatalog,
+		saveSessionID, characterID, issueIDs, planToken, expectedRevision)
+	if err == nil && !result.Applied {
+		logger.finish(diagnosticsservice.StatusBlocked, "", "")
+	} else {
+		logger.finishWithError(err)
+	}
+	return bridged(result, err)
 }
 
 // GetSaveCharacters delegates to the GetSaveCharacters endpoint and returns

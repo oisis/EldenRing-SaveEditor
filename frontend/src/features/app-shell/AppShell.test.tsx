@@ -1,8 +1,14 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { App } from "../../App";
-import { makeSaveSessionPort, renderApp, stubSaveSession } from "../../test/renderWithProviders";
+import type { DiagnosticEventPage } from "../../application/settings/settingsPort";
+import {
+  makeSaveSessionPort,
+  makeSettingsPort,
+  renderApp,
+  stubSaveSession,
+} from "../../test/renderWithProviders";
 import { fileNameFromPath } from "./AppShell";
 
 describe("AppShell", () => {
@@ -124,6 +130,105 @@ describe("AppShell", () => {
 
     expect(await screen.findByRole("region", { name: "Item Database" })).toBeVisible();
     expect(screen.getByRole("searchbox", { name: "Search items" })).toBeVisible();
+  });
+});
+
+describe("AppShell diagnostic console", () => {
+  const event = (seq: number, severity: string, message: string) => ({
+    seq,
+    timestamp: `2026-09-05T12:00:0${seq}Z`,
+    severity,
+    event: "operation_finished",
+    message,
+  });
+
+  it("renders the instance stream incrementally and only while expanded", async () => {
+    const getDiagnosticEvents = vi
+      .fn()
+      .mockResolvedValueOnce({
+        records: [event(1, "info", "application started")],
+        nextCursor: "1",
+        hasMore: false,
+        totalBuffered: 1,
+        cursorExpired: false,
+      })
+      .mockResolvedValue({
+        records: [event(2, "error", "operation finished")],
+        nextCursor: "2",
+        hasMore: false,
+        totalBuffered: 2,
+        cursorExpired: false,
+      });
+
+    await renderApp(<App />, { settingsPort: makeSettingsPort({ getDiagnosticEvents }) });
+
+    // Nothing polls while the console is collapsed.
+    expect(getDiagnosticEvents).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: /Console/ }));
+
+    const console_ = await screen.findByRole("region", { name: "Diagnostic console" });
+    expect(await within(console_).findByText("application started")).toBeVisible();
+    // The second poll continues from the cursor the first one returned, so the
+    // first record is kept rather than requested again.
+    await waitFor(() => expect(getDiagnosticEvents).toHaveBeenCalledTimes(2), { timeout: 2000 });
+    expect(getDiagnosticEvents).toHaveBeenLastCalledWith({
+      cursor: "1",
+      limit: 200,
+      severity: "",
+    });
+    expect(await within(console_).findByText("operation finished")).toBeVisible();
+    expect(within(console_).getAllByText("application started")).toHaveLength(1);
+
+    // The level filter narrows what is rendered without re-reading the stream.
+    await userEvent.selectOptions(within(console_).getByLabelText("Level"), "error");
+    expect(within(console_).queryByText("application started")).toBeNull();
+    expect(within(console_).getByText("operation finished")).toBeVisible();
+  });
+
+  it("ignores a pending diagnostic response after closing and reopening the console", async () => {
+    let resolveOld!: (page: DiagnosticEventPage) => void;
+    const pending = new Promise<DiagnosticEventPage>((resolve) => {
+      resolveOld = resolve;
+    });
+    const getDiagnosticEvents = vi
+      .fn()
+      .mockReturnValueOnce(pending)
+      .mockResolvedValue({
+        records: [event(2, "info", "current record")],
+        nextCursor: "2",
+        hasMore: false,
+        totalBuffered: 1,
+        cursorExpired: false,
+      });
+    await renderApp(<App />, { settingsPort: makeSettingsPort({ getDiagnosticEvents }) });
+    await userEvent.click(screen.getByRole("button", { name: /Console/ }));
+    expect(getDiagnosticEvents).toHaveBeenCalledTimes(1);
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.click(screen.getByRole("button", { name: /Console/ }));
+    const console_ = within(screen.getByRole("region", { name: "Diagnostic console" }));
+    expect(await console_.findByText("current record")).toBeVisible();
+    await act(async () =>
+      resolveOld({
+        records: [event(1, "error", "obsolete record")],
+        nextCursor: "1",
+        hasMore: false,
+        totalBuffered: 1,
+        cursorExpired: false,
+      }),
+    );
+    expect(screen.queryByText("obsolete record")).toBeNull();
+    expect(console_.getAllByText("current record")).toHaveLength(1);
+  });
+
+  it("states an explicit failure instead of rendering the transport message", async () => {
+    const getDiagnosticEvents = vi.fn(() => Promise.reject(new Error("bridge internals")));
+
+    await renderApp(<App />, { settingsPort: makeSettingsPort({ getDiagnosticEvents }) });
+    await userEvent.click(screen.getByRole("button", { name: /Console/ }));
+
+    expect(await screen.findByText("The diagnostic messages could not be read.")).toBeVisible();
+    expect(screen.queryByText(/bridge internals/)).toBeNull();
   });
 });
 

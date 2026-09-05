@@ -2,7 +2,7 @@
 Endpoint: GetHostSettings
 EndpointID: get_host_settings
 Purpose: Returns the persistent host application settings and the host directories the Settings screen can open.
-How it works: The runtime handler reads the injected host settings store and reports its values together with the configuration and log directories the composition root owns. It reads no save and mutates nothing.
+How it works: The runtime handler reads the injected host settings store and reports its values together with the configuration directory it owns and the log directory the diagnostic service owns. It reads no save and mutates nothing.
 Supported resource types: —.
 Input variables: none.
 GameCatalog variables read: none.
@@ -24,6 +24,7 @@ package application
 import (
 	"errors"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
 )
@@ -71,7 +72,13 @@ type HostSettingsResult struct {
 }
 
 // GetHostSettings reports the stored host settings.
-func GetHostSettings(store *hostsettings.Store) (HostSettingsResult, error) {
+//
+// diagnosticService is optional and is read only for the log directory: Debug
+// Mode itself is never reported or stored here, so the diagnostic flag keeps
+// exactly one owner.
+func GetHostSettings(
+	store *hostsettings.Store, diagnosticService *diagnostics.Service,
+) (HostSettingsResult, error) {
 	if store == nil {
 		return HostSettingsResult{}, errors.New("host settings store is required")
 	}
@@ -79,7 +86,7 @@ func GetHostSettings(store *hostsettings.Store) (HostSettingsResult, error) {
 	if err != nil {
 		return HostSettingsResult{}, err
 	}
-	return hostSettingsResult(store, settings), nil
+	return hostSettingsResult(store, diagnosticService, settings), nil
 }
 
 // SetHostSettings stores a complete settings value and reports what is now in
@@ -87,6 +94,7 @@ func GetHostSettings(store *hostsettings.Store) (HostSettingsResult, error) {
 // need a second, implicit source of truth for the fields it left out.
 func SetHostSettings(
 	store *hostsettings.Store,
+	diagnosticService *diagnostics.Service,
 	skipReviewForNormalRisk bool,
 	remoteBackupPolicy string,
 ) (HostSettingsResult, error) {
@@ -97,10 +105,14 @@ func SetHostSettings(
 	if err != nil {
 		return HostSettingsResult{}, err
 	}
-	return hostSettingsResult(store, settings), nil
+	return hostSettingsResult(store, diagnosticService, settings), nil
 }
 
-func hostSettingsResult(store *hostsettings.Store, settings hostsettings.Settings) HostSettingsResult {
+func hostSettingsResult(
+	store *hostsettings.Store,
+	diagnosticService *diagnostics.Service,
+	settings hostsettings.Settings,
+) HostSettingsResult {
 	policies := hostsettings.RemoteBackupPolicies()
 	available := make([]string, 0, len(policies))
 	for _, policy := range policies {
@@ -112,6 +124,6 @@ func hostSettingsResult(store *hostsettings.Store, settings hostsettings.Setting
 		AvailableRemoteBackupPolicies: available,
 		DefaultRemoteBackupPolicy:     string(hostsettings.DefaultRemoteBackupPolicy),
 		ConfigurationDirectoryExists:  store.Directory() != "",
-		LogDirectoryExists:            false,
+		LogDirectoryExists:            diagnosticService.Directory() != "",
 	}
 }

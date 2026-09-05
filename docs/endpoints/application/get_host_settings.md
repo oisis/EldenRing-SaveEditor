@@ -7,10 +7,11 @@ save data: the two Save behavior preferences of `Tools → Settings`.
 
 They belong to no save session, never enter a snapshot or a recovery journal,
 and survive closing a save. The result also states whether this host has a
-a configuration directory and whether this build provides a local log
-directory. This build has no local logging sink, so `logDirectoryExists` is
-always false and the interface does not advertise a directory that is not
-actually populated.
+configuration directory and whether it has a local log directory. The log
+directory is owned by the diagnostic service, not by the settings store: this
+endpoint only reports whether one exists so the interface can enable or disable
+`Open log directory`. Debug Mode itself is deliberately absent here — it is
+runtime state with a single owner and is read through `GetDiagnosticMode`.
 
 | | |
 |---|---|
@@ -25,7 +26,9 @@ actually populated.
 ## Input
 
 ```go
-func GetHostSettings(store *hostsettings.Store) (HostSettingsResult, error)
+func GetHostSettings(
+	store *hostsettings.Store, diagnosticService *diagnostics.Service,
+) (HostSettingsResult, error)
 ```
 
 ## Output

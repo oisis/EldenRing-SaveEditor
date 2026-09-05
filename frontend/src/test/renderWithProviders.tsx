@@ -558,6 +558,13 @@ export const stubHostSettings: HostSettings = {
   logDirectoryExists: false,
 };
 
+const stubDiagnosticMode = {
+  enabled: false,
+  logDirectoryExists: true,
+  localLoggingAvailable: true,
+  droppedRecords: 0,
+};
+
 export function makeSettingsPort(overrides: Partial<SettingsPort> = {}): SettingsPort {
   return {
     getSafetyProfile: () => Promise.resolve(stubSafetyProfile),
@@ -565,7 +572,18 @@ export function makeSettingsPort(overrides: Partial<SettingsPort> = {}): Setting
     getHostSettings: () => Promise.resolve(stubHostSettings),
     setHostSettings: (settings) => Promise.resolve({ ...stubHostSettings, ...settings }),
     openHostLocation: () => Promise.resolve(),
-    exportDiagnosticReport: () => Promise.resolve({ exported: true, recordCount: 0 }),
+    exportDiagnosticReport: () =>
+      Promise.resolve({ exported: true, recordCount: 0, eventCount: 0 }),
+    getDiagnosticMode: () => Promise.resolve(stubDiagnosticMode),
+    setDiagnosticMode: (enabled) => Promise.resolve({ ...stubDiagnosticMode, enabled }),
+    getDiagnosticEvents: () =>
+      Promise.resolve({
+        records: [],
+        nextCursor: "",
+        hasMore: false,
+        totalBuffered: 0,
+        cursorExpired: false,
+      }),
     ...overrides,
   };
 }

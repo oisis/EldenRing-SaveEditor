@@ -97,6 +97,10 @@ export function GetDeploymentGameStatus(arg1:string):Promise<deployment.GetDeplo
 
 export function GetDeploymentTargets():Promise<deployment.GetDeploymentTargetsResult>;
 
+export function GetDiagnosticEvents(arg1:string,arg2:number,arg3:string):Promise<diagnostics.Page>;
+
+export function GetDiagnosticMode():Promise<diagnostics.State>;
+
 export function GetEquipment(arg1:string,arg2:number):Promise<saveengine.CharacterEquipment>;
 
 export function GetEquipmentCandidates(arg1:string,arg2:number,arg3:string,arg4:string,arg5:number,arg6:number):Promise<equipment.GetEquipmentCandidatesResult>;
@@ -236,6 +240,8 @@ export function SetCharacterStats(arg1:string,arg2:number,arg3:saveengine.Charac
 export function SetColosseumUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetColosseumUnlockedResult>;
 
 export function SetCookbookUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetCookbookUnlockedResult>;
+
+export function SetDiagnosticMode(arg1:boolean):Promise<diagnostics.State>;
 
 export function SetEquippedArmaments(arg1:string,arg2:number,arg3:Array<any>,arg4:string):Promise<equipment.SetEquippedArmamentsResult>;
 

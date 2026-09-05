@@ -1,5 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useDiagnosticEvents } from "../../application/settings/useHostSettings";
 import appIconURL from "../../../../build/appicon.png";
 import type { Locale } from "../../i18n/i18n";
 import { Badge } from "../../ui/components/Badge/Badge";
@@ -26,7 +27,11 @@ import {
   brandName,
   consoleBar,
   consoleBarButton,
+  consoleFilter,
   consoleLatest,
+  consoleLevel,
+  consoleList,
+  consoleRow,
   consolePanel,
   consolePanelBody,
   consolePanelHeader,
@@ -60,6 +65,11 @@ export type AppSection =
 
 type ItemsSection = "inventory" | "database";
 
+/** The console's own filter vocabulary: the backend severities plus "all". */
+type ConsoleLevel = "all" | "debug" | "info" | "warning" | "error";
+
+const consoleLevels: readonly ConsoleLevel[] = ["all", "debug", "info", "warning", "error"];
+
 export type AppShellProps = {
   flow: SaveSessionFlow;
   theme: ThemeName;
@@ -87,6 +97,18 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   const { t } = useLingui();
   const [section, setSection] = useState<AppSection>("home");
   const [consoleOpen, setConsoleOpen] = useState(false);
+  // The console polls only while it is expanded and mounted; collapsing it
+  // stops the refresh rather than leaving a timer running behind the interface.
+  const [levelFilter, setConsoleLevel] = useState<ConsoleLevel>("all");
+  const diagnosticEvents = useDiagnosticEvents(consoleOpen);
+  const consoleRecords = useMemo(
+    () =>
+      levelFilter === "all"
+        ? diagnosticEvents.records
+        : diagnosticEvents.records.filter((record) => record.severity === levelFilter),
+    [diagnosticEvents.records, levelFilter],
+  );
+  const latestRecord = diagnosticEvents.records.at(-1);
   const [itemsSection, setItemsSection] = useState<ItemsSection>("inventory");
 
   const labels: Record<AppSection, string> = {
@@ -106,6 +128,13 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
     world: t`World progress and unlocks`,
     advanced: t`Advanced save features`,
     tools: t`Application settings and tools`,
+  };
+  const consoleLevelLabels: Record<ConsoleLevel, string> = {
+    all: t`All`,
+    debug: t`Debug`,
+    info: t`Info`,
+    warning: t`Warning`,
+    error: t`Error`,
   };
   const themeLabels: Record<ThemeName, string> = {
     light: t`Light`,
@@ -344,14 +373,48 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           <strong>
             <Trans>Console</Trans>
           </strong>
-          <Button size="sm" onClick={() => setConsoleOpen(false)}>
-            <Trans>Close</Trans>
-          </Button>
+          <div className={consoleFilter}>
+            <label htmlFor="console-level">
+              <Trans>Level</Trans>
+            </label>
+            <Select
+              id="console-level"
+              value={levelFilter}
+              onChange={(event) => setConsoleLevel(event.currentTarget.value as ConsoleLevel)}
+            >
+              {consoleLevels.map((level) => (
+                <option key={level} value={level}>
+                  {consoleLevelLabels[level]}
+                </option>
+              ))}
+            </Select>
+            <Button size="sm" onClick={() => setConsoleOpen(false)}>
+              <Trans>Close</Trans>
+            </Button>
+          </div>
         </header>
         <div className={consolePanelBody}>
-          <p className={message}>
-            <Trans>Live diagnostic messages are not available in this build yet.</Trans>
-          </p>
+          {diagnosticEvents.failed ? (
+            <p role="alert" className={message}>
+              <Trans>The diagnostic messages could not be read.</Trans>
+            </p>
+          ) : consoleRecords.length === 0 ? (
+            <p className={message}>
+              <Trans>No diagnostic messages yet.</Trans>
+            </p>
+          ) : (
+            <ul className={consoleList}>
+              {consoleRecords.map((record) => (
+                <li key={record.seq} className={consoleRow}>
+                  <span>{record.timestamp}</span>
+                  <span className={consoleLevel}>{record.severity}</span>
+                  {/* The message is the backend's own safe wording, rendered
+                      unchanged: the frontend composes no diagnostic text. */}
+                  <span>{[record.message, record.operation, record.stage, record.status, record.code, record.targetState].filter(Boolean).join(" · ")}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
@@ -367,7 +430,7 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
             <Trans>Console</Trans>
           </span>
           <span className={consoleLatest}>
-            <Trans>No live messages</Trans>
+            {latestRecord ? latestRecord.message : <Trans>No live messages</Trans>}
           </span>
         </button>
       </div>

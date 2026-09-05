@@ -10,9 +10,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/deployment"
+	"github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
@@ -57,6 +60,14 @@ func main() {
 	// configuration a second set of targets and trusted host keys.
 	buildTemplateStore := buildtemplates.NewStore(filepath.Join(stateDirectory, "templates"))
 	deploymentStore := deployment.NewStore(stateDirectory)
+	// The single process-wide diagnostic service. It owns Debug Mode, the safe
+	// record buffer the console reads and the local JSONL sink, which lives in a
+	// logs subdirectory of the same host state directory and never beside a save
+	// or inside the installation.
+	diagnosticService := diagnostics.NewService(diagnostics.Options{
+		Directory: filepath.Join(stateDirectory, "logs"),
+	})
+	defer diagnosticService.Close()
 	// The single process-wide GameCatalog, built from the embedded catalog data
 	// the backend already ships. A failure here is a build or data defect, not a
 	// user condition: the application stops instead of starting with a partial
@@ -80,9 +91,20 @@ func main() {
 		HostSettings:       hostSettings,
 		BuildTemplates:     buildTemplateStore,
 		DeploymentStore:    deploymentStore,
+		Diagnostics:        diagnosticService,
 		ChooseSaveFile:     desktop.NewWailsSaveFileChooser(),
 		ChooseSaveTarget:   desktop.NewWailsSaveTargetChooser(),
 		ChooseDocument:     desktop.NewWailsDocumentChooser(),
+	})
+
+	// The first record of every launch. Debug Mode starts disabled on every
+	// launch, so this info record is what a fresh log begins with.
+	applicationInfo, _ := application.GetApplicationInfo(applicationVersion)
+	diagnosticService.Log(diagnostics.Entry{
+		Event:    diagnostics.EventApplicationStarted,
+		Version:  applicationVersion,
+		Build:    applicationInfo.Build,
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	})
 
 	err = wails.Run(&options.App{

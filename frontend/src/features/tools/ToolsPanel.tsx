@@ -6,9 +6,11 @@ import type { BackupSettingsStatus } from "../save-session/useSaveSessionFlow";
 import { useSetSaveAccountID } from "../../application/save-session/useSetSaveAccountID";
 import { useSafetyProfile, useSetSafetyProfile } from "../../application/settings/useSafetyProfile";
 import {
+  useDiagnosticMode,
   useExportDiagnosticReport,
   useHostSettings,
   useOpenHostLocation,
+  useSetDiagnosticMode,
   useSetHostSettings,
 } from "../../application/settings/useHostSettings";
 import type { Locale } from "../../i18n/i18n";
@@ -249,6 +251,8 @@ function SettingsTab({
   const setHostSettings = useSetHostSettings();
   const openHostLocation = useOpenHostLocation();
   const exportReport = useExportDiagnosticReport();
+  const diagnosticMode = useDiagnosticMode();
+  const setDiagnosticMode = useSetDiagnosticMode();
 
   /**
    * Every host setting is stored as one complete value, so a change to one is
@@ -501,18 +505,29 @@ function SettingsTab({
             </Button>
           </li>
           <li className={settingItem}>
+            {/* The rendered state is the backend's own: the checkbox shows the
+                value the last confirmed call reported and never a local guess. */}
             <Checkbox
               id="tools-debug-mode"
-              checked={false}
-              disabled
-              onChange={() => undefined}
+              checked={diagnosticMode.data?.enabled === true}
+              disabled={
+                diagnosticMode.data === undefined || diagnosticMode.isError || setDiagnosticMode.isPending
+              }
+              onChange={(event) => setDiagnosticMode.mutate(event.currentTarget.checked)}
             />
             <label htmlFor="tools-debug-mode">
               <Trans>Debug Mode</Trans>
             </label>
           </li>
           <li className={settingItem}>
-            <Button disabled>
+            {/* Like the configuration directory, the log directory is opened by
+                identifier. No path is rendered here and none is ever sent. */}
+            <Button
+              disabled={
+                diagnosticMode.data?.logDirectoryExists !== true || openHostLocation.isPending
+              }
+              onClick={() => openHostLocation.mutate("logs")}
+            >
               <Trans>Open log directory</Trans>
             </Button>
           </li>
@@ -537,17 +552,37 @@ function SettingsTab({
         </ul>
         <p className={message}>
           <Trans>
-            Debug Mode and local application logs remain unavailable until their diagnostic
-            contract is defined.
+            Debug Mode adds detailed step records for this run only. It is always off when the
+            application starts, and turning it off stops new detailed records without deleting
+            the ones already written.
           </Trans>
         </p>
+        {diagnosticMode.data !== undefined && !diagnosticMode.data.localLoggingAvailable ? (
+          <p role="status" className={message}>
+            <Trans>
+              Local diagnostic logging is unavailable, so records are kept in this session only.
+              Nothing else is affected.
+            </Trans>
+          </p>
+        ) : null}
+        {setDiagnosticMode.isError ? (
+          <p role="alert" className={alert}>
+            <Trans>Debug Mode was not changed, so the previous state is still in effect.</Trans>
+          </p>
+        ) : null}
+        {diagnosticMode.isError ? (
+          <p role="alert" className={alert}>
+            <Trans>The diagnostic settings could not be read.</Trans>
+          </p>
+        ) : null}
         <p className={message}>
           {/* What the report may carry is stated plainly, because the user is
               the one who decides where it goes. */}
           <Trans>
             The diagnostic report carries the application version, the platform, the settings
-            above and the current session's diagnostic records. It never carries save data,
-            file paths or SSH keys.
+            above, the Debug Mode state and the recent diagnostic records of this run and of
+            the current session. It never carries save data, file paths, SSH keys or any file
+            from the log directory.
           </Trans>
         </p>
         {openHostLocation.isError || exportReport.isError ? (

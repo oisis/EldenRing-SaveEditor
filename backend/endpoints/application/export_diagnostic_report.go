@@ -2,11 +2,11 @@
 Endpoint: ExportDiagnosticReport
 EndpointID: export_diagnostic_report
 Purpose: Writes a redacted diagnostic report to a host path the user chose in the native Save As dialog.
-How it works: The runtime handler assembles the application version, the supported schema range, the declared capabilities, the host settings flags and, when a session is open, that session's structured diagnostic records. It writes the document atomically to the stated target and returns the number of records it carried.
+How it works: The runtime handler assembles the application version, the supported schema range, the declared capabilities, the host settings flags, the diagnostic mode state, a bounded slice of the instance-wide diagnostic records and, when a session is open, that session's structured diagnostic records. It writes the document atomically to the stated target and returns the number of records it carried.
 Supported resource types: —.
 Input variables: saveSessionID, target.
 GameCatalog variables read: only the MinimumSchemaVersion and CurrentSchemaVersion constants.
-Save variables read: none. The report carries no save bytes, no item data and no source path; only the session's own structured diagnostic records, which the engine produces without private data.
+Save variables read: none. The report carries no save bytes, no item data and no source path; only structured diagnostic records, which the engine and the diagnostic service produce from closed catalogues without private data. No configuration document and no file from the log directory is ever copied into it.
 Implementation status: implemented
 */
 package application
@@ -20,6 +20,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/hostsettings"
@@ -34,6 +35,10 @@ const ExportDiagnosticReportEndpointID = "export_diagnostic_report"
 // carries. The journal is a ring buffer, so this is a report size bound rather
 // than a filter: it exists so a long session cannot produce an unbounded file.
 const diagnosticReportRecordLimit = 2000
+
+// diagnosticReportEventLimit bounds the instance-wide slice the report carries.
+// It selects the newest 200 records from the 500-record buffer.
+const diagnosticReportEventLimit = 200
 
 // ExportDiagnosticReportDefinition describes the public getter contract. The
 // endpoint writes a file the user explicitly asked for and changes no
@@ -54,6 +59,9 @@ var ExportDiagnosticReportDefinition = contract.MustDefine(contract.Definition{
 type DiagnosticReportResult struct {
 	Exported    bool `json:"exported"`
 	RecordCount int  `json:"recordCount"`
+	// EventCount is the number of instance-wide diagnostic records the report
+	// carried, reported separately from the session's own journal records.
+	EventCount int `json:"eventCount"`
 }
 
 // diagnosticReport is the exact document shape written to disk. Every field is
@@ -69,6 +77,8 @@ type diagnosticReport struct {
 	SupportedSchemas   []SupportedSchema             `json:"supportedSchemas"`
 	Capabilities       []string                      `json:"capabilities"`
 	Settings           diagnosticReportSettings      `json:"settings"`
+	Diagnostics        diagnostics.State             `json:"diagnostics"`
+	Events             []diagnostics.Record          `json:"events"`
 	Session            *diagnosticReportSessionState `json:"session,omitempty"`
 	Records            []saveengine.DiagnosticRecord `json:"records"`
 }
@@ -98,6 +108,7 @@ type diagnosticReportSessionState struct {
 func ExportDiagnosticReport(
 	applicationVersion string,
 	settingsStore *hostsettings.Store,
+	diagnosticService *diagnostics.Service,
 	engine *saveengine.Engine,
 	saveSessionID string,
 	target string,
@@ -133,7 +144,16 @@ func ExportDiagnosticReport(
 			SkipReviewForNormalRisk: settings.SkipReviewForNormalRisk,
 			RemoteBackupPolicy:      string(settings.RemoteBackupPolicy),
 		},
-		Records: []saveengine.DiagnosticRecord{},
+		Records:     []saveengine.DiagnosticRecord{},
+		Events:      []diagnostics.Record{},
+		Diagnostics: diagnosticService.State(),
+	}
+
+	// The instance-wide records go through exactly the same reader the console
+	// uses, so the report cannot show a record the console could not, and the
+	// slice is bounded by the same record limit as the session journal.
+	if diagnosticService != nil {
+		report.Events = diagnosticService.RecentRecords(diagnosticReportEventLimit)
 	}
 
 	if saveSessionID != "" && engine != nil {
@@ -177,5 +197,9 @@ func ExportDiagnosticReport(
 		_ = os.Remove(temporary)
 		return DiagnosticReportResult{}, fmt.Errorf("cannot store the diagnostic report: %w", err)
 	}
-	return DiagnosticReportResult{Exported: true, RecordCount: len(report.Records)}, nil
+	return DiagnosticReportResult{
+		Exported:    true,
+		RecordCount: len(report.Records),
+		EventCount:  len(report.Events),
+	}, nil
 }

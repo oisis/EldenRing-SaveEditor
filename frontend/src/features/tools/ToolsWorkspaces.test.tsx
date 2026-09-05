@@ -456,4 +456,61 @@ describe("Tools workspaces", () => {
       remoteBackupPolicy: "ask",
     });
   });
+
+  it("turns Debug Mode on through the backend and opens the log directory", async () => {
+    const setDiagnosticMode = vi.fn((enabled: boolean) =>
+      Promise.resolve({
+        enabled,
+        logDirectoryExists: true,
+        localLoggingAvailable: true,
+        droppedRecords: 0,
+      }),
+    );
+    const openHostLocation = vi.fn(() => Promise.resolve());
+
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      settingsPort: makeSettingsPort({ setDiagnosticMode, openHostLocation }),
+    });
+
+    const toggle = await screen.findByLabelText("Debug Mode");
+    await waitFor(() => expect(toggle).toBeEnabled());
+    expect(toggle).not.toBeChecked();
+
+    await userEvent.click(toggle);
+    await waitFor(() => expect(setDiagnosticMode).toHaveBeenCalledWith(true));
+    // The rendered state is the one the backend confirmed, never a local guess.
+    await waitFor(() => expect(screen.getByLabelText("Debug Mode")).toBeChecked());
+
+    // The location is stated as an identifier; no path is sent from here.
+    await userEvent.click(screen.getByRole("button", { name: "Open log directory" }));
+    await waitFor(() => expect(openHostLocation).toHaveBeenCalledWith("logs"));
+  });
+
+  it("reports a Debug Mode read failure without exposing the transport error", async () => {
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      settingsPort: makeSettingsPort({
+        getDiagnosticMode: () => Promise.reject(new Error("private diagnostic failure")),
+      }),
+    });
+    expect(await screen.findByText("The diagnostic settings could not be read.")).toBeVisible();
+    expect(screen.getByLabelText("Debug Mode")).toBeDisabled();
+    expect(screen.queryByText("private diagnostic failure")).toBeNull();
+  });
+
+  it("keeps the previous Debug Mode state when the backend refuses the change", async () => {
+    const setDiagnosticMode = vi.fn(() => Promise.reject(new Error("refused")));
+
+    await renderApp(<ToolsPanel {...baseProps} />, {
+      settingsPort: makeSettingsPort({ setDiagnosticMode }),
+    });
+
+    const toggle = await screen.findByLabelText("Debug Mode");
+    await waitFor(() => expect(toggle).toBeEnabled());
+    await userEvent.click(toggle);
+
+    expect(
+      await screen.findByText("Debug Mode was not changed, so the previous state is still in effect."),
+    ).toBeVisible();
+    expect(screen.getByLabelText("Debug Mode")).not.toBeChecked();
+  });
 });
