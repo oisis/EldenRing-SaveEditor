@@ -88,6 +88,7 @@ can also be invoked directly from any working directory.
 
 ## Documentation
 
+- [Changelog](docs/CHANGELOG.md)
 - [Endpoint documentation](docs/endpoints/README.md)
 - [SaveForge 2.0 endpoint status](docs/endpoints/SF-2.0.md)
 - [SL2 binary format specification](docs/sl2-binary-format-spec.md)
