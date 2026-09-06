@@ -72,11 +72,29 @@ func main() {
 	// the backend already ships. A failure here is a build or data defect, not a
 	// user condition: the application stops instead of starting with a partial
 	// or empty catalog that would silently change endpoint results.
-	catalogData, err := loader.LoadFS(catalogdata.Files())
+	catalogFiles := catalogdata.Files()
+	catalogData, err := loader.LoadFS(catalogFiles)
 	if err != nil {
 		log.Fatalf("load game catalog data: %v", err)
 	}
-	gameCatalog, err := gamecatalog.New(catalogData.Manifest, catalogData.Resources())
+	// The network parameters and the appearance presets are data sets of their
+	// own rather than catalog resources, so they are loaded beside the documents
+	// and handed to the single catalog constructor. Without them the Advanced and
+	// Appearance endpoints answer from an empty catalog.
+	networkPresets, err := gamecatalog.LoadNetworkParams(catalogFiles)
+	if err != nil {
+		log.Fatalf("load network parameters: %v", err)
+	}
+	appearancePresets, err := gamecatalog.LoadAppearancePresets(catalogFiles)
+	if err != nil {
+		log.Fatalf("load appearance presets: %v", err)
+	}
+	gameCatalog, err := gamecatalog.NewWithData(gamecatalog.CatalogData{
+		Manifest:          catalogData.Manifest,
+		Resources:         catalogData.Resources(),
+		NetworkPresets:    networkPresets,
+		AppearancePresets: appearancePresets,
+	})
 	if err != nil {
 		log.Fatalf("build game catalog: %v", err)
 	}

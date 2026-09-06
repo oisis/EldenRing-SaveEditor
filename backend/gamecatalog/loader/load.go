@@ -60,5 +60,8 @@ func LoadFS(catalogFS fs.FS) (Data, error) {
 			Resource: resource,
 		})
 	}
+	if err := loadAppearanceAssets(catalogFS, data.assets); err != nil {
+		return Data{}, err
+	}
 	return data, nil
 }

@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/internal/catalogassets"
 )
 
@@ -79,6 +81,9 @@ func TestHandlerRejectsPathsOutsideValidatedItemIconsWithoutReading(t *testing.T
 		catalogassets.URLPrefix + "assets/icons/items/../catalog.json",
 		catalogassets.URLPrefix + "assets/icons/items\\dagger.png",
 		catalogassets.URLPrefix + "assets/icons/items/melee_armaments/dagger.webp",
+		catalogassets.URLPrefix + "assets/appearance/../catalog.json",
+		catalogassets.URLPrefix + "assets/appearance/geralt.png",
+		catalogassets.URLPrefix + "assets/appearance/nested/geralt.jpg.json",
 	}
 	for _, requestPath := range paths {
 		t.Run(requestPath, func(t *testing.T) {
@@ -131,5 +136,41 @@ func TestHandlerRejectsMutatingMethods(t *testing.T) {
 	}
 	if reader.calls != 0 {
 		t.Fatalf("reader calls = %d, want 0", reader.calls)
+	}
+}
+
+// The appearance preview of every preset is part of the same catalog asset
+// contract as an item icon. Serving only item icons left the Appearance cards
+// without an image, so the shipped catalog data answers both families here.
+func TestHandlerServesBothAssetFamiliesFromTheShippedCatalog(t *testing.T) {
+	t.Parallel()
+
+	data, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("load catalog data: %v", err)
+	}
+	handler := catalogassets.New(data)
+	for assetPath, wantMediaType := range map[string]string{
+		"assets/icons/items/talismans/carian_filigreed_crest.png": "image/png",
+		"assets/appearance/geralt-of-rivia-the-witcher.jpg":       "image/jpeg",
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, catalogassets.URLPrefix+assetPath, nil))
+		if recorder.Code != http.StatusOK || recorder.Body.Len() == 0 {
+			t.Errorf("%s = %d with %d body bytes, want 200 with content", assetPath, recorder.Code, recorder.Body.Len())
+			continue
+		}
+		if got := recorder.Header().Get("Content-Type"); got != wantMediaType {
+			t.Errorf("%s Content-Type = %q, want %q", assetPath, got, wantMediaType)
+		}
+	}
+
+	// An unauthored appearance file stays unknown instead of reaching the
+	// filesystem through the newly accepted prefix.
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet,
+		catalogassets.URLPrefix+"assets/appearance/not-a-preset.jpg", nil))
+	if recorder.Code != http.StatusNotFound {
+		t.Errorf("unknown appearance asset = %d, want 404", recorder.Code)
 	}
 }

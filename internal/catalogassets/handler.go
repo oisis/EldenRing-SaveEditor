@@ -1,5 +1,6 @@
-// Package catalogassets exposes validated, embedded GameCatalog item icons to
-// the Wails webview. It never reads paths from the host filesystem.
+// Package catalogassets exposes the validated, embedded GameCatalog images to
+// the Wails webview: item icons and appearance preset previews. It never reads
+// paths from the host filesystem.
 package catalogassets
 
 import (
@@ -9,8 +10,13 @@ import (
 )
 
 const (
-	URLPrefix       = "/catalog-assets/"
-	itemIconsPrefix = "assets/icons/items/"
+	URLPrefix = "/catalog-assets/"
+	// The two served asset families and their authored suffix. They mirror
+	// frontend/src/application/catalog/catalogAssetURL.ts, which builds the URLs.
+	itemIconsPrefix  = "assets/icons/items/"
+	itemIconSuffix   = ".png"
+	appearancePrefix = "assets/appearance/"
+	appearanceSuffix = ".jpg"
 )
 
 // Reader is the narrow catalog-data capability the handler needs. loader.Data
@@ -20,7 +26,7 @@ type Reader interface {
 	ReadAssetWithMediaType(assetPath string) ([]byte, string, bool)
 }
 
-// New builds the Wails AssetServer fallback handler for embedded item icons.
+// New builds the Wails AssetServer fallback handler for embedded catalog images.
 func New(reader Reader) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet && request.Method != http.MethodHead {
@@ -29,7 +35,7 @@ func New(reader Reader) http.Handler {
 			return
 		}
 
-		assetPath, valid := itemIconPath(request.URL.Path)
+		assetPath, valid := catalogAssetPath(request.URL.Path)
 		if !valid {
 			http.NotFound(writer, request)
 			return
@@ -58,14 +64,16 @@ func New(reader Reader) http.Handler {
 	})
 }
 
-func itemIconPath(requestPath string) (string, bool) {
+func catalogAssetPath(requestPath string) (string, bool) {
 	if !strings.HasPrefix(requestPath, URLPrefix) {
 		return "", false
 	}
 	assetPath := strings.TrimPrefix(requestPath, URLPrefix)
-	if !strings.HasPrefix(assetPath, itemIconsPrefix) ||
-		!strings.HasSuffix(assetPath, ".png") ||
-		strings.Contains(assetPath, "\\") {
+	isItemIcon := strings.HasPrefix(assetPath, itemIconsPrefix) &&
+		strings.HasSuffix(assetPath, itemIconSuffix)
+	isAppearance := strings.HasPrefix(assetPath, appearancePrefix) &&
+		strings.HasSuffix(assetPath, appearanceSuffix)
+	if (!isItemIcon && !isAppearance) || strings.Contains(assetPath, "\\") {
 		return "", false
 	}
 	for _, segment := range strings.Split(assetPath, "/") {
