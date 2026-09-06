@@ -1,11 +1,7 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { tokens } from "../../ui/tokens/contract.css";
 
-export const subnav = style({
-  display: "flex",
-  gap: tokens.space.xs,
-  marginBottom: tokens.space.md,
-});
+export { subnav } from "../../ui/patterns/workspace.css";
 
 export const sectionGrid = style({
   display: "grid",
@@ -19,14 +15,28 @@ export const sectionGrid = style({
 });
 
 export const identityCard = style({
-  marginBottom: tokens.space.md,
+  marginBottom: 0,
+});
+
+export const profileSections = style({
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: tokens.space.xl,
+  "@media": { "screen and (max-width: 1000px)": { gridTemplateColumns: "minmax(0, 1fr)" } },
+});
+export const profileSection = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: tokens.space.md,
+  minWidth: 0,
 });
 
 export const identityGrid = style({
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: tokens.space.md,
-  alignItems: "end",
+  alignItems: "start",
+  "@media": { "screen and (max-width: 760px)": { gridTemplateColumns: "minmax(0, 1fr)" } },
 });
 
 export const fieldGroup = style({
@@ -43,9 +53,12 @@ export const fieldLabel = style({
 
 export const nameForm = style({
   display: "flex",
+  flexWrap: "wrap",
   gap: tokens.space.xs,
   alignItems: "center",
 });
+
+globalStyle(`.${nameForm} > input`, { flex: "1 1 120px", width: 0, minWidth: 0 });
 
 export const attributeRow = style({
   display: "flex",
@@ -55,7 +68,7 @@ export const attributeRow = style({
 });
 
 export const attributeName = style({
-  width: "100px",
+  flex: "0 0 90px",
   fontSize: tokens.fontSize.sm,
   fontWeight: 600,
   textTransform: "capitalize",
@@ -63,17 +76,19 @@ export const attributeName = style({
 
 export const attributeSlider = style({
   flex: "1 1 auto",
+  minWidth: 0,
   cursor: "pointer",
   accentColor: tokens.color.accent,
 });
 
 export const attributeInput = style({
   width: "60px",
+  flexShrink: 0,
 });
 
 export const statGrid = style({
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: tokens.space.sm,
 });
 
@@ -120,18 +135,42 @@ export const presetViewer = style({
   borderRadius: tokens.radius.md,
   backgroundColor: tokens.color.surfaceRaised,
   border: `1px solid ${tokens.color.border}`,
+  width: "100%",
+  maxWidth: "280px",
+  justifySelf: "center",
+});
+
+export const presetStage = style({
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) minmax(0, 280px) minmax(0, 1fr)",
+  alignItems: "center",
+  gap: tokens.space.xl,
+  padding: `${tokens.space.xl} 0`,
+  overflow: "hidden",
+  "@media": { "screen and (max-width: 760px)": { gridTemplateColumns: "minmax(0, 1fr)" } },
+});
+
+export const presetNeighbor = style({
+  justifySelf: "center",
+  width: "100%",
+  maxWidth: "210px",
+  height: "300px",
+  objectFit: "cover",
+  borderRadius: tokens.radius.md,
+  opacity: 0.45,
+  "@media": { "screen and (max-width: 760px)": { display: "none" } },
 });
 
 export const presetImage = style({
-  maxHeight: "360px",
-  maxWidth: "100%",
+  height: "300px",
+  width: "100%",
   objectFit: "contain",
   borderRadius: tokens.radius.sm,
 });
 
 export const presetImagePlaceholder = style({
-  width: "280px",
-  height: "360px",
+  width: "100%",
+  height: "300px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -159,8 +198,12 @@ export const presetTags = style({
 
 export const favoritesGrid = style({
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+  gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
   gap: tokens.space.sm,
+  "@media": {
+    "screen and (max-width: 1100px)": { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+    "screen and (max-width: 720px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+  },
 });
 
 export const favoriteSlotCard = style({
@@ -181,6 +224,7 @@ export const favoriteSlotHeader = style({
 
 export const favoriteSlotActions = style({
   display: "flex",
+  flexWrap: "wrap",
   gap: tokens.space.xs,
   marginTop: tokens.space.xs,
 });

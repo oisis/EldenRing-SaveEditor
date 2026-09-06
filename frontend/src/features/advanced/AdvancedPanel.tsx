@@ -1,9 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useNetworkPresets,
-  useNetworkSettings,
-} from "../../application/network/useNetworkQueries";
+import { useNetworkPresets, useNetworkSettings } from "../../application/network/useNetworkQueries";
 import { useSetNetworkSettings } from "../../application/network/useNetworkMutations";
 import type {
   NetworkParamValues,
@@ -20,6 +17,7 @@ import {
   groupHeader,
   groupSection,
   groupTitle,
+  networkGrid,
   notice,
   presetButtons,
   presetMissingMessage,
@@ -29,12 +27,9 @@ import {
   subnav,
 } from "./AdvancedPanel.css";
 import { NetworkParamControl } from "./NetworkParamControl";
-import {
-  networkGroups,
-  presetRoles,
-  type PresetRoleDefinition,
-} from "./networkMetadata";
+import { networkGroups, presetRoles, type PresetRoleDefinition } from "./networkMetadata";
 import { SuperMarchantPlaceholder } from "./SuperMarchantPlaceholder";
+import { workspaceStack } from "../../ui/patterns/workspace.css";
 
 export type AdvancedPanelProps = {
   saveSessionID?: string | undefined;
@@ -189,9 +184,7 @@ export function AdvancedPanel({
       if (!saveSessionID || !saveRevision) return;
       setDraft((prev) => {
         const base =
-          prev &&
-          prev.saveSessionID === saveSessionID &&
-          prev.saveRevision === saveRevision
+          prev && prev.saveSessionID === saveSessionID && prev.saveRevision === saveRevision
             ? prev.values
             : settingsQuery.data?.parameters;
         if (!base) return null;
@@ -250,9 +243,7 @@ export function AdvancedPanel({
 
       setDraft((prev) => {
         const base =
-          prev &&
-          prev.saveSessionID === saveSessionID &&
-          prev.saveRevision === saveRevision
+          prev && prev.saveSessionID === saveSessionID && prev.saveRevision === saveRevision
             ? prev.values
             : settingsQuery.data?.parameters;
         if (!base) return null;
@@ -295,15 +286,17 @@ export function AdvancedPanel({
   }, [canMutate, saveSessionID, saveRevision, currentValues, mutations]);
 
   return (
-    <div className={panel}>
+    <div className={`${panel} ${workspaceStack}`}>
       <nav aria-label={t`Advanced subcategories`} className={subnav}>
         <Button
+          pressed={subtab === "network"}
           tone={subtab === "network" ? "accent" : "neutral"}
           onClick={() => setSubtab("network")}
         >
           <Trans>Network Tuning</Trans>
         </Button>
         <Button
+          pressed={subtab === "super-marchant"}
           tone={subtab === "super-marchant" ? "accent" : "neutral"}
           onClick={() => setSubtab("super-marchant")}
         >
@@ -340,17 +333,20 @@ export function AdvancedPanel({
           )}
 
           {saveSessionID && currentValues && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}
+            >
               {/* Preset Roles Section */}
               <section className={presetRolesCard} aria-label={t`Preset roles`}>
-                <div className={groupHeader}>
+                <div className={groupHeader} style={{ gridColumn: "1 / -1" }}>
                   <div>
                     <h3 className={groupTitle}>
                       <Trans>Preset roles</Trans>
                     </h3>
                     <p className={groupDescription}>
                       <Trans>
-                        Apply curated tuning profiles to specific matchmaking roles without affecting other parameters.
+                        Apply curated tuning profiles to specific matchmaking roles without
+                        affecting other parameters.
                       </Trans>
                     </p>
                   </div>
@@ -402,35 +398,37 @@ export function AdvancedPanel({
               </section>
 
               {/* 5 Parameter Groups */}
-              {networkGroups.map((group) => {
-                const groupTitleText = i18n._(group.title);
-                const groupDescText = i18n._(group.description);
+              <div className={networkGrid}>
+                {networkGroups.map((group) => {
+                  const groupTitleText = i18n._(group.title);
+                  const groupDescText = i18n._(group.description);
 
-                return (
-                  <section key={group.id} className={groupSection} aria-label={groupTitleText}>
-                    <div className={groupHeader}>
-                      <div>
-                        <h3 className={groupTitle}>{groupTitleText}</h3>
-                        <p className={groupDescription}>{groupDescText}</p>
+                  return (
+                    <section key={group.id} className={groupSection} aria-label={groupTitleText}>
+                      <div className={groupHeader}>
+                        <div>
+                          <h3 className={groupTitle}>{groupTitleText}</h3>
+                          <p className={groupDescription}>{groupDescText}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className={controlsGrid}>
-                      {group.fields.map((field) => (
-                        <NetworkParamControl
-                          key={field.key}
-                          metadata={field}
-                          value={currentValues[field.key]}
-                          resetToken={resetToken}
-                          disabled={isBusy}
-                          onChange={handleFieldChange}
-                          onValidityChange={handleValidityChange}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
+                      <div className={controlsGrid}>
+                        {group.fields.map((field) => (
+                          <NetworkParamControl
+                            key={field.key}
+                            metadata={field}
+                            value={currentValues[field.key]}
+                            resetToken={resetToken}
+                            disabled={isBusy}
+                            onChange={handleFieldChange}
+                            onValidityChange={handleValidityChange}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
 
               {mutations.error && (
                 <p role="alert" className={alert}>
@@ -439,18 +437,10 @@ export function AdvancedPanel({
               )}
 
               <div className={actionsBar}>
-                <Button
-                  tone="accent"
-                  disabled={!canMutate}
-                  onClick={handleApplyChanges}
-                >
+                <Button tone="accent" disabled={!canMutate} onClick={handleApplyChanges}>
                   <Trans>Apply changes</Trans>
                 </Button>
-                <Button
-                  tone="neutral"
-                  disabled={isBusy || !isModified}
-                  onClick={handleReset}
-                >
+                <Button tone="neutral" disabled={isBusy || !isModified} onClick={handleReset}>
                   <Trans>Reset</Trans>
                 </Button>
                 {hasInvalidField && (
@@ -472,8 +462,8 @@ export function AdvancedPanel({
                 <p style={{ margin: 0 }}>
                   <Trans>
                     Custom network settings modify matchmaking timers and buffer limits stored in
-                    UserData11. Applying changes creates an operation that will be reviewed in Review
-                    Changes before writing to disk.
+                    UserData11. Applying changes creates an operation that will be reviewed in
+                    Review Changes before writing to disk.
                   </Trans>
                 </p>
               </div>

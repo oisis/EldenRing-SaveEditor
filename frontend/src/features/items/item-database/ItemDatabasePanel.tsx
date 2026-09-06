@@ -14,7 +14,7 @@ import { useItemMutations } from "../../../application/items/useItemMutations";
 import { useItemPreferences } from "../../../application/preferences/itemPreferences";
 import { Badge } from "../../../ui/components/Badge/Badge";
 import { Button } from "../../../ui/components/Button/Button";
-import { Card } from "../../../ui/components/Card/Card";
+import { workspaceStack } from "../../../ui/patterns/workspace.css";
 import { Checkbox } from "../../../ui/components/Checkbox/Checkbox";
 import { Dialog } from "../../../ui/components/Dialog/Dialog";
 import { Input } from "../../../ui/components/Input/Input";
@@ -286,7 +286,7 @@ export function ItemDatabasePanel({
   const categories = model.resources.data?.categories ?? [];
 
   return (
-    <Card aria-label={t`Item Database`} className={panel}>
+    <section aria-label={t`Item Database`} className={`${panel} ${workspaceStack}`}>
       <div className={toolbar}>
         <div className={filterRow}>
           <label className={visuallyHidden} htmlFor="item-database-search">
@@ -637,7 +637,7 @@ export function ItemDatabasePanel({
           <Trans>Add to save</Trans>
         </Button>
       </Dialog>
-    </Card>
+    </section>
   );
 }
 

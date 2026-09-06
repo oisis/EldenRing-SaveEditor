@@ -31,11 +31,16 @@ import type {
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
+import { workspaceStack } from "../../ui/patterns/workspace.css";
 import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
 import { alert, message, panel, spacer, toolbar } from "../../ui/patterns/panel.css";
 import {
   areaTitle,
+  area,
+  areaGrid,
+  areaSummary,
+  search as searchField,
   dataset as datasetBox,
   datasetBody,
   datasetControls,
@@ -135,7 +140,6 @@ type PresentedDataset = {
 
 /** The neutral bucket for an entry the backend supplied no label for. */
 const otherGroup = " other";
-
 
 function groupEntries(entries: readonly PresentedEntry[]): [string, PresentedEntry[]][] {
   const groups = new Map<string, PresentedEntry[]>();
@@ -767,7 +771,7 @@ export function WorldPanel({
   }
 
   return (
-    <Card aria-label={t`World`} className={panel}>
+    <section aria-label={t`World`} className={`${panel} ${workspaceStack}`}>
       <nav aria-label={t`World sections`} className={subnav}>
         <Button size="sm" pressed={tab === "exploration"} onClick={() => setTab("exploration")}>
           <Trans>Exploration</Trans>
@@ -784,6 +788,8 @@ export function WorldPanel({
         <Input
           type="search"
           aria-label={t`Search World entries`}
+          placeholder={t`Search World entries`}
+          className={searchField}
           value={search}
           onChange={(event) => setSearch(event.currentTarget.value)}
         />
@@ -860,35 +866,39 @@ export function WorldPanel({
                     <Trans>No entry matches the search.</Trans>
                   </p>
                 ) : null}
-                {ready
-                  ? groupEntries(shown).map(([group, items]) => {
-                      const label = group === otherGroup ? otherLabel : group;
-                      return (
-                        <section key={group} aria-label={label}>
-                          <h4 className={areaTitle}>{label}</h4>
-                          <ul className={entryList}>
-                            {items.map((item) => (
-                              <li key={item.id} className={entryBox}>
-                                <span className={entryName}>{item.name}</span>
-                                <span className={entryMeta}>{item.state}</span>
-                                {item.meta === "" ? null : (
-                                  <span className={entryMeta}>{item.meta}</span>
-                                )}
-                                {item.details}
-                                {item.action}
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-                      );
-                    })
-                  : null}
+                <div className={areaGrid}>
+                  {ready
+                    ? groupEntries(shown).map(([group, items]) => {
+                        const label = group === otherGroup ? otherLabel : group;
+                        return (
+                          <section key={group} aria-label={label} className={area}>
+                            <div className={areaSummary}>
+                              <h4 className={areaTitle}>{label}</h4>
+                            </div>
+                            <ul className={entryList}>
+                              {items.map((item) => (
+                                <li key={item.id} className={entryBox}>
+                                  <span className={entryName}>{item.name}</span>
+                                  <span className={entryMeta}>{item.state}</span>
+                                  {item.meta === "" ? null : (
+                                    <span className={entryMeta}>{item.meta}</span>
+                                  )}
+                                  {item.details}
+                                  {item.action}
+                                </li>
+                              ))}
+                            </ul>
+                          </section>
+                        );
+                      })
+                    : null}
+                </div>
               </div>
             </details>
           );
         })}
       </div>
-    </Card>
+    </section>
   );
 }
 

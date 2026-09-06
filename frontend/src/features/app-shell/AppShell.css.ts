@@ -2,7 +2,7 @@ import { style } from "@vanilla-extract/css";
 import { tokens } from "../../ui/tokens/contract.css";
 
 const sidebarWidth = "258px";
-const topbarHeight = "52px";
+const topbarHeight = "48px";
 const consoleHeight = "30px";
 
 export const shell = style({
@@ -177,7 +177,7 @@ export const workspace = style({
   minWidth: 0,
   minHeight: 0,
   overflow: "auto",
-  padding: tokens.space.lg,
+  padding: "20px 24px",
   "@media": { "screen and (max-width: 900px)": { padding: tokens.space.md } },
 });
 
@@ -188,7 +188,7 @@ export const screen = style({
   gap: tokens.space.md,
 });
 
-export const itemSubnav = style({ display: "flex", gap: tokens.space.xs });
+export { subnav as itemSubnav } from "../../ui/patterns/workspace.css";
 
 export const placeholder = style({ minHeight: "180px", justifyContent: "center" });
 

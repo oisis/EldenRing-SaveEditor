@@ -22,6 +22,12 @@ import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
 import { alert, message, panel } from "../../ui/patterns/panel.css";
 import {
+  disclosure,
+  disclosureHeading,
+  disclosureBody,
+  workspaceStack,
+} from "../../ui/patterns/workspace.css";
+import {
   attributeInput,
   attributeName,
   attributeRow,
@@ -34,6 +40,8 @@ import {
   fieldLabel,
   identityCard,
   identityGrid,
+  profileSections,
+  profileSection,
   nameForm,
   presetContainer,
   presetControls,
@@ -41,6 +49,8 @@ import {
   presetImagePlaceholder,
   presetTags,
   presetViewer,
+  presetStage,
+  presetNeighbor,
   sectionGrid,
   statBox,
   statBoxLabel,
@@ -346,7 +356,7 @@ export function CharacterPanel({
   };
 
   return (
-    <div className={panel}>
+    <div className={`${panel} ${workspaceStack}`}>
       <nav aria-label={t`Character navigation`} className={subnav}>
         <Button size="sm" pressed={activeTab === "profile"} onClick={() => setActiveTab("profile")}>
           <Trans>Profile</Trans>
@@ -399,319 +409,338 @@ export function CharacterPanel({
                     <Trans>Unable to load the profile of this character slot.</Trans>
                   </p>
                 ) : null}
-                <div className={identityGrid}>
-                  <form className={fieldGroup} onSubmit={handleSaveName}>
-                    <label htmlFor="character-name-input" className={fieldLabel}>
-                      <Trans>Name</Trans>
-                    </label>
-                    <div className={nameForm}>
-                      <Input
-                        id="character-name-input"
-                        value={nameValue}
-                        disabled={isBusy || !profileReady}
-                        onChange={(e) =>
-                          setNameDraft({ key: editContextKey, value: e.currentTarget.value })
-                        }
-                      />
-                      <Button
-                        type="submit"
-                        size="sm"
-                        disabled={
-                          isBusy ||
-                          !profileReady ||
-                          !nameValue.trim() ||
-                          nameValue === (profileQuery.data?.name ?? "")
-                        }
-                      >
-                        <Trans>Save</Trans>
-                      </Button>
-                    </div>
-                  </form>
+                <div className={profileSections}>
+                  <section className={profileSection}>
+                    <div className={identityGrid}>
+                      <form className={fieldGroup} onSubmit={handleSaveName}>
+                        <label htmlFor="character-name-input" className={fieldLabel}>
+                          <Trans>Name</Trans>
+                        </label>
+                        <div className={nameForm}>
+                          <Input
+                            id="character-name-input"
+                            value={nameValue}
+                            disabled={isBusy || !profileReady}
+                            onChange={(e) =>
+                              setNameDraft({ key: editContextKey, value: e.currentTarget.value })
+                            }
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            disabled={
+                              isBusy ||
+                              !profileReady ||
+                              !nameValue.trim() ||
+                              nameValue === (profileQuery.data?.name ?? "")
+                            }
+                          >
+                            <Trans>Save</Trans>
+                          </Button>
+                        </div>
+                      </form>
 
-                  <div className={fieldGroup}>
-                    <span className={fieldLabel}>
-                      <Trans>Starting Class</Trans>
-                    </span>
-                    <div className={nameForm}>
-                      <span>
-                        {profileReady && classesReady ? (
-                          currentClassName
-                        ) : profileQuery.isError || classesQuery.isError ? (
-                          <Trans>Unavailable</Trans>
-                        ) : (
-                          <Trans>Loading…</Trans>
-                        )}
-                      </span>
-                      <Button
-                        size="sm"
-                        disabled={isBusy || !profileReady || !classesReady}
-                        onClick={() => {
-                          setPendingClassID(profileQuery.data?.startingClassID ?? 0);
-                          setClassPickerOpen(true);
-                        }}
-                      >
-                        <Trans>Change Class</Trans>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className={fieldGroup}>
-                    <span className={fieldLabel}>
-                      <Trans>Body Type</Trans>
-                    </span>
-                    <div className={nameForm}>
-                      {!profileReady ? (
-                        <Badge tone="neutral">
-                          {profileQuery.isError ? (
-                            <Trans>Unavailable</Trans>
-                          ) : (
-                            <Trans>Loading…</Trans>
-                          )}
-                        </Badge>
-                      ) : profileQuery.data.gender === 0 || profileQuery.data.gender === 1 ? (
-                        <>
-                          <Badge>{profileQuery.data.gender === 1 ? "Type A" : "Type B"}</Badge>
+                      <div className={fieldGroup}>
+                        <span className={fieldLabel}>
+                          <Trans>Starting Class</Trans>
+                        </span>
+                        <div className={nameForm}>
+                          <span>
+                            {profileReady && classesReady ? (
+                              currentClassName
+                            ) : profileQuery.isError || classesQuery.isError ? (
+                              <Trans>Unavailable</Trans>
+                            ) : (
+                              <Trans>Loading…</Trans>
+                            )}
+                          </span>
                           <Button
                             size="sm"
-                            disabled={isBusy}
+                            disabled={isBusy || !profileReady || !classesReady}
                             onClick={() => {
-                              if (!profileQuery.data) return;
-                              setPendingGender(profileQuery.data.gender === 1 ? 0 : 1);
-                              setConfirmGenderOpen(true);
+                              setPendingClassID(profileQuery.data?.startingClassID ?? 0);
+                              setClassPickerOpen(true);
                             }}
                           >
-                            <Trans>
-                              Switch to {profileQuery.data.gender === 1 ? "Type B" : "Type A"}
-                            </Trans>
+                            <Trans>Change Class</Trans>
                           </Button>
-                        </>
-                      ) : (
-                        <Badge tone="neutral">
-                          <Trans>Unknown</Trans>
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+                        </div>
+                      </div>
 
-                  <div className={fieldGroup}>
-                    <span className={fieldLabel}>
-                      <Trans>Rune Level</Trans>
-                    </span>
-                    {profileReady ? (
-                      <span className={statBoxValue}>{profileQuery.data.level}</span>
-                    ) : (
-                      <span className={message}>
-                        {profileQuery.isError ? (
-                          <Trans>Unavailable</Trans>
+                      <div className={fieldGroup}>
+                        <span className={fieldLabel}>
+                          <Trans>Body Type</Trans>
+                        </span>
+                        <div className={nameForm}>
+                          {!profileReady ? (
+                            <Badge tone="neutral">
+                              {profileQuery.isError ? (
+                                <Trans>Unavailable</Trans>
+                              ) : (
+                                <Trans>Loading…</Trans>
+                              )}
+                            </Badge>
+                          ) : profileQuery.data.gender === 0 || profileQuery.data.gender === 1 ? (
+                            <>
+                              <Badge>{profileQuery.data.gender === 1 ? "Type A" : "Type B"}</Badge>
+                              <Button
+                                size="sm"
+                                disabled={isBusy}
+                                onClick={() => {
+                                  if (!profileQuery.data) return;
+                                  setPendingGender(profileQuery.data.gender === 1 ? 0 : 1);
+                                  setConfirmGenderOpen(true);
+                                }}
+                              >
+                                <Trans>
+                                  Switch to {profileQuery.data.gender === 1 ? "Type B" : "Type A"}
+                                </Trans>
+                              </Button>
+                            </>
+                          ) : (
+                            <Badge tone="neutral">
+                              <Trans>Unknown</Trans>
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={fieldGroup}>
+                        <span className={fieldLabel}>
+                          <Trans>Rune Level</Trans>
+                        </span>
+                        {profileReady ? (
+                          <span className={statBoxValue}>{profileQuery.data.level}</span>
                         ) : (
-                          <Trans>Loading…</Trans>
+                          <span className={message}>
+                            {profileQuery.isError ? (
+                              <Trans>Unavailable</Trans>
+                            ) : (
+                              <Trans>Loading…</Trans>
+                            )}
+                          </span>
                         )}
-                      </span>
-                    )}
-                  </div>
+                      </div>
+                    </div>
+                  </section>
+                  <section aria-label={t`Progression`} className={profileSection}>
+                    <h2>
+                      <Trans>Progression</Trans>
+                    </h2>
+                    {statsQuery.isPending ? (
+                      <p role="status" className={message}>
+                        <Trans>Loading progression…</Trans>
+                      </p>
+                    ) : null}
+                    {statsQuery.isError ? (
+                      <p role="alert" className={alert}>
+                        <Trans>Unable to load the progression of this character slot.</Trans>
+                      </p>
+                    ) : null}
+                    {statsReady && runesValue !== undefined ? (
+                      <>
+                        <div className={fieldGroup}>
+                          <label htmlFor="character-runes-input" className={fieldLabel}>
+                            <Trans>Runes Held</Trans>
+                          </label>
+                          <div className={nameForm}>
+                            <Input
+                              id="character-runes-input"
+                              type="number"
+                              min={0}
+                              max={runesHeldMaximum}
+                              value={runesValue}
+                              disabled={isBusy}
+                              onChange={(e) =>
+                                setRunesDraft({ key: editContextKey, value: e.currentTarget.value })
+                              }
+                            />
+                            <Button
+                              size="sm"
+                              disabled={isBusy || !runesValid}
+                              onClick={handleSaveRunes}
+                            >
+                              <Trans>Save Runes</Trans>
+                            </Button>
+                          </div>
+                        </div>
+                        <div className={fieldGroup}>
+                          <span className={fieldLabel}>
+                            <Trans>Soul Memory</Trans>
+                          </span>
+                          <span className={statBoxValue}>{statsQuery.data.soulMemory}</span>
+                        </div>
+                      </>
+                    ) : null}
+                    {loadoutQuery.isPending ? (
+                      <p role="status" className={message}>
+                        <Trans>Loading loadout capacity…</Trans>
+                      </p>
+                    ) : null}
+                    {loadoutQuery.isError ? (
+                      <p role="alert" className={alert}>
+                        <Trans>Unable to load the loadout capacity of this character slot.</Trans>
+                      </p>
+                    ) : null}
+                    {loadoutReady ? (
+                      <div className={statGrid}>
+                        <div className={statBox}>
+                          <span className={statBoxLabel}>
+                            <Trans>Memory Stones</Trans>
+                          </span>
+                          <span className={statBoxValue}>{loadoutQuery.data.memoryStones}</span>
+                        </div>
+                        <div className={statBox}>
+                          <span className={statBoxLabel}>
+                            <Trans>Talisman Slots</Trans>
+                          </span>
+                          <span className={statBoxValue}>
+                            {loadoutQuery.data.unlockedTalismanSlots}
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
                 </div>
               </Card>
 
               <div className={sectionGrid}>
-                <Card aria-label={t`Attributes`}>
-                  <h2>
-                    <Trans>Attributes</Trans>
-                  </h2>
-                  {statsQuery.isPending ? (
-                    <p role="status" className={message}>
-                      <Trans>Loading attributes…</Trans>
-                    </p>
-                  ) : null}
-                  {statsQuery.isError ? (
-                    <p role="alert" className={alert}>
-                      <Trans>Unable to load the attributes of this character slot.</Trans>
-                    </p>
-                  ) : null}
-                  {statsReady && attributeValues !== undefined ? (
-                    <>
-                      {attributeKeys.map((attr) => (
-                        <div key={attr} className={attributeRow}>
-                          <span className={attributeName}>{attributeLabels[attr]}</span>
-                          <input
-                            type="range"
-                            aria-label={attributeLabels[attr]}
-                            min={1}
-                            max={99}
-                            value={attributeValues[attr]}
-                            disabled={isBusy}
-                            onChange={(e) =>
-                              setAttributesDraft({
-                                key: editContextKey,
-                                value: {
-                                  ...attributeValues,
-                                  [attr]: Number(e.currentTarget.value),
-                                },
-                              })
-                            }
-                            className={attributeSlider}
-                          />
-                          <Input
-                            type="number"
-                            min={1}
-                            max={99}
-                            value={String(attributeValues[attr])}
-                            disabled={isBusy}
-                            onChange={(e) => {
-                              const val = Number(e.currentTarget.value);
-                              if (val >= 1 && val <= 99) {
-                                setAttributesDraft({
-                                  key: editContextKey,
-                                  value: { ...attributeValues, [attr]: val },
-                                });
-                              }
-                            }}
-                            className={attributeInput}
-                          />
-                        </div>
-                      ))}
-                      <div className={favoriteSlotActions}>
-                        <Button size="sm" disabled={isBusy} onClick={handleSaveAttributes}>
-                          <Trans>Save Attributes</Trans>
-                        </Button>
-                        <Button size="sm" disabled={isBusy} onClick={handleResetAttributesDraft}>
-                          <Trans>Reset</Trans>
-                        </Button>
-                      </div>
-                    </>
-                  ) : null}
-                </Card>
-
-                <Card aria-label={t`Base Resources`}>
-                  <h2>
-                    <Trans>Base Resources</Trans>
-                  </h2>
-                  {statsQuery.isPending ? (
-                    <p role="status" className={message}>
-                      <Trans>Loading base resources…</Trans>
-                    </p>
-                  ) : null}
-                  {statsQuery.isError ? (
-                    <p role="alert" className={alert}>
-                      <Trans>Unable to load the base resources of this character slot.</Trans>
-                    </p>
-                  ) : null}
-                  {statsQuery.isSuccess ? (
-                    <div className={statGrid}>
-                      <div className={statBox}>
-                        <span className={statBoxLabel}>
-                          <Trans>HP</Trans>
-                        </span>
-                        <span className={statBoxValue}>
-                          {statsQuery.data.hp} / {statsQuery.data.maxHP}
-                        </span>
-                        <span className={statBoxSub}>
-                          <Trans>Base: {statsQuery.data.baseMaxHP}</Trans>
-                        </span>
-                      </div>
-                      <div className={statBox}>
-                        <span className={statBoxLabel}>
-                          <Trans>FP</Trans>
-                        </span>
-                        <span className={statBoxValue}>
-                          {statsQuery.data.fp} / {statsQuery.data.maxFP}
-                        </span>
-                        <span className={statBoxSub}>
-                          <Trans>Base: {statsQuery.data.baseMaxFP}</Trans>
-                        </span>
-                      </div>
-                      <div className={statBox}>
-                        <span className={statBoxLabel}>
-                          <Trans>Stamina (SP)</Trans>
-                        </span>
-                        <span className={statBoxValue}>
-                          {statsQuery.data.sp} / {statsQuery.data.maxSP}
-                        </span>
-                        <span className={statBoxSub}>
-                          <Trans>Base: {statsQuery.data.baseMaxSP}</Trans>
-                        </span>
-                      </div>
+                <section aria-label={t`Attributes`}>
+                  <details open className={disclosure}>
+                    <summary className={disclosureHeading}>
+                      <h2>
+                        <Trans>Attributes</Trans>
+                      </h2>
+                    </summary>
+                    <div className={disclosureBody}>
+                      {statsQuery.isPending ? (
+                        <p role="status" className={message}>
+                          <Trans>Loading attributes…</Trans>
+                        </p>
+                      ) : null}
+                      {statsQuery.isError ? (
+                        <p role="alert" className={alert}>
+                          <Trans>Unable to load the attributes of this character slot.</Trans>
+                        </p>
+                      ) : null}
+                      {statsReady && attributeValues !== undefined ? (
+                        <>
+                          {attributeKeys.map((attr) => (
+                            <div key={attr} className={attributeRow}>
+                              <span className={attributeName}>{attributeLabels[attr]}</span>
+                              <input
+                                type="range"
+                                aria-label={attributeLabels[attr]}
+                                min={1}
+                                max={99}
+                                value={attributeValues[attr]}
+                                disabled={isBusy}
+                                onChange={(e) =>
+                                  setAttributesDraft({
+                                    key: editContextKey,
+                                    value: {
+                                      ...attributeValues,
+                                      [attr]: Number(e.currentTarget.value),
+                                    },
+                                  })
+                                }
+                                className={attributeSlider}
+                              />
+                              <Input
+                                type="number"
+                                min={1}
+                                max={99}
+                                value={String(attributeValues[attr])}
+                                disabled={isBusy}
+                                onChange={(e) => {
+                                  const val = Number(e.currentTarget.value);
+                                  if (val >= 1 && val <= 99) {
+                                    setAttributesDraft({
+                                      key: editContextKey,
+                                      value: { ...attributeValues, [attr]: val },
+                                    });
+                                  }
+                                }}
+                                className={attributeInput}
+                              />
+                            </div>
+                          ))}
+                          <div className={favoriteSlotActions}>
+                            <Button size="sm" disabled={isBusy} onClick={handleSaveAttributes}>
+                              <Trans>Save Attributes</Trans>
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={isBusy}
+                              onClick={handleResetAttributesDraft}
+                            >
+                              <Trans>Reset</Trans>
+                            </Button>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
-                  ) : null}
-                </Card>
+                  </details>
+                </section>
 
-                <Card aria-label={t`Progression`}>
-                  <h2>
-                    <Trans>Progression</Trans>
-                  </h2>
-                  {statsQuery.isPending ? (
-                    <p role="status" className={message}>
-                      <Trans>Loading progression…</Trans>
-                    </p>
-                  ) : null}
-                  {statsQuery.isError ? (
-                    <p role="alert" className={alert}>
-                      <Trans>Unable to load the progression of this character slot.</Trans>
-                    </p>
-                  ) : null}
-                  {statsReady && runesValue !== undefined ? (
-                    <>
-                      <div className={fieldGroup}>
-                        <label htmlFor="character-runes-input" className={fieldLabel}>
-                          <Trans>Runes Held</Trans>
-                        </label>
-                        <div className={nameForm}>
-                          <Input
-                            id="character-runes-input"
-                            type="number"
-                            min={0}
-                            max={runesHeldMaximum}
-                            value={runesValue}
-                            disabled={isBusy}
-                            onChange={(e) =>
-                              setRunesDraft({ key: editContextKey, value: e.currentTarget.value })
-                            }
-                          />
-                          <Button
-                            size="sm"
-                            disabled={isBusy || !runesValid}
-                            onClick={handleSaveRunes}
-                          >
-                            <Trans>Save Runes</Trans>
-                          </Button>
+                <section aria-label={t`Base Resources`}>
+                  <details open className={disclosure}>
+                    <summary className={disclosureHeading}>
+                      <h2>
+                        <Trans>Base Resources</Trans>
+                      </h2>
+                    </summary>
+                    <div className={disclosureBody}>
+                      {statsQuery.isPending ? (
+                        <p role="status" className={message}>
+                          <Trans>Loading base resources…</Trans>
+                        </p>
+                      ) : null}
+                      {statsQuery.isError ? (
+                        <p role="alert" className={alert}>
+                          <Trans>Unable to load the base resources of this character slot.</Trans>
+                        </p>
+                      ) : null}
+                      {statsQuery.isSuccess ? (
+                        <div className={statGrid}>
+                          <div className={statBox}>
+                            <span className={statBoxLabel}>
+                              <Trans>HP</Trans>
+                            </span>
+                            <span className={statBoxValue}>
+                              {statsQuery.data.hp} / {statsQuery.data.maxHP}
+                            </span>
+                            <span className={statBoxSub}>
+                              <Trans>Base: {statsQuery.data.baseMaxHP}</Trans>
+                            </span>
+                          </div>
+                          <div className={statBox}>
+                            <span className={statBoxLabel}>
+                              <Trans>FP</Trans>
+                            </span>
+                            <span className={statBoxValue}>
+                              {statsQuery.data.fp} / {statsQuery.data.maxFP}
+                            </span>
+                            <span className={statBoxSub}>
+                              <Trans>Base: {statsQuery.data.baseMaxFP}</Trans>
+                            </span>
+                          </div>
+                          <div className={statBox}>
+                            <span className={statBoxLabel}>
+                              <Trans>Stamina (SP)</Trans>
+                            </span>
+                            <span className={statBoxValue}>
+                              {statsQuery.data.sp} / {statsQuery.data.maxSP}
+                            </span>
+                            <span className={statBoxSub}>
+                              <Trans>Base: {statsQuery.data.baseMaxSP}</Trans>
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <div className={fieldGroup}>
-                        <span className={fieldLabel}>
-                          <Trans>Soul Memory</Trans>
-                        </span>
-                        <span className={statBoxValue}>{statsQuery.data.soulMemory}</span>
-                      </div>
-                    </>
-                  ) : null}
-                  {loadoutQuery.isPending ? (
-                    <p role="status" className={message}>
-                      <Trans>Loading loadout capacity…</Trans>
-                    </p>
-                  ) : null}
-                  {loadoutQuery.isError ? (
-                    <p role="alert" className={alert}>
-                      <Trans>Unable to load the loadout capacity of this character slot.</Trans>
-                    </p>
-                  ) : null}
-                  {loadoutReady ? (
-                    <div className={statGrid}>
-                      <div className={statBox}>
-                        <span className={statBoxLabel}>
-                          <Trans>Memory Stones</Trans>
-                        </span>
-                        <span className={statBoxValue}>{loadoutQuery.data.memoryStones}</span>
-                      </div>
-                      <div className={statBox}>
-                        <span className={statBoxLabel}>
-                          <Trans>Talisman Slots</Trans>
-                        </span>
-                        <span className={statBoxValue}>
-                          {loadoutQuery.data.unlockedTalismanSlots}
-                        </span>
-                      </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                </Card>
+                  </details>
+                </section>
               </div>
             </>
           )}
@@ -869,57 +898,83 @@ export function CharacterPanel({
               </p>
             ) : null}
             {presetsReady && activePreset !== undefined ? (
-              <div className={presetViewer}>
-                {activePresetImageURL !== undefined ? (
-                  <img src={activePresetImageURL} alt={activePreset.name} className={presetImage} />
+              <div className={presetStage}>
+                {filteredPresets[safePresetIndex - 1] ? (
+                  <img
+                    className={presetNeighbor}
+                    alt=""
+                    aria-hidden="true"
+                    src={appearancePresetAssetURL(filteredPresets[safePresetIndex - 1].image)}
+                  />
                 ) : (
-                  <div className={presetImagePlaceholder}>
-                    <Trans>No preview image</Trans>
-                  </div>
+                  <div className={presetNeighbor} aria-hidden="true" />
                 )}
-                <h3>{activePreset.name}</h3>
-                <Badge>{activePreset.bodyType}</Badge>
-                {activePreset.tags.length > 0 && (
-                  <div className={presetTags}>
-                    {activePreset.tags.map((tag) => (
-                      <Badge key={tag} tone="neutral">
-                        {tag}
-                      </Badge>
-                    ))}
+                <div className={presetViewer}>
+                  {activePresetImageURL !== undefined ? (
+                    <img
+                      src={activePresetImageURL}
+                      alt={activePreset.name}
+                      className={presetImage}
+                    />
+                  ) : (
+                    <div className={presetImagePlaceholder}>
+                      <Trans>No preview image</Trans>
+                    </div>
+                  )}
+                  <h3>{activePreset.name}</h3>
+                  <Badge>{activePreset.bodyType}</Badge>
+                  {activePreset.tags.length > 0 && (
+                    <div className={presetTags}>
+                      {activePreset.tags.map((tag) => (
+                        <Badge key={tag} tone="neutral">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className={presetControls}>
+                    <Button
+                      size="sm"
+                      disabled={safePresetIndex === 0}
+                      onClick={() => setSelectedPresetIndex(Math.max(0, safePresetIndex - 1))}
+                    >
+                      <Trans>Previous</Trans>
+                    </Button>
+                    <span>
+                      {safePresetIndex + 1} / {filteredPresets.length}
+                    </span>
+                    <Button
+                      size="sm"
+                      disabled={safePresetIndex === filteredPresets.length - 1}
+                      onClick={() =>
+                        setSelectedPresetIndex(
+                          Math.min(filteredPresets.length - 1, safePresetIndex + 1),
+                        )
+                      }
+                    >
+                      <Trans>Next</Trans>
+                    </Button>
                   </div>
+                  <div>
+                    <Button
+                      size="sm"
+                      disabled={!hasActiveCharacter || isBusy}
+                      onClick={handleApplyPreset}
+                    >
+                      <Trans>Apply to Character</Trans>
+                    </Button>
+                  </div>
+                </div>
+                {filteredPresets[safePresetIndex + 1] ? (
+                  <img
+                    className={presetNeighbor}
+                    alt=""
+                    aria-hidden="true"
+                    src={appearancePresetAssetURL(filteredPresets[safePresetIndex + 1].image)}
+                  />
+                ) : (
+                  <div className={presetNeighbor} aria-hidden="true" />
                 )}
-                <div className={presetControls}>
-                  <Button
-                    size="sm"
-                    disabled={safePresetIndex === 0}
-                    onClick={() => setSelectedPresetIndex(Math.max(0, safePresetIndex - 1))}
-                  >
-                    <Trans>Previous</Trans>
-                  </Button>
-                  <span>
-                    {safePresetIndex + 1} / {filteredPresets.length}
-                  </span>
-                  <Button
-                    size="sm"
-                    disabled={safePresetIndex === filteredPresets.length - 1}
-                    onClick={() =>
-                      setSelectedPresetIndex(
-                        Math.min(filteredPresets.length - 1, safePresetIndex + 1),
-                      )
-                    }
-                  >
-                    <Trans>Next</Trans>
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    size="sm"
-                    disabled={!hasActiveCharacter || isBusy}
-                    onClick={handleApplyPreset}
-                  >
-                    <Trans>Apply to Character</Trans>
-                  </Button>
-                </div>
               </div>
             ) : null}
           </Card>

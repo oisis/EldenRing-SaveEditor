@@ -14,7 +14,7 @@ import { useItemMutations } from "../../../application/items/useItemMutations";
 import { useItemPreferences } from "../../../application/preferences/itemPreferences";
 import { Badge } from "../../../ui/components/Badge/Badge";
 import { Button } from "../../../ui/components/Button/Button";
-import { Card } from "../../../ui/components/Card/Card";
+import { workspaceStack } from "../../../ui/patterns/workspace.css";
 import { Checkbox } from "../../../ui/components/Checkbox/Checkbox";
 import { Dialog } from "../../../ui/components/Dialog/Dialog";
 import { Input } from "../../../ui/components/Input/Input";
@@ -385,7 +385,7 @@ export function InventoryAndStoragePanel({
   const tableModel = useTable({ features: tableFeatureSet, columns, data: rows }, (state) => state);
 
   return (
-    <Card aria-label={t`Inventory and Storage`} className={panel}>
+    <section aria-label={t`Inventory and Storage`} className={`${panel} ${workspaceStack}`}>
       <div className={toolbar}>
         <h2 className={visuallyHidden}>
           <Trans>Inventory and Storage</Trans>
@@ -679,7 +679,7 @@ export function InventoryAndStoragePanel({
           />
         ) : null}
       </Dialog>
-    </Card>
+    </section>
   );
 }
 
@@ -805,6 +805,7 @@ function ContainerGrid({
               // The tile opens the details, so its accessible name is the item
               // itself; the quantity beside it is presentation, not identity.
               aria-label={displayName(record, nameUnavailable)}
+              title={displayName(record, nameUnavailable)}
               pressed={model.openedRow?.ownedItemID === record.ownedItemID}
               onClick={(event) => {
                 returnFocusRef.current = event.currentTarget;

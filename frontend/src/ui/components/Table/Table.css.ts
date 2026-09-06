@@ -16,7 +16,7 @@ export const table = style({
   fontSize: tokens.fontSize.md,
 });
 
-globalStyle(`${table} th`, {
+globalStyle(`.${table} th`, {
   position: "sticky",
   top: 0,
   zIndex: 1,
@@ -28,11 +28,11 @@ globalStyle(`${table} th`, {
   fontWeight: 700,
 });
 
-globalStyle(`${table} td`, {
+globalStyle(`.${table} td`, {
   padding: tokens.space.sm,
   borderBottom: `1px solid ${tokens.color.border}`,
   verticalAlign: "middle",
 });
 
-globalStyle(`${table} tbody tr:last-child td`, { borderBottom: 0 });
-globalStyle(`${table} tbody tr:hover`, { backgroundColor: tokens.color.surfaceHover });
+globalStyle(`.${table} tbody tr:last-child td`, { borderBottom: 0 });
+globalStyle(`.${table} tbody tr:hover`, { backgroundColor: tokens.color.surfaceHover });

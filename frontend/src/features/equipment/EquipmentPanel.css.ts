@@ -1,144 +1,122 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { tokens } from "../../ui/tokens/contract.css";
 
-/**
- * Equipment layout only. Shared panel patterns live in ui/patterns.
- *
- * The screen is one composition rather than a row of independent tiles: the
- * groups share a single fluid grid, so they reflow together instead of each
- * keeping a fixed width of its own.
- */
-
+/** One fluid composition: equipment at left, pouch/physick and spells at right. */
 export const board = style({
   display: "grid",
-  gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+  gridTemplateColumns: "repeat(9, minmax(0, 1fr))",
+  gridTemplateAreas:
+    '"right right right ammo ammo pouch pouch spells spells" "left left left ammo ammo pouch pouch spells spells" "armor armor armor armor . pouch pouch spells spells" "tal tal tal tal . physick physick spells spells" "quick quick quick quick quick physick physick spells spells"',
   gap: tokens.space.md,
-  minHeight: 0,
-  "@media": {
-    "screen and (max-width: 1100px)": { gridTemplateColumns: "repeat(6, minmax(0, 1fr))" },
-    "screen and (max-width: 720px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
-  },
-});
-
-/** A group occupying one third, one half or the full width of the board. */
-export const groupThird = style({
-  gridColumn: "span 4",
+  alignItems: "start",
   minWidth: 0,
   "@media": {
-    "screen and (max-width: 1100px)": { gridColumn: "span 3" },
-    "screen and (max-width: 720px)": { gridColumn: "span 2" },
+    "screen and (max-width: 950px)": {
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+      gridTemplateAreas:
+        '"right right left left" "ammo ammo armor armor" "tal tal quick quick" "pouch pouch spells spells" "physick physick spells spells"',
+    },
   },
 });
 
-export const groupHalf = style({
-  gridColumn: "span 6",
-  minWidth: 0,
-  "@media": {
-    "screen and (max-width: 1100px)": { gridColumn: "span 6" },
-    "screen and (max-width: 720px)": { gridColumn: "span 2" },
-  },
-});
-
-export const groupFull = style({ gridColumn: "1 / -1", minWidth: 0 });
+export const rightGroup = style({ gridArea: "right" });
+export const leftGroup = style({ gridArea: "left" });
+export const ammoGroup = style({ gridArea: "ammo" });
+export const armorGroup = style({ gridArea: "armor" });
+export const talismanGroup = style({ gridArea: "tal" });
+export const quickGroup = style({ gridArea: "quick" });
+export const pouchGroup = style({ gridArea: "pouch" });
+export const physickGroup = style({ gridArea: "physick" });
+export const spellGroup = style({ gridArea: "spells" });
 
 export const group = style({
   display: "flex",
   flexDirection: "column",
   gap: tokens.space.sm,
-  padding: tokens.space.md,
-  border: `1px solid ${tokens.color.border}`,
-  borderRadius: tokens.radius.md,
-  background: tokens.color.surfaceRaised,
+  minWidth: 0,
 });
-
 export const groupHeader = style({
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
-  gap: tokens.space.sm,
+  gap: tokens.space.xs,
 });
-
 export const groupTitle = style({
   margin: 0,
-  fontSize: tokens.fontSize.md,
-  fontWeight: 700,
+  fontSize: tokens.fontSize.sm,
+  fontWeight: 600,
+  color: tokens.color.textMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
 });
-
-/** A run of slots that wraps instead of scrolling. */
 export const slotRow = style({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: tokens.space.sm,
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: tokens.space.xs,
 });
-
-/** The square field of one slot, used for every group. */
 export const slot = style({
-  width: "104px",
-  height: "104px",
+  width: "100%",
+  height: "auto",
+  aspectRatio: "1",
+  minWidth: 0,
+  minHeight: 0,
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  gap: tokens.space.xs,
+  gap: "2px",
   padding: tokens.space.xs,
   textAlign: "center",
+  overflow: "hidden",
 });
-
-export const slotIcon = style({ width: "36px", height: "36px", objectFit: "contain" });
-
+export const slotIcon = style({ width: "40%", height: "40%", objectFit: "contain", flexShrink: 1 });
 export const slotIconPlaceholder = style({
-  width: "36px",
-  height: "36px",
+  width: "36%",
+  aspectRatio: "1",
   borderRadius: tokens.radius.sm,
   background: tokens.color.surfaceHover,
 });
-
 export const slotName = style({
   display: "-webkit-box",
   overflow: "hidden",
   width: "100%",
   color: tokens.color.text,
   fontSize: tokens.fontSize.sm,
-  lineHeight: 1.2,
+  lineHeight: 1.1,
   WebkitBoxOrient: "vertical",
-  WebkitLineClamp: 2,
+  WebkitLineClamp: 1,
 });
-
 export const slotMeta = style({
   color: tokens.color.textMuted,
-  fontSize: tokens.fontSize.sm,
+  fontSize: "10px",
+  overflow: "hidden",
+  maxWidth: "100%",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 });
-
-/**
- * The six Quick Pouch fields. The confirmed 1.x view lays them out in two
- * columns, filled row by row: up and right, then left and down, then the two
- * ordinary fields.
- */
 export const pouchPad = style({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: tokens.space.sm,
-  maxWidth: "240px",
+  gap: tokens.space.xs,
 });
-
-/**
- * The first ten spell positions, as in the confirmed 1.x view: two columns of
- * five, filled column by column, so position 1 to 5 form the left column.
- */
+/** Keep the confirmed column-major spell order and the separate final pair. */
 export const spellPrimaryGrid = style({
   display: "grid",
   gridAutoFlow: "column",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gridTemplateRows: "repeat(5, auto)",
-  gap: tokens.space.sm,
-  maxWidth: "240px",
+  gap: tokens.space.xs,
 });
-
-/** Spell positions 11 and 12, in their own two-column row below the first ten. */
 export const spellExtraGrid = style({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: tokens.space.sm,
-  maxWidth: "240px",
+  gap: tokens.space.xs,
+});
+globalStyle(`.${armorGroup} .${slotRow}, .${talismanGroup} .${slotRow}`, {
+  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+});
+globalStyle(`.${quickGroup} .${slotRow}`, { gridTemplateColumns: "repeat(5, minmax(0, 1fr))" });
+globalStyle(`.${ammoGroup} .${slotRow}, .${physickGroup} .${slotRow}`, {
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
 });
 
 /** One picker result row. */

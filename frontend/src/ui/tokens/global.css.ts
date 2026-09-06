@@ -25,6 +25,14 @@ globalStyle("body", {
   backgroundColor: tokens.color.background,
 });
 
+globalStyle("h1, h2, h3, h4, p", { margin: 0 });
+globalStyle("h2", { fontSize: tokens.fontSize.md, fontWeight: 600 });
+globalStyle("h3, h4", { fontSize: tokens.fontSize.sm, fontWeight: 600 });
+globalStyle("*", {
+  scrollbarWidth: "thin",
+  scrollbarColor: `${tokens.color.borderStrong} transparent`,
+});
+
 /**
  * One visible focus ring for the whole application. Components must not remove
  * it; a control that needs a different shape adjusts its own border radius.

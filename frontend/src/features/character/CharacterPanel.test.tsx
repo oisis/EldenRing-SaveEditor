@@ -128,6 +128,28 @@ describe("CharacterPanel", () => {
     expect(screen.getByText("150")).toBeInTheDocument();
     expect(screen.getByText("HP")).toBeInTheDocument();
 
+    const identityAndProgression = screen.getByRole("region", { name: "Identity and Progression" });
+    expect(
+      within(identityAndProgression).getByRole("region", { name: "Progression" }),
+    ).toBeInTheDocument();
+    const attributesDisclosure = screen
+      .getByRole("region", { name: "Attributes" })
+      .querySelector("details");
+    const resourcesDisclosure = screen
+      .getByRole("region", { name: "Base Resources" })
+      .querySelector("details");
+    expect(attributesDisclosure).toHaveAttribute("open");
+    expect(resourcesDisclosure).toHaveAttribute("open");
+    fireEvent.click(
+      within(screen.getByRole("region", { name: "Attributes" })).getByText("Attributes"),
+    );
+    expect(attributesDisclosure).not.toHaveAttribute("open");
+    expect(resourcesDisclosure).toHaveAttribute("open");
+    fireEvent.click(
+      within(screen.getByRole("region", { name: "Attributes" })).getByText("Attributes"),
+    );
+    expect(attributesDisclosure).toHaveAttribute("open");
+
     // Name mutation
     const nameInput = screen.getByLabelText("Name");
     fireEvent.change(nameInput, { target: { value: "Champion" } });

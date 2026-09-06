@@ -24,6 +24,8 @@ export const groupTitle = style({
   margin: 0,
   fontSize: tokens.fontSize.sm,
   color: tokens.color.textMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
 });
 
 export const list = style({
@@ -53,7 +55,14 @@ export const row = style({
       paddingBlock: tokens.space.sm,
       textAlign: "left",
       minWidth: 0,
+      borderColor: "transparent",
+      backgroundColor: "transparent",
     },
+    '&&[aria-pressed="true"]': {
+      borderColor: tokens.color.accent,
+      backgroundColor: tokens.color.surfaceHover,
+    },
+    "&&:hover": { backgroundColor: tokens.color.surfaceHover },
   },
 });
 
@@ -94,7 +103,7 @@ export const inactiveRow = style({
   gap: tokens.space.xs,
   paddingBlock: tokens.space.sm,
   paddingInline: tokens.space.md,
-  border: `1px solid ${tokens.color.border}`,
+  border: "1px solid transparent",
   borderRadius: tokens.radius.sm,
   color: tokens.color.textMuted,
   minWidth: 0,

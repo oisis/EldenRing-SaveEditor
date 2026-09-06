@@ -19,11 +19,12 @@ export const grid = style({
 
 export const tile = style({
   minWidth: 0,
-  height: "112px",
+  width: "100%",
+  height: "142px",
   flexDirection: "column",
   alignItems: "stretch",
   justifyContent: "space-between",
-  padding: tokens.space.md,
+  padding: `${tokens.space.xl} ${tokens.space.sm} ${tokens.space.sm}`,
   textAlign: "left",
 });
 
@@ -84,7 +85,12 @@ export const cellControls = style({
 
 export const cellControl = style({ pointerEvents: "auto" });
 
-export const tileIcon = style({ width: "36px", height: "36px", objectFit: "contain" });
+export const tileIcon = style({
+  width: "48px",
+  height: "48px",
+  objectFit: "contain",
+  alignSelf: "center",
+});
 
 export const tileIconPlaceholder = style({
   width: "36px",

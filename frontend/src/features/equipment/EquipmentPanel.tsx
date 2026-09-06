@@ -33,10 +33,16 @@ import {
   candidateName,
   candidate as candidateRow,
   group,
-  groupFull,
-  groupHalf,
+  rightGroup,
+  leftGroup,
+  ammoGroup,
+  armorGroup,
+  talismanGroup,
+  quickGroup,
+  pouchGroup,
+  physickGroup,
+  spellGroup,
   groupHeader,
-  groupThird,
   groupTitle,
   pagination,
   pickerSearch,
@@ -489,7 +495,7 @@ export function EquipmentPanel({
 
       {model?.active ? (
         <div className={board}>
-          <section className={`${group} ${groupThird}`} aria-label={t`Right hand`}>
+          <section className={`${group} ${rightGroup}`} aria-label={t`Right hand`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Right hand</Trans>
@@ -506,7 +512,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupThird}`} aria-label={t`Left hand`}>
+          <section className={`${group} ${leftGroup}`} aria-label={t`Left hand`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Left hand</Trans>
@@ -523,7 +529,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupThird}`} aria-label={t`Ammunition`}>
+          <section className={`${group} ${ammoGroup}`} aria-label={t`Ammunition`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Ammunition</Trans>
@@ -545,7 +551,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupHalf}`} aria-label={t`Armor`}>
+          <section className={`${group} ${armorGroup}`} aria-label={t`Armor`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Armor</Trans>
@@ -562,7 +568,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupHalf}`} aria-label={t`Talismans`}>
+          <section className={`${group} ${talismanGroup}`} aria-label={t`Talismans`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Talismans</Trans>
@@ -585,7 +591,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupHalf}`} aria-label={t`Quick Items`}>
+          <section className={`${group} ${quickGroup}`} aria-label={t`Quick Items`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Quick Items</Trans>
@@ -606,7 +612,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupThird}`} aria-label={t`Quick Pouch`}>
+          <section className={`${group} ${pouchGroup}`} aria-label={t`Quick Pouch`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Quick Pouch</Trans>
@@ -623,7 +629,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupThird}`} aria-label={t`Wondrous Physick`}>
+          <section className={`${group} ${physickGroup}`} aria-label={t`Wondrous Physick`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Wondrous Physick</Trans>
@@ -638,7 +644,7 @@ export function EquipmentPanel({
             </div>
           </section>
 
-          <section className={`${group} ${groupFull}`} aria-label={t`Spells`}>
+          <section className={`${group} ${spellGroup}`} aria-label={t`Spells`}>
             <div className={groupHeader}>
               <h3 className={groupTitle}>
                 <Trans>Spells</Trans>
@@ -659,9 +665,7 @@ export function EquipmentPanel({
               {model.spells.slice(0, 10).map((entry, index) => renderSpellSlot(entry, index))}
             </div>
             <div className={spellExtraGrid}>
-              {model.spells
-                .slice(10)
-                .map((entry, offset) => renderSpellSlot(entry, offset + 10))}
+              {model.spells.slice(10).map((entry, offset) => renderSpellSlot(entry, offset + 10))}
             </div>
           </section>
         </div>

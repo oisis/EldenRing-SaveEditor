@@ -7,15 +7,14 @@ import { tokens } from "../../../ui/tokens/contract.css";
  * dialog, and the shared panel patterns live in ui/patterns.
  */
 
-const cellSize = "96px";
-const iconSize = "36px";
+const iconSize = "32px";
 
 export const workspace = style({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: tokens.space.lg,
   minHeight: 0,
-  "@media": { "screen and (max-width: 1080px)": { gridTemplateColumns: "1fr" } },
+  "@media": { "screen and (max-width: 820px)": { gridTemplateColumns: "1fr" } },
 });
 
 export const container = style({
@@ -57,7 +56,7 @@ export const cardNavigation = style({
 export const grid = style({
   display: "grid",
   gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
-  gap: tokens.space.xs,
+  gap: "6px",
   padding: tokens.space.sm,
   border: `1px solid ${tokens.color.border}`,
   borderRadius: tokens.radius.md,
@@ -69,7 +68,10 @@ export const grid = style({
 
 export const tile = style({
   minWidth: 0,
-  height: cellSize,
+  width: "100%",
+  height: "auto",
+  aspectRatio: "1",
+  position: "relative",
   flexDirection: "column",
   alignItems: "stretch",
   justifyContent: "space-between",
@@ -78,7 +80,7 @@ export const tile = style({
 });
 
 export const emptyCell = style({
-  height: cellSize,
+  aspectRatio: "1",
   border: `1px dashed ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
   backgroundColor: tokens.color.surfaceRaised,
@@ -89,6 +91,7 @@ export const tileIcon = style({
   height: iconSize,
   alignSelf: "center",
   objectFit: "contain",
+  margin: "auto",
 });
 
 export const tileIconPlaceholder = style({
@@ -97,9 +100,14 @@ export const tileIconPlaceholder = style({
   alignSelf: "center",
   border: `1px dashed ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
+  margin: "auto",
 });
 
 export const tileName = style({
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  clipPath: "inset(50%)",
   overflow: "hidden",
   color: tokens.color.text,
   fontSize: tokens.fontSize.sm,
@@ -108,6 +116,10 @@ export const tileName = style({
 });
 
 export const tileQuantity = style({
+  position: "absolute",
+  bottom: "3px",
+  right: "4px",
+  maxWidth: "calc(100% - 8px)",
   overflow: "hidden",
   color: tokens.color.textMuted,
   fontSize: tokens.fontSize.sm,
