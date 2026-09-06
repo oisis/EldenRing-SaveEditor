@@ -13,7 +13,7 @@ export const button = recipe({
     font: "inherit",
     fontSize: tokens.fontSize.md,
     color: tokens.color.text,
-    backgroundColor: tokens.color.surfaceRaised,
+    backgroundColor: tokens.color.surfaceSunken,
     transitionProperty: "background-color, border-color, color",
     transitionDuration: tokens.motion.fast,
     selectors: {
@@ -34,12 +34,14 @@ export const button = recipe({
         backgroundColor: tokens.color.accent,
         borderColor: tokens.color.accent,
         color: tokens.color.accentContrast,
+        fontWeight: 600,
       },
     },
     size: {
       sm: {
         height: tokens.controlHeight.sm,
         paddingInline: tokens.space.sm,
+        fontSize: tokens.fontSize.sm,
       },
       md: {
         height: tokens.controlHeight.md,
@@ -49,7 +51,7 @@ export const button = recipe({
     pressed: {
       true: {
         borderColor: tokens.color.accent,
-        backgroundColor: tokens.color.surfaceHover,
+        backgroundColor: tokens.color.selected,
       },
       false: {},
     },

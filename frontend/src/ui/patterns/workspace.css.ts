@@ -12,12 +12,12 @@ export const subnav = style({
   padding: "2px",
   border: `1px solid ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
-  backgroundColor: tokens.color.surfaceRaised,
+  backgroundColor: tokens.color.surfaceSunken,
   flexShrink: 0,
 });
 globalStyle(`.${subnav} > button`, {
   flex: "none",
-  height: "28px",
+  height: tokens.controlHeight.sm,
   paddingInline: tokens.space.md,
   border: 0,
   borderRadius: "4px",
@@ -28,7 +28,7 @@ globalStyle(`.${subnav} > button`, {
 globalStyle(`.${subnav} > button[aria-pressed="true"]`, {
   backgroundColor: tokens.color.surface,
   color: tokens.color.text,
-  boxShadow: "0 1px 2px rgb(0 0 0 / 12%)",
+  boxShadow: tokens.shadow.sm,
   fontWeight: 600,
 });
 

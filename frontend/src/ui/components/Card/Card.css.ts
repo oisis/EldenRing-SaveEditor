@@ -11,6 +11,7 @@ export const card = style({
   borderRadius: tokens.radius.md,
   backgroundColor: tokens.color.surface,
   color: tokens.color.text,
+  boxShadow: tokens.shadow.sm,
 });
 
 /** Existing card headings share the mockup's separated header, without changing their semantics. */
@@ -19,7 +20,7 @@ globalStyle(`.${card} > h2:first-child`, {
   padding: `${tokens.space.md} ${tokens.space.lg}`,
   borderBottom: `1px solid ${tokens.color.border}`,
   borderRadius: `${tokens.radius.md} ${tokens.radius.md} 0 0`,
-  backgroundColor: tokens.color.surfaceRaised,
   fontSize: tokens.fontSize.md,
   fontWeight: 600,
+  letterSpacing: "0.01em",
 });

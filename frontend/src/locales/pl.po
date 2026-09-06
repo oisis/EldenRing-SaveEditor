@@ -86,6 +86,10 @@ msgstr "Pole numeryczne: {labelText}"
 msgid "{matched} of {0} matched steps"
 msgstr "Dopasowane kroki: {matched} z {0}"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "{pendingChangeCount, plural, one {# change} other {# changes}}"
+msgstr "{pendingChangeCount, plural, one {# zmiana} few {# zmiany} many {# zmian} other {# zmiany}}"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{pendingCount} changes"
 msgstr "Zmiany: {pendingCount}"

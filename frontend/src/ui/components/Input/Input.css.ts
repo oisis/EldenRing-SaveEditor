@@ -5,7 +5,7 @@ export const input = style({
   width: "100%",
   minWidth: 0,
   height: tokens.controlHeight.md,
-  paddingInline: tokens.space.sm,
+  paddingInline: "9px",
   border: `1px solid ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
   backgroundColor: tokens.color.surfaceRaised,

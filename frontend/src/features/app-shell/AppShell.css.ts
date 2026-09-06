@@ -15,7 +15,9 @@ export const shell = style({
   minWidth: 0,
   minHeight: 0,
   overflow: "hidden",
-  backgroundColor: tokens.color.background,
+  // The shell stays transparent so the themed application backdrop, which the
+  // Elden Ring theme paints as layered gradients, is what the user sees.
+  backgroundColor: "transparent",
   "@media": {
     "screen and (max-width: 900px)": {
       gridTemplateColumns: "220px minmax(0, 1fr)",
@@ -63,7 +65,7 @@ export const topbar = style({
   alignItems: "center",
   gap: tokens.space.sm,
   minWidth: 0,
-  paddingInline: tokens.space.md,
+  paddingInline: tokens.space.lg,
   borderBottom: `1px solid ${tokens.color.border}`,
   backgroundColor: tokens.color.surfaceRaised,
   "@media": {
@@ -71,11 +73,26 @@ export const topbar = style({
       minHeight: topbarHeight,
       overflowX: "auto",
     },
+    "screen and (max-width: 1100px)": {
+      paddingInline: tokens.space.sm,
+      gap: tokens.space.xs,
+    },
   },
+});
+
+/** The mockup's hairline between the session toolbar and the theme selector. */
+export const topbarSeparator = style({
+  flex: "none",
+  width: "1px",
+  height: "20px",
+  backgroundColor: tokens.color.border,
+  "@media": { "screen and (max-width: 1100px)": { display: "none" } },
 });
 
 export const moduleNav = style({
   display: "flex",
+  alignItems: "center",
+  gap: tokens.space.xs,
   alignSelf: "stretch",
   minWidth: 0,
   overflowX: "auto",
@@ -91,6 +108,7 @@ export const moduleTab = style({
   color: tokens.color.textMuted,
   backgroundColor: "transparent",
   font: "inherit",
+  fontSize: tokens.fontSize.md,
   fontWeight: 500,
   cursor: "pointer",
   transitionProperty: "background-color, border-color, color",
@@ -100,7 +118,7 @@ export const moduleTab = style({
     '&[aria-current="page"]': {
       color: tokens.color.text,
       borderBottomColor: tokens.color.accent,
-      fontWeight: 700,
+      fontWeight: 600,
     },
   },
   "@media": {
@@ -117,6 +135,17 @@ export const operations = style({
   display: "flex",
   gap: tokens.space.xs,
   flex: "none",
+});
+
+/** The Review Changes counter: figures stay aligned and a dirty save is flagged. */
+export const changesCounter = style({
+  fontVariantNumeric: "tabular-nums",
+  selectors: {
+    '&[data-dirty="true"]:not(:disabled)': {
+      borderColor: tokens.color.warning,
+      color: tokens.color.warning,
+    },
+  },
 });
 
 export const operationText = style({
@@ -142,7 +171,7 @@ export const sidebar = style({
 
 export const fileHeader = style({
   flex: "none",
-  padding: tokens.space.md,
+  padding: `${tokens.space.md} ${tokens.space.lg}`,
   borderBottom: `1px solid ${tokens.color.border}`,
 });
 
@@ -159,7 +188,8 @@ export const fileName = style({
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  fontWeight: 700,
+  fontSize: tokens.fontSize.md,
+  fontWeight: 600,
 });
 
 export const sidebarBody = style({
@@ -167,10 +197,15 @@ export const sidebarBody = style({
   minHeight: 0,
   flex: 1,
   overflowY: "auto",
-  padding: tokens.space.md,
+  padding: `${tokens.space.md} ${tokens.space.sm} ${tokens.space.lg}`,
 });
 
-export const sidebarEmpty = style({ margin: 0, color: tokens.color.textMuted });
+export const sidebarEmpty = style({
+  margin: 0,
+  paddingInline: tokens.space.sm,
+  color: tokens.color.textMuted,
+  fontSize: tokens.fontSize.sm,
+});
 
 export const workspace = style({
   gridArea: "workspace",
@@ -201,11 +236,15 @@ export const consolePanel = style({
   display: "flex",
   width: "min(1024px, calc(100vw - 32px))",
   height: "244px",
+  minHeight: "150px",
   maxHeight: "60vh",
+  resize: "vertical",
   flexDirection: "column",
   overflow: "hidden",
   border: `1px solid ${tokens.color.borderStrong}`,
+  borderBottom: 0,
   backgroundColor: tokens.color.surfaceRaised,
+  boxShadow: tokens.shadow.lg,
   selectors: { "&[hidden]": { display: "none" } },
 });
 
@@ -214,15 +253,23 @@ export const consolePanelHeader = style({
   alignItems: "center",
   justifyContent: "space-between",
   gap: tokens.space.sm,
-  padding: tokens.space.sm,
+  flex: "none",
+  height: "42px",
+  padding: `6px ${tokens.space.md}`,
   borderBottom: `1px solid ${tokens.color.border}`,
+  backgroundColor: tokens.color.surfaceSunken,
+  fontSize: tokens.fontSize.md,
 });
 
 export const consolePanelBody = style({
   flex: 1,
   minHeight: 0,
   overflow: "auto",
-  padding: tokens.space.md,
+  padding: `5px ${tokens.space.md}`,
+  // The log surface reads as a recessed terminal, one step below the panel.
+  backgroundColor: `color-mix(in srgb, ${tokens.color.background} 88%, black)`,
+  fontFamily: tokens.font.mono,
+  fontSize: tokens.fontSize.xs,
 });
 
 export const consoleBar = style({
@@ -231,14 +278,24 @@ export const consoleBar = style({
   display: "flex",
   justifyContent: "center",
   minWidth: 0,
-  borderTop: `1px solid ${tokens.color.border}`,
+  borderTop: `1px solid ${tokens.color.borderStrong}`,
   backgroundColor: tokens.color.surfaceRaised,
+});
+
+/** Shows at a glance that the diagnostic stream is live. */
+export const consoleIndicator = style({
+  width: "7px",
+  height: "7px",
+  flex: "none",
+  borderRadius: "50%",
+  backgroundColor: tokens.color.accent,
+  boxShadow: `0 0 8px ${tokens.color.accent}`,
 });
 
 export const consoleBarButton = style({
   display: "flex",
   alignItems: "center",
-  gap: tokens.space.md,
+  gap: tokens.space.sm,
   width: "min(1024px, calc(100vw - 32px))",
   minWidth: 0,
   paddingInline: tokens.space.md,
@@ -253,40 +310,75 @@ export const consoleBarButton = style({
 });
 
 export const consoleLatest = style({
+  flex: 1,
   minWidth: 0,
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  color: tokens.color.textMuted,
+  color: tokens.color.textFaint,
+  fontFamily: tokens.font.mono,
+  fontSize: tokens.fontSize.xs,
 });
 
 /** One console record per row: time, level and the backend's own message. */
 export const consoleList = style({
   display: "flex",
   flexDirection: "column",
-  gap: tokens.space.xs,
   margin: 0,
   padding: 0,
   listStyle: "none",
-  fontFamily: tokens.font.mono,
-  fontSize: tokens.fontSize.sm,
 });
 
 export const consoleRow = style({
   display: "grid",
-  gridTemplateColumns: "auto auto 1fr",
+  // The first column holds HH:mm:ssZ, so it is sized for that label rather
+  // than for the full RFC 3339 timestamp the record still carries.
+  gridTemplateColumns: "76px 52px minmax(0, 1fr)",
   gap: tokens.space.sm,
   alignItems: "baseline",
   minWidth: 0,
+  padding: "3px 0",
+  borderBottom: `1px solid color-mix(in srgb, ${tokens.color.border} 45%, transparent)`,
 });
 
+export const consoleTime = style({
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  color: tokens.color.textFaint,
+});
+
+/**
+ * The severity keeps the backend's own vocabulary; only its colour changes, so
+ * a level the backend adds later still renders with the neutral information
+ * colour instead of disappearing.
+ */
 export const consoleLevel = style({
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
   textTransform: "uppercase",
-  color: tokens.color.textMuted,
+  fontWeight: 600,
+  color: tokens.color.info,
+  selectors: {
+    '&[data-level="debug"]': { color: tokens.color.textFaint },
+    '&[data-level="warning"]': { color: tokens.color.warning },
+    '&[data-level="error"]': { color: tokens.color.danger },
+  },
 });
 
 export const consoleFilter = style({
   display: "flex",
   alignItems: "center",
   gap: tokens.space.sm,
+  fontSize: tokens.fontSize.sm,
+  color: tokens.color.textMuted,
+});
+
+export const consoleEmpty = style({
+  padding: "20px",
+  color: tokens.color.textFaint,
+  textAlign: "center",
 });

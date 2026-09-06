@@ -20,19 +20,25 @@ globalStyle(`.${table} th`, {
   position: "sticky",
   top: 0,
   zIndex: 1,
-  padding: tokens.space.sm,
-  borderBottom: `1px solid ${tokens.color.borderStrong}`,
-  backgroundColor: tokens.color.surfaceRaised,
+  padding: `${tokens.space.sm} ${tokens.space.md}`,
+  borderBottom: `1px solid ${tokens.color.border}`,
+  backgroundColor: tokens.color.surfaceSunken,
   color: tokens.color.textMuted,
   textAlign: "left",
+  fontSize: tokens.fontSize.xs,
   fontWeight: 700,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
 });
 
 globalStyle(`.${table} td`, {
-  padding: tokens.space.sm,
+  padding: `6px ${tokens.space.md}`,
   borderBottom: `1px solid ${tokens.color.border}`,
   verticalAlign: "middle",
 });
 
 globalStyle(`.${table} tbody tr:last-child td`, { borderBottom: 0 });
 globalStyle(`.${table} tbody tr:hover`, { backgroundColor: tokens.color.surfaceHover });
+globalStyle(`.${table} tbody tr[aria-selected="true"]`, {
+  backgroundColor: tokens.color.selected,
+});

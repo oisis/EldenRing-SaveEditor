@@ -9,7 +9,24 @@ import {
   renderApp,
   stubSaveSession,
 } from "../../test/renderWithProviders";
-import { fileNameFromPath } from "./AppShell";
+import { consoleTimeLabel, fileNameFromPath } from "./AppShell";
+
+/** One applied operation, as the backend projects it into Review Changes. */
+const pendingOperation = {
+  operationID: "operation-1",
+  operationKind: "set_character_runes",
+  saveSessionID: stubSaveSession.saveSessionID,
+  saveRevision: stubSaveSession.saveRevision,
+  order: "1",
+  area: "Character",
+  description: "Runes set to 500",
+  beforeState: "0",
+  afterState: "500",
+  risk: "normal" as const,
+  riskReason: "The backend accepted this ordinary operation.",
+  changedByteCount: 4,
+  changedScopes: [],
+};
 
 describe("AppShell", () => {
   it("renders the accepted module order and keeps file actions on Home", async () => {
@@ -122,6 +139,47 @@ describe("AppShell", () => {
     );
   });
 
+  it("counts the pending operations of the loaded save on the Changes button", async () => {
+    await renderApp(<App />, {
+      saveSessionPort: makeSaveSessionPort({
+        getOperationHistory: (saveSessionID) =>
+          Promise.resolve({
+            saveSessionID,
+            saveRevision: stubSaveSession.saveRevision,
+            operations: [pendingOperation],
+            undoCount: 1,
+            redoCount: 2,
+          }),
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Open Save" }));
+    await screen.findByText(stubSaveSession.sourcePath);
+
+    // Only the operations still applied are pending: the two redo entries are
+    // undone work and must not be counted as changes waiting to be saved.
+    expect(await screen.findByRole("button", { name: "1 change" })).toBeEnabled();
+  });
+
+  it("claims no count while the read history belongs to another revision", async () => {
+    await renderApp(<App />, {
+      saveSessionPort: makeSaveSessionPort({
+        getOperationHistory: (saveSessionID) =>
+          Promise.resolve({
+            saveSessionID,
+            saveRevision: `${stubSaveSession.saveRevision}0`,
+            operations: [pendingOperation],
+            undoCount: 1,
+            redoCount: 0,
+          }),
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Open Save" }));
+    await screen.findByText(stubSaveSession.sourcePath);
+
+    expect(screen.getByRole("button", { name: "Changes" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /\d+ change/ })).toBeNull();
+  });
+
   it("keeps Item Database reachable without an open save", async () => {
     await renderApp(<App />);
 
@@ -229,6 +287,16 @@ describe("AppShell diagnostic console", () => {
 
     expect(await screen.findByText("The diagnostic messages could not be read.")).toBeVisible();
     expect(screen.queryByText(/bridge internals/)).toBeNull();
+  });
+});
+
+describe("consoleTimeLabel", () => {
+  it("shortens an RFC 3339 record to the console column's UTC time", () => {
+    expect(consoleTimeLabel("2026-09-05T12:00:01Z")).toBe("12:00:01Z");
+  });
+
+  it("falls back to a placeholder instead of inventing an hour", () => {
+    expect(consoleTimeLabel("not a timestamp")).toBe("--:--:--");
   });
 });
 

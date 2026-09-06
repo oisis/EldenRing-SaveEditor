@@ -12,17 +12,25 @@ import { createThemeContract } from "@vanilla-extract/css";
 export const tokens = createThemeContract({
   color: {
     background: null,
+    /** The painted application backdrop; the Elden Ring theme layers gradients over it. */
+    appBackground: null,
     surface: null,
     surfaceRaised: null,
+    surfaceSunken: null,
     surfaceHover: null,
     border: null,
     borderStrong: null,
     text: null,
     textMuted: null,
+    textFaint: null,
     accent: null,
     accentText: null,
     accentContrast: null,
+    selected: null,
     focus: null,
+    info: null,
+    warning: null,
+    warningSurface: null,
     danger: null,
     dangerSurface: null,
     overlay: null,
@@ -32,6 +40,7 @@ export const tokens = createThemeContract({
     mono: null,
   },
   fontSize: {
+    xs: null,
     sm: null,
     md: null,
     lg: null,
@@ -51,6 +60,10 @@ export const tokens = createThemeContract({
   radius: {
     sm: null,
     md: null,
+  },
+  shadow: {
+    sm: null,
+    lg: null,
   },
   /**
    * Motion durations are tokens so `prefers-reduced-motion` can neutralise

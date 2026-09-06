@@ -22,8 +22,11 @@ globalStyle("body", {
   fontSize: tokens.fontSize.md,
   lineHeight: 1.45,
   color: tokens.color.text,
-  backgroundColor: tokens.color.background,
+  background: tokens.color.appBackground,
+  backgroundAttachment: "fixed",
 });
+
+globalStyle("::selection", { background: tokens.color.selected });
 
 globalStyle("h1, h2, h3, h4, p", { margin: 0 });
 globalStyle("h2", { fontSize: tokens.fontSize.md, fontWeight: 600 });
@@ -31,6 +34,15 @@ globalStyle("h3, h4", { fontSize: tokens.fontSize.sm, fontWeight: 600 });
 globalStyle("*", {
   scrollbarWidth: "thin",
   scrollbarColor: `${tokens.color.borderStrong} transparent`,
+});
+/** Firefox honours the two properties above; WebKit needs the pseudo-elements. */
+globalStyle("*::-webkit-scrollbar", { width: "10px", height: "10px" });
+globalStyle("*::-webkit-scrollbar-track", { background: "transparent" });
+globalStyle("*::-webkit-scrollbar-thumb", {
+  background: tokens.color.borderStrong,
+  borderRadius: "6px",
+  border: "2px solid transparent",
+  backgroundClip: "content-box",
 });
 
 /**

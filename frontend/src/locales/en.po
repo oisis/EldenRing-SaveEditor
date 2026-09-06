@@ -86,6 +86,10 @@ msgstr "{labelText} numeric input"
 msgid "{matched} of {0} matched steps"
 msgstr "{matched} of {0} matched steps"
 
+#: src/features/app-shell/AppShell.tsx
+msgid "{pendingChangeCount, plural, one {# change} other {# changes}}"
+msgstr "{pendingChangeCount, plural, one {# change} other {# changes}}"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{pendingCount} changes"
 msgstr "{pendingCount} changes"

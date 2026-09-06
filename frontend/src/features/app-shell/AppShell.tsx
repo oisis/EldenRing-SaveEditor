@@ -1,4 +1,4 @@
-import { Trans, useLingui } from "@lingui/react/macro";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
 import { useDiagnosticEvents } from "../../application/settings/useHostSettings";
 import appIconURL from "../../../../build/appicon.png";
@@ -25,13 +25,17 @@ import {
   brand,
   brandLogo,
   brandName,
+  changesCounter,
   consoleBar,
   consoleBarButton,
+  consoleEmpty,
   consoleFilter,
+  consoleIndicator,
   consoleLatest,
   consoleLevel,
   consoleList,
   consoleRow,
+  consoleTime,
   consolePanel,
   consolePanelBody,
   consolePanelHeader,
@@ -50,6 +54,7 @@ import {
   sidebarBody,
   sidebarEmpty,
   topbar,
+  topbarSeparator,
   topbarSpacer,
   workspace,
 } from "./AppShell.css";
@@ -147,6 +152,23 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   const session = flow.session;
   const selectedCharacterID = flow.selection.selectedCharacterID;
 
+  /**
+   * The pending changes of the loaded save are exactly the operations the
+   * backend still holds for it: an undone operation leaves that list for the
+   * redo stack and a successful Save empties it. The count is only claimed
+   * while the fetched history belongs to the session revision on screen, so a
+   * session whose history is not read yet shows no number instead of a zero
+   * it cannot confirm.
+   */
+  const history = flow.history;
+  const pendingChangeCount =
+    session !== undefined &&
+    history !== undefined &&
+    history.saveSessionID === session.saveSessionID &&
+    history.saveRevision === session.saveRevision
+      ? history.operations.length
+      : undefined;
+
   return (
     <div className={shell}>
       <div className={brand}>
@@ -177,7 +199,7 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
         <span className={topbarSpacer} />
 
         {session !== undefined && (
-          <Badge tone={session.unsavedChanges ? "accent" : "neutral"}>
+          <Badge dot tone={session.unsavedChanges ? "warning" : "accent"}>
             {session.unsavedChanges ? <Trans>Modified</Trans> : <Trans>Saved</Trans>}
           </Badge>
         )}
@@ -211,6 +233,8 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           </Button>
           <Button
             size="sm"
+            className={changesCounter}
+            data-dirty={pendingChangeCount !== undefined && pendingChangeCount > 0}
             disabled={session === undefined || flow.isBusy}
             title={t`Review changes and validate before saving`}
             onClick={flow.openReview}
@@ -218,11 +242,16 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
             <span className={operationGlyph} aria-hidden="true">
               Δ
             </span>
-            <span className={operationText}>
+            {/* The count itself is never hidden by width: it is the label. */}
+            {pendingChangeCount === undefined || pendingChangeCount === 0 ? (
               <Trans>Changes</Trans>
-            </span>
+            ) : (
+              <Plural value={pendingChangeCount} one="# change" other="# changes" />
+            )}
           </Button>
         </div>
+
+        <div className={topbarSeparator} aria-hidden="true" />
 
         <Select
           aria-label={t`Theme`}
@@ -423,15 +452,23 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               <Trans>The diagnostic messages could not be read.</Trans>
             </p>
           ) : consoleRecords.length === 0 ? (
-            <p className={message}>
+            <p className={consoleEmpty}>
               <Trans>No diagnostic messages yet.</Trans>
             </p>
           ) : (
             <ul className={consoleList}>
               {consoleRecords.map((record) => (
                 <li key={record.seq} className={consoleRow}>
-                  <span>{record.timestamp}</span>
-                  <span className={consoleLevel}>{record.severity}</span>
+                  <time
+                    className={consoleTime}
+                    dateTime={record.timestamp}
+                    title={record.timestamp}
+                  >
+                    {consoleTimeLabel(record.timestamp)}
+                  </time>
+                  <span className={consoleLevel} data-level={record.severity}>
+                    {record.severity}
+                  </span>
                   {/* The message is the backend's own safe wording, rendered
                       unchanged: the frontend composes no diagnostic text. */}
                   <span>{[record.message, record.operation, record.stage, record.status, record.code, record.targetState].filter(Boolean).join(" · ")}</span>
@@ -450,12 +487,14 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
           aria-controls="diagnostic-console"
           onClick={() => setConsoleOpen((open) => !open)}
         >
-          <span>
+          <span className={consoleIndicator} aria-hidden="true" />
+          <strong>
             <Trans>Console</Trans>
-          </span>
+          </strong>
           <span className={consoleLatest}>
             {latestRecord ? latestRecord.message : <Trans>No live messages</Trans>}
           </span>
+          <Badge>{diagnosticEvents.records.length}</Badge>
         </button>
       </div>
 
@@ -464,6 +503,19 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
       <RecoveryJournalDialog flow={flow} />
     </div>
   );
+}
+
+/**
+ * Shortens a diagnostic record's RFC 3339 timestamp to the console column's
+ * `HH:mm:ssZ`. The trailing `Z` keeps the displayed time explicitly UTC, the
+ * zone the backend records in, so it is never read as local time. The record's
+ * own value is never rewritten: the caller keeps it in `dateTime` and `title`,
+ * and a timestamp this function cannot parse falls back to a placeholder
+ * instead of an invented hour.
+ */
+export function consoleTimeLabel(timestamp: string): string {
+  const parsed = new Date(timestamp);
+  return Number.isNaN(parsed.getTime()) ? "--:--:--" : `${parsed.toISOString().slice(11, 19)}Z`;
 }
 
 /** Returns only presentation text; the exact backend path stays untouched. */
