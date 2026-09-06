@@ -14,6 +14,7 @@ import { EquipmentPortProvider } from "./application/equipment/equipmentClient";
 import { FavoritesPortProvider } from "./application/favorites/favoritesClient";
 import { ItemsPortProvider } from "./application/items/itemsClient";
 import { ItemPreferencesProvider } from "./application/preferences/itemPreferences";
+import { AppearancePreferencesProvider } from "./application/preferences/appearancePreferences";
 import { NetworkPortProvider } from "./application/network/networkClient";
 import { SaveSessionPortProvider } from "./application/save-session/saveSessionClient";
 import { SettingsPortProvider } from "./application/settings/settingsClient";
@@ -48,37 +49,39 @@ createRoot(container).render(
               are host state and survive closing a save. */}
           <SettingsPortProvider port={wailsDesktopBridge}>
             <ItemPreferencesProvider>
-              <CatalogPortProvider port={wailsDesktopBridge}>
-                <AppearancePortProvider port={wailsDesktopBridge}>
-                  <FavoritesPortProvider port={wailsDesktopBridge}>
-                    <SaveSessionPortProvider port={wailsDesktopBridge}>
-                      <CharacterPortProvider port={wailsDesktopBridge}>
-                        <DiagnosticsPortProvider port={wailsDesktopBridge}>
-                          <ItemsPortProvider port={wailsDesktopBridge}>
-                            <EquipmentPortProvider port={wailsDesktopBridge}>
-                              <WorldPortProvider port={wailsDesktopBridge}>
-                                <NetworkPortProvider port={wailsDesktopBridge}>
-                                  {/* Templates, Deployment and About are Tools
-                                      modules. Their ports sit here, above the
-                                      screen that uses them, so nothing below
-                                      reaches the adapter as a global. */}
-                                  <TemplatePortProvider port={wailsDesktopBridge}>
-                                    <DeploymentPortProvider port={wailsDesktopBridge}>
-                                      <AboutPortProvider port={wailsDesktopBridge}>
-                                        <App />
-                                      </AboutPortProvider>
-                                    </DeploymentPortProvider>
-                                  </TemplatePortProvider>
-                                </NetworkPortProvider>
-                              </WorldPortProvider>
-                            </EquipmentPortProvider>
-                          </ItemsPortProvider>
-                        </DiagnosticsPortProvider>
-                      </CharacterPortProvider>
-                    </SaveSessionPortProvider>
-                  </FavoritesPortProvider>
-                </AppearancePortProvider>
-              </CatalogPortProvider>
+              <AppearancePreferencesProvider>
+                <CatalogPortProvider port={wailsDesktopBridge}>
+                  <AppearancePortProvider port={wailsDesktopBridge}>
+                    <FavoritesPortProvider port={wailsDesktopBridge}>
+                      <SaveSessionPortProvider port={wailsDesktopBridge}>
+                        <CharacterPortProvider port={wailsDesktopBridge}>
+                          <DiagnosticsPortProvider port={wailsDesktopBridge}>
+                            <ItemsPortProvider port={wailsDesktopBridge}>
+                              <EquipmentPortProvider port={wailsDesktopBridge}>
+                                <WorldPortProvider port={wailsDesktopBridge}>
+                                  <NetworkPortProvider port={wailsDesktopBridge}>
+                                    {/* Templates, Deployment and About are Tools
+                                        modules. Their ports sit here, above the
+                                        screen that uses them, so nothing below
+                                        reaches the adapter as a global. */}
+                                    <TemplatePortProvider port={wailsDesktopBridge}>
+                                      <DeploymentPortProvider port={wailsDesktopBridge}>
+                                        <AboutPortProvider port={wailsDesktopBridge}>
+                                          <App />
+                                        </AboutPortProvider>
+                                      </DeploymentPortProvider>
+                                    </TemplatePortProvider>
+                                  </NetworkPortProvider>
+                                </WorldPortProvider>
+                              </EquipmentPortProvider>
+                            </ItemsPortProvider>
+                          </DiagnosticsPortProvider>
+                        </CharacterPortProvider>
+                      </SaveSessionPortProvider>
+                    </FavoritesPortProvider>
+                  </AppearancePortProvider>
+                </CatalogPortProvider>
+              </AppearancePreferencesProvider>
             </ItemPreferencesProvider>
           </SettingsPortProvider>
         </ApplicationInfoPortProvider>

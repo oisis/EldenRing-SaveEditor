@@ -92,6 +92,10 @@ msgstr "{0}: wybierz wygląd"
 msgid "{count} inactive slots"
 msgstr "{count} nieaktywnych slotów"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "{freeMirrorCount} free mirror slots"
+msgstr "Wolne sloty Mirror: {freeMirrorCount}"
+
 #: src/features/advanced/NetworkParamControl.tsx
 msgid "{labelText} numeric input"
 msgstr "Pole numeryczne: {labelText}"
@@ -108,6 +112,14 @@ msgstr "{pendingChangeCount, plural, one {# zmiana} few {# zmiany} many {# zmian
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{pendingCount} changes"
 msgstr "Zmiany: {pendingCount}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "★ Remove from local favorites"
+msgstr "★ Usuń z lokalnych ulubionych"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "☆ Add to local favorites"
+msgstr "☆ Dodaj do lokalnych ulubionych"
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
@@ -156,6 +168,7 @@ msgstr "Aktywny"
 msgid "Active characters"
 msgstr "Aktywne postacie"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add"
 msgstr "Dodaj"
@@ -180,6 +193,11 @@ msgstr "Ustawienia dodawania"
 #: src/features/character/CharacterPanel.tsx
 msgid "Add Settings are deferred and not connected to item operations."
 msgstr "Ustawienia dodawania są odłożone i niepołączone z operacjami na przedmiotach."
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Add to local favorites — {0}"
+msgstr "Dodaj do lokalnych ulubionych — {0}"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add to save"
@@ -253,6 +271,10 @@ msgstr "Zawsze twórz zdalny backup"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Ammunition"
 msgstr "Amunicja"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Appearance preset"
+msgstr "Preset wyglądu"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -884,6 +906,10 @@ msgstr "Konsola diagnostyczna"
 msgid "Diagnostic ID:"
 msgstr "Identyfikator diagnostyczny:"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Direct preset addition to Mirror Favorites is not supported by SaveEngine 2.0"
+msgstr "Bezpośrednie dodawanie presetów do Mirror Favorites nie jest obsługiwane przez SaveEngine 2.0"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -1040,6 +1066,7 @@ msgstr "Szybsze"
 msgid "Favorite"
 msgstr "Ulubione"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Favorites only"
@@ -1081,6 +1108,10 @@ msgstr "Format"
 #: src/features/character/CharacterPanel.tsx
 msgid "FP"
 msgstr "FP"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "free mirror slots"
+msgstr "wolnych slotów Mirror"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Game state"
@@ -1195,10 +1226,6 @@ msgstr "Importuj plik szablonu"
 #: src/features/character/CharacterPanel.tsx
 msgid "Include Ashen Capital"
 msgstr "Uwzględnij Stolicę Popiołów"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Include Leyndell Ashen Capital items"
-msgstr "Uwzględnij przedmioty z Leyndell, Stolicy Popiołów"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Info"
@@ -1493,6 +1520,10 @@ msgstr "Ręczna kolejność"
 #: src/features/world/WorldPanel.tsx
 msgid "Map Regions"
 msgstr "Regiony mapy"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
+msgstr "Masowe ulepszanie posiadanych broni wymaga dedykowanego writera (odłożone)."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Matched"
@@ -1995,21 +2026,22 @@ msgid "Pre-order"
 msgstr "Przedsprzedaż"
 
 #: src/features/character/CharacterPanel.tsx
-msgid "Prefer +1, +2 variants"
-msgstr "Preferuj warianty +1, +2"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Preset Catalog"
-msgstr "Katalog presetów"
+msgid "Preset Preview"
+msgstr "Podgląd presetu"
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Preset roles"
 msgstr "Role presetów"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Presets can be browsed without a save. Applying one needs an open save and a selected character."
+msgstr "Presety można przeglądać bez otwartego save'a. Zastosowanie presetu wymaga otwartego save'a i wybranej postaci."
+
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Presets for this role are unavailable or incomplete."
 msgstr "Presety dla tej roli są niedostępne lub niekompletne."
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Preview"
 msgstr "Podgląd"
@@ -2017,6 +2049,11 @@ msgstr "Podgląd"
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Preview repair plan"
 msgstr "Pokaż plan naprawy"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Preview: {0}"
+msgstr "Podgląd: {0}"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -2171,6 +2208,11 @@ msgstr "Usuń {name} z ulubionych"
 #: src/features/world/WorldPanel.tsx
 msgid "Remove Fog of War"
 msgstr "Usuń mgłę wojny"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Remove from local favorites — {0}"
+msgstr "Usuń z lokalnych ulubionych — {0}"
 
 #. placeholder {0}: recent.path
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -2412,10 +2454,13 @@ msgstr "Skanuj w poszukiwaniu problemów"
 msgid "Scanning…"
 msgstr "Skanowanie…"
 
-#: src/features/character/CharacterPanel.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Search"
 msgstr "Szukaj"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Search appearance presets"
+msgstr "Szukaj presetów wyglądu"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Search Areas"
@@ -2433,10 +2478,6 @@ msgstr "Czas odnowienia wyszukiwania"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Szukaj przedmiotów"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Search presets..."
-msgstr "Szukaj presetów..."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Search World entries"
@@ -2492,6 +2533,11 @@ msgstr "Wybierz aktywną postać, aby zobaczyć i edytować dane profilu."
 #: src/features/character/CharacterPanel.tsx
 msgid "Select Starting Class"
 msgstr "Wybierz klasę początkową"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Select: {0}"
+msgstr "Wybierz: {0}"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -2728,6 +2774,10 @@ msgstr "Prochy ducha"
 msgid "Spirit Ash level"
 msgstr "Poziom prochów ducha"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Spirit Ash level input"
+msgstr "Wartość poziomu prochów ducha"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spirit Ashes"
 msgstr "Prochy duchów"
@@ -2760,10 +2810,6 @@ msgstr "Kondycja (SP)"
 #: src/features/character/CharacterPanel.tsx
 msgid "Standard"
 msgstr "Standardowe"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Standard +25, Special +10"
-msgstr "Zwykłe +25, Unikalne +10"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Start command"
@@ -2919,6 +2965,10 @@ msgstr "Sloty talizmanów"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Talisman slots: {0}"
 msgstr "Sloty talizmanów: {0}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Talisman tier hierarchy is not yet mapped in catalog."
+msgstr "Hierarchia tierów talizmanów nie jest jeszcze zmapowana w katalogu."
 
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -3360,6 +3410,14 @@ msgstr "Samouczki"
 msgid "Type"
 msgstr "Typ"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Type A"
+msgstr "Typ A"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Type B"
+msgstr "Typ B"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
 msgstr "Nie udało się wczytać postaci."
@@ -3643,12 +3701,20 @@ msgid "Weapon +10 level"
 msgstr "Poziom broni +10"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Weapon +10 level input"
+msgstr "Wartość poziomu broni +10"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Weapon +25"
 msgstr "Broń +25"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Weapon +25 level"
 msgstr "Poziom broni +25"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +25 level input"
+msgstr "Wartość poziomu broni +25"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
@@ -3666,6 +3732,10 @@ msgstr "Cudowny Eliksir"
 #: src/features/world/WorldPanel.tsx
 msgid "World"
 msgstr "Świat"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "World grace unlock is deferred to World tab."
+msgstr "Odblokowywanie łask świata jest odłożone do zakładki Świat."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "World progress and unlocks"
@@ -3687,27 +3757,3 @@ msgstr "Korzystasz z najnowszego wydania."
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "You have unsaved changes in your draft."
 msgstr "Masz niezapisane zmiany w wersji roboczej."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
-msgstr "Masowe ulepszanie posiadanych broni wymaga dedykowanego writera (odłożone)."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Talisman tier hierarchy is not yet mapped in catalog."
-msgstr "Hierarchia tierów talizmanów nie jest jeszcze zmapowana w katalogu."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "World grace unlock is deferred to World tab."
-msgstr "Odblokowywanie łask świata jest odłożone do zakładki Świat."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Weapon +25 level input"
-msgstr "Wartość poziomu broni +25"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Weapon +10 level input"
-msgstr "Wartość poziomu broni +10"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Spirit Ash level input"
-msgstr "Wartość poziomu prochów ducha"

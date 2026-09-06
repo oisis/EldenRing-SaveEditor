@@ -1,7 +1,8 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, renderHook, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { AppearancePort } from "../../application/appearance/appearancePort";
+import { useAppearancePreferences } from "../../application/preferences/appearancePreferences";
 import type { CharacterPort } from "../../application/character/characterPort";
 import type { EquipmentPort } from "../../application/equipment/equipmentPort";
 import type { FavoritesPort } from "../../application/favorites/favoritesPort";
@@ -296,9 +297,16 @@ describe("CharacterPanel", () => {
     // counter past its end.
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("2 / 2")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Body Type Filter"), { target: { value: "Type A" } });
+    fireEvent.click(screen.getByLabelText("Type B"));
     expect(screen.getByText("1 / 1")).toBeInTheDocument();
     expect(screen.getByText("Geralt of Rivia, the Witcher")).toBeInTheDocument();
+
+    // Disabling both body types yields an empty list without preset apply actions
+    fireEvent.click(screen.getByLabelText("Type A"));
+    expect(
+      screen.getByText("No appearance presets matched your search."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Apply to Character" })).not.toBeInTheDocument();
   });
 
   it("applies appearance and favorite presets with active character and forwards receipts", async () => {
@@ -330,6 +338,90 @@ describe("CharacterPanel", () => {
       expectedRevision: "0",
     });
   });
+
+  it("manages appearance favorites, carousel spatial navigation and preview modal", async () => {
+    const withSave = setup();
+    await withSave.render();
+
+    fireEvent.click(screen.getByRole("button", { name: "Appearance Presets" }));
+    expect(await screen.findByText("Geralt of Rivia, the Witcher")).toBeInTheDocument();
+
+    // Toggle favorite on the first preset
+    const favButton = screen.getByRole("button", {
+      name: "Add to local favorites — Geralt of Rivia, the Witcher",
+    });
+    fireEvent.click(favButton);
+    expect(
+      screen.getByRole("button", {
+        name: "Remove from local favorites — Geralt of Rivia, the Witcher",
+      }),
+    ).toBeInTheDocument();
+
+    // Favorites only filter isolates the favorite preset
+    const favoritesOnlyCheckbox = screen.getByLabelText("Favorites only");
+    fireEvent.click(favoritesOnlyCheckbox);
+    expect(screen.getByText("1 / 1")).toBeInTheDocument();
+    expect(screen.getByText("Geralt of Rivia, the Witcher")).toBeInTheDocument();
+    expect(screen.queryByText("Ciri, the Princess of Cintra")).not.toBeInTheDocument();
+
+    // Turn off favorites only filter to see both
+    fireEvent.click(favoritesOnlyCheckbox);
+    expect(screen.getByText("1 / 2")).toBeInTheDocument();
+
+    // Keyboard navigation in carousel
+    const carousel = screen.getByRole("region", { name: "Appearance Presets" });
+    fireEvent.keyDown(carousel, { key: "ArrowRight" });
+    expect(screen.getByText("2 / 2")).toBeInTheDocument();
+
+    // Verify Add button is disabled (unsupported in SaveEngine 2.0)
+    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
+
+    // Open preset preview modal for Ciri (active preset #2)
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    expect(
+      await screen.findByRole("dialog", { name: "Ciri, the Princess of Cintra" }),
+    ).toBeInTheDocument();
+
+    // Apply from the preview modal applies specifically the previewed preset (Ciri),
+    // and closes the modal only on success.
+    const previewDialog = screen.getByRole("dialog", { name: "Ciri, the Princess of Cintra" });
+    const modalApplyButton = within(previewDialog).getByRole("button", {
+      name: "Apply to Character",
+    });
+    fireEvent.click(modalApplyButton);
+    await waitFor(() =>
+      expect(withSave.applyAppearancePreset).toHaveBeenCalledWith({
+        saveSessionID: "session-1",
+        characterID: 0,
+        presetID: "ciri-the-princess-of-cintra-from-witcher",
+        expectedRevision: "0",
+      }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Ciri, the Princess of Cintra" }),
+      ).not.toBeInTheDocument(),
+    );
+
+    // Search matching tags or ID ("princess" matches Ciri, narrowing to 1/1)
+    const searchInput = screen.getByLabelText("Search appearance presets");
+    fireEvent.change(searchInput, { target: { value: "princess" } });
+    expect(screen.getByText("1 / 1")).toBeInTheDocument();
+    expect(screen.getByText("Ciri, the Princess of Cintra")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+
+    // Resetting search restores 1/2 without stale index out of bounds
+    fireEvent.change(searchInput, { target: { value: "" } });
+    expect(screen.getByText("1 / 2")).toBeInTheDocument();
+  });
+
+  it("throws a configuration error when useAppearancePreferences is used without provider", () => {
+    expect(() => renderHook(() => useAppearancePreferences())).toThrow(
+      "AppearancePreferencesProvider is missing above this component",
+    );
+  });
+
 
   it.each([
     {

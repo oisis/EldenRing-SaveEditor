@@ -92,6 +92,10 @@ msgstr "{0}: select appearance"
 msgid "{count} inactive slots"
 msgstr "{count} inactive slots"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "{freeMirrorCount} free mirror slots"
+msgstr "{freeMirrorCount} free mirror slots"
+
 #: src/features/advanced/NetworkParamControl.tsx
 msgid "{labelText} numeric input"
 msgstr "{labelText} numeric input"
@@ -108,6 +112,14 @@ msgstr "{pendingChangeCount, plural, one {# change} other {# changes}}"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{pendingCount} changes"
 msgstr "{pendingCount} changes"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "★ Remove from local favorites"
+msgstr "★ Remove from local favorites"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "☆ Add to local favorites"
+msgstr "☆ Add to local favorites"
 
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
@@ -156,6 +168,7 @@ msgstr "Active"
 msgid "Active characters"
 msgstr "Active characters"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add"
 msgstr "Add"
@@ -180,6 +193,11 @@ msgstr "Add Settings"
 #: src/features/character/CharacterPanel.tsx
 msgid "Add Settings are deferred and not connected to item operations."
 msgstr "Add Settings are deferred and not connected to item operations."
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Add to local favorites — {0}"
+msgstr "Add to local favorites — {0}"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add to save"
@@ -253,6 +271,10 @@ msgstr "Always create a remote backup"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Ammunition"
 msgstr "Ammunition"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Appearance preset"
+msgstr "Appearance preset"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -884,6 +906,10 @@ msgstr "Diagnostic console"
 msgid "Diagnostic ID:"
 msgstr "Diagnostic ID:"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Direct preset addition to Mirror Favorites is not supported by SaveEngine 2.0"
+msgstr "Direct preset addition to Mirror Favorites is not supported by SaveEngine 2.0"
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -1040,6 +1066,7 @@ msgstr "Faster"
 msgid "Favorite"
 msgstr "Favorite"
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Favorites only"
@@ -1081,6 +1108,10 @@ msgstr "Format"
 #: src/features/character/CharacterPanel.tsx
 msgid "FP"
 msgstr "FP"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "free mirror slots"
+msgstr "free mirror slots"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Game state"
@@ -1195,10 +1226,6 @@ msgstr "Import a template file"
 #: src/features/character/CharacterPanel.tsx
 msgid "Include Ashen Capital"
 msgstr "Include Ashen Capital"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Include Leyndell Ashen Capital items"
-msgstr "Include Leyndell Ashen Capital items"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Info"
@@ -1493,6 +1520,10 @@ msgstr "Manual sort order"
 #: src/features/world/WorldPanel.tsx
 msgid "Map Regions"
 msgstr "Map Regions"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
+msgstr "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Matched"
@@ -1995,21 +2026,22 @@ msgid "Pre-order"
 msgstr "Pre-order"
 
 #: src/features/character/CharacterPanel.tsx
-msgid "Prefer +1, +2 variants"
-msgstr "Prefer +1, +2 variants"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Preset Catalog"
-msgstr "Preset Catalog"
+msgid "Preset Preview"
+msgstr "Preset Preview"
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Preset roles"
 msgstr "Preset roles"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Presets can be browsed without a save. Applying one needs an open save and a selected character."
+msgstr "Presets can be browsed without a save. Applying one needs an open save and a selected character."
+
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Presets for this role are unavailable or incomplete."
 msgstr "Presets for this role are unavailable or incomplete."
 
+#: src/features/character/CharacterPanel.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Preview"
 msgstr "Preview"
@@ -2017,6 +2049,11 @@ msgstr "Preview"
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Preview repair plan"
 msgstr "Preview repair plan"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Preview: {0}"
+msgstr "Preview: {0}"
 
 #: src/features/character/CharacterPanel.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -2171,6 +2208,11 @@ msgstr "Remove {name} from favorites"
 #: src/features/world/WorldPanel.tsx
 msgid "Remove Fog of War"
 msgstr "Remove Fog of War"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Remove from local favorites — {0}"
+msgstr "Remove from local favorites — {0}"
 
 #. placeholder {0}: recent.path
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -2412,10 +2454,13 @@ msgstr "Scan for problems"
 msgid "Scanning…"
 msgstr "Scanning…"
 
-#: src/features/character/CharacterPanel.tsx
 #: src/features/tools/TemplatesTab.tsx
 msgid "Search"
 msgstr "Search"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Search appearance presets"
+msgstr "Search appearance presets"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Search Areas"
@@ -2433,10 +2478,6 @@ msgstr "Search Cooldown"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Search items"
 msgstr "Search items"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Search presets..."
-msgstr "Search presets..."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Search World entries"
@@ -2492,6 +2533,11 @@ msgstr "Select an active character to view and edit profile data."
 #: src/features/character/CharacterPanel.tsx
 msgid "Select Starting Class"
 msgstr "Select Starting Class"
+
+#. placeholder {0}: preset.name
+#: src/features/character/CharacterPanel.tsx
+msgid "Select: {0}"
+msgstr "Select: {0}"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -2728,6 +2774,10 @@ msgstr "Spirit Ash"
 msgid "Spirit Ash level"
 msgstr "Spirit Ash level"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Spirit Ash level input"
+msgstr "Spirit Ash level input"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spirit Ashes"
 msgstr "Spirit Ashes"
@@ -2760,10 +2810,6 @@ msgstr "Stamina (SP)"
 #: src/features/character/CharacterPanel.tsx
 msgid "Standard"
 msgstr "Standard"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Standard +25, Special +10"
-msgstr "Standard +25, Special +10"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Start command"
@@ -2919,6 +2965,10 @@ msgstr "Talisman Slots"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Talisman slots: {0}"
 msgstr "Talisman slots: {0}"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Talisman tier hierarchy is not yet mapped in catalog."
+msgstr "Talisman tier hierarchy is not yet mapped in catalog."
 
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -3360,6 +3410,14 @@ msgstr "Tutorials"
 msgid "Type"
 msgstr "Type"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Type A"
+msgstr "Type A"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Type B"
+msgstr "Type B"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unable to load characters."
 msgstr "Unable to load characters."
@@ -3643,12 +3701,20 @@ msgid "Weapon +10 level"
 msgstr "Weapon +10 level"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Weapon +10 level input"
+msgstr "Weapon +10 level input"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Weapon +25"
 msgstr "Weapon +25"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Weapon +25 level"
 msgstr "Weapon +25 level"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +25 level input"
+msgstr "Weapon +25 level input"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
@@ -3666,6 +3732,10 @@ msgstr "Wondrous Physick"
 #: src/features/world/WorldPanel.tsx
 msgid "World"
 msgstr "World"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "World grace unlock is deferred to World tab."
+msgstr "World grace unlock is deferred to World tab."
 
 #: src/features/app-shell/AppShell.tsx
 msgid "World progress and unlocks"
@@ -3687,27 +3757,3 @@ msgstr "You are running the latest release."
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "You have unsaved changes in your draft."
 msgstr "You have unsaved changes in your draft."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
-msgstr "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Talisman tier hierarchy is not yet mapped in catalog."
-msgstr "Talisman tier hierarchy is not yet mapped in catalog."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "World grace unlock is deferred to World tab."
-msgstr "World grace unlock is deferred to World tab."
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Weapon +25 level input"
-msgstr "Weapon +25 level input"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Weapon +10 level input"
-msgstr "Weapon +10 level input"
-
-#: src/features/character/CharacterPanel.tsx
-msgid "Spirit Ash level input"
-msgstr "Spirit Ash level input"

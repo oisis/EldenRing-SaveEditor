@@ -1,7 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppearancePresets } from "../../application/appearance/useAppearancePresets";
+import type { AppearancePresetSummary } from "../../application/appearance/appearancePort";
+import { useAppearancePreferences } from "../../application/preferences/appearancePreferences";
 import { appearancePresetAssetURL } from "../../application/catalog/catalogAssetURL";
 import { useCatalogResources } from "../../application/catalog/useCatalogResources";
 import type {
@@ -21,7 +23,7 @@ import { Checkbox } from "../../ui/components/Checkbox/Checkbox";
 import { Dialog } from "../../ui/components/Dialog/Dialog";
 import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
-import { alert, message, panel } from "../../ui/patterns/panel.css";
+import { alert, message, panel, visuallyHidden } from "../../ui/patterns/panel.css";
 import {
   disclosure,
   disclosureHeading,
@@ -48,9 +50,6 @@ import {
   derivedStatSub,
   derivedStatValue,
   favoriteSlotActions,
-  favoriteSlotCard,
-  favoriteSlotHeader,
-  favoritesGrid,
   field,
   fieldGroup,
   fieldHint,
@@ -59,15 +58,45 @@ import {
   fieldLabelSuffix,
   fieldRow,
   identityCard,
-  identityGrid,
+  mirrorFavoriteActions,
+  mirrorFavoriteCard,
+  mirrorFavoriteDetails,
+  mirrorFavoritePortrait,
+  mirrorFavoritesHead,
+  mirrorFavoritesList,
+  mirrorFavoritesSection,
+  mirrorFavoriteSlot,
+  mirrorFavoriteTitle,
+  presetArrow,
+  presetArrowNext,
+  presetArrowPrev,
+  presetBadges,
+  presetBrowser,
+  presetBrowserHead,
+  presetCard,
+  presetCardActions,
+  presetCardActive,
+  presetCardBody,
+  presetCardFavorite,
+  presetCardImage,
+  presetCardPlaceholder,
+  presetCardPortrait,
+  presetCardShade,
+  presetCarousel,
   presetContainer,
-  presetControls,
-  presetImage,
-  presetImagePlaceholder,
-  presetNeighbor,
+  presetFilterSwitches,
+  presetMeta,
+  presetName,
+  presetPreviewImage,
+  presetPreviewInfo,
+  presetPreviewModal,
+  presetPreviewPortrait,
+  presetRange,
+  presetRangeInput,
+  presetRangeLabel,
+  presetRing,
+  presetSpacer,
   presetStage,
-  presetTags,
-  presetViewer,
   profileAdvanced,
   profileGrid,
   profileLower,
@@ -176,10 +205,15 @@ export function CharacterPanel({
     pageSize: 50,
   });
 
-  // Appearance queries
+  // Appearance queries and host preferences
+  const appPreferences = useAppearancePreferences();
   const [searchDraft, setSearchDraft] = useState("");
-  const [bodyTypeFilter, setBodyTypeFilter] = useState<"all" | "Type A" | "Type B">("all");
-  const presetsQuery = useAppearancePresets({ search: searchDraft });
+  const [typeAFilter, setTypeAFilter] = useState(true);
+  const [typeBFilter, setTypeBFilter] = useState(true);
+  const [favoritesOnlyFilter, setFavoritesOnlyFilter] = useState(false);
+  const [previewPreset, setPreviewPreset] = useState<AppearancePresetSummary | null>(null);
+
+  const presetsQuery = useAppearancePresets();
   const favoritesQuery = useFavoritePresets(saveSessionID, saveRevision);
 
   // Every editable field stays closed until its own read succeeded. A pending or
@@ -251,21 +285,71 @@ export function CharacterPanel({
     return classRes?.name ?? `Class ${profileQuery.data.startingClassID}`;
   }, [profileQuery.isSuccess, profileQuery.data, classesQuery.isSuccess, classesQuery.data]);
 
-  // Filtered appearance presets
+  // Filtered appearance presets.
+  // Presets are fetched as a whole catalog, and filtered locally across ID,
+  // name, and tags so search query matching is unified and includes tags.
   const filteredPresets = useMemo(() => {
     const list = presetsQuery.data ?? [];
-    if (bodyTypeFilter === "all") return list;
-    return list.filter((p) => p.bodyType === bodyTypeFilter);
-  }, [presetsQuery.data, bodyTypeFilter]);
+    const q = searchDraft.trim().toLowerCase();
+    return list.filter((p) => {
+      if (p.bodyType === "Type A" && !typeAFilter) return false;
+      if (p.bodyType === "Type B" && !typeBFilter) return false;
+      if (favoritesOnlyFilter && !appPreferences.isFavorite(p.id)) return false;
+      if (
+        q &&
+        !p.id.toLowerCase().includes(q) &&
+        !p.name.toLowerCase().includes(q) &&
+        !p.tags.some((tag) => tag.toLowerCase().includes(q))
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [
+    presetsQuery.data,
+    searchDraft,
+    typeAFilter,
+    typeBFilter,
+    favoritesOnlyFilter,
+    appPreferences,
+  ]);
 
   // A search or filter change shrinks the list without touching the stored
   // index, so every consumer reads the clamped index instead. That is what keeps
   // the counter, the arrows and the applied preset on the same entry.
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
-  const safePresetIndex = selectedPresetIndex >= filteredPresets.length ? 0 : selectedPresetIndex;
+  const safePresetIndex =
+    filteredPresets.length === 0
+      ? 0
+      : Math.min(Math.max(0, selectedPresetIndex), filteredPresets.length - 1);
   const activePreset = filteredPresets[safePresetIndex];
-  const activePresetImageURL =
-    activePreset === undefined ? undefined : appearancePresetAssetURL(activePreset.image);
+
+  useEffect(() => {
+    if (selectedPresetIndex !== safePresetIndex) {
+      setSelectedPresetIndex(safePresetIndex);
+    }
+  }, [selectedPresetIndex, safePresetIndex]);
+
+  const canApply = hasActiveCharacter && !isBusy;
+  const freeMirrorCount = favoritesQuery.data?.presets
+    ? favoritesQuery.data.presets.filter((s) => !s.active).length
+    : 0;
+
+  const handleStepPreset = (delta: number) => {
+    const total = filteredPresets.length;
+    if (total <= 1) return;
+    const nextIndex = (safePresetIndex + delta + total) % total;
+    setSelectedPresetIndex(nextIndex);
+  };
+
+  const offsetFor = (index: number) => {
+    if (filteredPresets.length < 2) return 0;
+    let offset = index - safePresetIndex;
+    const half = filteredPresets.length / 2;
+    if (offset > half) offset -= filteredPresets.length;
+    if (offset < -half) offset += filteredPresets.length;
+    return offset;
+  };
 
   // Actions
   const handleSaveName = async (event: React.FormEvent) => {
@@ -327,12 +411,28 @@ export function CharacterPanel({
     });
   };
 
-  const handleApplyPreset = async () => {
-    if (!hasActiveCharacter || !presetsReady || !activePreset || isBusy) return;
-    await mutations.applyAppearancePreset({
+  const handleApplyPresetTarget = async (
+    targetPreset: AppearancePresetSummary | null | undefined,
+  ): Promise<boolean> => {
+    if (
+      !targetPreset ||
+      !hasActiveCharacter ||
+      !presetsReady ||
+      isBusy ||
+      saveSessionID === undefined ||
+      characterID === undefined ||
+      saveRevision === undefined
+    ) {
+      return false;
+    }
+    const existsInCatalog = presetsQuery.data?.some((p) => p.id === targetPreset.id);
+    if (!existsInCatalog) {
+      return false;
+    }
+    return await mutations.applyAppearancePreset({
       saveSessionID,
       characterID,
-      presetID: activePreset.id,
+      presetID: targetPreset.id,
       expectedRevision: saveRevision,
     });
   };
@@ -1345,170 +1445,315 @@ export function CharacterPanel({
 
       {activeTab === "appearance" && (
         <div className={presetContainer}>
-          <Card aria-label={t`Appearance Presets`}>
-            <h2>
-              <Trans>Preset Catalog</Trans>
-            </h2>
-            <div className={identityGrid}>
-              <div className={fieldGroup}>
-                <label htmlFor="appearance-search-input" className={fieldLabel}>
-                  <Trans>Search</Trans>
-                </label>
+          {!canApply && (
+            <div role="status" className={message} style={{ marginBottom: 12 }}>
+              <Trans>
+                Presets can be browsed without a save. Applying one needs an open save and a
+                selected character.
+              </Trans>
+            </div>
+          )}
+
+          <div className={presetBrowser}>
+            <div className={presetBrowserHead}>
+              <div className={field}>
                 <Input
                   id="appearance-search-input"
-                  placeholder={t`Search presets...`}
+                  placeholder={t`Search appearance presets`}
+                  aria-label={t`Search appearance presets`}
                   value={searchDraft}
                   onChange={(e) => setSearchDraft(e.currentTarget.value)}
                 />
               </div>
-              <div className={fieldGroup}>
-                <label htmlFor="appearance-body-type-filter" className={fieldLabel}>
-                  <Trans>Body Type Filter</Trans>
+
+              <div className={presetFilterSwitches}>
+                <label className={switchLabel}>
+                  <Checkbox
+                    checked={typeAFilter}
+                    onChange={(e) => setTypeAFilter(e.currentTarget.checked)}
+                    aria-label={t`Type A`}
+                  />
+                  <span>
+                    <Trans>Type A</Trans>
+                  </span>
                 </label>
-                <Select
-                  id="appearance-body-type-filter"
-                  value={bodyTypeFilter}
-                  onChange={(e) =>
-                    setBodyTypeFilter(e.currentTarget.value as "all" | "Type A" | "Type B")
-                  }
-                >
-                  <option value="all">{t`All Body Types`}</option>
-                  <option value="Type A">Type A</option>
-                  <option value="Type B">Type B</option>
-                </Select>
+
+                <label className={switchLabel}>
+                  <Checkbox
+                    checked={typeBFilter}
+                    onChange={(e) => setTypeBFilter(e.currentTarget.checked)}
+                    aria-label={t`Type B`}
+                  />
+                  <span>
+                    <Trans>Type B</Trans>
+                  </span>
+                </label>
+
+                <label className={switchLabel}>
+                  <Checkbox
+                    checked={favoritesOnlyFilter}
+                    onChange={(e) => setFavoritesOnlyFilter(e.currentTarget.checked)}
+                    aria-label={t`Favorites only`}
+                  />
+                  <span>★ <Trans>Favorites only</Trans></span>
+                </label>
+              </div>
+
+              <div className={presetSpacer} />
+
+              <div className={presetBadges}>
+                <Badge tone="neutral">
+                  {filteredPresets.length}/{presetsQuery.data?.length ?? 0}
+                </Badge>
+                {canApply && (
+                  <Badge tone="accent">
+                    <Trans>{freeMirrorCount} free mirror slots</Trans>
+                  </Badge>
+                )}
               </div>
             </div>
 
-            {presetsQuery.isPending ? (
-              <p role="status" className={message}>
-                <Trans>Loading appearance presets…</Trans>
-              </p>
-            ) : null}
-            {presetsQuery.isError ? (
-              <p role="alert" className={alert}>
-                <Trans>Unable to load the appearance presets.</Trans>
-              </p>
-            ) : null}
-            {presetsReady && filteredPresets.length === 0 ? (
-              <p className={message}>
-                <Trans>No appearance presets matched your search.</Trans>
-              </p>
-            ) : null}
-            {presetsReady && activePreset !== undefined ? (
-              <div className={presetStage}>
-                {filteredPresets[safePresetIndex - 1] ? (
-                  <img
-                    className={presetNeighbor}
-                    alt=""
-                    aria-hidden="true"
-                    src={appearancePresetAssetURL(filteredPresets[safePresetIndex - 1].image)}
-                  />
-                ) : (
-                  <div className={presetNeighbor} aria-hidden="true" />
-                )}
-                <div className={presetViewer}>
-                  {activePresetImageURL !== undefined ? (
-                    <img
-                      src={activePresetImageURL}
-                      alt={activePreset.name}
-                      className={presetImage}
-                    />
-                  ) : (
-                    <div className={presetImagePlaceholder}>
-                      <Trans>No preview image</Trans>
-                    </div>
-                  )}
-                  <h3>{activePreset.name}</h3>
-                  <Badge>{activePreset.bodyType}</Badge>
-                  {activePreset.tags.length > 0 && (
-                    <div className={presetTags}>
-                      {activePreset.tags.map((tag) => (
-                        <Badge key={tag} tone="neutral">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <div className={presetControls}>
-                    <Button
-                      size="sm"
-                      disabled={safePresetIndex === 0}
-                      onClick={() => setSelectedPresetIndex(Math.max(0, safePresetIndex - 1))}
-                    >
-                      <Trans>Previous</Trans>
-                    </Button>
-                    <span>
-                      {safePresetIndex + 1} / {filteredPresets.length}
-                    </span>
-                    <Button
-                      size="sm"
-                      disabled={safePresetIndex === filteredPresets.length - 1}
-                      onClick={() =>
-                        setSelectedPresetIndex(
-                          Math.min(filteredPresets.length - 1, safePresetIndex + 1),
-                        )
-                      }
-                    >
-                      <Trans>Next</Trans>
-                    </Button>
-                  </div>
-                  <div>
-                    <Button
-                      size="sm"
-                      disabled={!hasActiveCharacter || isBusy}
-                      onClick={handleApplyPreset}
-                    >
-                      <Trans>Apply to Character</Trans>
-                    </Button>
-                  </div>
+            <section
+              className={presetCarousel}
+              aria-label={t`Appearance Presets`}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                const target = e.target as HTMLElement | null;
+                if (
+                  target &&
+                  (target.tagName === "INPUT" ||
+                    target.tagName === "SELECT" ||
+                    target.tagName === "TEXTAREA" ||
+                    target.getAttribute("role") === "slider")
+                ) {
+                  return;
+                }
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  handleStepPreset(-1);
+                } else if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  handleStepPreset(1);
+                }
+              }}
+            >
+              <div className={presetRing} aria-hidden="true" />
+
+              {presetsQuery.isPending && (
+                <p role="status" className={message}>
+                  <Trans>Loading appearance presets…</Trans>
+                </p>
+              )}
+
+              {presetsQuery.isError && (
+                <p role="alert" className={alert}>
+                  <Trans>Unable to load the appearance presets.</Trans>
+                </p>
+              )}
+
+              {presetsReady && filteredPresets.length === 0 ? (
+                <p className={message}>
+                  <Trans>No appearance presets matched your search.</Trans>
+                </p>
+              ) : null}
+
+              {presetsReady && filteredPresets.length > 0 ? (
+                <div className={presetStage}>
+                  {filteredPresets.map((preset, index) => {
+                    const offset = offsetFor(index);
+                    const distance = Math.abs(offset);
+                    const shown = distance <= 2;
+                    if (!shown) return null;
+
+                    const isActive = offset === 0;
+                    const isFav = appPreferences.isFavorite(preset.id);
+                    const cardStyle = {
+                      "--offset": offset,
+                      "--distance": distance,
+                      "--card-opacity": Math.max(0.18, 1 - distance * 0.18),
+                      "--card-z": 30 - distance,
+                    } as React.CSSProperties;
+
+                    return (
+                      <article
+                        key={preset.id}
+                        className={`${presetCard} ${isActive ? presetCardActive : ""}`}
+                        style={cardStyle}
+                      >
+                        <button
+                          type="button"
+                          className={presetCardFavorite}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            appPreferences.toggleFavorite(preset.id);
+                          }}
+                          tabIndex={isActive ? 0 : -1}
+                          aria-label={
+                            isFav
+                              ? t`Remove from local favorites — ${preset.name}`
+                              : t`Add to local favorites — ${preset.name}`
+                          }
+                        >
+                          {isFav ? "★" : "☆"}
+                        </button>
+                        <button
+                          type="button"
+                          className={presetCardPortrait}
+                          onClick={() => {
+                            if (isActive) {
+                              setPreviewPreset(preset);
+                            } else {
+                              setSelectedPresetIndex(index);
+                            }
+                          }}
+                          tabIndex={0}
+                          aria-label={
+                            isActive ? t`Preview: ${preset.name}` : t`Select: ${preset.name}`
+                          }
+                        >
+                          {preset.image ? (
+                            <img
+                              src={appearancePresetAssetURL(preset.image)}
+                              alt={preset.name}
+                              className={presetCardImage}
+                            />
+                          ) : (
+                            <div className={presetCardPlaceholder}>
+                              <Trans>No preview image</Trans>
+                            </div>
+                          )}
+                          <span className={presetCardShade} />
+                        </button>
+                        <div className={presetCardBody}>
+                          <strong className={presetName}>{preset.name}</strong>
+                          <span className={presetMeta}>
+                            {preset.bodyType}
+                            {preset.tags.length > 0 ? ` · ${preset.tags.join(", ")}` : ""}
+                          </span>
+                          {isActive && (
+                            <div className={presetCardActions}>
+                              <Button size="sm" onClick={() => setPreviewPreset(preset)}>
+                                <Trans>Preview</Trans>
+                              </Button>
+                              <div style={{ display: "flex", gap: "6px" }}>
+                                <Button
+                                  size="sm"
+                                  disabled
+                                  title={t`Direct preset addition to Mirror Favorites is not supported by SaveEngine 2.0`}
+                                >
+                                  <Trans>Add</Trans>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  disabled={!canApply || isBusy}
+                                  onClick={() => handleApplyPresetTarget(activePreset)}
+                                >
+                                  <Trans>Apply to Character</Trans>
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
-                {filteredPresets[safePresetIndex + 1] ? (
-                  <img
-                    className={presetNeighbor}
-                    alt=""
-                    aria-hidden="true"
-                    src={appearancePresetAssetURL(filteredPresets[safePresetIndex + 1].image)}
-                  />
-                ) : (
-                  <div className={presetNeighbor} aria-hidden="true" />
+              ) : null}
+
+              <button
+                type="button"
+                className={`${presetArrow} ${presetArrowPrev}`}
+                onClick={() => handleStepPreset(-1)}
+                disabled={filteredPresets.length <= 1}
+                aria-label={t`Previous`}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className={`${presetArrow} ${presetArrowNext}`}
+                onClick={() => handleStepPreset(1)}
+                disabled={filteredPresets.length <= 1}
+                aria-label={t`Next`}
+              >
+                ›
+              </button>
+            </section>
+
+            {filteredPresets.length > 0 && (
+              <div className={presetRange}>
+                <span className={presetRangeLabel}>
+                  {safePresetIndex + 1} / {filteredPresets.length}
+                </span>
+                {filteredPresets.length > 1 && (
+                  <>
+                    <label htmlFor="preset-range-slider" className={visuallyHidden}>
+                      <Trans>Appearance preset</Trans>
+                    </label>
+                    <input
+                      id="preset-range-slider"
+                      type="range"
+                      min={0}
+                      max={filteredPresets.length - 1}
+                      value={safePresetIndex}
+                      onChange={(e) => setSelectedPresetIndex(Number(e.currentTarget.value))}
+                      className={presetRangeInput}
+                      aria-label={t`Appearance preset`}
+                    />
+                    <span className={presetRangeLabel}>{filteredPresets.length}</span>
+                  </>
                 )}
               </div>
-            ) : null}
-          </Card>
+            )}
+          </div>
 
-          <Card aria-label={t`Mirror Favorites`}>
-            <h2>
-              <Trans>Mirror Favorites</Trans>
-            </h2>
+          <section className={mirrorFavoritesSection} aria-label={t`Mirror Favorites`}>
+            <div className={mirrorFavoritesHead}>
+              <h2>
+                <Trans>Mirror Favorites</Trans>
+              </h2>
+              {favoritesReady && (
+                <Badge tone="neutral">
+                  {favoritesQuery.data.presets.filter((s) => s.active).length} · {freeMirrorCount}{" "}
+                  <Trans>free mirror slots</Trans>
+                </Badge>
+              )}
+            </div>
+
             {!saveSessionID ? (
-              <p className={message}>
-                <Trans>Mirror Favorites require an active save session.</Trans>
-              </p>
+              <Card>
+                <p className={message}>
+                  <Trans>Mirror Favorites require an active save session.</Trans>
+                </p>
+              </Card>
             ) : (
               <>
-                {favoritesQuery.isPending ? (
+                {favoritesQuery.isPending && (
                   <p role="status" className={message}>
                     <Trans>Loading Mirror Favorites…</Trans>
                   </p>
-                ) : null}
-                {favoritesQuery.isError ? (
+                )}
+                {favoritesQuery.isError && (
                   <p role="alert" className={alert}>
                     <Trans>Unable to load the Mirror Favorites of this save.</Trans>
                   </p>
-                ) : null}
-                {favoritesReady ? (
-                  <div className={favoritesGrid}>
+                )}
+                {favoritesReady && (
+                  <div className={mirrorFavoritesList}>
                     {favoritesQuery.data.presets.map((slot) => (
-                      <div key={slot.favoriteSlotID} className={favoriteSlotCard}>
-                        <div className={favoriteSlotHeader}>
-                          <strong>
+                      <div key={slot.favoriteSlotID} className={mirrorFavoriteCard}>
+                        <div className={mirrorFavoritePortrait}>
+                          {slot.active ? "★" : slot.favoriteSlotID + 1}
+                        </div>
+                        <div className={mirrorFavoriteDetails}>
+                          <strong className={mirrorFavoriteTitle}>
                             <Trans>Slot {slot.favoriteSlotID + 1}</Trans>
                           </strong>
-                          <Badge tone={slot.active ? "accent" : "neutral"}>
+                          <span className={mirrorFavoriteSlot}>
                             {slot.active ? <Trans>Active</Trans> : <Trans>Empty</Trans>}
-                          </Badge>
+                          </span>
                         </div>
-                        <div className={favoriteSlotActions}>
+                        <div className={mirrorFavoriteActions}>
                           {slot.active ? (
                             <>
                               <Button
@@ -1546,10 +1791,76 @@ export function CharacterPanel({
                       </div>
                     ))}
                   </div>
-                ) : null}
+                )}
               </>
             )}
-          </Card>
+          </section>
+
+          {/* Preset Preview Dialog */}
+          <Dialog
+            open={previewPreset !== null}
+            onOpenChange={(open) => {
+              if (!open) setPreviewPreset(null);
+            }}
+            title={previewPreset?.name ?? t`Preset Preview`}
+            closeLabel={t`Close`}
+          >
+            {previewPreset && (
+              <div className={presetPreviewModal}>
+                <div className={presetPreviewPortrait}>
+                  {previewPreset.image ? (
+                    <img
+                      src={appearancePresetAssetURL(previewPreset.image)}
+                      alt={previewPreset.name}
+                      className={presetPreviewImage}
+                    />
+                  ) : (
+                    <div className={presetCardPlaceholder}>
+                      <Trans>No preview image</Trans>
+                    </div>
+                  )}
+                </div>
+                <div className={presetPreviewInfo}>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                    <Badge>{previewPreset.bodyType}</Badge>
+                    {previewPreset.tags.map((tag) => (
+                      <Badge key={tag} tone="neutral">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className={favoriteSlotActions}>
+                    <Button
+                      size="sm"
+                      onClick={() => appPreferences.toggleFavorite(previewPreset.id)}
+                    >
+                      {appPreferences.isFavorite(previewPreset.id)
+                        ? t`★ Remove from local favorites`
+                        : t`☆ Add to local favorites`}
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={
+                        !canApply ||
+                        !presetsReady ||
+                        isBusy ||
+                        !presetsQuery.data?.some((p) => p.id === previewPreset.id)
+                      }
+                      onClick={async () => {
+                        if (!previewPreset || !canApply || isBusy) return;
+                        const ok = await handleApplyPresetTarget(previewPreset);
+                        if (ok) {
+                          setPreviewPreset(null);
+                        }
+                      }}
+                    >
+                      <Trans>Apply to Character</Trans>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Dialog>
 
           {/* Confirm Replace Favorite Dialog */}
           <Dialog

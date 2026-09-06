@@ -59,6 +59,7 @@ import type {
   OwnedItemsPage,
 } from "../application/items/itemsPort";
 import { ItemPreferencesProvider } from "../application/preferences/itemPreferences";
+import { AppearancePreferencesProvider } from "../application/preferences/appearancePreferences";
 import { SaveSessionPortProvider } from "../application/save-session/saveSessionClient";
 import type {
   MutationReceipt,
@@ -1536,35 +1537,37 @@ export function TestProviders({
       <ApplicationInfoPortProvider port={port ?? makePort()}>
         <SettingsPortProvider port={settingsPort ?? makeSettingsPort()}>
           <ItemPreferencesProvider initialShowItemID={showItemID}>
-            <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
-              <AppearancePortProvider port={appearancePort ?? makeAppearancePort()}>
-                <FavoritesPortProvider port={favoritesPort ?? makeFavoritesPort()}>
-                  <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
-                    <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
-                      <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
-                        <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
-                          <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
-                            <WorldPortProvider port={worldPort ?? makeWorldPort()}>
-                              <NetworkPortProvider port={networkPort ?? makeNetworkPort()}>
-                                <AboutPortProvider port={aboutPort ?? makeAboutPort()}>
-                                  <TemplatePortProvider port={templatePort ?? makeTemplatePort()}>
-                                    <DeploymentPortProvider
-                                      port={deploymentPort ?? makeDeploymentPort()}
-                                    >
-                                      {children}
-                                    </DeploymentPortProvider>
-                                  </TemplatePortProvider>
-                                </AboutPortProvider>
-                              </NetworkPortProvider>
-                            </WorldPortProvider>
-                          </EquipmentPortProvider>
-                        </ItemsPortProvider>
-                      </DiagnosticsPortProvider>
-                    </CharacterPortProvider>
-                  </SaveSessionPortProvider>
-                </FavoritesPortProvider>
-              </AppearancePortProvider>
-            </CatalogPortProvider>
+            <AppearancePreferencesProvider>
+              <CatalogPortProvider port={catalogPort ?? makeCatalogPort()}>
+                <AppearancePortProvider port={appearancePort ?? makeAppearancePort()}>
+                  <FavoritesPortProvider port={favoritesPort ?? makeFavoritesPort()}>
+                    <SaveSessionPortProvider port={saveSessionPort ?? makeSaveSessionPort()}>
+                      <CharacterPortProvider port={characterPort ?? makeCharacterPort()}>
+                        <DiagnosticsPortProvider port={diagnosticsPort ?? makeDiagnosticsPort()}>
+                          <ItemsPortProvider port={itemsPort ?? makeItemsPort()}>
+                            <EquipmentPortProvider port={equipmentPort ?? makeEquipmentPort()}>
+                              <WorldPortProvider port={worldPort ?? makeWorldPort()}>
+                                <NetworkPortProvider port={networkPort ?? makeNetworkPort()}>
+                                  <AboutPortProvider port={aboutPort ?? makeAboutPort()}>
+                                    <TemplatePortProvider port={templatePort ?? makeTemplatePort()}>
+                                      <DeploymentPortProvider
+                                        port={deploymentPort ?? makeDeploymentPort()}
+                                      >
+                                        {children}
+                                      </DeploymentPortProvider>
+                                    </TemplatePortProvider>
+                                  </AboutPortProvider>
+                                </NetworkPortProvider>
+                              </WorldPortProvider>
+                            </EquipmentPortProvider>
+                          </ItemsPortProvider>
+                        </DiagnosticsPortProvider>
+                      </CharacterPortProvider>
+                    </SaveSessionPortProvider>
+                  </FavoritesPortProvider>
+                </AppearancePortProvider>
+              </CatalogPortProvider>
+            </AppearancePreferencesProvider>
           </ItemPreferencesProvider>
         </SettingsPortProvider>
       </ApplicationInfoPortProvider>
