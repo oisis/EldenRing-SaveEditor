@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type {
   CharacterPort,
@@ -6,10 +6,12 @@ import type {
   SaveCharacters,
 } from "../../application/character/characterPort";
 import {
+  makeCatalogPort,
   makeCharacterPort,
   renderApp,
   stubCharacterProfile,
   stubCharacterStats,
+  stubSlotsFor,
 } from "../../test/renderWithProviders";
 import { CharacterSidebar } from "./CharacterSidebar";
 import { useCharacterSelection } from "./useCharacterSelection";
@@ -22,7 +24,7 @@ function saveCharacters(
   saveSessionID: string,
   characters: readonly CharacterSummary[],
 ): SaveCharacters {
-  return { saveSessionID, saveRevision: "0", characters };
+  return { saveSessionID, saveRevision: "0", characters, slots: stubSlotsFor(characters) };
 }
 
 /**
@@ -72,7 +74,15 @@ describe("CharacterSidebar", () => {
     expect(await screen.findByRole("button", { name: /Zero/ })).toBeInTheDocument();
     expect(screen.getByRole("complementary", { name: "Characters" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Active characters" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Inactive slots" })).toBeInTheDocument();
+
+    // The inactive slots start collapsed behind a counted disclosure, so only
+    // the active ones are listed until it is opened.
+    const inactive = screen.getByRole("button", { name: "7 inactive slots" });
+    expect(inactive).toHaveAttribute("aria-expanded", "false");
+    expect(slotLabels()).toEqual(["Slot 1", "Slot 3", "Slot 6"]);
+
+    fireEvent.click(inactive);
+    expect(inactive).toHaveAttribute("aria-expanded", "true");
 
     // Active slots first, and the reported order preserved inside both groups.
     expect(slotLabels()).toEqual([
@@ -99,6 +109,7 @@ describe("CharacterSidebar", () => {
     await renderApp(<Harness saveSessionID="session-1" />, { characterPort: listing(scrambled) });
 
     expect(await screen.findByRole("button", { name: /Zero/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "2 inactive slots" }));
     expect(slotLabels()).toEqual(["Slot 4", "Slot 1", "Slot 2", "Slot 3"]);
   });
 
@@ -106,20 +117,46 @@ describe("CharacterSidebar", () => {
     await renderApp(<Harness saveSessionID="session-1" />, { characterPort: listing(tenSlots) });
 
     expect(await screen.findByRole("button", { name: /Zero/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "7 inactive slots" }));
+
     for (let slotNumber = 1; slotNumber <= 10; slotNumber += 1) {
-      expect(screen.getByText(`Slot ${slotNumber}`)).toBeInTheDocument();
+      expect(screen.getByText(`Slot ${slotNumber} · Unknown`)).toBeInTheDocument();
     }
-    expect(screen.queryByText("Slot 0")).toBeNull();
-    expect(screen.queryByText("Slot 11")).toBeNull();
+    expect(screen.queryByText(/\bSlot 0\b/)).toBeNull();
+    expect(screen.queryByText(/\bSlot 11\b/)).toBeNull();
   });
 
-  it("shows the name and the rune level of an active character and nothing else", async () => {
-    await renderApp(<Harness saveSessionID="session-1" />, { characterPort: listing(tenSlots) });
+  it("shows the name, the rune level and the reported starting class of an active character and nothing else", async () => {
+    // The only class the catalog can name is the one the slot projection of the
+    // fixture reports for an active slot.
+    const catalogPort = makeCatalogPort({
+      getResources: () =>
+        Promise.resolve({
+          resources: [{ kind: "class", key: "0", family: "", name: "Vagabond" }],
+          total: 1,
+          page: 1,
+          pageSize: 50,
+        }),
+    });
+    await renderApp(<Harness saveSessionID="session-1" />, {
+      characterPort: listing(tenSlots),
+      catalogPort,
+    });
 
     const row = await screen.findByRole("button", { name: /Zero/ });
     expect(row).toHaveTextContent("Zero");
     expect(row).toHaveTextContent("RL 150");
-    expect(row).toHaveTextContent("Slot 1");
+    // The starting class comes from the slot projection, never from the profile.
+    await waitFor(() => expect(row).toHaveTextContent("Slot 1 · Vagabond"));
+
+    fireEvent.click(screen.getByRole("button", { name: "7 inactive slots" }));
+
+    // Exactly what this fixture states: seven empty slots, no residual one, and
+    // no class invented for a slot the backend reports none for.
+    expect(screen.getAllByText("Empty")).toHaveLength(7);
+    expect(screen.queryByText("Residual data")).toBeNull();
+    expect(screen.getByText("Slot 2 · Unknown")).toBeInTheDocument();
+    expect(screen.queryByText("Slot 2 · Vagabond")).toBeNull();
 
     // Nothing the current backend contract cannot state is rendered.
     const panel = screen.getByRole("complementary", { name: "Characters" });
@@ -127,9 +164,6 @@ describe("CharacterSidebar", () => {
       String(stubCharacterProfile.secondsPlayed),
       "Play Time",
       "Starting Class",
-      "Empty",
-      "Residual",
-      "Unknown",
       "Gender",
       "Body Type",
     ]) {
@@ -145,10 +179,18 @@ describe("CharacterSidebar", () => {
 
     expect(await screen.findByRole("button", { name: /Zero/ })).toBeInTheDocument();
 
-    // Exactly the three active slots are controls; the seven inactive ones are not.
-    expect(screen.getAllByRole("button")).toHaveLength(3);
-    expect(screen.getAllByText("Inactive slot")).toHaveLength(7);
-    expect(screen.queryByRole("button", { name: /Inactive slot/ })).toBeNull();
+    // The three active slots and the disclosure are the only controls.
+    expect(screen.getAllByRole("button")).toHaveLength(4);
+
+    fireEvent.click(screen.getByRole("button", { name: "7 inactive slots" }));
+
+    // The seven inactive slots of this fixture, classified as the backend
+    // reports them, and none of them a control.
+    expect(screen.getAllByRole("listitem")).toHaveLength(10);
+    expect(screen.getAllByText("Empty")).toHaveLength(7);
+    expect(screen.queryByText("Residual data")).toBeNull();
+    expect(screen.getAllByRole("button")).toHaveLength(4);
+    expect(screen.queryByRole("button", { name: /Empty/ })).toBeNull();
   });
 
   it("exposes the selection to assistive technology and moves it on a click", async () => {
@@ -211,7 +253,16 @@ describe("CharacterSidebar", () => {
     });
 
     expect(await screen.findByText("No active character is available.")).toBeInTheDocument();
-    expect(screen.queryByRole("button")).toBeNull();
+
+    // The disclosure is the only control: no character can be selected.
+    const inactive = screen.getByRole("button", { name: "2 inactive slots" });
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+
+    fireEvent.click(inactive);
+    expect(screen.getAllByText("Empty")).toHaveLength(2);
+    expect(screen.getByText("Slot 1 · Unknown")).toBeInTheDocument();
+    expect(screen.getByText("Slot 2 · Unknown")).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
   it("shows a safe message instead of the transport error", async () => {
@@ -234,10 +285,13 @@ describe("CharacterSidebar", () => {
     expect(await screen.findByRole("button", { name: /Zero/ })).toBeInTheDocument();
     expect(screen.getByRole("complementary", { name: "Postacie" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Aktywne postacie" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Nieaktywne sloty" })).toBeInTheDocument();
-    expect(screen.getAllByText("Nieaktywny slot")).toHaveLength(7);
-    expect(screen.getByText("Slot 1")).toBeInTheDocument();
+    expect(screen.getByText("Slot 1 · Nieznana")).toBeInTheDocument();
     expect(screen.getByText("RL 150")).toBeInTheDocument();
+
+    const inactive = screen.getByRole("button", { name: "7 nieaktywnych slotów" });
+    fireEvent.click(inactive);
+    expect(screen.getAllByText("Puste")).toHaveLength(7);
+    expect(screen.getByText("Slot 2 · Nieznana")).toBeInTheDocument();
   });
 
   it("renders the Polish safe message for a failed list", async () => {

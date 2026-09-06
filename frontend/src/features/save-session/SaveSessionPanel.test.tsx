@@ -18,6 +18,7 @@ const inactiveOnly = makeCharacterPort({
       saveSessionID: stubSaveSession.saveSessionID,
       saveRevision: stubSaveSession.saveRevision,
       characters: [{ characterID: 0, active: false, name: "", level: 0 }],
+      slots: [],
     }),
 });
 

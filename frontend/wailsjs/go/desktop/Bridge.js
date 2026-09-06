@@ -42,6 +42,10 @@ export function ClearRecentFiles() {
   return window['go']['desktop']['Bridge']['ClearRecentFiles']();
 }
 
+export function CloneCharacter(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['CloneCharacter'](arg1, arg2, arg3, arg4);
+}
+
 export function CloseSave(arg1) {
   return window['go']['desktop']['Bridge']['CloseSave'](arg1);
 }
@@ -64,6 +68,10 @@ export function CreateTargetBackup(arg1, arg2, arg3) {
 
 export function DeleteBuildTemplate(arg1, arg2) {
   return window['go']['desktop']['Bridge']['DeleteBuildTemplate'](arg1, arg2);
+}
+
+export function DeleteCharacter(arg1, arg2, arg3) {
+  return window['go']['desktop']['Bridge']['DeleteCharacter'](arg1, arg2, arg3);
 }
 
 export function DeleteDeploymentTarget(arg1) {
@@ -424,6 +432,10 @@ export function SetBellBearingUnlocked(arg1, arg2, arg3, arg4, arg5, arg6) {
 
 export function SetBossDefeated(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['desktop']['Bridge']['SetBossDefeated'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function SetCharacterActive(arg1, arg2, arg3, arg4) {
+  return window['go']['desktop']['Bridge']['SetCharacterActive'](arg1, arg2, arg3, arg4);
 }
 
 export function SetCharacterGender(arg1, arg2, arg3, arg4) {

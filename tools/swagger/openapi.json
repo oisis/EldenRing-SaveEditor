@@ -5801,7 +5801,7 @@
       },
       "SaveCharacters": {
         "type": "object",
-        "description": "The session that was read and one summary per physical slot, always ten of them in slot order.",
+        "description": "The session that was read, one summary per physical slot and one slot-management projection per physical slot, always ten of each in slot order.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -5815,9 +5815,68 @@
             "items": {
               "$ref": "#/components/schemas/CharacterSummary"
             }
+          },
+          "slots": {
+            "type": "array",
+            "description": "The slot-management projection of the same ten slots, matched by characterID. It is reported beside the summaries and is never derived from active.",
+            "items": {
+              "$ref": "#/components/schemas/CharacterSlot"
+            }
           }
         },
-        "required": ["saveSessionID", "saveRevision", "characters"]
+        "required": ["saveSessionID", "saveRevision", "characters", "slots"]
+      },
+      "CharacterSlotCapabilities": {
+        "type": "object",
+        "description": "The slot operations the current state allows. A capability is a presentation hint: every writer revalidates the slot and the expected revision. delete covers deleting an active character and clearing a residual slot alike, because DeleteCharacter performs both.",
+        "properties": {
+          "activate": {
+            "type": "boolean"
+          },
+          "deactivate": {
+            "type": "boolean"
+          },
+          "cloneFrom": {
+            "type": "boolean",
+            "description": "The slot is a usable CloneCharacter source."
+          },
+          "cloneInto": {
+            "type": "boolean",
+            "description": "The slot is a usable CloneCharacter target, which requires it to be completely empty."
+          },
+          "delete": {
+            "type": "boolean"
+          }
+        },
+        "required": ["activate", "deactivate", "cloneFrom", "cloneInto", "delete"]
+      },
+      "CharacterSlot": {
+        "type": "object",
+        "description": "The slot-management projection of one physical slot: its classified state, its safely readable starting class and the operations the backend allows for it.",
+        "properties": {
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "state": {
+            "type": "string",
+            "enum": ["active", "residual", "empty", "unknown"],
+            "description": "unknown is the fail-safe state: the slot could not be classified, so it is neither presented as empty nor offered any operation."
+          },
+          "startingClassID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Raw identifier, meaningful only while startingClassKnown is true."
+          },
+          "startingClassKnown": {
+            "type": "boolean",
+            "description": "True for an active slot only. A residual profile summary can be cleared, so its class byte would be an invented default."
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/CharacterSlotCapabilities"
+          }
+        },
+        "required": ["characterID", "state", "startingClassID", "startingClassKnown", "capabilities"]
       },
       "CharacterProfile": {
         "type": "object",

@@ -3586,6 +3586,65 @@ export namespace saveengine {
 		    return a;
 		}
 	}
+	export class CharacterSlotCapabilities {
+	    activate: boolean;
+	    deactivate: boolean;
+	    cloneFrom: boolean;
+	    cloneInto: boolean;
+	    delete: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterSlotCapabilities(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.activate = source["activate"];
+	        this.deactivate = source["deactivate"];
+	        this.cloneFrom = source["cloneFrom"];
+	        this.cloneInto = source["cloneInto"];
+	        this.delete = source["delete"];
+	    }
+	}
+	export class CharacterSlot {
+	    characterID: number;
+	    state: string;
+	    startingClassID: number;
+	    startingClassKnown: boolean;
+	    capabilities: CharacterSlotCapabilities;
+	
+	    static createFrom(source: any = {}) {
+	        return new CharacterSlot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.characterID = source["characterID"];
+	        this.state = source["state"];
+	        this.startingClassID = source["startingClassID"];
+	        this.startingClassKnown = source["startingClassKnown"];
+	        this.capabilities = this.convertValues(source["capabilities"], CharacterSlotCapabilities);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class CharacterStats {
 	    saveSessionID: string;
 	    saveRevision: string;
@@ -3660,6 +3719,54 @@ export namespace saveengine {
 	        this.active = source["active"];
 	        this.name = source["name"];
 	        this.level = source["level"];
+	    }
+	}
+	export class CloneCharacterResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    sourceCharacterID: number;
+	    targetSlotID: number;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CloneCharacterResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.sourceCharacterID = source["sourceCharacterID"];
+	        this.targetSlotID = source["targetSlotID"];
+	        this.name = source["name"];
+	    }
+	}
+	export class DeleteCharacterResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    characterID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteCharacterResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.characterID = source["characterID"];
 	    }
 	}
 	export class DeleteFavoritePresetResult {
@@ -4128,6 +4235,7 @@ export namespace saveengine {
 	    saveSessionID: string;
 	    saveRevision: string;
 	    characters: CharacterSummary[];
+	    slots: CharacterSlot[];
 	
 	    static createFrom(source: any = {}) {
 	        return new SaveCharacters(source);
@@ -4138,6 +4246,7 @@ export namespace saveengine {
 	        this.saveSessionID = source["saveSessionID"];
 	        this.saveRevision = source["saveRevision"];
 	        this.characters = this.convertValues(source["characters"], CharacterSummary);
+	        this.slots = this.convertValues(source["slots"], CharacterSlot);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -4228,6 +4337,32 @@ export namespace saveengine {
 	        this.saveRevision = source["saveRevision"];
 	        this.unsavedChanges = source["unsavedChanges"];
 	        this.eventSequence = source["eventSequence"];
+	    }
+	}
+	export class SetCharacterActiveResult {
+	    operationID: string;
+	    operationKind: string;
+	    saveSessionID: string;
+	    saveRevision: string;
+	    changedScopes: string[];
+	    changed: boolean;
+	    characterID: number;
+	    active: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetCharacterActiveResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationID = source["operationID"];
+	        this.operationKind = source["operationKind"];
+	        this.saveSessionID = source["saveSessionID"];
+	        this.saveRevision = source["saveRevision"];
+	        this.changedScopes = source["changedScopes"];
+	        this.changed = source["changed"];
+	        this.characterID = source["characterID"];
+	        this.active = source["active"];
 	    }
 	}
 	export class SetCharacterNameResult {

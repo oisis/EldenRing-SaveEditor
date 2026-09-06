@@ -631,6 +631,43 @@ func (b *Bridge) SetCharacterRunes(
 		b.saveEngine, saveSessionID, characterID, runes, expectedRevision))
 }
 
+// SetCharacterActive delegates to the SetCharacterActive endpoint and returns
+// its result and error unchanged, including the idempotent success that commits
+// nothing and carries no operation identifier.
+func (b *Bridge) SetCharacterActive(
+	saveSessionID string,
+	characterID int,
+	active bool,
+	expectedRevision string,
+) (character.SetCharacterActiveResult, error) {
+	return bridged(character.SetCharacterActive(
+		b.saveEngine, saveSessionID, characterID, active, expectedRevision))
+}
+
+// CloneCharacter delegates to the CloneCharacter endpoint and returns its
+// result and error unchanged.
+func (b *Bridge) CloneCharacter(
+	saveSessionID string,
+	sourceCharacterID int,
+	targetSlotID int,
+	expectedRevision string,
+) (character.CloneCharacterResult, error) {
+	return bridged(character.CloneCharacter(
+		b.saveEngine, saveSessionID, sourceCharacterID, targetSlotID, expectedRevision))
+}
+
+// DeleteCharacter delegates to the DeleteCharacter endpoint and returns its
+// result and error unchanged. It is the one writer behind both deleting an
+// active character and clearing a residual slot.
+func (b *Bridge) DeleteCharacter(
+	saveSessionID string,
+	characterID int,
+	expectedRevision string,
+) (character.DeleteCharacterResult, error) {
+	return bridged(character.DeleteCharacter(
+		b.saveEngine, saveSessionID, characterID, expectedRevision))
+}
+
 // GetAppearancePresets delegates to the GetAppearancePresets endpoint and
 // returns its result and error unchanged.
 func (b *Bridge) GetAppearancePresets(

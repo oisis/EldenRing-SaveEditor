@@ -61,12 +61,19 @@ type CharacterSummary struct {
 	Level       uint32 `json:"level"`
 }
 
-// SaveCharacters is the result of GetSaveCharacters: the session that was read
-// and one summary per physical slot, always ten of them in slot order.
+// SaveCharacters is the result of GetSaveCharacters: the session that was read,
+// one summary per physical slot and one slot-management projection per physical
+// slot, always ten of each in slot order.
+//
+// Characters and Slots are two views of the same ten slots and share their
+// positional CharacterID. They are kept apart on purpose: Characters stays the
+// safe presentation summary that reveals nothing about an inactive slot, while
+// Slots carries the state and capabilities the slot management needs.
 type SaveCharacters struct {
 	SaveSessionID string             `json:"saveSessionID"`
 	SaveRevision  string             `json:"saveRevision"`
 	Characters    []CharacterSummary `json:"characters"`
+	Slots         []CharacterSlot    `json:"slots"`
 }
 
 // GetSaveCharacters returns the summary of all ten physical character slots of
@@ -101,8 +108,10 @@ func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, e
 	}
 
 	characters := make([]CharacterSummary, characterSlotCount)
+	slots := make([]CharacterSlot, characterSlotCount)
 	for slot := range characters {
 		characters[slot] = CharacterSummary{CharacterID: slot}
+		slots[slot] = describeCharacterSlot(loaded, slot, flags[slot])
 		if flags[slot] != userData10ActiveFlagValue {
 			continue
 		}
@@ -126,6 +135,7 @@ func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, e
 		SaveSessionID: saveSessionID,
 		SaveRevision:  loaded.session.revisionString(),
 		Characters:    characters,
+		Slots:         slots,
 	}, nil
 }
 

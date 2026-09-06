@@ -1,7 +1,7 @@
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
-import { useDiagnosticEvents } from "../../application/settings/useHostSettings";
 import appIconURL from "../../../../build/appicon.png";
+import { useDiagnosticEvents } from "../../application/settings/useHostSettings";
 import type { Locale } from "../../i18n/i18n";
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
@@ -34,11 +34,11 @@ import {
   consoleLatest,
   consoleLevel,
   consoleList,
-  consoleRow,
-  consoleTime,
   consolePanel,
   consolePanelBody,
   consolePanelHeader,
+  consoleRow,
+  consoleTime,
   fileHeader,
   fileLine,
   fileName,
@@ -285,7 +285,15 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               <Trans>Open a save from Home to see its character slots.</Trans>
             </p>
           ) : (
-            <CharacterSidebar model={flow.selection} />
+            <CharacterSidebar
+              model={flow.selection}
+              management={{
+                saveSessionID: session.saveSessionID,
+                saveRevision: session.saveRevision,
+                applyMutationReceipt: flow.applyMutationReceipt,
+                sessionBusy: flow.isBusy,
+              }}
+            />
           )}
         </div>
       </div>
@@ -471,7 +479,18 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
                   </span>
                   {/* The message is the backend's own safe wording, rendered
                       unchanged: the frontend composes no diagnostic text. */}
-                  <span>{[record.message, record.operation, record.stage, record.status, record.code, record.targetState].filter(Boolean).join(" · ")}</span>
+                  <span>
+                    {[
+                      record.message,
+                      record.operation,
+                      record.stage,
+                      record.status,
+                      record.code,
+                      record.targetState,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
                 </li>
               ))}
             </ul>

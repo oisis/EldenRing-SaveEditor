@@ -11,6 +11,7 @@ import {
   makeCharacterPort,
   stubCharacterProfile,
   stubCharacterStats,
+  stubSlotsFor,
   TestProviders,
 } from "../../test/renderWithProviders";
 import { useCharacterSelection } from "./useCharacterSelection";
@@ -28,7 +29,7 @@ function saveCharacters(
   saveSessionID: string,
   characters: readonly CharacterSummary[],
 ): SaveCharacters {
-  return { saveSessionID, saveRevision: "0", characters };
+  return { saveSessionID, saveRevision: "0", characters, slots: stubSlotsFor(characters) };
 }
 
 function setup(port: CharacterPort) {

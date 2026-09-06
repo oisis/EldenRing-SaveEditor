@@ -35,6 +35,8 @@ export function ClearActiveTargetBackup(arg1:string):Promise<deployment.GetTarge
 
 export function ClearRecentFiles():Promise<void>;
 
+export function CloneCharacter(arg1:string,arg2:number,arg3:number,arg4:string):Promise<saveengine.CloneCharacterResult>;
+
 export function CloseSave(arg1:string):Promise<void>;
 
 export function CloseTargetGame(arg1:string):Promise<deployment.CommandOutcome>;
@@ -46,6 +48,8 @@ export function CreateDeploymentTarget(arg1:deployment.TargetInput):Promise<depl
 export function CreateTargetBackup(arg1:string,arg2:Array<string>,arg3:string):Promise<deployment.GetTargetBackupsResult>;
 
 export function DeleteBuildTemplate(arg1:string,arg2:string):Promise<templates.DeleteBuildTemplateResult>;
+
+export function DeleteCharacter(arg1:string,arg2:number,arg3:string):Promise<saveengine.DeleteCharacterResult>;
 
 export function DeleteDeploymentTarget(arg1:string):Promise<deployment.GetDeploymentTargetsResult>;
 
@@ -226,6 +230,8 @@ export function SelectSaveTarget(arg1:string):Promise<string>;
 export function SetBellBearingUnlocked(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetBellBearingUnlockedResult>;
 
 export function SetBossDefeated(arg1:string,arg2:number,arg3:string,arg4:string,arg5:boolean,arg6:string):Promise<world.SetBossDefeatedResult>;
+
+export function SetCharacterActive(arg1:string,arg2:number,arg3:boolean,arg4:string):Promise<saveengine.SetCharacterActiveResult>;
 
 export function SetCharacterGender(arg1:string,arg2:number,arg3:number,arg4:string):Promise<character.SetCharacterGenderResult>;
 

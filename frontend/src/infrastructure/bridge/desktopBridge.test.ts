@@ -3,7 +3,9 @@ import {
   ApplyAppearancePreset,
   ApplyFavoritePreset,
   ApplyRepairs,
+  CloneCharacter,
   CloseSave,
+  DeleteCharacter,
   DeleteFavoritePreset,
   GetAppearancePresets,
   GetApplicationInfo,
@@ -33,6 +35,7 @@ import {
   LoadSave,
   SetGraceVisited,
   SelectSaveFile,
+  SetCharacterActive,
   SetCharacterGender,
   SetCharacterName,
   SetCharacterStartingClass,
@@ -64,7 +67,9 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   ApplyAppearancePreset: vi.fn(),
   ApplyRepairs: vi.fn(),
   ApplyFavoritePreset: vi.fn(),
+  CloneCharacter: vi.fn(),
   CloseSave: vi.fn(),
+  DeleteCharacter: vi.fn(),
   DeleteFavoritePreset: vi.fn(),
   GetAppearancePresets: vi.fn(),
   GetApplicationInfo: vi.fn(),
@@ -94,6 +99,7 @@ vi.mock("../../../wailsjs/go/desktop/Bridge", () => ({
   LoadSave: vi.fn(),
   SetGraceVisited: vi.fn(),
   SelectSaveFile: vi.fn(),
+  SetCharacterActive: vi.fn(),
   SetCharacterGender: vi.fn(),
   SetCharacterName: vi.fn(),
   SetCharacterStartingClass: vi.fn(),
@@ -375,6 +381,34 @@ const characters = saveengine.SaveCharacters.createFrom({
     { characterID: 0, active: true, name: "Tarnished", level: 150 },
     { characterID: 1, active: false, name: "", level: 0 },
   ],
+  slots: [
+    {
+      characterID: 0,
+      state: "active",
+      startingClassID: 3,
+      startingClassKnown: true,
+      capabilities: {
+        activate: false,
+        deactivate: true,
+        cloneFrom: true,
+        cloneInto: false,
+        delete: true,
+      },
+    },
+    {
+      characterID: 1,
+      state: "empty",
+      startingClassID: 0,
+      startingClassKnown: false,
+      capabilities: {
+        activate: false,
+        deactivate: false,
+        cloneFrom: false,
+        cloneInto: true,
+        delete: false,
+      },
+    },
+  ],
 });
 
 const profile = saveengine.CharacterProfile.createFrom({
@@ -444,15 +478,158 @@ describe("wails character adapter", () => {
   it("maps every reported slot summary field and nothing else", async () => {
     getSaveCharacters.mockResolvedValue(characters);
 
-    // Exactly the fields the backend reports; no slot number, no status beyond
-    // `active`, and an inactive slot is an ordinary result.
+    // Exactly the fields the backend reports: the summary keeps its own narrow
+    // shape, and the slot projection is carried beside it without being merged
+    // into the summary or derived from `active`.
     await expect(wailsDesktopBridge.getSaveCharacters("session-1")).resolves.toEqual({
       saveSessionID: "session-1",
       characters: [
         { characterID: 0, active: true, name: "Tarnished", level: 150 },
         { characterID: 1, active: false, name: "", level: 0 },
       ],
+      slots: [
+        {
+          characterID: 0,
+          state: "active",
+          startingClassID: 3,
+          startingClassKnown: true,
+          capabilities: {
+            activate: false,
+            deactivate: true,
+            cloneFrom: true,
+            cloneInto: false,
+            delete: true,
+          },
+        },
+        {
+          characterID: 1,
+          state: "empty",
+          startingClassID: 0,
+          startingClassKnown: false,
+          capabilities: {
+            activate: false,
+            deactivate: false,
+            cloneFrom: false,
+            cloneInto: true,
+            delete: false,
+          },
+        },
+      ],
     });
+  });
+
+  it("applies a committed activity change and reports the idempotent one without a receipt", async () => {
+    const setCharacterActive = vi.mocked(SetCharacterActive);
+
+    setCharacterActive.mockResolvedValue(
+      saveengine.SetCharacterActiveResult.createFrom({
+        operationID: "op-1",
+        operationKind: "set_character_active",
+        saveSessionID: "session-1",
+        saveRevision: "2",
+        changedScopes: ["character.list"],
+        changed: true,
+        characterID: 3,
+        active: false,
+      }),
+    );
+    await expect(
+      wailsDesktopBridge.setCharacterActive({
+        saveSessionID: "session-1",
+        characterID: 3,
+        active: false,
+        expectedRevision: "1",
+      }),
+    ).resolves.toEqual({
+      changed: true,
+      receipt: {
+        operationID: "op-1",
+        operationKind: "set_character_active",
+        saveSessionID: "session-1",
+        saveRevision: "2",
+        changedScopes: ["character.list"],
+      },
+    });
+    expect(setCharacterActive).toHaveBeenCalledExactlyOnceWith("session-1", 3, false, "1");
+
+    // The idempotent success carries no execution members at all, so nothing is
+    // read from them and no receipt is fabricated for an absent mutation.
+    setCharacterActive.mockResolvedValue(
+      saveengine.SetCharacterActiveResult.createFrom({
+        saveSessionID: "session-1",
+        saveRevision: "1",
+        changed: false,
+        characterID: 3,
+        active: false,
+      }),
+    );
+    await expect(
+      wailsDesktopBridge.setCharacterActive({
+        saveSessionID: "session-1",
+        characterID: 3,
+        active: false,
+        expectedRevision: "1",
+      }),
+    ).resolves.toEqual({ changed: false });
+  });
+
+  it("passes the clone and delete arguments through and returns their receipts", async () => {
+    const cloneCharacter = vi.mocked(CloneCharacter);
+    const deleteCharacter = vi.mocked(DeleteCharacter);
+
+    cloneCharacter.mockResolvedValue(
+      saveengine.CloneCharacterResult.createFrom({
+        operationID: "op-2",
+        operationKind: "clone_character",
+        saveSessionID: "session-1",
+        saveRevision: "2",
+        changedScopes: ["character.list"],
+        sourceCharacterID: 0,
+        targetSlotID: 6,
+        name: "Tarnished 2",
+      }),
+    );
+    deleteCharacter.mockResolvedValue(
+      saveengine.DeleteCharacterResult.createFrom({
+        operationID: "op-3",
+        operationKind: "delete_character",
+        saveSessionID: "session-1",
+        saveRevision: "3",
+        changedScopes: ["character.list"],
+        characterID: 6,
+      }),
+    );
+
+    await expect(
+      wailsDesktopBridge.cloneCharacter({
+        saveSessionID: "session-1",
+        sourceCharacterID: 0,
+        targetSlotID: 6,
+        expectedRevision: "1",
+      }),
+    ).resolves.toEqual({
+      operationID: "op-2",
+      operationKind: "clone_character",
+      saveSessionID: "session-1",
+      saveRevision: "2",
+      changedScopes: ["character.list"],
+    });
+    expect(cloneCharacter).toHaveBeenCalledExactlyOnceWith("session-1", 0, 6, "1");
+
+    await expect(
+      wailsDesktopBridge.deleteCharacter({
+        saveSessionID: "session-1",
+        characterID: 6,
+        expectedRevision: "2",
+      }),
+    ).resolves.toEqual({
+      operationID: "op-3",
+      operationKind: "delete_character",
+      saveSessionID: "session-1",
+      saveRevision: "3",
+      changedScopes: ["character.list"],
+    });
+    expect(deleteCharacter).toHaveBeenCalledExactlyOnceWith("session-1", 6, "2");
   });
 
   it("maps every reported profile field and nothing else", async () => {

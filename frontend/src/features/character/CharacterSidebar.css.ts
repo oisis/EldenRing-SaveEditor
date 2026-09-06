@@ -107,4 +107,69 @@ export const inactiveRow = style({
   borderRadius: tokens.radius.sm,
   color: tokens.color.textMuted,
   minWidth: 0,
+  flex: 1,
+});
+
+/**
+ * One list entry: the slot itself and its management control side by side. The
+ * slot must shrink, the control must not.
+ */
+export const entry = style({
+  display: "flex",
+  alignItems: "stretch",
+  gap: tokens.space.xs,
+  minWidth: 0,
+});
+
+/** The vertical ellipsis. It keeps the shared button base and only squares it. */
+export const manage = style({
+  selectors: {
+    "&&": {
+      flex: "none",
+      width: tokens.controlHeight.md,
+      paddingInline: 0,
+      height: "auto",
+    },
+  },
+});
+
+/**
+ * The inactive-group disclosure. It is the shared button reduced to a quiet
+ * full-width row, so the group keeps one visual weight below the active list.
+ */
+export const disclosure = style({
+  selectors: {
+    "&&": {
+      width: "100%",
+      justifyContent: "flex-start",
+      gap: tokens.space.xs,
+      borderColor: "transparent",
+      backgroundColor: "transparent",
+      color: tokens.color.textMuted,
+      fontSize: tokens.fontSize.sm,
+    },
+    "&&:hover": { backgroundColor: tokens.color.surfaceHover },
+  },
+});
+
+/** The state word of an inactive slot; `Residual data` is the notable one. */
+export const stateLabel = style({
+  fontWeight: 600,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  minWidth: 0,
+});
+
+export const dialogSection = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: tokens.space.sm,
+  minWidth: 0,
+});
+
+export const dialogActions = style({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: tokens.space.sm,
 });

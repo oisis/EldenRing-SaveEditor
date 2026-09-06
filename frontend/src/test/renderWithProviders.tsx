@@ -25,6 +25,9 @@ import { CharacterPortProvider } from "../application/character/characterClient"
 import type {
   CharacterPort,
   CharacterProfile,
+  CharacterSlot,
+  CharacterSlotCapabilities,
+  CharacterSlotState,
   CharacterStats,
   SaveCharacters,
 } from "../application/character/characterPort";
@@ -114,6 +117,43 @@ export const stubSaveSession: SaveSession = {
   eventSequence: "0",
 };
 
+/**
+ * The slot projection of one stub slot. Capabilities are stated explicitly so a
+ * test can never accidentally offer an operation the backend would refuse.
+ */
+export function stubCharacterSlot(
+  characterID: number,
+  state: CharacterSlotState,
+  overrides: Partial<CharacterSlot> = {},
+): CharacterSlot {
+  const capabilities: CharacterSlotCapabilities = {
+    activate: state === "residual",
+    deactivate: state === "active",
+    cloneFrom: state === "active",
+    cloneInto: state === "empty",
+    delete: state === "active" || state === "residual",
+  };
+  return {
+    characterID,
+    state,
+    startingClassID: 0,
+    startingClassKnown: state === "active",
+    capabilities,
+    ...overrides,
+  };
+}
+
+/**
+ * The slot projection a summary list implies for a test that does not care
+ * about slot management: an active summary is an active slot, an inactive one
+ * is an empty slot. A test that needs residual or unknown data builds its own.
+ */
+export function stubSlotsFor(characters: readonly { characterID: number; active: boolean }[]) {
+  return characters.map((character) =>
+    stubCharacterSlot(character.characterID, character.active ? "active" : "empty"),
+  );
+}
+
 export const stubSaveCharacters: SaveCharacters = {
   saveSessionID: "session-1",
   saveRevision: "0",
@@ -121,6 +161,7 @@ export const stubSaveCharacters: SaveCharacters = {
     { characterID: 0, active: true, name: "Tarnished", level: 150 },
     { characterID: 1, active: false, name: "", level: 0 },
   ],
+  slots: [stubCharacterSlot(0, "active"), stubCharacterSlot(1, "empty")],
 };
 
 export const stubCharacterProfile: CharacterProfile = {
@@ -1223,6 +1264,10 @@ export function makeCharacterPort(overrides: Partial<CharacterPort> = {}): Chara
     setCharacterStartingClass: () => Promise.resolve(stubCharacterMutationReceipt),
     setCharacterGender: () => Promise.resolve(stubCharacterMutationReceipt),
     setCharacterRunes: () => Promise.resolve(stubCharacterMutationReceipt),
+    setCharacterActive: () =>
+      Promise.resolve({ changed: true, receipt: stubCharacterMutationReceipt }),
+    cloneCharacter: () => Promise.resolve(stubCharacterMutationReceipt),
+    deleteCharacter: () => Promise.resolve(stubCharacterMutationReceipt),
     ...overrides,
   };
 }

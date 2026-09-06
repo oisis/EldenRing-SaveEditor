@@ -13,6 +13,12 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: summary.name
+#. placeholder {1}: summary.level
+#: src/features/character/CharacterSidebar.tsx
+msgid "{0} — RL {1}"
+msgstr "{0} — RL {1}"
+
 #. placeholder {0}: action.scope
 #. placeholder {0}: rejection.scope
 #. placeholder {1}: action.operation
@@ -77,6 +83,10 @@ msgstr "{0}: quest step"
 msgid "{0}: select appearance"
 msgstr "{0}: select appearance"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "{count} inactive slots"
+msgstr "{count} inactive slots"
+
 #: src/features/advanced/NetworkParamControl.tsx
 msgid "{labelText} numeric input"
 msgstr "{labelText} numeric input"
@@ -121,11 +131,16 @@ msgstr "About & Updates"
 msgid "Actions"
 msgstr "Actions"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Activate"
+msgstr "Activate"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Activated"
 msgstr "Activated"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 #: src/features/tools/SaveManagerTab.tsx
 #: src/features/world/WorldPanel.tsx
 msgid "Active"
@@ -449,6 +464,7 @@ msgid "Buy me a coffee"
 msgstr "Buy me a coffee"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
@@ -534,6 +550,10 @@ msgstr "Chest"
 msgid "Choose an item"
 msgstr "Choose an item"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Clean residual data"
+msgstr "Clean residual data"
+
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Clear"
 msgstr "Clear"
@@ -547,12 +567,25 @@ msgstr "Clear selection"
 msgid "Clear the active mark"
 msgstr "Clear the active mark"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Clear the residual data of slot {slotNumber}? The remaining character data is removed from the session."
+msgstr "Clear the residual data of slot {slotNumber}? The remaining character data is removed from the session."
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Clear this slot"
 msgstr "Clear this slot"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Clone"
+msgstr "Clone"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Clone to slot…"
+msgstr "Clone to slot…"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
@@ -588,6 +621,10 @@ msgstr "Colosseums"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Configuration"
 msgstr "Configuration"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Confirm"
+msgstr "Confirm"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Confirm Body Type Change"
@@ -697,6 +734,14 @@ msgstr "Cut content"
 msgid "Dark"
 msgstr "Dark"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Deactivate"
+msgstr "Deactivate"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Deactivating keeps the character data in the slot."
+msgstr "Deactivating keeps the character data in the slot."
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Debug"
 msgstr "Debug"
@@ -728,9 +773,17 @@ msgstr "Delay between matchmaking search retries."
 msgid "Delete"
 msgstr "Delete"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Delete character"
+msgstr "Delete character"
+
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Delete the backup"
 msgstr "Delete the backup"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Delete the character in slot {slotNumber}? Its data is removed from the session."
+msgstr "Delete the character in slot {slotNumber}? Its data is removed from the session."
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Delete the target"
@@ -843,6 +896,7 @@ msgid "Elden Ring"
 msgstr "Elden Ring"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Empty"
 msgstr "Empty"
@@ -1044,14 +1098,6 @@ msgstr "If you replaced the machine or reinstalled its operating system, forget 
 #: src/features/tools/TemplatesTab.tsx
 msgid "Import a template file"
 msgstr "Import a template file"
-
-#: src/features/character/CharacterSidebar.tsx
-msgid "Inactive slot"
-msgstr "Inactive slot"
-
-#: src/features/character/CharacterSidebar.tsx
-msgid "Inactive slots"
-msgstr "Inactive slots"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Info"
@@ -1301,6 +1347,20 @@ msgstr "Locked"
 msgid "Make this backup the target save?"
 msgstr "Make this backup the target save?"
 
+#. placeholder {0}: character.name
+#: src/features/character/CharacterSidebar.tsx
+msgid "Manage slot — {0}"
+msgstr "Manage slot — {0}"
+
+#. placeholder {0}: character.characterID + 1
+#: src/features/character/CharacterSidebar.tsx
+msgid "Manage slot {0}"
+msgstr "Manage slot {0}"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Manage slot {slotNumber}"
+msgstr "Manage slot {slotNumber}"
+
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Manual"
 msgstr "Manual"
@@ -1486,6 +1546,10 @@ msgstr "No appearance presets matched your search."
 #: src/features/app-shell/AppShell.tsx
 msgid "No diagnostic messages yet."
 msgstr "No diagnostic messages yet."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "No empty slot"
+msgstr "No empty slot"
 
 #: src/features/world/WorldPanel.tsx
 msgid "No entry matches the search."
@@ -1972,6 +2036,10 @@ msgstr "Request Timeout"
 msgid "Reset"
 msgstr "Reset"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Residual data"
+msgstr "Residual data"
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Restore"
@@ -2218,6 +2286,10 @@ msgstr "Select"
 msgid "Select {0}"
 msgstr "Select {0}"
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "Select a slot"
+msgstr "Select a slot"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Select a step"
 msgstr "Select a step"
@@ -2354,14 +2426,24 @@ msgstr "Sites of Grace"
 msgid "Skip Review Changes for normal operations"
 msgstr "Skip Review Changes for normal operations"
 
+#. placeholder {0}: candidate.characterID + 1
 #. placeholder {0}: slot.favoriteSlotID + 1
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 msgid "Slot {0}"
 msgstr "Slot {0}"
 
 #: src/features/character/CharacterSidebar.tsx
-msgid "Slot {slotNumber}"
-msgstr "Slot {slotNumber}"
+msgid "Slot {slotNumber} · {startingClass}"
+msgstr "Slot {slotNumber} · {startingClass}"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Slot {slotNumber} · Unknown"
+msgstr "Slot {slotNumber} · Unknown"
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "Slot operations stay session changes until the save is written."
+msgstr "Slot operations stay session changes until the save is written."
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -2876,6 +2958,14 @@ msgstr "The selected resource has no item details."
 msgid "The session changed after validation. Validate the current revision again."
 msgstr "The session changed after validation. Validate the current revision again."
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "The slot operation was applied, but the character list could not be refreshed. The slots shown here are out of date and no further slot operation is offered until the session catches up on its own."
+msgstr "The slot operation was applied, but the character list could not be refreshed. The slots shown here are out of date and no further slot operation is offered until the session catches up on its own."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "The slot operation was rejected. Reload the list and try again."
+msgstr "The slot operation was rejected. Reload the list and try again."
+
 #: src/features/tools/DeploymentTab.tsx
 msgid "The SSH host key changed"
 msgstr "The SSH host key changed"
@@ -2977,6 +3067,10 @@ msgstr "This feature will be added in a future update."
 msgid "This host presented a different key than the one approved for it. The connection was refused and nothing on the target was touched."
 msgstr "This host presented a different key than the one approved for it. The connection was refused and nothing on the target was touched."
 
+#: src/features/character/CharacterSidebar.tsx
+msgid "This inactive slot still contains character data. Clearing it removes that data from the session."
+msgstr "This inactive slot still contains character data. Clearing it removes that data from the session."
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "This journal cannot be replayed automatically. You can export or discard it."
 msgstr "This journal cannot be replayed automatically. You can export or discard it."
@@ -3010,6 +3104,10 @@ msgstr "This save has no active character, so it cannot be edited. It was not op
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
 msgstr "This save opened with {0} error(s) and {1} warning(s) reported by the backend."
+
+#: src/features/character/CharacterSidebar.tsx
+msgid "This slot is no longer part of the loaded session."
+msgstr "This slot is no longer part of the loaded session."
 
 #: src/features/tools/SaveManagerTab.tsx
 msgid "This target has no backups yet."
@@ -3132,6 +3230,7 @@ msgid "unknown"
 msgstr "unknown"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/character/CharacterSidebar.tsx
 msgid "Unknown"
 msgstr "Unknown"
 

@@ -13,7 +13,7 @@ until [`WriteSave`](../savesession/write_save.md) is called.
 | Kind | Mutation |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active` of the loopback-only local explorer |
+| Transport status | transport-exposed — `PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active` of the loopback-only local explorer, and the `SetCharacterActive` Wails binding of the desktop application |
 | Implementation source | [../../../backend/endpoints/character/set_character_active.go](../../../backend/endpoints/character/set_character_active.go) |
 | Endpoint tests | [../../../backend/endpoints/character/set_character_active_test.go](../../../backend/endpoints/character/set_character_active_test.go) |
 | SaveEngine source | [../../../backend/saveengine/set_character_active.go](../../../backend/saveengine/set_character_active.go) |

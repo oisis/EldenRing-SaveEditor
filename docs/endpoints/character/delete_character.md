@@ -16,7 +16,7 @@ untouched until [`WriteSave`](../savesession/write_save.md) succeeds.
 | Kind | Mutation |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}/characters/{characterID}` of the loopback-only local explorer |
+| Transport status | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}/characters/{characterID}` of the loopback-only local explorer, and the `DeleteCharacter` Wails binding of the desktop application |
 | Implementation source | [../../../backend/endpoints/character/delete_character.go](../../../backend/endpoints/character/delete_character.go) |
 | Endpoint tests | [../../../backend/endpoints/character/delete_character_test.go](../../../backend/endpoints/character/delete_character_test.go) |
 | SaveEngine source | [../../../backend/saveengine/delete_character.go](../../../backend/saveengine/delete_character.go) |

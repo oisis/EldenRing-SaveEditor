@@ -13,12 +13,14 @@ import {
   CheckForUpdates,
   ClearActiveTargetBackup,
   ClearRecentFiles,
+  CloneCharacter,
   CloseSave,
   CloseTargetGame,
   CreateBuildTemplate,
   CreateDeploymentTarget,
   CreateTargetBackup,
   DeleteBuildTemplate,
+  DeleteCharacter,
   DeleteDeploymentTarget,
   DeleteFavoritePreset,
   DeleteTargetBackup,
@@ -106,6 +108,7 @@ import {
   SaveAs,
   SelectSaveFile,
   SelectSaveTarget,
+  SetCharacterActive,
   SetCharacterGender,
   SetCharacterName,
   SetCharacterRunes,
@@ -187,6 +190,7 @@ import type {
   CharacterAttributes,
   CharacterPort,
   CharacterProfile,
+  CharacterSlotState,
   CharacterStats,
   SaveCharacters,
 } from "../../application/character/characterPort";
@@ -368,6 +372,21 @@ function toSpectralSteedAttireStatus(value: string): SpectralSteedAttireStatus {
     throw new AppErrorException(bridgeCallFailed());
   }
   return value as SpectralSteedAttireStatus;
+}
+
+const characterSlotStates = ["active", "residual", "empty", "unknown"] as const;
+
+/**
+ * The slot state is a closed backend contract, so an unrecognised value is
+ * contract drift and fails closed like any other bridge failure. It is not
+ * silently degraded into `unknown`: that state has its own meaning, and reusing
+ * it for a value this layer failed to read would hide the drift.
+ */
+function toCharacterSlotState(value: string): CharacterSlotState {
+  if (!characterSlotStates.includes(value as CharacterSlotState)) {
+    throw new AppErrorException(bridgeCallFailed());
+  }
+  return value as CharacterSlotState;
 }
 
 function toOperationRisk(value: string): OperationRisk {
@@ -1769,9 +1788,7 @@ function toCommandOutcome(outcome: deployment.CommandOutcome): CommandOutcome {
   };
 }
 
-function toDeploymentTargetState(
-  value: string,
-): DeploymentOperationResult["targetState"] {
+function toDeploymentTargetState(value: string): DeploymentOperationResult["targetState"] {
   switch (value) {
     case "unchanged":
     case "replaced_verified":
@@ -2047,6 +2064,19 @@ export const wailsDesktopBridge: ApplicationInfoPort &
         name: summary.name,
         level: summary.level,
       })),
+      slots: result.slots.map((slot) => ({
+        characterID: slot.characterID,
+        state: toCharacterSlotState(slot.state),
+        startingClassID: slot.startingClassID,
+        startingClassKnown: slot.startingClassKnown,
+        capabilities: {
+          activate: slot.capabilities.activate,
+          deactivate: slot.capabilities.deactivate,
+          cloneFrom: slot.capabilities.cloneFrom,
+          cloneInto: slot.capabilities.cloneInto,
+          delete: slot.capabilities.delete,
+        },
+      })),
     };
   },
 
@@ -2152,6 +2182,30 @@ export const wailsDesktopBridge: ApplicationInfoPort &
       await callBridge(() =>
         SetCharacterRunes(saveSessionID, characterID, runes, expectedRevision),
       ),
+    ),
+
+  // The idempotent success is recognised by `changed` alone. Its receipt members
+  // are absent on the wire, so nothing is read from them and no receipt is
+  // fabricated for a mutation that never happened.
+  setCharacterActive: async ({ saveSessionID, characterID, active, expectedRevision }) => {
+    const result = await callBridge(() =>
+      SetCharacterActive(saveSessionID, characterID, active, expectedRevision),
+    );
+    return result.changed
+      ? { changed: true, receipt: toMutationReceipt(result) }
+      : { changed: false };
+  },
+
+  cloneCharacter: async ({ saveSessionID, sourceCharacterID, targetSlotID, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() =>
+        CloneCharacter(saveSessionID, sourceCharacterID, targetSlotID, expectedRevision),
+      ),
+    ),
+
+  deleteCharacter: async ({ saveSessionID, characterID, expectedRevision }) =>
+    toMutationReceipt(
+      await callBridge(() => DeleteCharacter(saveSessionID, characterID, expectedRevision)),
     ),
 
   getAppearancePresets: async ({
@@ -2698,18 +2752,14 @@ export const wailsDesktopBridge: ApplicationInfoPort &
 
   setNetworkSettings: async (saveSessionID, networkSettings, expectedRevision) =>
     toSetNetworkSettingsResult(
-      await callBridge(() =>
-        SetNetworkSettings(saveSessionID, networkSettings, expectedRevision),
-      ),
+      await callBridge(() => SetNetworkSettings(saveSessionID, networkSettings, expectedRevision)),
     ),
 
   getHostSettings: async () => toHostSettings(await callBridge(GetHostSettings)),
 
   setHostSettings: async ({ skipReviewForNormalRisk, remoteBackupPolicy }) =>
     toHostSettings(
-      await callBridge(() =>
-        SetHostSettings(skipReviewForNormalRisk, remoteBackupPolicy),
-      ),
+      await callBridge(() => SetHostSettings(skipReviewForNormalRisk, remoteBackupPolicy)),
     ),
 
   // The identifier is the whole argument. There is deliberately no way to state

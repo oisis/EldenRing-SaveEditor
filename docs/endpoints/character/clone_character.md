@@ -15,7 +15,7 @@ untouched until [`WriteSave`](../savesession/write_save.md) succeeds.
 | Kind | Mutation |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `POST /api/v1/save-sessions/{saveSessionID}/characters/{sourceCharacterID}/clone` of the loopback-only local explorer |
+| Transport status | transport-exposed — `POST /api/v1/save-sessions/{saveSessionID}/characters/{sourceCharacterID}/clone` of the loopback-only local explorer, and the `CloneCharacter` Wails binding of the desktop application |
 | Implementation source | [../../../backend/endpoints/character/clone_character.go](../../../backend/endpoints/character/clone_character.go) |
 | Endpoint tests | [../../../backend/endpoints/character/clone_character_test.go](../../../backend/endpoints/character/clone_character_test.go) |
 | SaveEngine source | [../../../backend/saveengine/clone_character.go](../../../backend/saveengine/clone_character.go) |

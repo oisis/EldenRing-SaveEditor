@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { CharacterSummary } from "../../application/character/characterPort";
+import type { CharacterSlot, CharacterSummary } from "../../application/character/characterPort";
 import { useCharacterProfile } from "../../application/character/useCharacterProfile";
 import { useCharacterStats } from "../../application/character/useCharacterStats";
 import { useSaveCharacters } from "../../application/character/useSaveCharacters";
@@ -24,11 +24,21 @@ export type CharacterSelection = {
   activeCharacters: readonly CharacterSummary[];
   /** Backend order, preserved; everything the backend did not report as active. */
   inactiveCharacters: readonly CharacterSummary[];
+  /**
+   * The slot-management projection in slot order, exactly as the backend
+   * classified it. It is read beside the summaries and never derived from them.
+   */
+  slots: readonly CharacterSlot[];
+  /** The projection of one slot, or `undefined` while the list is unread. */
+  slotOf: (characterID: number) => CharacterSlot | undefined;
   selectedCharacterID: number | undefined;
   selectCharacter: (characterID: number) => void;
   profile: ReturnType<typeof useCharacterProfile>;
   stats: ReturnType<typeof useCharacterStats>;
 };
+
+/** A stable identity, so an unread list does not change the returned object. */
+const emptySlots: readonly CharacterSlot[] = [];
 
 /**
  * The character selection of one save session. It owns nothing but the user's
@@ -75,6 +85,7 @@ export function useCharacterSelection(
     () => (reported ?? []).filter((character) => !character.active),
     [reported],
   );
+  const slots = characters.data?.slots ?? emptySlots;
 
   // Read through the same comparison the reset is written with, so even the
   // render that triggers the reset already sees no intent for this session.
@@ -102,6 +113,8 @@ export function useCharacterSelection(
     characters,
     activeCharacters,
     inactiveCharacters,
+    slots,
+    slotOf: (characterID) => slots.find((slot) => slot.characterID === characterID),
     selectedCharacterID,
     selectCharacter: (characterID) => setEntry({ saveSessionID, characterID }),
     profile,

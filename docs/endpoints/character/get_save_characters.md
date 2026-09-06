@@ -18,7 +18,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters` of the local OpenAPI explorer (`tools/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters` of the local OpenAPI explorer (`tools/swagger`), and the `GetSaveCharacters` Wails binding of the desktop application. The HTTP route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. There is no CLI command. |
 | Implementation source | [../../../backend/endpoints/character/get_save_characters.go](../../../backend/endpoints/character/get_save_characters.go) |
 | Test source | [../../../backend/endpoints/character/get_save_characters_test.go](../../../backend/endpoints/character/get_save_characters_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -52,6 +52,7 @@ type SaveCharacters struct {
 	SaveSessionID string             `json:"saveSessionID"`
 	SaveRevision  string             `json:"saveRevision"`
 	Characters    []CharacterSummary `json:"characters"`
+	Slots         []CharacterSlot    `json:"slots"`
 }
 
 type CharacterSummary struct {
@@ -59,6 +60,22 @@ type CharacterSummary struct {
 	Active      bool   `json:"active"`
 	Name        string `json:"name"`
 	Level       uint32 `json:"level"`
+}
+
+type CharacterSlot struct {
+	CharacterID        int                       `json:"characterID"`
+	State              string                    `json:"state"`
+	StartingClassID    uint8                     `json:"startingClassID"`
+	StartingClassKnown bool                      `json:"startingClassKnown"`
+	Capabilities       CharacterSlotCapabilities `json:"capabilities"`
+}
+
+type CharacterSlotCapabilities struct {
+	Activate   bool `json:"activate"`
+	Deactivate bool `json:"deactivate"`
+	CloneFrom  bool `json:"cloneFrom"`
+	CloneInto  bool `json:"cloneInto"`
+	Delete     bool `json:"delete"`
 }
 ```
 
@@ -71,6 +88,46 @@ type CharacterSummary struct {
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `name` | `string` | The character name of an active slot. Always `""` for an inactive slot. |
 | `level` | `uint32` | The character level of an active slot. Always `0` for an inactive slot. |
+| `slots` | `[]CharacterSlot` | Always exactly ten entries, one per physical slot, in slot order `0..9`, matched to `characters` by `characterID`. The slice is never `nil` on success. |
+| `state` | `string` | `active`, `residual`, `empty` or `unknown`. See *Slot states* below. |
+| `startingClassID` | `uint8` | Raw starting-class identifier, meaningful only while `startingClassKnown` is `true`. |
+| `startingClassKnown` | `bool` | `true` for an active slot only. |
+| `capabilities` | `CharacterSlotCapabilities` | The slot operations this state allows. |
+
+### Slot states
+
+`Characters` and `Slots` are two views of the same ten slots and are kept apart
+deliberately: `Characters` stays the safe presentation summary that reveals
+nothing about an inactive slot, while `Slots` carries the state and the
+capabilities the slot management needs.
+
+| State | Condition |
+|---|---|
+| `active` | The activity flag is exactly `1`. |
+| `residual` | The flag is `0` and the slot still carries residual character data, established from the same evidence [`DeleteCharacter`](delete_character.md) evaluates. |
+| `empty` | The flag is `0` and both the slot data and the complete profile summary are zeroed. This is the only condition [`CloneCharacter`](clone_character.md) accepts as a target. |
+| `unknown` | The flag is neither `0` nor `1`, a read failed, or data is present but no residual character could be established. It is the fail-safe state: no operation is offered and the slot is never presented as empty. |
+
+`startingClassID` is read from the profile summary of an active slot alone. A
+residual profile summary can be zeroed while the slot data is not, so its class
+byte would be a default value invented for a character that never had it; such a
+slot reports `startingClassKnown: false` instead.
+
+### Capabilities
+
+A capability is a presentation hint. Every writer revalidates the slot and the
+expected revision, so a stale capability can never turn into an accepted
+mutation. `delete` covers deleting an active character and clearing a residual
+slot alike, because [`DeleteCharacter`](delete_character.md) is the one writer
+that performs either.
+
+| Capability | Reported for |
+|---|---|
+| `activate` | A residual slot whose reactivation [`SetCharacterActive`](set_character_active.md) would accept. |
+| `deactivate` | An active slot. |
+| `cloneFrom` | An active slot, as a `CloneCharacter` source. |
+| `cloneInto` | An empty slot, as a `CloneCharacter` target. |
+| `delete` | An active or residual slot. |
 
 ### Inactive and residual slots
 
@@ -82,9 +139,10 @@ the residual name and level are neither decoded nor returned.
 ### What is not returned
 
 The result contains only the confirmed fields above. It carries no `SteamID`,
-no play time, no class, no NG+ level, no location, no save version, no
-appearance data, no inventory, no offsets, and no raw bytes. None of that is
-read to produce it.
+no play time, no NG+ level, no location, no save version, no appearance data,
+no inventory, no offsets, and no raw bytes. None of that is read to produce it.
+The only class it reports is the starting-class identifier of an active slot,
+through `Slots`.
 
 On any error the result is the zero value.
 
@@ -95,8 +153,9 @@ On any error the result is the zero value.
    looks the session up under its own lock, and reads the snapshot through the
    codec's bounded, copying reads.
 3. SaveEngine reads the ten slot activity flags, then decodes the name and level
-   of the active slots only, and returns the result by value. The snapshot and
-   the session model stay inside the package.
+   of the active slots only, classifies every slot for the `Slots` projection
+   using the same helpers the slot writers use, and returns the result by value.
+   The snapshot and the session model stay inside the package.
 
 The endpoint is thin by design: it contains no SaveEngine rule, it holds no
 knowledge of the save format, and there is no shared endpoint helper behind it.

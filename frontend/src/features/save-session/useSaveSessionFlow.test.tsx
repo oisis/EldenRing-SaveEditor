@@ -180,6 +180,7 @@ describe("useSaveSessionFlow", () => {
               { characterID: 0, active: false, name: "", level: 0 },
               { characterID: 1, active: false, name: "", level: 0 },
             ],
+            slots: [],
           }),
       }),
     });
@@ -272,6 +273,7 @@ describe("useSaveSessionFlow", () => {
               { characterID: 3, active: true, name: "Second", level: 60 },
               { characterID: 5, active: true, name: "Third", level: 90 },
             ],
+            slots: [],
           }),
       }),
     });
@@ -426,6 +428,7 @@ describe("useSaveSessionFlow", () => {
               saveSessionID === candidate.saveSessionID
                 ? [{ characterID: 0, active: false, name: "", level: 0 }]
                 : stubSaveCharacters.characters,
+            slots: [],
           }),
       }),
     });
@@ -803,6 +806,7 @@ describe("useSaveSessionFlow", () => {
               { characterID: 2, active: true, name: "Second", level: 20 },
               { characterID: 3, active: false, name: "", level: 0 },
             ],
+            slots: [],
           }),
       }),
     });
