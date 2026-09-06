@@ -13,6 +13,8 @@ published or fully validated release. Outstanding verification is listed below.
 - Rebuilt the desktop application around Wails 2, React and TypeScript, with a
   shared application shell, English and Polish translations, and the Home,
   Character, Items, Equipment, World, Advanced and Tools workspaces.
+- Restored the Home dashboard's card layout, session and backup summaries,
+  recent-file rows, and direct shortcuts to read-only workspaces without a save.
 - Implemented character profile and progression editing, appearance presets,
   and favorite presets through the new backend contracts.
 - Integrated Inventory, Storage and the Item Database with item names and

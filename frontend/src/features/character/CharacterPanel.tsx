@@ -54,6 +54,7 @@ import {
 const runesHeldMaximum = 999_999_999;
 
 export type CharacterPanelProps = {
+  initialTab?: "profile" | "appearance";
   saveSessionID?: string | undefined;
   saveRevision?: string | undefined;
   characterID?: number | undefined;
@@ -91,13 +92,14 @@ function statsAttributes(stats: CharacterStats): CharacterAttributes {
 }
 
 export function CharacterPanel({
+  initialTab = "profile",
   saveSessionID,
   saveRevision,
   characterID,
   applyMutationReceipt,
   sessionBusy = false,
 }: CharacterPanelProps) {
-  const [activeTab, setActiveTab] = useState<"profile" | "appearance">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "appearance">(initialTab);
 
   const mutations = useCharacterMutations(applyMutationReceipt ?? (async () => {}));
   const isBusy = sessionBusy || mutations.isBusy;

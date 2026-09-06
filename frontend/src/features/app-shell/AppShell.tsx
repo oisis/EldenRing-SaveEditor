@@ -110,6 +110,8 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
   );
   const latestRecord = diagnosticEvents.records.at(-1);
   const [itemsSection, setItemsSection] = useState<ItemsSection>("inventory");
+  const [characterEntryTab, setCharacterEntryTab] = useState<"profile" | "appearance">("profile");
+  const [toolsEntryTab, setToolsEntryTab] = useState<"settings" | "about">("settings");
 
   const labels: Record<AppSection, string> = {
     home: t`Home`,
@@ -161,7 +163,11 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
               className={moduleTab}
               aria-current={section === name ? "page" : undefined}
               title={descriptions[name]}
-              onClick={() => setSection(name)}
+              onClick={() => {
+                setCharacterEntryTab("profile");
+                setToolsEntryTab("settings");
+                setSection(name);
+              }}
             >
               {labels[name]}
             </button>
@@ -256,10 +262,27 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
       </div>
 
       <main className={workspace} id="workspace" tabIndex={-1}>
-        {section === "home" && <SaveSessionContent flow={flow} />}
+        {section === "home" && (
+          <SaveSessionContent
+            flow={flow}
+            onNavigate={(destination) => {
+              if (destination === "appearance") {
+                setCharacterEntryTab("appearance");
+                setSection("character");
+              } else if (destination === "database") {
+                setItemsSection("database");
+                setSection("items");
+              } else {
+                setToolsEntryTab(destination);
+                setSection("tools");
+              }
+            }}
+          />
+        )}
         {section === "character" && (
           <section aria-label={t`Character`} className={screen}>
             <CharacterPanel
+              initialTab={characterEntryTab}
               saveSessionID={session?.saveSessionID}
               saveRevision={session?.saveRevision}
               characterID={selectedCharacterID}
@@ -341,6 +364,7 @@ export function AppShell({ flow, theme, onThemeChange, locale, onLocaleChange }:
         {section === "tools" && (
           <section aria-label={t`Tools`} className={screen}>
             <ToolsPanel
+              initialSubtab={toolsEntryTab}
               theme={theme}
               onThemeChange={onThemeChange}
               locale={locale}

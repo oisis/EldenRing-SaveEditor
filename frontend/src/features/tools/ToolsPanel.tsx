@@ -44,6 +44,7 @@ const subtabs = ["settings", "templates", "deployment", "save-manager", "about"]
 export type ToolsSubtab = (typeof subtabs)[number];
 
 export type ToolsPanelProps = {
+  initialSubtab?: ToolsSubtab;
   theme: ThemeName;
   onThemeChange: (theme: ThemeName) => void;
   locale: Locale;
@@ -95,6 +96,7 @@ export type ToolsPanelProps = {
  * module. Each of the five subtabs is a module of its own below this file.
  */
 export function ToolsPanel({
+  initialSubtab = "settings",
   theme,
   onThemeChange,
   locale,
@@ -114,7 +116,7 @@ export function ToolsPanel({
   sessionBusy = false,
 }: ToolsPanelProps) {
   const { t } = useLingui();
-  const [subtab, setSubtab] = useState<ToolsSubtab>("settings");
+  const [subtab, setSubtab] = useState<ToolsSubtab>(initialSubtab);
 
   const subtabLabels: Record<ToolsSubtab, string> = {
     settings: t`Settings`,

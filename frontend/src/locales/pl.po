@@ -28,6 +28,11 @@ msgstr "{0} · {1}"
 msgid "{0} · {1} · {2}"
 msgstr "{0} · {1} · {2}"
 
+#. placeholder {0}: selection.activeCharacters.length
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{0} active"
+msgstr "Aktywne: {0}"
+
 #. placeholder {0}: validation.unresolvedRecords
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{0} record(s) could not be resolved."
@@ -81,6 +86,10 @@ msgstr "Pole numeryczne: {labelText}"
 msgid "{matched} of {0} matched steps"
 msgstr "Dopasowane kroki: {matched} z {0}"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "{pendingCount} changes"
+msgstr "Zmiany: {pendingCount}"
+
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "A locked position is one this character has not unlocked yet; the backend reports how many are available."
 msgstr "Zablokowana pozycja to taka, której ta postać jeszcze nie odblokowała; backend podaje, ile jest dostępnych."
@@ -97,6 +106,7 @@ msgstr "Filtr ryzyka nie jest dostępny: backend nie zgłasza poziomu ryzyka sza
 msgid "A save session could not be closed and is still open. Nothing was changed on disk. Opening and closing a save stay unavailable until it is closed."
 msgstr "Nie udało się zamknąć sesji save i pozostaje ona otwarta. Nic nie zostało zmienione na dysku. Otwieranie i zamykanie save pozostaje niedostępne, dopóki nie zostanie zamknięta."
 
+#: src/features/save-session/SaveSessionPanel.tsx
 #: src/features/tools/ToolsPanel.tsx
 msgid "About & Updates"
 msgstr "Informacje i aktualizacje"
@@ -118,6 +128,7 @@ msgid "Active"
 msgstr "Aktywny"
 
 #: src/features/character/CharacterSidebar.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Active characters"
 msgstr "Aktywne postacie"
 
@@ -212,6 +223,7 @@ msgid "Ammunition"
 msgstr "Amunicja"
 
 #: src/features/character/CharacterPanel.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Appearance Presets"
 msgstr "Presety wyglądu"
 
@@ -317,9 +329,14 @@ msgstr "Autor"
 msgid "Automatic"
 msgstr "Automatyczny"
 
+#: src/features/save-session/SaveSessionPanel.tsx
 #: src/features/tools/ToolsPanel.tsx
 msgid "Automatic backups kept"
 msgstr "Liczba zachowanych automatycznych backupów"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Available without a save"
+msgstr "Dostępne bez otwartego zapisu"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Back up and continue"
@@ -337,6 +354,10 @@ msgstr "Backend aplikacji"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Backup name pattern"
 msgstr "Wzorzec nazwy backupu"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Backup settings are unavailable."
+msgstr "Ustawienia backupów są niedostępne."
 
 #. placeholder {0}: flow.lastSaveResult.backupPath
 #: src/features/save-session/SaveSessionPanel.tsx
@@ -653,6 +674,10 @@ msgstr "Krytyczne problemy walidacji blokują zapis."
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Crystal Tear {0}"
 msgstr "Kryształowa Łza {0}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Current save"
+msgstr "Bieżący zapis"
 
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Custom network settings modify matchmaking timers and buffer limits stored in UserData11. Applying changes creates an operation that will be reviewed in Review Changes before writing to disk."
@@ -1083,6 +1108,7 @@ msgstr "Ekwipunek, skrzynia i baza przedmiotów"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Item Database"
 msgstr "Baza przedmiotów"
 
@@ -1128,6 +1154,10 @@ msgstr "Rodzaj"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Language"
 msgstr "Język"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Last pre-save validation"
+msgstr "Ostatnia walidacja przed zapisem"
 
 #: src/features/save-session/RecoveryJournalDialog.tsx
 msgid "Later"
@@ -1238,6 +1268,10 @@ msgstr "Wczytywanie wariantów…"
 #: src/features/world/WorldPanel.tsx
 msgid "Loading…"
 msgstr "Wczytywanie…"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Local backups"
+msgstr "Lokalne backupy"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Local diagnostic logging is unavailable, so records are kept in this session only. Nothing else is affected."
@@ -1398,6 +1432,10 @@ msgstr "Przesuń w górę"
 msgid "Name"
 msgstr "Nazwa"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Name pattern"
+msgstr "Wzorzec nazwy"
+
 #: src/features/equipment/EquipmentPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1482,6 +1520,10 @@ msgid "No preview image"
 msgstr "Brak obrazu podglądu"
 
 #: src/features/save-session/SaveSessionPanel.tsx
+msgid "No recent files."
+msgstr "Brak ostatnio otwieranych plików."
+
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "No save is open."
 msgstr "Żaden save nie jest otwarty."
 
@@ -1545,6 +1587,10 @@ msgstr "Nieodkryty"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Not unlocked yet"
 msgstr "Jeszcze nieodblokowane"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Not validated for the current revision."
+msgstr "Bieżąca rewizja nie została zwalidowana."
 
 #: src/features/world/WorldPanel.tsx
 msgid "Not visited"
@@ -1671,6 +1717,10 @@ msgstr "Strona {0}"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Page {servedPage}"
 msgstr "Strona {servedPage}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Pending changes"
+msgstr "Oczekujące zmiany"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Percentage rate for searching all areas for co-op blue summons."
@@ -1891,6 +1941,11 @@ msgstr "Usuń {name} z ulubionych"
 #: src/features/world/WorldPanel.tsx
 msgid "Remove Fog of War"
 msgstr "Usuń mgłę wojny"
+
+#. placeholder {0}: recent.path
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Remove recent file: {0}"
+msgstr "Usuń z ostatnich plików: {0}"
 
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Repair plan"
@@ -2250,6 +2305,7 @@ msgstr "Ustaw odblokowane"
 msgid "Set visited"
 msgstr "Ustaw odwiedzone"
 
+#: src/features/save-session/SaveSessionPanel.tsx
 #: src/features/tools/ToolsPanel.tsx
 msgid "Settings"
 msgstr "Ustawienia"
@@ -3051,6 +3107,7 @@ msgstr "Nie można wczytać tej sekcji świata."
 #: src/features/character/CharacterPanel.tsx
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Unavailable"
 msgstr "Niedostępne"
 
@@ -3140,7 +3197,12 @@ msgstr "Walidacja"
 msgid "Validation always runs. Skipping Review Changes only hides the modal for an operation the completed validation reported with no warning and no ban risk, and the remote backup setting only chooses whether the mandatory backup is confirmed each time."
 msgstr "Walidacja wykonuje się zawsze. Pominięcie Review Changes ukrywa modal wyłącznie dla operacji, którą zakończona walidacja zgłosiła bez ostrzeżeń i bez ban risk, a ustawienie zdalnego backupu decyduje tylko o tym, czy obowiązkowy backup jest za każdym razem potwierdzany."
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Validation did not pass."
+msgstr "Walidacja nie powiodła się."
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Validation passed."
 msgstr "Walidacja zakończona powodzeniem."
 
