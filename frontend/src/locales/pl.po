@@ -55,6 +55,11 @@ msgstr "Nie udało się sprawdzić zakresów: {0}, a nierozpoznanych rekordów j
 msgid "{0} scope(s) could not be checked, so this save is not confirmed clean."
 msgstr "Nie udało się sprawdzić zakresów: {0}, więc ten save nie jest potwierdzony jako poprawny."
 
+#. placeholder {0}: attributeLabels[attr]
+#: src/features/character/CharacterPanel.tsx
+msgid "{0} value"
+msgstr "{0} – wartość"
+
 #. placeholder {0}: scope.scope
 #. placeholder {1}: scope.recordsChecked
 #. placeholder {2}: scope.unresolvedRecords
@@ -167,6 +172,14 @@ msgstr "Dodaj cel"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add items"
 msgstr "Dodaj przedmioty"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Add Settings"
+msgstr "Ustawienia dodawania"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Add Settings are deferred and not connected to item operations."
+msgstr "Ustawienia dodawania są odłożone i niepołączone z operacjami na przedmiotach."
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Add to save"
@@ -297,6 +310,10 @@ msgid "Approve this host key"
 msgstr "Zatwierd\\u017a ten klucz hosta"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Arc"
+msgstr "Mis"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Arcane"
 msgstr "Tajemność"
 
@@ -421,6 +438,10 @@ msgstr "Bell Bearings"
 #: src/features/tools/AboutTab.tsx
 msgid "Bitcoin"
 msgstr "Bitcoin"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Blood"
+msgstr "Krew"
 
 #: src/features/advanced/networkMetadata.ts
 msgid "Blue matchmaking"
@@ -614,6 +635,10 @@ msgstr "Zamknij podgląd"
 msgid "Close Save"
 msgstr "Zamknij save"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Cold"
+msgstr "Mróz"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Collapse all"
 msgstr "Zwiń wszystko"
@@ -766,6 +791,10 @@ msgstr "Debug Mode nie został zmieniony, więc nadal obowiązuje poprzedni stan
 msgid "Defeated"
 msgstr "Pokonany"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Defense"
+msgstr "Obrona"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Delay between matchmaking search retries."
 msgstr "Opóźnienie między kolejnymi próbami wyszukiwania w matchmakingu."
@@ -836,6 +865,14 @@ msgid "Details"
 msgstr "Szczegóły"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Determined by attribute total."
+msgstr "Zależne od sumy atrybutów."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Dex"
+msgstr "Zre"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Dexterity"
 msgstr "Zręczność"
 
@@ -852,6 +889,10 @@ msgstr "Identyfikator diagnostyczny:"
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Discard"
 msgstr "Odrzuć"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Discovery"
+msgstr "Odkrywanie"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -906,12 +947,20 @@ msgid "Empty"
 msgstr "Puste"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "End"
+msgstr "Kon"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Endurance"
 msgstr "Wytrzymałość"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "English"
 msgstr "angielski"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Equip Load"
+msgstr "Udźwig"
 
 #: src/features/app-shell/AppShell.tsx
 #: src/features/equipment/EquipmentPanel.tsx
@@ -966,6 +1015,10 @@ msgstr "Eksportuj"
 msgid "Export diagnostic report"
 msgstr "Eksportuj raport diagnostyczny"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Fai"
+msgstr "Wia"
+
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Failed to apply network settings."
 msgstr "Nie udało się zastosować ustawień sieciowych."
@@ -997,9 +1050,21 @@ msgstr "Tylko ulubione"
 msgid "File"
 msgstr "Plik"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Fire"
+msgstr "Ogień"
+
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "Fix invalid field values before applying changes."
 msgstr "Popraw nieprawidłowe wartości pól przed zastosowaniem zmian."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Flame Art"
+msgstr "Sztuka płomieni"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Focus"
+msgstr "Skupienie"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Fog of War"
@@ -1047,6 +1112,18 @@ msgstr "Sztywny limit znaków pobieranych z serwera."
 msgid "Head"
 msgstr "Głowa"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Heavy"
+msgstr "Ciężki"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Highest talismans only"
+msgstr "Tylko najwyższe talizmany"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Holy"
+msgstr "Świętość"
+
 #: src/features/app-shell/AppShell.tsx
 msgid "Home"
 msgstr "Główna"
@@ -1092,6 +1169,10 @@ msgid "I understand that at least one of these items carries a ban risk and I co
 msgstr "Rozumiem, że co najmniej jeden z tych przedmiotów niesie ryzyko bana, i potwierdzam jego dodanie."
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Identity"
+msgstr "Tożsamość"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Identity & Progression"
 msgstr "Tożsamość i postęp"
 
@@ -1103,9 +1184,21 @@ msgstr "Tożsamość i postęp"
 msgid "If you replaced the machine or reinstalled its operating system, forget the approved host key first and then test the target again."
 msgstr "Je\\u017celi wymieniono maszyn\\u0119 albo przeinstalowano jej system, najpierw usu\\u0144 zatwierdzony klucz hosta, a potem ponownie przetestuj target."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Immunity"
+msgstr "Odporność"
+
 #: src/features/tools/TemplatesTab.tsx
 msgid "Import a template file"
 msgstr "Importuj plik szablonu"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Include Ashen Capital"
+msgstr "Uwzględnij Stolicę Popiołów"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Include Leyndell Ashen Capital items"
+msgstr "Uwzględnij przedmioty z Leyndell, Stolicy Popiołów"
 
 #: src/features/app-shell/AppShell.tsx
 msgid "Info"
@@ -1118,6 +1211,14 @@ msgstr "Informacje z GameCatalog."
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Information from the save and GameCatalog."
 msgstr "Informacje z save i GameCatalog."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Infusion"
+msgstr "Nasycenie"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Int"
+msgstr "Int"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Intelligence"
@@ -1205,6 +1306,10 @@ msgstr "Sekcje przedmiotów"
 msgid "Items: {total}"
 msgstr "Przedmioty: {total}"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Keen"
+msgstr "Ostry"
+
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Kind"
 msgstr "Rodzaj"
@@ -1247,6 +1352,10 @@ msgstr "Poziom"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Light"
 msgstr "Jasny"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Lightning"
+msgstr "Błyskawice"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Load a save and select a character to read the Inventory and the Storage Box."
@@ -1351,6 +1460,10 @@ msgstr "Zablokuj wszystkie stroje Spectral Steed"
 msgid "Locked"
 msgstr "Zablokowane"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Magic"
+msgstr "Magia"
+
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Make this backup the target save?"
 msgstr "Ustawić ten backup jako save celu?"
@@ -1453,6 +1566,10 @@ msgid "Memory Stones"
 msgstr "Kamienie pamięci"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Min"
+msgstr "Umy"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Mind"
 msgstr "Umysł"
 
@@ -1538,6 +1655,10 @@ msgstr "Następna karta ekwipunku"
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Next storage card"
 msgstr "Następna karta skrzyni"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "NG+ Cycle"
+msgstr "Cykl NG+"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
@@ -1681,6 +1802,10 @@ msgstr "Nic na celu nie zostało zmienione."
 msgid "Number of break-in areas queried per invasion search cycle."
 msgstr "Liczba obszarów inwazji odpytywanych w jednym cyklu wyszukiwania."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Occult"
+msgstr "Mistycyzm"
+
 #: src/features/tools/DeploymentTab.tsx
 msgid "Only the configuration is removed. No file on the target is touched."
 msgstr "Usuwana jest wyłącznie konfiguracja. Żaden plik na celu nie jest ruszany."
@@ -1807,6 +1932,10 @@ msgstr "Wskaźnik procentowy przeszukiwania wszystkich obszarów dla błękitnyc
 msgid "Percentage rate for searching all areas vs blue summons."
 msgstr "Wskaźnik procentowy przeszukiwania wszystkich obszarów przeciwko błękitnym przywołaniom."
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Physical"
+msgstr "Fizyczne"
+
 #: src/features/tools/SaveIntegrityCard.tsx
 msgid "Planned repairs"
 msgstr "Zaplanowane naprawy"
@@ -1815,6 +1944,14 @@ msgstr "Zaplanowane naprawy"
 #: src/features/tools/AboutTab.tsx
 msgid "Platform"
 msgstr "Platforma"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Poise"
+msgstr "Równowaga"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Poison"
+msgstr "Trucizna"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Polish"
@@ -1856,6 +1993,10 @@ msgstr "Sakiewka w górę"
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Pre-order"
 msgstr "Przedsprzedaż"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Prefer +1, +2 variants"
+msgstr "Preferuj warianty +1, +2"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Preset Catalog"
@@ -1900,6 +2041,10 @@ msgstr "Ścieżka klucza prywatnego"
 msgid "Profile"
 msgstr "Profil"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Profile changes are staged until you save the file."
+msgstr "Zmiany profilu są przygotowane do momentu zapisania pliku."
+
 #: src/features/world/WorldPanel.tsx
 msgid "Progress"
 msgstr "Postęp"
@@ -1907,6 +2052,10 @@ msgstr "Postęp"
 #: src/features/character/CharacterPanel.tsx
 msgid "Progression"
 msgstr "Postęp"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Quality"
+msgstr "Jakość"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 msgid "Quantity"
@@ -1947,6 +2096,10 @@ msgstr "Szybka sakiewka"
 #: src/features/equipment/EquipmentPanel.tsx
 msgid "Read-only"
 msgstr "Tylko do odczytu"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Read-only loadout capacity."
+msgstr "Pojemność wyposażenia tylko do odczytu."
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Recent files"
@@ -2049,6 +2202,14 @@ msgstr "Resetuj"
 msgid "Residual data"
 msgstr "Pozostałości danych"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Resistances"
+msgstr "Odporności"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Resources"
+msgstr "Zasoby"
+
 #: src/features/save-session/RecoveryJournalDialog.tsx
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Restore"
@@ -2126,12 +2287,20 @@ msgid "RL {level}"
 msgstr "RL {level}"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Robustness"
+msgstr "Krzepkość"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Rune Level"
 msgstr "Poziom run"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Runes Held"
 msgstr "Posiadane runy"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Sacred"
+msgstr "Święty"
 
 #: src/features/tools/ToolsPanel.tsx
 msgid "Safe"
@@ -2273,6 +2442,10 @@ msgstr "Szukaj presetów..."
 msgid "Search World entries"
 msgstr "Szukaj wpisów świata"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Secondary"
+msgstr "Drugorzędne"
+
 #: src/features/advanced/networkMetadata.ts
 msgid "Seconds before a pending summon request expires."
 msgstr "Sekundy do wygaśnięcia oczekującego żądania przywołania."
@@ -2350,6 +2523,10 @@ msgstr "Ustaw aktywowany"
 #: src/features/tools/SaveManagerTab.tsx
 msgid "Set active"
 msgstr "Ustaw jako aktywny"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Set all weapons"
+msgstr "Ustaw wszystkie bronie"
 
 #: src/features/world/WorldPanel.tsx
 msgid "Set defeated"
@@ -2543,6 +2720,14 @@ msgstr "Zmienione sloty zaklęć"
 msgid "Spells"
 msgstr "Zaklęcia"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Spirit Ash"
+msgstr "Prochy ducha"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Spirit Ash level"
+msgstr "Poziom prochów ducha"
+
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Spirit Ashes"
 msgstr "Prochy duchów"
@@ -2571,6 +2756,14 @@ msgstr "Etap"
 #: src/features/character/CharacterPanel.tsx
 msgid "Stamina (SP)"
 msgstr "Kondycja (SP)"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Standard"
+msgstr "Standardowe"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Standard +25, Special +10"
+msgstr "Zwykłe +25, Unikalne +10"
 
 #: src/features/tools/DeploymentTab.tsx
 msgid "Start command"
@@ -2640,6 +2833,10 @@ msgstr "Zapisz dane backupu"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Storing the backup name pattern…"
 msgstr "Zapisywanie wzorca nazw backupów…"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Str"
+msgstr "Sił"
 
 #: src/features/character/CharacterPanel.tsx
 msgid "Strength"
@@ -3151,6 +3348,10 @@ msgstr "Narzędzia"
 msgid "Tools sections"
 msgstr "Sekcje narzędzi"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Total runes acquired. Read-only."
+msgstr "Łącznie zdobyte runy. Tylko do odczytu."
+
 #: src/features/world/WorldPanel.tsx
 msgid "Tutorials"
 msgstr "Samouczki"
@@ -3235,6 +3436,10 @@ msgstr "Nie można wczytać tej sekcji świata."
 msgid "Unavailable"
 msgstr "Niedostępne"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Unavailable (save contract deferred)."
+msgstr "Niedostępne (kontrakt zapisu odłożony)."
+
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "undo"
 msgstr "cofnięć"
@@ -3251,7 +3456,6 @@ msgstr "Cofnij ostatnią operację"
 msgid "unknown"
 msgstr "nieznany"
 
-#: src/features/character/CharacterPanel.tsx
 #: src/features/character/CharacterSidebar.tsx
 msgid "Unknown"
 msgstr "Nieznany"
@@ -3362,6 +3566,10 @@ msgid "View report"
 msgstr "Pokaż raport"
 
 #: src/features/character/CharacterPanel.tsx
+msgid "Vig"
+msgstr "Krz"
+
+#: src/features/character/CharacterPanel.tsx
 msgid "Vigor"
 msgstr "Krzepa"
 
@@ -3397,6 +3605,22 @@ msgstr "Maks. listy gości"
 msgid "Visitor Timeout"
 msgstr "Limit czasu gościa"
 
+#: src/features/character/CharacterPanel.tsx
+msgid "Vitality"
+msgstr "Witalność"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "vs Pierce"
+msgstr "vs Kłute"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "vs Slash"
+msgstr "vs Cięte"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "vs Strike"
+msgstr "vs Obuchowe"
+
 #: src/features/app-shell/AppShell.tsx
 #: src/features/review-changes/ReviewChangesDialog.tsx
 msgid "Warning"
@@ -3409,6 +3633,22 @@ msgstr "ostrzeżeń"
 #: src/features/tools/DeploymentTab.tsx
 msgid "Warnings"
 msgstr "Ostrzeżenia"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +10"
+msgstr "Broń +10"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +10 level"
+msgstr "Poziom broni +10"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +25"
+msgstr "Broń +25"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +25 level"
+msgstr "Poziom broni +25"
 
 #: src/features/items/item-database/ItemDatabasePanel.tsx
 msgid "Weapons"
@@ -3447,3 +3687,27 @@ msgstr "Korzystasz z najnowszego wydania."
 #: src/features/advanced/AdvancedPanel.tsx
 msgid "You have unsaved changes in your draft."
 msgstr "Masz niezapisane zmiany w wersji roboczej."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Mass upgrade of owned weapons requires a dedicated writer (deferred)."
+msgstr "Masowe ulepszanie posiadanych broni wymaga dedykowanego writera (odłożone)."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Talisman tier hierarchy is not yet mapped in catalog."
+msgstr "Hierarchia tierów talizmanów nie jest jeszcze zmapowana w katalogu."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "World grace unlock is deferred to World tab."
+msgstr "Odblokowywanie łask świata jest odłożone do zakładki Świat."
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +25 level input"
+msgstr "Wartość poziomu broni +25"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Weapon +10 level input"
+msgstr "Wartość poziomu broni +10"
+
+#: src/features/character/CharacterPanel.tsx
+msgid "Spirit Ash level input"
+msgstr "Wartość poziomu prochów ducha"

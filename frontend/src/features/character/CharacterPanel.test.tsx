@@ -3,12 +3,15 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { AppearancePort } from "../../application/appearance/appearancePort";
 import type { CharacterPort } from "../../application/character/characterPort";
+import type { EquipmentPort } from "../../application/equipment/equipmentPort";
 import type { FavoritesPort } from "../../application/favorites/favoritesPort";
 import {
   makeAppearancePort,
   makeCharacterPort,
+  makeEquipmentPort,
   makeFavoritesPort,
   renderApp,
+  stubCharacterLoadout,
   stubCharacterMutationReceipt,
   stubCharacterStats,
 } from "../../test/renderWithProviders";
@@ -39,6 +42,7 @@ function setup(
     characterPort?: Partial<CharacterPort>;
     appearancePort?: Partial<AppearancePort>;
     favoritesPort?: Partial<FavoritesPort>;
+    equipmentPort?: Partial<EquipmentPort>;
     saveSessionID?: string | undefined;
     saveRevision?: string | undefined;
     characterID?: number | undefined;
@@ -81,6 +85,7 @@ function setup(
     ...overrides.favoritesPort,
     applyFavoritePreset,
   });
+  const equipmentPort = makeEquipmentPort(overrides.equipmentPort);
 
   return {
     setCharacterName,
@@ -98,7 +103,7 @@ function setup(
           applyMutationReceipt={applyMutationReceipt}
           sessionBusy={overrides.sessionBusy ?? false}
         />,
-        { characterPort, appearancePort, favoritesPort },
+        { characterPort, appearancePort, favoritesPort, equipmentPort },
       ),
   };
 }
@@ -191,6 +196,13 @@ describe("CharacterPanel", () => {
     await waitFor(() => expect(within(progression).getByText("Memory Stones")).toBeInTheDocument());
     expect(within(progression).getByText("3")).toBeInTheDocument();
     expect(within(progression).getByText("Talisman Slots")).toBeInTheDocument();
+    expect(within(progression).getByText("1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Talisman Slots")).toHaveValue(1);
+
+    // Base Resources: authoritative current, max and baseMax values are preserved
+    expect(screen.getByText("Base: 1900")).toBeInTheDocument();
+    expect(screen.getByText("Base: 220")).toBeInTheDocument();
+    expect(screen.getByText("Base: 130")).toBeInTheDocument();
 
     const runesInput = screen.getByLabelText("Runes Held");
     expect(runesInput).toHaveValue(250000);
@@ -356,5 +368,39 @@ describe("CharacterPanel", () => {
     expect(await screen.findByDisplayValue("Tarnished")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Save Attributes" })).toBeDisabled();
+  });
+
+  it("renders talisman capacity without offset at 4/4 and presents disabled Add Settings placeholder", async () => {
+    const { render } = setup({
+      equipmentPort: {
+        getCharacterLoadout: () =>
+          Promise.resolve({
+            ...stubCharacterLoadout,
+            unlockedTalismanSlots: 4,
+          }),
+      },
+    });
+    await render();
+
+    const progression = await screen.findByRole("region", { name: "Progression" });
+    await waitFor(() => expect(within(progression).getByText("Talisman Slots")).toBeInTheDocument());
+    expect(within(progression).getByText("4")).toBeInTheDocument();
+    expect(screen.getByLabelText("Talisman Slots")).toHaveValue(4);
+
+    // Add Settings: summary in heading shows Unavailable and controls remain disabled
+    expect(screen.getByText("Add Settings")).toBeInTheDocument();
+    expect(
+      screen.getByText("Add Settings are deferred and not connected to item operations."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByLabelText("Weapon +25 level")).toBeDisabled();
+    expect(screen.getByLabelText("Weapon +10 level")).toBeDisabled();
+    expect(screen.getByLabelText("Infusion")).toBeDisabled();
+    expect(screen.getByLabelText("Spirit Ash level")).toBeDisabled();
+
+    // Deferred/unsupported switches remain disabled with clear explanations
+    expect(screen.getByLabelText("Set all weapons")).toBeDisabled();
+    expect(screen.getByLabelText("Highest talismans only")).toBeDisabled();
+    expect(screen.getByLabelText("Include Ashen Capital")).toBeDisabled();
   });
 });

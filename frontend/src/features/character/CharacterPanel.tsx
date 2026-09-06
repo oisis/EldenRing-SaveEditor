@@ -17,6 +17,7 @@ import type { MutationReceipt } from "../../application/save-session/saveSession
 import { Badge } from "../../ui/components/Badge/Badge";
 import { Button } from "../../ui/components/Button/Button";
 import { Card } from "../../ui/components/Card/Card";
+import { Checkbox } from "../../ui/components/Checkbox/Checkbox";
 import { Dialog } from "../../ui/components/Dialog/Dialog";
 import { Input } from "../../ui/components/Input/Input";
 import { Select } from "../../ui/components/Select/Select";
@@ -28,36 +29,63 @@ import {
   workspaceStack,
 } from "../../ui/patterns/workspace.css";
 import {
-  attributeInput,
-  attributeName,
-  attributeRow,
-  attributeSlider,
+  addSettingsAccordion,
+  addSettingsBody,
+  addSettingsGrid,
+  addSettingsHeading,
+  addSettingsSwitches,
+  addSettingsTitle,
+  addSettingsTitleGroup,
+  cardBadges,
+  cardBody,
+  cardHeader,
+  cardTitle,
+  derivedGrid,
+  derivedGroup,
+  derivedGroupTitle,
+  derivedStat,
+  derivedStatLabel,
+  derivedStatSub,
+  derivedStatValue,
   favoriteSlotActions,
   favoriteSlotCard,
   favoriteSlotHeader,
   favoritesGrid,
+  field,
   fieldGroup,
+  fieldHint,
   fieldLabel,
+  fieldLabelRow,
+  fieldLabelSuffix,
+  fieldRow,
   identityCard,
   identityGrid,
-  profileSections,
-  profileSection,
-  nameForm,
   presetContainer,
   presetControls,
   presetImage,
   presetImagePlaceholder,
+  presetNeighbor,
+  presetStage,
   presetTags,
   presetViewer,
-  presetStage,
-  presetNeighbor,
-  sectionGrid,
-  statBox,
-  statBoxLabel,
-  statBoxSub,
+  profileAdvanced,
+  profileGrid,
+  profileLower,
+  profileNote,
+  profilePanel,
+  profileSection,
+  profileSectionTitle,
+  profileSections,
+  rangeControl,
+  rangeLabel,
+  rangeNumberInput,
+  rangeSlider,
   statBoxValue,
-  statGrid,
   subnav,
+  summaryContent,
+  summaryMeta,
+  switchLabel,
+  switchText,
 } from "./CharacterPanel.css";
 
 /** The confirmed backend maximum for held runes; the field never offers more. */
@@ -100,6 +128,22 @@ function statsAttributes(stats: CharacterStats): CharacterAttributes {
     arcane: stats.arcane,
   };
 }
+
+const INFUSIONS = [
+  "Standard",
+  "Heavy",
+  "Keen",
+  "Quality",
+  "Fire",
+  "Flame Art",
+  "Lightning",
+  "Sacred",
+  "Magic",
+  "Cold",
+  "Poison",
+  "Blood",
+  "Occult",
+];
 
 export function CharacterPanel({
   initialTab = "profile",
@@ -355,6 +399,43 @@ export function CharacterPanel({
     arcane: t`Arcane`,
   };
 
+  const attributeShortNames: Record<keyof CharacterAttributes, string> = {
+    vigor: t`Vig`,
+    mind: t`Min`,
+    endurance: t`End`,
+    strength: t`Str`,
+    dexterity: t`Dex`,
+    intelligence: t`Int`,
+    faith: t`Fai`,
+    arcane: t`Arc`,
+  };
+
+  const infusionLabels: Record<string, string> = {
+    Standard: t`Standard`,
+    Heavy: t`Heavy`,
+    Keen: t`Keen`,
+    Quality: t`Quality`,
+    Fire: t`Fire`,
+    "Flame Art": t`Flame Art`,
+    Lightning: t`Lightning`,
+    Sacred: t`Sacred`,
+    Magic: t`Magic`,
+    Cold: t`Cold`,
+    Poison: t`Poison`,
+    Blood: t`Blood`,
+    Occult: t`Occult`,
+  };
+
+  const attrSummary = attributeValues
+    ? attributeKeys
+        .map((attr) => `${attributeShortNames[attr]} ${attributeValues[attr]}`)
+        .join(" · ")
+    : "";
+
+  const resourcesSummary = statsQuery.isSuccess
+    ? `HP ${statsQuery.data.hp}/${statsQuery.data.maxHP} · FP ${statsQuery.data.fp}/${statsQuery.data.maxFP} · SP ${statsQuery.data.sp}/${statsQuery.data.maxSP}`
+    : "";
+
   return (
     <div className={`${panel} ${workspaceStack}`}>
       <nav aria-label={t`Character navigation`} className={subnav}>
@@ -396,352 +477,768 @@ export function CharacterPanel({
           ) : (
             <>
               <Card aria-label={t`Identity and Progression`} className={identityCard}>
-                <h2>
-                  <Trans>Identity &amp; Progression</Trans>
-                </h2>
-                {profileQuery.isPending ? (
-                  <p role="status" className={message}>
-                    <Trans>Loading character profile…</Trans>
-                  </p>
-                ) : null}
-                {profileQuery.isError ? (
-                  <p role="alert" className={alert}>
-                    <Trans>Unable to load the profile of this character slot.</Trans>
-                  </p>
-                ) : null}
-                <div className={profileSections}>
-                  <section className={profileSection}>
-                    <div className={identityGrid}>
-                      <form className={fieldGroup} onSubmit={handleSaveName}>
-                        <label htmlFor="character-name-input" className={fieldLabel}>
-                          <Trans>Name</Trans>
-                        </label>
-                        <div className={nameForm}>
-                          <Input
-                            id="character-name-input"
-                            value={nameValue}
-                            disabled={isBusy || !profileReady}
-                            onChange={(e) =>
-                              setNameDraft({ key: editContextKey, value: e.currentTarget.value })
-                            }
-                          />
-                          <Button
-                            type="submit"
-                            size="sm"
-                            disabled={
-                              isBusy ||
-                              !profileReady ||
-                              !nameValue.trim() ||
-                              nameValue === (profileQuery.data?.name ?? "")
-                            }
-                          >
-                            <Trans>Save</Trans>
-                          </Button>
-                        </div>
-                      </form>
-
-                      <div className={fieldGroup}>
-                        <span className={fieldLabel}>
-                          <Trans>Starting Class</Trans>
-                        </span>
-                        <div className={nameForm}>
-                          <span>
-                            {profileReady && classesReady ? (
-                              currentClassName
-                            ) : profileQuery.isError || classesQuery.isError ? (
-                              <Trans>Unavailable</Trans>
-                            ) : (
-                              <Trans>Loading…</Trans>
-                            )}
-                          </span>
-                          <Button
-                            size="sm"
-                            disabled={isBusy || !profileReady || !classesReady}
-                            onClick={() => {
-                              setPendingClassID(profileQuery.data?.startingClassID ?? 0);
-                              setClassPickerOpen(true);
-                            }}
-                          >
-                            <Trans>Change Class</Trans>
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className={fieldGroup}>
-                        <span className={fieldLabel}>
-                          <Trans>Body Type</Trans>
-                        </span>
-                        <div className={nameForm}>
-                          {!profileReady ? (
-                            <Badge tone="neutral">
-                              {profileQuery.isError ? (
-                                <Trans>Unavailable</Trans>
-                              ) : (
-                                <Trans>Loading…</Trans>
-                              )}
-                            </Badge>
-                          ) : profileQuery.data.gender === 0 || profileQuery.data.gender === 1 ? (
-                            <>
-                              <Badge>{profileQuery.data.gender === 1 ? "Type A" : "Type B"}</Badge>
-                              <Button
-                                size="sm"
-                                disabled={isBusy}
-                                onClick={() => {
-                                  if (!profileQuery.data) return;
-                                  setPendingGender(profileQuery.data.gender === 1 ? 0 : 1);
-                                  setConfirmGenderOpen(true);
-                                }}
-                              >
-                                <Trans>
-                                  Switch to {profileQuery.data.gender === 1 ? "Type B" : "Type A"}
-                                </Trans>
-                              </Button>
-                            </>
-                          ) : (
-                            <Badge tone="neutral">
-                              <Trans>Unknown</Trans>
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className={fieldGroup}>
-                        <span className={fieldLabel}>
-                          <Trans>Rune Level</Trans>
-                        </span>
-                        {profileReady ? (
-                          <span className={statBoxValue}>{profileQuery.data.level}</span>
-                        ) : (
-                          <span className={message}>
-                            {profileQuery.isError ? (
-                              <Trans>Unavailable</Trans>
-                            ) : (
-                              <Trans>Loading…</Trans>
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-                  <section aria-label={t`Progression`} className={profileSection}>
-                    <h2>
-                      <Trans>Progression</Trans>
-                    </h2>
-                    {statsQuery.isPending ? (
-                      <p role="status" className={message}>
-                        <Trans>Loading progression…</Trans>
-                      </p>
+                <header className={cardHeader}>
+                  <h2 className={cardTitle}>
+                    <Trans>Identity &amp; Progression</Trans>
+                  </h2>
+                  <div className={cardBadges}>
+                    {profileReady ? (
+                      <Badge tone="neutral">RL {profileQuery.data.level}</Badge>
                     ) : null}
-                    {statsQuery.isError ? (
-                      <p role="alert" className={alert}>
-                        <Trans>Unable to load the progression of this character slot.</Trans>
-                      </p>
-                    ) : null}
-                    {statsReady && runesValue !== undefined ? (
-                      <>
-                        <div className={fieldGroup}>
-                          <label htmlFor="character-runes-input" className={fieldLabel}>
-                            <Trans>Runes Held</Trans>
+                  </div>
+                </header>
+                <div className={cardBody}>
+                  {profileQuery.isPending ? (
+                    <p role="status" className={message}>
+                      <Trans>Loading character profile…</Trans>
+                    </p>
+                  ) : null}
+                  {profileQuery.isError ? (
+                    <p role="alert" className={alert}>
+                      <Trans>Unable to load the profile of this character slot.</Trans>
+                    </p>
+                  ) : null}
+                  <div className={profileSections}>
+                    <section className={profileSection}>
+                      <h3 className={profileSectionTitle}>
+                        <Trans>Identity</Trans>
+                      </h3>
+                      <div className={profileGrid}>
+                        <form className={field} onSubmit={handleSaveName}>
+                          <label htmlFor="character-name-input" className={fieldLabel}>
+                            <Trans>Name</Trans>
                           </label>
-                          <div className={nameForm}>
+                          <div className={fieldRow}>
                             <Input
-                              id="character-runes-input"
-                              type="number"
-                              min={0}
-                              max={runesHeldMaximum}
-                              value={runesValue}
-                              disabled={isBusy}
+                              id="character-name-input"
+                              value={nameValue}
+                              disabled={isBusy || !profileReady}
                               onChange={(e) =>
-                                setRunesDraft({ key: editContextKey, value: e.currentTarget.value })
+                                setNameDraft({ key: editContextKey, value: e.currentTarget.value })
                               }
                             />
                             <Button
+                              type="submit"
                               size="sm"
-                              disabled={isBusy || !runesValid}
-                              onClick={handleSaveRunes}
+                              disabled={
+                                isBusy ||
+                                !profileReady ||
+                                !nameValue.trim() ||
+                                nameValue === (profileQuery.data?.name ?? "")
+                              }
                             >
-                              <Trans>Save Runes</Trans>
+                              <Trans>Save</Trans>
+                            </Button>
+                          </div>
+                        </form>
+
+                        <div className={field}>
+                          <label htmlFor="character-starting-class-input" className={fieldLabel}>
+                            <Trans>Starting Class</Trans>
+                          </label>
+                          <div className={fieldRow}>
+                            <Input
+                              id="character-starting-class-input"
+                              aria-label={t`Starting Class`}
+                              readOnly
+                              value={
+                                profileReady && classesReady
+                                  ? currentClassName
+                                  : profileQuery.isError || classesQuery.isError
+                                    ? t`Unavailable`
+                                    : t`Loading…`
+                              }
+                              disabled={isBusy || !profileReady}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              disabled={isBusy || !profileReady || !classesReady}
+                              onClick={() => {
+                                setPendingClassID(profileQuery.data?.startingClassID ?? 0);
+                                setClassPickerOpen(true);
+                              }}
+                            >
+                              <Trans>Change Class</Trans>
                             </Button>
                           </div>
                         </div>
-                        <div className={fieldGroup}>
+
+                        <div className={field}>
                           <span className={fieldLabel}>
-                            <Trans>Soul Memory</Trans>
+                            <Trans>Body Type</Trans>
                           </span>
-                          <span className={statBoxValue}>{statsQuery.data.soulMemory}</span>
-                        </div>
-                      </>
-                    ) : null}
-                    {loadoutQuery.isPending ? (
-                      <p role="status" className={message}>
-                        <Trans>Loading loadout capacity…</Trans>
-                      </p>
-                    ) : null}
-                    {loadoutQuery.isError ? (
-                      <p role="alert" className={alert}>
-                        <Trans>Unable to load the loadout capacity of this character slot.</Trans>
-                      </p>
-                    ) : null}
-                    {loadoutReady ? (
-                      <div className={statGrid}>
-                        <div className={statBox}>
-                          <span className={statBoxLabel}>
-                            <Trans>Memory Stones</Trans>
-                          </span>
-                          <span className={statBoxValue}>{loadoutQuery.data.memoryStones}</span>
-                        </div>
-                        <div className={statBox}>
-                          <span className={statBoxLabel}>
-                            <Trans>Talisman Slots</Trans>
-                          </span>
-                          <span className={statBoxValue}>
-                            {loadoutQuery.data.unlockedTalismanSlots}
-                          </span>
+                          <div className={fieldRow}>
+                            {!profileReady ? (
+                              <Badge tone="neutral">
+                                {profileQuery.isError ? (
+                                  <Trans>Unavailable</Trans>
+                                ) : (
+                                  <Trans>Loading…</Trans>
+                                )}
+                              </Badge>
+                            ) : profileQuery.data.gender === 0 || profileQuery.data.gender === 1 ? (
+                              <>
+                                <Badge>
+                                  {profileQuery.data.gender === 1 ? "Type A" : "Type B"}
+                                </Badge>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  disabled={isBusy}
+                                  onClick={() => {
+                                    if (!profileQuery.data) return;
+                                    setPendingGender(profileQuery.data.gender === 1 ? 0 : 1);
+                                    setConfirmGenderOpen(true);
+                                  }}
+                                >
+                                  <Trans>
+                                    Switch to{" "}
+                                    {profileQuery.data.gender === 1 ? "Type B" : "Type A"}
+                                  </Trans>
+                                </Button>
+                              </>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
-                    ) : null}
-                  </section>
+                    </section>
+
+                    <section aria-label={t`Progression`} className={profileSection}>
+                      <h3 className={profileSectionTitle}>
+                        <Trans>Progression</Trans>
+                      </h3>
+                      {statsQuery.isPending ? (
+                        <p role="status" className={message}>
+                          <Trans>Loading progression…</Trans>
+                        </p>
+                      ) : null}
+                      {statsQuery.isError ? (
+                        <p role="alert" className={alert}>
+                          <Trans>Unable to load the progression of this character slot.</Trans>
+                        </p>
+                      ) : null}
+                      <div className={profileGrid}>
+                        <div className={field}>
+                          <div className={fieldLabelRow}>
+                            <label htmlFor="character-rl-input" className={fieldLabel}>
+                              <Trans>Rune Level</Trans>
+                            </label>
+                            {profileReady ? (
+                              <span className={statBoxValue}>{profileQuery.data.level}</span>
+                            ) : null}
+                          </div>
+                          <Input
+                            id="character-rl-input"
+                            type="number"
+                            readOnly
+                            value={profileReady ? String(profileQuery.data.level) : ""}
+                            disabled={isBusy || !profileReady}
+                            aria-label={t`Rune Level`}
+                          />
+                          <span className={fieldHint}>
+                            <Trans>Determined by attribute total.</Trans>
+                          </span>
+                        </div>
+
+                        <div className={field}>
+                          <div className={fieldLabelRow}>
+                            <label htmlFor="character-ng-input" className={fieldLabel}>
+                              <Trans>NG+ Cycle</Trans>
+                            </label>
+                            <span className={fieldLabelSuffix}>
+                              <Trans>Unavailable</Trans>
+                            </span>
+                          </div>
+                          <Input
+                            id="character-ng-input"
+                            readOnly
+                            value="--"
+                            disabled
+                            aria-label={t`NG+ Cycle`}
+                          />
+                          <span className={fieldHint}>
+                            <Trans>Unavailable (save contract deferred).</Trans>
+                          </span>
+                        </div>
+
+                        {statsReady && runesValue !== undefined ? (
+                          <div className={field}>
+                            <label htmlFor="character-runes-input" className={fieldLabel}>
+                              <Trans>Runes Held</Trans>
+                            </label>
+                            <div className={fieldRow}>
+                              <Input
+                                id="character-runes-input"
+                                type="number"
+                                min={0}
+                                max={runesHeldMaximum}
+                                value={runesValue}
+                                disabled={isBusy}
+                                aria-label={t`Runes Held`}
+                                onChange={(e) =>
+                                  setRunesDraft({
+                                    key: editContextKey,
+                                    value: e.currentTarget.value,
+                                  })
+                                }
+                              />
+                              <Button
+                                type="button"
+                                size="sm"
+                                disabled={isBusy || !runesValid}
+                                onClick={handleSaveRunes}
+                              >
+                                <Trans>Save Runes</Trans>
+                              </Button>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {statsReady ? (
+                          <div className={field}>
+                            <div className={fieldLabelRow}>
+                              <label htmlFor="character-sm-input" className={fieldLabel}>
+                                <Trans>Soul Memory</Trans>
+                              </label>
+                              <span className={statBoxValue}>{statsQuery.data.soulMemory}</span>
+                            </div>
+                            <Input
+                              id="character-sm-input"
+                              type="number"
+                              readOnly
+                              value={String(statsQuery.data.soulMemory)}
+                              disabled={isBusy}
+                              aria-label={t`Soul Memory`}
+                            />
+                            <span className={fieldHint}>
+                              <Trans>Total runes acquired. Read-only.</Trans>
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {loadoutQuery.isPending ? (
+                          <p role="status" className={message}>
+                            <Trans>Loading loadout capacity…</Trans>
+                          </p>
+                        ) : null}
+                        {loadoutQuery.isError ? (
+                          <p role="alert" className={alert}>
+                            <Trans>Unable to load the loadout capacity of this character slot.</Trans>
+                          </p>
+                        ) : null}
+                        {loadoutReady ? (
+                          <>
+                            <div className={field}>
+                              <div className={fieldLabelRow}>
+                                <label htmlFor="character-memory-stones-input" className={fieldLabel}>
+                                  <Trans>Memory Stones</Trans>
+                                </label>
+                                <span className={fieldLabelSuffix}>
+                                  <span className={statBoxValue}>{loadoutQuery.data.memoryStones}</span>
+                                  /8
+                                </span>
+                              </div>
+                              <Input
+                                id="character-memory-stones-input"
+                                type="number"
+                                readOnly
+                                value={String(loadoutQuery.data.memoryStones)}
+                                disabled={isBusy}
+                                aria-label={t`Memory Stones`}
+                              />
+                              <span className={fieldHint}>
+                                <Trans>Read-only loadout capacity.</Trans>
+                              </span>
+                            </div>
+                            <div className={field}>
+                              <div className={fieldLabelRow}>
+                                <label htmlFor="character-talisman-slots-input" className={fieldLabel}>
+                                  <Trans>Talisman Slots</Trans>
+                                </label>
+                                <span className={fieldLabelSuffix}>
+                                  <span className={statBoxValue}>
+                                    {loadoutQuery.data.unlockedTalismanSlots}
+                                  </span>
+                                  /4
+                                </span>
+                              </div>
+                              <Input
+                                id="character-talisman-slots-input"
+                                type="number"
+                                readOnly
+                                value={String(loadoutQuery.data.unlockedTalismanSlots)}
+                                disabled={isBusy}
+                                aria-label={t`Talisman Slots`}
+                              />
+                              <span className={fieldHint}>
+                                <Trans>Read-only loadout capacity.</Trans>
+                              </span>
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    </section>
+                  </div>
                 </div>
               </Card>
 
-              <div className={sectionGrid}>
-                <section aria-label={t`Attributes`}>
-                  <details open className={disclosure}>
-                    <summary className={disclosureHeading}>
-                      <h2>
-                        <Trans>Attributes</Trans>
-                      </h2>
-                    </summary>
-                    <div className={disclosureBody}>
-                      {statsQuery.isPending ? (
-                        <p role="status" className={message}>
-                          <Trans>Loading attributes…</Trans>
-                        </p>
-                      ) : null}
-                      {statsQuery.isError ? (
-                        <p role="alert" className={alert}>
-                          <Trans>Unable to load the attributes of this character slot.</Trans>
-                        </p>
-                      ) : null}
-                      {statsReady && attributeValues !== undefined ? (
-                        <>
-                          {attributeKeys.map((attr) => (
-                            <div key={attr} className={attributeRow}>
-                              <span className={attributeName}>{attributeLabels[attr]}</span>
-                              <input
-                                type="range"
-                                aria-label={attributeLabels[attr]}
-                                min={1}
-                                max={99}
-                                value={attributeValues[attr]}
-                                disabled={isBusy}
-                                onChange={(e) =>
-                                  setAttributesDraft({
-                                    key: editContextKey,
-                                    value: {
-                                      ...attributeValues,
-                                      [attr]: Number(e.currentTarget.value),
-                                    },
-                                  })
-                                }
-                                className={attributeSlider}
-                              />
-                              <Input
-                                type="number"
-                                min={1}
-                                max={99}
-                                value={String(attributeValues[attr])}
-                                disabled={isBusy}
-                                onChange={(e) => {
-                                  const val = Number(e.currentTarget.value);
-                                  if (val >= 1 && val <= 99) {
+              <div className={profileAdvanced}>
+                <details className={addSettingsAccordion}>
+                  <summary className={addSettingsHeading}>
+                    <div className={addSettingsTitleGroup}>
+                      <h3 className={addSettingsTitle}>
+                        <Trans>Add Settings</Trans>
+                      </h3>
+                      <span className={fieldLabelSuffix}>
+                        <Trans>Unavailable</Trans>
+                      </span>
+                    </div>
+                  </summary>
+                  <div className={addSettingsBody}>
+                    <p className={fieldHint}>
+                      <Trans>Add Settings are deferred and not connected to item operations.</Trans>
+                    </p>
+                    <div className={addSettingsGrid}>
+                      <div className={rangeControl}>
+                        <label htmlFor="add-settings-weapon25-slider" className={rangeLabel}>
+                          <Trans>Weapon +25</Trans>
+                        </label>
+                        <input
+                          id="add-settings-weapon25-slider"
+                          type="range"
+                          min={0}
+                          max={25}
+                          value={0}
+                          disabled
+                          readOnly
+                          aria-label={t`Weapon +25 level`}
+                          className={rangeSlider}
+                        />
+                        <Input
+                          id="add-settings-weapon25-number"
+                          type="number"
+                          aria-label={t`Weapon +25 level input`}
+                          min={0}
+                          max={25}
+                          value="0"
+                          disabled
+                          readOnly
+                          className={rangeNumberInput}
+                        />
+                      </div>
+
+                      <div className={rangeControl}>
+                        <label htmlFor="add-settings-weapon10-slider" className={rangeLabel}>
+                          <Trans>Weapon +10</Trans>
+                        </label>
+                        <input
+                          id="add-settings-weapon10-slider"
+                          type="range"
+                          min={0}
+                          max={10}
+                          value={0}
+                          disabled
+                          readOnly
+                          aria-label={t`Weapon +10 level`}
+                          className={rangeSlider}
+                        />
+                        <Input
+                          id="add-settings-weapon10-number"
+                          type="number"
+                          aria-label={t`Weapon +10 level input`}
+                          min={0}
+                          max={10}
+                          value="0"
+                          disabled
+                          readOnly
+                          className={rangeNumberInput}
+                        />
+                      </div>
+
+                      <div className={rangeControl}>
+                        <label htmlFor="add-settings-infusion-select" className={rangeLabel}>
+                          <Trans>Infusion</Trans>
+                        </label>
+                        <Select
+                          id="add-settings-infusion-select"
+                          aria-label={t`Infusion`}
+                          value="Standard"
+                          disabled
+                        >
+                          {INFUSIONS.map((inf) => (
+                            <option key={inf} value={inf}>
+                              {infusionLabels[inf] ?? inf}
+                            </option>
+                          ))}
+                        </Select>
+                        <span />
+                      </div>
+
+                      <div className={rangeControl}>
+                        <label htmlFor="add-settings-ash-slider" className={rangeLabel}>
+                          <Trans>Spirit Ash</Trans>
+                        </label>
+                        <input
+                          id="add-settings-ash-slider"
+                          type="range"
+                          min={0}
+                          max={10}
+                          value={0}
+                          disabled
+                          readOnly
+                          aria-label={t`Spirit Ash level`}
+                          className={rangeSlider}
+                        />
+                        <Input
+                          id="add-settings-ash-number"
+                          type="number"
+                          aria-label={t`Spirit Ash level input`}
+                          min={0}
+                          max={10}
+                          value="0"
+                          disabled
+                          readOnly
+                          className={rangeNumberInput}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={addSettingsSwitches}>
+                      <label className={switchLabel}>
+                        <Checkbox
+                          disabled
+                          checked={false}
+                          aria-label={t`Set all weapons`}
+                        />
+                        <div className={switchText}>
+                          <strong>
+                            <Trans>Set all weapons</Trans>
+                          </strong>
+                          <span className={fieldHint}>
+                            <Trans>Mass upgrade of owned weapons requires a dedicated writer (deferred).</Trans>
+                          </span>
+                        </div>
+                      </label>
+                      <label className={switchLabel}>
+                        <Checkbox
+                          disabled
+                          checked={false}
+                          aria-label={t`Highest talismans only`}
+                        />
+                        <div className={switchText}>
+                          <strong>
+                            <Trans>Highest talismans only</Trans>
+                          </strong>
+                          <span className={fieldHint}>
+                            <Trans>Talisman tier hierarchy is not yet mapped in catalog.</Trans>
+                          </span>
+                        </div>
+                      </label>
+                      <label className={switchLabel}>
+                        <Checkbox
+                          disabled
+                          checked={false}
+                          aria-label={t`Include Ashen Capital`}
+                        />
+                        <div className={switchText}>
+                          <strong>
+                            <Trans>Include Ashen Capital</Trans>
+                          </strong>
+                          <span className={fieldHint}>
+                            <Trans>World grace unlock is deferred to World tab.</Trans>
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </details>
+              </div>
+
+              <div className={profileLower}>
+                <div className={profilePanel}>
+                  <section aria-label={t`Attributes`}>
+                    <details open className={disclosure}>
+                      <summary className={disclosureHeading}>
+                        <div className={summaryContent}>
+                          <h2>
+                            <Trans>Attributes</Trans>
+                          </h2>
+                          {attrSummary ? (
+                            <span className={summaryMeta}>{attrSummary}</span>
+                          ) : null}
+                        </div>
+                      </summary>
+                      <div className={disclosureBody}>
+                        {statsQuery.isPending ? (
+                          <p role="status" className={message}>
+                            <Trans>Loading attributes…</Trans>
+                          </p>
+                        ) : null}
+                        {statsQuery.isError ? (
+                          <p role="alert" className={alert}>
+                            <Trans>Unable to load the attributes of this character slot.</Trans>
+                          </p>
+                        ) : null}
+                        {statsReady && attributeValues !== undefined ? (
+                          <>
+                            {attributeKeys.map((attr) => (
+                              <div key={attr} className={rangeControl}>
+                                <label
+                                  htmlFor={`character-attr-slider-${attr}`}
+                                  className={rangeLabel}
+                                >
+                                  {attributeLabels[attr]}
+                                </label>
+                                <input
+                                  id={`character-attr-slider-${attr}`}
+                                  type="range"
+                                  min={1}
+                                  max={99}
+                                  value={attributeValues[attr]}
+                                  disabled={isBusy}
+                                  onChange={(e) =>
                                     setAttributesDraft({
                                       key: editContextKey,
-                                      value: { ...attributeValues, [attr]: val },
-                                    });
+                                      value: {
+                                        ...attributeValues,
+                                        [attr]: Number(e.currentTarget.value),
+                                      },
+                                    })
                                   }
-                                }}
-                                className={attributeInput}
-                              />
+                                  className={rangeSlider}
+                                />
+                                <Input
+                                  id={`character-attr-number-${attr}`}
+                                  type="number"
+                                  aria-label={t`${attributeLabels[attr]} value`}
+                                  min={1}
+                                  max={99}
+                                  value={String(attributeValues[attr])}
+                                  disabled={isBusy}
+                                  onChange={(e) => {
+                                    const val = Number(e.currentTarget.value);
+                                    if (val >= 1 && val <= 99) {
+                                      setAttributesDraft({
+                                        key: editContextKey,
+                                        value: { ...attributeValues, [attr]: val },
+                                      });
+                                    }
+                                  }}
+                                  className={rangeNumberInput}
+                                />
+                              </div>
+                            ))}
+                            <div className={favoriteSlotActions}>
+                              <Button size="sm" disabled={isBusy} onClick={handleSaveAttributes}>
+                                <Trans>Save Attributes</Trans>
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={isBusy}
+                                onClick={handleResetAttributesDraft}
+                              >
+                                <Trans>Reset</Trans>
+                              </Button>
                             </div>
-                          ))}
-                          <div className={favoriteSlotActions}>
-                            <Button size="sm" disabled={isBusy} onClick={handleSaveAttributes}>
-                              <Trans>Save Attributes</Trans>
-                            </Button>
-                            <Button
-                              size="sm"
-                              disabled={isBusy}
-                              onClick={handleResetAttributesDraft}
-                            >
-                              <Trans>Reset</Trans>
-                            </Button>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </details>
-                </section>
+                          </>
+                        ) : null}
+                      </div>
+                    </details>
+                  </section>
+                </div>
 
-                <section aria-label={t`Base Resources`}>
-                  <details open className={disclosure}>
-                    <summary className={disclosureHeading}>
-                      <h2>
-                        <Trans>Base Resources</Trans>
-                      </h2>
-                    </summary>
-                    <div className={disclosureBody}>
-                      {statsQuery.isPending ? (
-                        <p role="status" className={message}>
-                          <Trans>Loading base resources…</Trans>
-                        </p>
-                      ) : null}
-                      {statsQuery.isError ? (
-                        <p role="alert" className={alert}>
-                          <Trans>Unable to load the base resources of this character slot.</Trans>
-                        </p>
-                      ) : null}
-                      {statsQuery.isSuccess ? (
-                        <div className={statGrid}>
-                          <div className={statBox}>
-                            <span className={statBoxLabel}>
-                              <Trans>HP</Trans>
-                            </span>
-                            <span className={statBoxValue}>
-                              {statsQuery.data.hp} / {statsQuery.data.maxHP}
-                            </span>
-                            <span className={statBoxSub}>
-                              <Trans>Base: {statsQuery.data.baseMaxHP}</Trans>
-                            </span>
-                          </div>
-                          <div className={statBox}>
-                            <span className={statBoxLabel}>
-                              <Trans>FP</Trans>
-                            </span>
-                            <span className={statBoxValue}>
-                              {statsQuery.data.fp} / {statsQuery.data.maxFP}
-                            </span>
-                            <span className={statBoxSub}>
-                              <Trans>Base: {statsQuery.data.baseMaxFP}</Trans>
-                            </span>
-                          </div>
-                          <div className={statBox}>
-                            <span className={statBoxLabel}>
-                              <Trans>Stamina (SP)</Trans>
-                            </span>
-                            <span className={statBoxValue}>
-                              {statsQuery.data.sp} / {statsQuery.data.maxSP}
-                            </span>
-                            <span className={statBoxSub}>
-                              <Trans>Base: {statsQuery.data.baseMaxSP}</Trans>
-                            </span>
-                          </div>
+                <div className={profilePanel}>
+                  <section aria-label={t`Base Resources`}>
+                    <details open className={disclosure}>
+                      <summary className={disclosureHeading}>
+                        <div className={summaryContent}>
+                          <h2>
+                            <Trans>Base Resources</Trans>
+                          </h2>
+                          {resourcesSummary ? (
+                            <span className={summaryMeta}>{resourcesSummary}</span>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                  </details>
-                </section>
+                      </summary>
+                      <div className={disclosureBody}>
+                        {statsQuery.isPending ? (
+                          <p role="status" className={message}>
+                            <Trans>Loading base resources…</Trans>
+                          </p>
+                        ) : null}
+                        {statsQuery.isError ? (
+                          <p role="alert" className={alert}>
+                            <Trans>Unable to load the base resources of this character slot.</Trans>
+                          </p>
+                        ) : null}
+                        {statsQuery.isSuccess ? (
+                          <>
+                            <div className={derivedGroup}>
+                              <h3 className={derivedGroupTitle}>
+                                <Trans>Resources</Trans>
+                              </h3>
+                              <div className={derivedGrid}>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>HP</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>
+                                    {statsQuery.data.hp} / {statsQuery.data.maxHP}
+                                  </span>
+                                  <span className={derivedStatSub}>
+                                    <Trans>Base: {statsQuery.data.baseMaxHP}</Trans>
+                                  </span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>FP</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>
+                                    {statsQuery.data.fp} / {statsQuery.data.maxFP}
+                                  </span>
+                                  <span className={derivedStatSub}>
+                                    <Trans>Base: {statsQuery.data.baseMaxFP}</Trans>
+                                  </span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Stamina (SP)</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>
+                                    {statsQuery.data.sp} / {statsQuery.data.maxSP}
+                                  </span>
+                                  <span className={derivedStatSub}>
+                                    <Trans>Base: {statsQuery.data.baseMaxSP}</Trans>
+                                  </span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Equip Load</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className={derivedGroup}>
+                              <h3 className={derivedGroupTitle}>
+                                <Trans>Secondary</Trans>
+                              </h3>
+                              <div className={derivedGrid}>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Poise</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Discovery</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className={derivedGroup}>
+                              <h3 className={derivedGroupTitle}>
+                                <Trans>Defense</Trans>
+                              </h3>
+                              <div className={derivedGrid}>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Physical</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>vs Strike</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>vs Slash</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>vs Pierce</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Magic</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Fire</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Lightning</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Holy</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>-- / --%</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className={derivedGroup}>
+                              <h3 className={derivedGroupTitle}>
+                                <Trans>Resistances</Trans>
+                              </h3>
+                              <div className={derivedGrid}>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Immunity</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Robustness</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Focus</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                                <div className={derivedStat}>
+                                  <span className={derivedStatLabel}>
+                                    <Trans>Vitality</Trans>
+                                  </span>
+                                  <span className={derivedStatValue}>--</span>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    </details>
+                  </section>
+                </div>
               </div>
+
+              <p className={profileNote}>
+                <Trans>Profile changes are staged until you save the file.</Trans>
+              </p>
             </>
           )}
 
