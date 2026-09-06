@@ -42,11 +42,21 @@ type CharacterSlotCapabilities struct {
 // identifier is read from the profile summary of an active slot alone: a
 // residual summary can be zeroed while the slot data is not, so its class byte
 // would be a default value invented for a character that never had it.
+//
+// SlotVersion is the version the slot itself declares in the first four bytes
+// of its data block, which is the same value the writers read before they trust
+// a version-gated offset. It is per slot, because the save format declares it
+// per slot and carries no container-wide version. A slot that declares 0
+// declares no version at all — exactly what rebuildSlotWithRegions and
+// pcAccountIDFieldAt reject — so it reports SlotVersionKnown false instead of a
+// zero that would read as a real version.
 type CharacterSlot struct {
 	CharacterID        int                       `json:"characterID"`
 	State              string                    `json:"state"`
 	StartingClassID    uint8                     `json:"startingClassID"`
 	StartingClassKnown bool                      `json:"startingClassKnown"`
+	SlotVersion        uint32                    `json:"slotVersion"`
+	SlotVersionKnown   bool                      `json:"slotVersionKnown"`
 	Capabilities       CharacterSlotCapabilities `json:"capabilities"`
 }
 
@@ -63,6 +73,15 @@ func describeCharacterSlot(loaded *loadedSave, characterID int, flag byte) Chara
 	slot := CharacterSlot{CharacterID: characterID, State: CharacterSlotStateUnknown}
 	summaryAt := userData10Base(loaded.session.platform) + userData10SummaryOffset +
 		int64(characterID)*userData10SummaryStride
+
+	// The declared version is a property of the slot block, not of its
+	// classification, so it is read for every flag value and left unknown when
+	// the read fails or the slot declares none.
+	if version, err := loaded.snapshot.uint32At(
+		slotDataBase(loaded.session.platform, characterID)); err == nil && version != 0 {
+		slot.SlotVersion = version
+		slot.SlotVersionKnown = true
+	}
 
 	switch flag {
 	case userData10ActiveFlagValue:

@@ -48,12 +48,19 @@ export type CharacterSlotCapabilities = {
  * meaningful only while `startingClassKnown` is true; the backend reports it
  * for an active slot alone and never invents a default class for a slot whose
  * profile summary was cleared.
+ *
+ * `slotVersion` is the version the slot itself declares and is meaningful only
+ * while `slotVersionKnown` is true. The save format declares it per slot and
+ * carries no container-wide version, so no consumer may present one slot's
+ * value as the version of the file.
  */
 export type CharacterSlot = {
   characterID: number;
   state: CharacterSlotState;
   startingClassID: number;
   startingClassKnown: boolean;
+  slotVersion: number;
+  slotVersionKnown: boolean;
   capabilities: CharacterSlotCapabilities;
 };
 

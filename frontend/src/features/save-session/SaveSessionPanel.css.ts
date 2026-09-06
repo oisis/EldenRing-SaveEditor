@@ -32,18 +32,20 @@ export const cardHeader = style({
 });
 export const cardTitle = style({ margin: 0, fontSize: tokens.fontSize.md, fontWeight: 600 });
 export const cardBody = style({ padding: tokens.space.lg, margin: 0 });
+/**
+ * The mockup's `.kv` list: one grid for the whole list, so every label column
+ * lines up on its own longest label instead of on a fixed width.
+ */
 export const facts = style({
-  display: "flex",
-  flexDirection: "column",
-  gap: tokens.space.sm,
+  display: "grid",
+  gridTemplateColumns: "auto minmax(0, 1fr)",
+  rowGap: "3px",
+  columnGap: tokens.space.lg,
+  alignItems: "baseline",
   margin: 0,
 });
-export const fact = style({
-  display: "grid",
-  gridTemplateColumns: "minmax(110px, 0.8fr) minmax(0, 1.2fr)",
-  gap: tokens.space.md,
-  alignItems: "baseline",
-});
+/** The row wrapper exists for readability; the grid above owns the columns. */
+export const fact = style({ display: "contents" });
 export const factValue = style({
   margin: 0,
   overflowWrap: "anywhere",
@@ -62,26 +64,36 @@ export const summaryTile = style({
   padding: tokens.space.md,
   border: `1px solid ${tokens.color.border}`,
   borderRadius: tokens.radius.sm,
-  backgroundColor: tokens.color.surface,
+  backgroundColor: tokens.color.surfaceSunken,
 });
-export const summaryValue = style({ fontSize: tokens.fontSize.xl });
+export const summaryLabel = style({
+  color: tokens.color.textMuted,
+  fontSize: tokens.fontSize.xs,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+});
+export const summaryValue = style({
+  fontSize: tokens.fontSize.xl,
+  fontWeight: 650,
+  fontVariantNumeric: "tabular-nums",
+});
 export const recentList = style({ listStyle: "none", margin: 0, padding: 0 });
 export const recentRow = style({
   display: "flex",
   alignItems: "center",
-  gap: tokens.space.sm,
+  gap: tokens.space.md,
   paddingRight: tokens.space.md,
   borderBottom: `1px solid ${tokens.color.border}`,
   selectors: { "&:last-child": { borderBottom: 0 } },
 });
 export const recentOpen = style({
   display: "flex",
-  alignItems: "center",
+  alignItems: "baseline",
   flexWrap: "wrap",
-  gap: tokens.space.sm,
+  gap: tokens.space.md,
   flex: 1,
   minWidth: 0,
-  padding: `${tokens.space.md} ${tokens.space.lg}`,
+  padding: `7px ${tokens.space.lg}`,
   border: 0,
   background: "transparent",
   color: tokens.color.text,
@@ -93,18 +105,22 @@ export const recentOpen = style({
     "&:disabled": { opacity: 0.5, cursor: "not-allowed" },
   },
 });
-export const recentName = style({ fontWeight: 600, overflowWrap: "anywhere" });
+export const recentName = style({ fontWeight: 500, overflowWrap: "anywhere" });
 export const recentPath = style({
   flex: "1 1 160px",
   minWidth: 0,
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  color: tokens.color.textMuted,
+  color: tokens.color.textFaint,
   fontFamily: tokens.font.mono,
-  fontSize: tokens.fontSize.sm,
+  fontSize: tokens.fontSize.xs,
 });
-export const recentTime = style({ color: tokens.color.textMuted, fontSize: tokens.fontSize.sm });
+export const recentTime = style({
+  marginLeft: "auto",
+  color: tokens.color.textFaint,
+  fontSize: tokens.fontSize.xs,
+});
 
 export const stack = style({
   display: "flex",

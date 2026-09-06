@@ -5872,11 +5872,20 @@
             "type": "boolean",
             "description": "True for an active slot only. A residual profile summary can be cleared, so its class byte would be an invented default."
           },
+          "slotVersion": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Version declared in the first four bytes of the slot data block, meaningful only while slotVersionKnown is true. The format declares it per slot; there is no container-wide version."
+          },
+          "slotVersionKnown": {
+            "type": "boolean",
+            "description": "True when the declaration could be read and is not 0. A slot declaring 0 declares no version, which is what the version-gated writers reject."
+          },
           "capabilities": {
             "$ref": "#/components/schemas/CharacterSlotCapabilities"
           }
         },
-        "required": ["characterID", "state", "startingClassID", "startingClassKnown", "capabilities"]
+        "required": ["characterID", "state", "startingClassID", "startingClassKnown", "slotVersion", "slotVersionKnown", "capabilities"]
       },
       "CharacterProfile": {
         "type": "object",

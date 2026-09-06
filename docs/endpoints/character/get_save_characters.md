@@ -67,6 +67,8 @@ type CharacterSlot struct {
 	State              string                    `json:"state"`
 	StartingClassID    uint8                     `json:"startingClassID"`
 	StartingClassKnown bool                      `json:"startingClassKnown"`
+	SlotVersion        uint32                    `json:"slotVersion"`
+	SlotVersionKnown   bool                      `json:"slotVersionKnown"`
 	Capabilities       CharacterSlotCapabilities `json:"capabilities"`
 }
 
@@ -92,6 +94,8 @@ type CharacterSlotCapabilities struct {
 | `state` | `string` | `active`, `residual`, `empty` or `unknown`. See *Slot states* below. |
 | `startingClassID` | `uint8` | Raw starting-class identifier, meaningful only while `startingClassKnown` is `true`. |
 | `startingClassKnown` | `bool` | `true` for an active slot only. |
+| `slotVersion` | `uint32` | The version the slot declares in the first four bytes of its data block, meaningful only while `slotVersionKnown` is `true`. |
+| `slotVersionKnown` | `bool` | `true` when the declaration could be read and is not `0`. |
 | `capabilities` | `CharacterSlotCapabilities` | The slot operations this state allows. |
 
 ### Slot states
@@ -112,6 +116,16 @@ capabilities the slot management needs.
 residual profile summary can be zeroed while the slot data is not, so its class
 byte would be a default value invented for a character that never had it; such a
 slot reports `startingClassKnown: false` instead.
+
+`slotVersion` is read from the first four bytes of the slot data block, the same
+declaration the account-identifier locator and the region rebuild consult before
+they trust a version-gated offset. The save format declares that version per
+slot and carries no container-wide version, so this projection reports it per
+slot and never presents one slot's value as the version of the file. A slot
+declaring `0` declares no version at all, which is exactly what both writers
+reject, and reports `slotVersionKnown: false` rather than a zero that would read
+as a real version. The value is reported for every slot state, including
+`unknown`: it is a property of the block, not of the classification.
 
 ### Capabilities
 

@@ -138,6 +138,8 @@ export function stubCharacterSlot(
     state,
     startingClassID: 0,
     startingClassKnown: state === "active",
+    slotVersion: 0,
+    slotVersionKnown: false,
     capabilities,
     ...overrides,
   };

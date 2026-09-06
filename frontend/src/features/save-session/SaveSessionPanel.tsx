@@ -28,6 +28,7 @@ import {
   reportList,
   reportScope,
   stack,
+  summaryLabel,
   summaryTile,
   summaryTiles,
   summaryValue,
@@ -52,6 +53,16 @@ export type HomeDestination = "appearance" | "database" | "settings" | "about";
 
 function recentFileName(path: string): string {
   return path.split(/[\\/]/).at(-1) || path;
+}
+
+/**
+ * The backend's raw slot version, rendered the way the save format writes it:
+ * an unsigned hexadecimal declaration. Nothing is mapped onto a product version
+ * and nothing is rounded; an unreadable or absent declaration never reaches
+ * this function.
+ */
+function formatSlotVersion(version: number): string {
+  return `0x${version.toString(16).toUpperCase().padStart(2, "0")}`;
 }
 
 function recentOpenedAt(value: string, locale: string): string {
@@ -102,6 +113,28 @@ export function SaveSessionContent({
     flow.reviewValidation.saveRevision === session.saveRevision
       ? flow.reviewValidation
       : undefined;
+  // The slot the session is currently showing. It stays undefined while the slot
+  // list is unread, failed or reports no slot for the selection, so the screen
+  // never fills the gap with another slot's declaration.
+  const currentCharacters =
+    selection.characters.isSuccess &&
+    selection.characters.data.saveSessionID === session?.saveSessionID &&
+    selection.characters.data.saveRevision === session?.saveRevision
+      ? selection.characters.data
+      : undefined;
+  const selectedSlot =
+    currentCharacters === undefined || selection.selectedCharacterID === undefined
+      ? undefined
+      : currentCharacters.slots.find((slot) => slot.characterID === selection.selectedCharacterID);
+  const selectedSlotNumber = selectedSlot === undefined ? undefined : selectedSlot.characterID + 1;
+  const selectedSlotVersion =
+    selectedSlot?.slotVersionKnown === true
+      ? formatSlotVersion(selectedSlot.slotVersion)
+      : undefined;
+  const reportedBackup =
+    session !== undefined && flow.lastSaveResult?.saveSessionID === session.saveSessionID
+      ? flow.lastSaveResult.backupPath
+      : undefined;
   const shortcuts: { destination: HomeDestination; label: string }[] = [
     { destination: "appearance", label: t`Appearance Presets` },
     { destination: "database", label: t`Item Database` },
@@ -118,6 +151,11 @@ export function SaveSessionContent({
               <h2 className={cardTitle}>
                 <Trans>Current save</Trans>
               </h2>
+              {session !== undefined && (
+                <Badge dot tone={session.unsavedChanges ? "warning" : "accent"}>
+                  {session.unsavedChanges ? <Trans>Modified</Trans> : <Trans>Saved</Trans>}
+                </Badge>
+              )}
             </header>
             <div className={cardBody}>
               <div className={stack}>
@@ -276,6 +314,25 @@ export function SaveSessionContent({
                     </div>
                     <div className={fact}>
                       <dt className={factLabel}>
+                        <Trans>Slot version</Trans>
+                      </dt>
+                      {/* The save format declares a version per slot and none for
+                      the container, so this states the slot it belongs to and
+                      never presents one slot's value as the version of the file. */}
+                      <dd className={factValue}>
+                        {selectedSlot === undefined ? (
+                          <Trans>Unavailable</Trans>
+                        ) : selectedSlotVersion !== undefined ? (
+                          <Trans>
+                            Slot {selectedSlotNumber} · {selectedSlotVersion}
+                          </Trans>
+                        ) : (
+                          <Trans>Slot {selectedSlotNumber} · Version unavailable</Trans>
+                        )}
+                      </dd>
+                    </div>
+                    <div className={fact}>
+                      <dt className={factLabel}>
                         <Trans>Format</Trans>
                       </dt>
                       <dd className={factValue}>
@@ -393,7 +450,7 @@ export function SaveSessionContent({
               <>
                 <div className={summaryTiles}>
                   <section className={summaryTile} aria-label={t`Pending changes`}>
-                    <span className={factLabel}>
+                    <span className={summaryLabel}>
                       <Trans>Pending changes</Trans>
                     </span>
                     <strong className={summaryValue}>
@@ -405,12 +462,18 @@ export function SaveSessionContent({
                     </strong>
                   </section>
                   <section className={summaryTile} aria-label={t`Active characters`}>
-                    <span className={factLabel}>
+                    <span className={summaryLabel}>
                       <Trans>Active characters</Trans>
                     </span>
                     <strong className={summaryValue}>
-                      {selection.characters.isSuccess ? (
-                        <Trans>{selection.activeCharacters.length} active</Trans>
+                      {currentCharacters !== undefined ? (
+                        <Trans>
+                          {
+                            currentCharacters.characters.filter((character) => character.active)
+                              .length
+                          }{" "}
+                          active
+                        </Trans>
                       ) : (
                         <Trans>Unavailable</Trans>
                       )}
@@ -441,6 +504,26 @@ export function SaveSessionContent({
                             <Trans>Automatic backups kept</Trans>
                           </dt>
                           <dd className={factValue}>{flow.lifecycleSettings.backupRetention}</dd>
+                        </div>
+                        {flow.lifecycleSettings.backupNameExample !== undefined && (
+                          <div className={fact}>
+                            <dt className={factLabel}>
+                              <Trans>Example name</Trans>
+                            </dt>
+                            {/* The backend renders the example from the pattern in
+                            effect; the grammar is never reimplemented here. */}
+                            <dd className={factValue}>
+                              {flow.lifecycleSettings.backupNameExample}
+                            </dd>
+                          </div>
+                        )}
+                        <div className={fact}>
+                          <dt className={factLabel}>
+                            <Trans>Backup reported by last save</Trans>
+                          </dt>
+                          <dd className={factValue}>
+                            {reportedBackup ?? <Trans>Unavailable</Trans>}
+                          </dd>
                         </div>
                       </dl>
                     )}
@@ -494,7 +577,7 @@ export function SaveSessionContent({
           </p>
         ) : (
           <ul className={recentList}>
-            {flow.recentFiles.map((recent) => (
+            {flow.recentFiles.slice(0, 10).map((recent) => (
               <li key={recent.path} className={recentRow}>
                 <button
                   type="button"

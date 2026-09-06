@@ -3611,6 +3611,8 @@ export namespace saveengine {
 	    state: string;
 	    startingClassID: number;
 	    startingClassKnown: boolean;
+	    slotVersion: number;
+	    slotVersionKnown: boolean;
 	    capabilities: CharacterSlotCapabilities;
 	
 	    static createFrom(source: any = {}) {
@@ -3623,6 +3625,8 @@ export namespace saveengine {
 	        this.state = source["state"];
 	        this.startingClassID = source["startingClassID"];
 	        this.startingClassKnown = source["startingClassKnown"];
+	        this.slotVersion = source["slotVersion"];
+	        this.slotVersionKnown = source["slotVersionKnown"];
 	        this.capabilities = this.convertValues(source["capabilities"], CharacterSlotCapabilities);
 	    }
 	

@@ -2069,6 +2069,8 @@ export const wailsDesktopBridge: ApplicationInfoPort &
         state: toCharacterSlotState(slot.state),
         startingClassID: slot.startingClassID,
         startingClassKnown: slot.startingClassKnown,
+        slotVersion: slot.slotVersion,
+        slotVersionKnown: slot.slotVersionKnown,
         capabilities: {
           activate: slot.capabilities.activate,
           deactivate: slot.capabilities.deactivate,

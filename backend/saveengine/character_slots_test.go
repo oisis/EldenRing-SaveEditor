@@ -1,9 +1,53 @@
 package saveengine
 
 import (
+	"encoding/binary"
+	"os"
 	"reflect"
 	"testing"
 )
+
+func TestGetSaveCharactersReportsEachDeclaredSlotVersion(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := charactersFixture{}
+			content.flags[0], content.names[0] = 1, "First"
+			content.flags[1], content.names[1] = 1, "Second"
+			content.flags[3] = 2 // Unknown classification still has a declaration.
+			path := writeCharactersFixture(t, platform, content)
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			versions := []uint32{0x4C, 0xE6, 0, 0x1234}
+			for slot, version := range versions {
+				binary.LittleEndian.PutUint32(data[slotDataBase(platform, slot):], version)
+			}
+			if err := os.WriteFile(path, data, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			engine := New()
+			loaded, err := engine.LoadSave(path, string(platform), "local")
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := engine.GetSaveCharacters(loaded.SaveSessionID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for slot, version := range versions {
+				got := result.Slots[slot]
+				if got.SlotVersion != version || got.SlotVersionKnown != (version != 0) {
+					t.Errorf("slot %d version = %d, known = %v; want %d, %v", slot,
+						got.SlotVersion, got.SlotVersionKnown, version, version != 0)
+				}
+			}
+			if result.SaveRevision != "0" {
+				t.Errorf("read changed revision: %s", result.SaveRevision)
+			}
+		})
+	}
+}
 
 // The slot-management projection must classify the four states from the same
 // evidence the writers evaluate, and it must never offer a capability the

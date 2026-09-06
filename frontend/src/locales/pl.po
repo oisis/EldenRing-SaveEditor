@@ -34,7 +34,7 @@ msgstr "{0} · {1}"
 msgid "{0} · {1} · {2}"
 msgstr "{0} · {1} · {2}"
 
-#. placeholder {0}: selection.activeCharacters.length
+#. placeholder {0}: currentCharacters.characters.filter((character) => character.active) .length
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{0} active"
 msgstr "Aktywne: {0}"
@@ -373,6 +373,10 @@ msgstr "Backend aplikacji"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Backup name pattern"
 msgstr "Wzorzec nazwy backupu"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Backup reported by last save"
+msgstr "Backup zgłoszony przy ostatnim zapisie"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Backup settings are unavailable."
@@ -937,6 +941,10 @@ msgstr "Błędy: {0}. Ostrzeżenia: {1}."
 msgid "Example"
 msgstr "Przyk\\u0142ad"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Example name"
+msgstr "Przykładowa nazwa"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Expand all"
 msgstr "Rozwiń wszystko"
@@ -1461,6 +1469,7 @@ msgid "Mirror Favorites require an active save session."
 msgstr "Ulubione Lustra wymagają aktywnej sesji zapisu."
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Modified"
 msgstr "Zmodyfikowano"
 
@@ -2201,6 +2210,7 @@ msgid "Save…"
 msgstr "Zapisz…"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Saved"
 msgstr "Zapisano"
 
@@ -2433,6 +2443,14 @@ msgstr "Pomijaj Review Changes dla zwykłych operacji"
 msgid "Slot {0}"
 msgstr "Slot {0}"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot {selectedSlotNumber} · {selectedSlotVersion}"
+msgstr "Slot {selectedSlotNumber} · {selectedSlotVersion}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot {selectedSlotNumber} · Version unavailable"
+msgstr "Slot {selectedSlotNumber} · Wersja niedostępna"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber} · {startingClass}"
 msgstr "Slot {slotNumber} · {startingClass}"
@@ -2444,6 +2462,10 @@ msgstr "Slot {slotNumber} · Nieznana"
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot operations stay session changes until the save is written."
 msgstr "Operacje na slotach pozostają zmianami sesji do momentu zapisu pliku."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot version"
+msgstr "Wersja slotu"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx

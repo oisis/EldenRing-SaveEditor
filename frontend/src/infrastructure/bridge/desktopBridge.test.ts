@@ -387,6 +387,8 @@ const characters = saveengine.SaveCharacters.createFrom({
       state: "active",
       startingClassID: 3,
       startingClassKnown: true,
+      slotVersion: 0x4C,
+      slotVersionKnown: true,
       capabilities: {
         activate: false,
         deactivate: true,
@@ -400,6 +402,8 @@ const characters = saveengine.SaveCharacters.createFrom({
       state: "empty",
       startingClassID: 0,
       startingClassKnown: false,
+      slotVersion: 0,
+      slotVersionKnown: false,
       capabilities: {
         activate: false,
         deactivate: false,
@@ -493,6 +497,8 @@ describe("wails character adapter", () => {
           state: "active",
           startingClassID: 3,
           startingClassKnown: true,
+          slotVersion: 0x4C,
+          slotVersionKnown: true,
           capabilities: {
             activate: false,
             deactivate: true,
@@ -506,6 +512,8 @@ describe("wails character adapter", () => {
           state: "empty",
           startingClassID: 0,
           startingClassKnown: false,
+          slotVersion: 0,
+          slotVersionKnown: false,
           capabilities: {
             activate: false,
             deactivate: false,

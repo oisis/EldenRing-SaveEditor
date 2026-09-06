@@ -34,7 +34,7 @@ msgstr "{0} · {1}"
 msgid "{0} · {1} · {2}"
 msgstr "{0} · {1} · {2}"
 
-#. placeholder {0}: selection.activeCharacters.length
+#. placeholder {0}: currentCharacters.characters.filter((character) => character.active) .length
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "{0} active"
 msgstr "{0} active"
@@ -373,6 +373,10 @@ msgstr "Backend"
 #: src/features/tools/ToolsPanel.tsx
 msgid "Backup name pattern"
 msgstr "Backup name pattern"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Backup reported by last save"
+msgstr "Backup reported by last save"
 
 #: src/features/save-session/SaveSessionPanel.tsx
 msgid "Backup settings are unavailable."
@@ -937,6 +941,10 @@ msgstr "Errors: {0}. Warnings: {1}."
 msgid "Example"
 msgstr "Example"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Example name"
+msgstr "Example name"
+
 #: src/features/world/WorldPanel.tsx
 msgid "Expand all"
 msgstr "Expand all"
@@ -1461,6 +1469,7 @@ msgid "Mirror Favorites require an active save session."
 msgstr "Mirror Favorites require an active save session."
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Modified"
 msgstr "Modified"
 
@@ -2201,6 +2210,7 @@ msgid "Save…"
 msgstr "Save…"
 
 #: src/features/app-shell/AppShell.tsx
+#: src/features/save-session/SaveSessionPanel.tsx
 msgid "Saved"
 msgstr "Saved"
 
@@ -2433,6 +2443,14 @@ msgstr "Skip Review Changes for normal operations"
 msgid "Slot {0}"
 msgstr "Slot {0}"
 
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot {selectedSlotNumber} · {selectedSlotVersion}"
+msgstr "Slot {selectedSlotNumber} · {selectedSlotVersion}"
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot {selectedSlotNumber} · Version unavailable"
+msgstr "Slot {selectedSlotNumber} · Version unavailable"
+
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot {slotNumber} · {startingClass}"
 msgstr "Slot {slotNumber} · {startingClass}"
@@ -2444,6 +2462,10 @@ msgstr "Slot {slotNumber} · Unknown"
 #: src/features/character/CharacterSidebar.tsx
 msgid "Slot operations stay session changes until the save is written."
 msgstr "Slot operations stay session changes until the save is written."
+
+#: src/features/save-session/SaveSessionPanel.tsx
+msgid "Slot version"
+msgstr "Slot version"
 
 #: src/features/items/inventory-storage/InventoryAndStoragePanel.tsx
 #: src/features/items/item-database/ItemDatabasePanel.tsx
